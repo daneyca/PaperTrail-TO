@@ -1,0 +1,357 @@
+.document-records-card {
+    background: #ffffff;
+    border: 1px solid #dbe3ef;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.document-records-card.document-drafts-panel {
+    display: block;
+    gap: 0;
+    padding: 0;
+    border-left: 1px solid #dbe3ef;
+}
+
+.document-records-card header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5edf6;
+}
+
+.document-records-card .section-label {
+    display: inline-flex;
+    color: #2563eb;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+}
+
+.document-records-card h2 {
+    margin: 4px 0;
+    color: #10233f;
+    font-size: 1.3rem;
+    line-height: 1.2;
+}
+
+.document-records-card p {
+    color: #617188;
+    margin: 0;
+}
+
+.document-records-type {
+    display: inline-flex;
+    margin-top: 10px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: #eef5ff;
+    color: #174b87;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.document-records-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 42px;
+    height: 42px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: #eef5ff;
+    color: #174b87;
+    font-size: 1rem;
+    font-weight: 900;
+}
+
+.document-records-table-wrap {
+    width: 100%;
+    overflow-x: visible;
+}
+
+.document-records-table {
+    width: 100%;
+    min-width: 0;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 0.9rem;
+}
+
+.document-records-table th {
+    background: #edf4fb;
+    color: #10233f;
+    font-size: 0.72rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    padding: 12px 16px;
+    text-align: left;
+    white-space: normal;
+}
+
+.document-records-table td {
+    padding: 14px 16px;
+    border-top: 1px solid #e5edf6;
+    color: #334155;
+    vertical-align: middle;
+}
+
+.document-records-table th:nth-child(1),
+.document-records-table td:nth-child(1) {
+    width: 44%;
+}
+
+.document-records-table th:nth-child(2),
+.document-records-table td:nth-child(2) {
+    width: 22%;
+}
+
+.document-records-table th:nth-child(3),
+.document-records-table td:nth-child(3) {
+    width: 20%;
+}
+
+.document-records-table th:nth-child(4),
+.document-records-table td:nth-child(4) {
+    width: 14%;
+}
+
+.document-records-table tr:hover {
+    background: #f8fbff;
+}
+
+.document-record-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    color: #10233f;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.document-record-meta {
+    display: block;
+    margin-top: 4px;
+    color: #708198;
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+.document-status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.document-status-draft {
+    background: #fff4cc;
+    color: #8a5a00;
+}
+
+.document-status-submitted {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.document-status-accepted {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.document-status-signed {
+    background: #e0f2fe;
+    color: #075985;
+}
+
+.document-status-completed {
+    background: #ccfbf1;
+    color: #0f766e;
+}
+
+.document-status-returned {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.document-status-review {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.document-status-neutral {
+    background: #e8eef6;
+    color: #334155;
+}
+
+.document-record-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: nowrap;
+}
+
+.document-record-open-btn,
+.document-record-edit-btn,
+.document-record-print-btn,
+.document-record-download-btn,
+.document-record-submit-btn,
+.document-record-delete-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 0;
+    font-weight: 800;
+    font-size: 0.8rem;
+    text-decoration: none;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+    cursor: pointer;
+    font-family: inherit;
+    line-height: 1.15;
+}
+
+.document-record-icon-btn {
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    min-height: 34px;
+    padding: 0;
+    border-radius: 10px;
+}
+
+.document-record-icon-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.document-record-open-btn {
+    background: #102f57;
+    color: #ffffff;
+}
+
+.document-record-open-btn:hover {
+    background: #164477;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.document-record-edit-btn {
+    border: 1px solid #cbd8ea;
+    background: #ffffff;
+    color: #102f57;
+}
+
+.document-record-edit-btn:hover {
+    border-color: #9bb9e2;
+    background: #f1f6ff;
+    color: #102f57;
+    transform: translateY(-1px);
+}
+
+.document-record-print-btn {
+    border: 1px solid #dbe3ef;
+    background: #f8fbff;
+    color: #174b87;
+}
+
+.document-record-print-btn:hover {
+    border-color: #adc8ef;
+    background: #eef5ff;
+    color: #102f57;
+    transform: translateY(-1px);
+}
+
+.document-record-download-btn {
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.document-record-download-btn:hover {
+    border-color: #93c5fd;
+    background: #dbeafe;
+    color: #0f3c80;
+    transform: translateY(-1px);
+}
+
+.document-record-submit-btn {
+    background: #f4b51e;
+    color: #0b294b;
+}
+
+.document-record-submit-btn:hover {
+    background: #d99b09;
+    color: #0b294b;
+    transform: translateY(-1px);
+}
+
+.document-record-delete-btn {
+    border: 1px solid #fecaca;
+    background: #fff1f2;
+    color: #b91c1c;
+}
+
+.document-record-delete-btn:hover {
+    border-color: #fca5a5;
+    background: #fee2e2;
+    color: #991b1b;
+    transform: translateY(-1px);
+}
+
+.document-record-actions form {
+    margin: 0;
+}
+
+.document-records-empty {
+    padding: 30px 24px;
+    color: #617188;
+}
+
+.document-records-empty strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #10233f;
+}
+
+@media (max-width: 720px) {
+    .document-records-card header {
+        padding: 18px;
+    }
+
+    .document-records-table th,
+    .document-records-table td {
+        padding: 10px 8px;
+        font-size: 0.78rem;
+    }
+
+    .document-records-table th:nth-child(3),
+    .document-records-table td:nth-child(3) {
+        display: none;
+    }
+
+    .document-records-table th:nth-child(1),
+    .document-records-table td:nth-child(1) {
+        width: 48%;
+    }
+
+    .document-records-table th:nth-child(2),
+    .document-records-table td:nth-child(2) {
+        width: 32%;
+    }
+
+    .document-records-table th:nth-child(4),
+    .document-records-table td:nth-child(4) {
+        width: 20%;
+    }
+}

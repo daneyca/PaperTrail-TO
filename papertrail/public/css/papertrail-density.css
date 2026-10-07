@@ -1,0 +1,1198 @@
+/* PaperTrail global density layer.
+   UI only: approximates the denser browser view through component spacing. */
+
+body.dashboard-body:not(.modal-document-body) {
+    --pt-page-inline: clamp(10px, 1.2vw, 18px);
+    --pt-page-gap: 10px;
+}
+
+body.dashboard-body .dashboard-main {
+    padding-top: 8px !important;
+    font-size: 14px;
+}
+
+body.dashboard-body:not(.modal-document-body) .dashboard-content {
+    padding-top: 10px !important;
+    padding-bottom: 20px !important;
+    gap: var(--pt-page-gap) !important;
+}
+
+body.dashboard-body :where(
+    .enterprise-dashboard,
+    .dashboard-grid,
+    .dashboard-panels,
+    .dashboard-two-column,
+    .dashboard-insights-grid,
+    .procurement-analytics-grid,
+    .procurement-insight-grid,
+    .profile-layout,
+    .document-review-layout,
+    .budget-review-layout,
+    .signature-request-layout,
+    .bac-pr-detail-layout,
+    .rule-config-layout,
+    .document-form-layout,
+    .pt-ui-document-shell,
+    .records-overview-grid,
+    .admin-dashboard-content,
+    .hope-dashboard-content
+) {
+    gap: 10px !important;
+}
+
+body.dashboard-body .dashboard-topbar,
+body.dashboard-body .dashboard-topbar.enterprise-topbar {
+    min-height: 48px !important;
+    margin-top: 8px !important;
+    padding: 5px 9px !important;
+    gap: 8px !important;
+    border-radius: 12px !important;
+}
+
+body.dashboard-body .dashboard-topbar .enterprise-topbar__left,
+body.dashboard-body .enterprise-topbar__left,
+body.dashboard-body .dashboard-topbar .enterprise-topbar__right,
+body.dashboard-body .enterprise-topbar__right,
+body.dashboard-body .dashboard-profile {
+    gap: 6px !important;
+}
+
+body.dashboard-body .dashboard-topbar .enterprise-topbar__left,
+body.dashboard-body .enterprise-topbar__left {
+    width: 100% !important;
+}
+
+body.dashboard-body .dashboard-search {
+    flex: 1 1 100% !important;
+    flex-basis: 100% !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 220px !important;
+}
+
+body.dashboard-body .dashboard-search input {
+    width: 100% !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    border-radius: 10px !important;
+    padding-left: 35px !important;
+    font-size: 0.78rem !important;
+}
+
+body.dashboard-body .dashboard-search-icon {
+    left: 11px !important;
+    width: 14px !important;
+    height: 14px !important;
+}
+
+body.dashboard-body .dashboard-search-icon svg {
+    width: 14px !important;
+    height: 14px !important;
+}
+
+body.dashboard-body .dashboard-utility-button,
+body.dashboard-body .notification-button {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    border-radius: 10px !important;
+}
+
+body.dashboard-body .dashboard-utility-button svg,
+body.dashboard-body .notification-button svg {
+    width: 14px !important;
+    height: 14px !important;
+}
+
+body.dashboard-body .pht-clock-widget {
+    min-width: 158px !important;
+    min-height: 32px !important;
+    padding: 3px 8px !important;
+    border-radius: 10px !important;
+}
+
+body.dashboard-body .pht-clock-widget span {
+    font-size: 0.46rem !important;
+}
+
+body.dashboard-body .pht-clock-widget strong,
+body.dashboard-body .pht-clock-widget time {
+    font-size: 0.58rem !important;
+}
+
+body.dashboard-body .dashboard-profile .topbar-account-toggle.pt-user-profile-block,
+body.dashboard-body .dashboard-profile > .pt-user-profile-block {
+    min-height: 40px !important;
+    max-width: 212px !important;
+    padding: 4px 26px 4px 6px !important;
+    border-radius: 10px !important;
+}
+
+body.dashboard-body .dashboard-profile .pt-user-avatar {
+    flex-basis: 24px !important;
+    width: 24px !important;
+    height: 24px !important;
+    max-width: 24px !important;
+    max-height: 24px !important;
+}
+
+body.dashboard-body .dashboard-profile .pt-user-profile-block__copy strong {
+    max-width: 140px !important;
+    font-size: 0.68rem !important;
+}
+
+body.dashboard-body .dashboard-profile .pt-user-profile-block__copy span {
+    max-width: 144px !important;
+    font-size: 0.54rem !important;
+}
+
+body.dashboard-body .topbar-account-dropdown a,
+body.dashboard-body .topbar-account-dropdown button {
+    min-height: 38px !important;
+    padding: 9px 11px !important;
+    font-size: 0.74rem !important;
+}
+
+body.dashboard-body .dashboard-content > .dashboard-hero.admin-users-hero,
+body.dashboard-body .dashboard-content > .dashboard-hero,
+body.dashboard-body .dashboard-hero,
+body.dashboard-body .enterprise-hero,
+body.dashboard-body .page-hero {
+    min-height: 88px !important;
+    padding: 14px 16px !important;
+    border-radius: 14px !important;
+}
+
+body.dashboard-body .dashboard-content > .dashboard-hero h1,
+body.dashboard-body .dashboard-hero h1,
+body.dashboard-body .enterprise-hero h1,
+body.dashboard-body .page-hero h1,
+body.dashboard-body .pt-workspace-welcome h1 {
+    font-size: clamp(1.18rem, 1.55vw, 1.6rem) !important;
+    line-height: 1.12 !important;
+}
+
+body.dashboard-body .dashboard-hero p:not(.eyebrow),
+body.dashboard-body .enterprise-hero p:not(.eyebrow),
+body.dashboard-body .page-hero p:not(.eyebrow),
+body.dashboard-body .pt-workspace-welcome p:not(.eyebrow) {
+    margin-top: 4px !important;
+    font-size: 0.8rem !important;
+    line-height: 1.35 !important;
+}
+
+body.dashboard-body .pt-workspace-welcome {
+    min-height: 96px !important;
+    padding: 16px 18px !important;
+    border-radius: 14px !important;
+}
+
+body.dashboard-body .section-label,
+body.dashboard-body .pt-ui-eyebrow,
+body.dashboard-body .eyebrow,
+body.dashboard-body .attachments-eyebrow {
+    font-size: 0.6rem !important;
+    line-height: 1.1 !important;
+}
+
+body.dashboard-body :where(
+    .summary-card-grid,
+    .stat-grid.stat-grid-modern,
+    .stat-grid-modern,
+    .reports-summary-strip,
+    .notification-summary-strip,
+    .rule-config-summary,
+    .metric-grid,
+    .status-card-grid,
+    .dashboard-stat-grid,
+    .quick-card-grid,
+    .enterprise-kpi-grid,
+    .admin-dashboard-metric-grid,
+    .dashboard-widget-grid,
+    .dashboard-widget-grid-minimal
+) {
+    gap: 8px !important;
+}
+
+body.dashboard-body:not(.modal-document-body) :where(
+    .enterprise-dashboard > .enterprise-kpi-grid.row,
+    .dashboard-content > .stat-grid-modern,
+    .dashboard-content > .stat-grid.stat-grid-modern,
+    .dashboard-content > .summary-card-grid,
+    .dashboard-content > .reports-summary-strip,
+    .dashboard-content > .notification-summary-strip,
+    .dashboard-content > .rule-config-summary
+) {
+    --pt-stat-card-min: 142px;
+    gap: 8px !important;
+}
+
+body.dashboard-body :where(
+    .summary-card,
+    .stat-card-modern,
+    .procurement-kpi-card,
+    .admin-dashboard-metric,
+    .admin-stat-kpi,
+    .dashboard-identity-card,
+    .quick-card,
+    .metric-card,
+    .status-card
+) {
+    min-height: 72px !important;
+    padding: 11px 12px !important;
+    border-radius: 10px !important;
+}
+
+body.dashboard-body :where(.summary-card, .stat-card-modern, .admin-dashboard-metric, .admin-stat-kpi) {
+    padding-bottom: 19px !important;
+}
+
+body.dashboard-body :where(.summary-card__accent, .stat-card-modern:not(.summary-card)::before) {
+    position: absolute !important;
+    right: 14px !important;
+    bottom: 8px !important;
+    left: 14px !important;
+    width: auto !important;
+    height: 4px !important;
+    border-radius: 999px !important;
+    pointer-events: none !important;
+}
+
+body.dashboard-body :where(
+    .summary-card__icon,
+    .stat-card-modern > b,
+    .summary-card::after,
+    .stat-card-modern::after
+) {
+    display: none !important;
+    content: none !important;
+}
+
+body.dashboard-body :where(.procurement-kpi-card) {
+    gap: 9px !important;
+}
+
+body.dashboard-body :where(
+    .summary-card__icon,
+    .stat-card-modern > b,
+    .summary-card::after,
+    .stat-card-modern::after,
+    .procurement-kpi-card__icon,
+    .admin-dashboard-metric-icon,
+    .admin-stat-kpi-icon
+) {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    flex-basis: 28px !important;
+    border-radius: 10px !important;
+}
+
+body.dashboard-body :where(.procurement-kpi-card__icon svg, .summary-card__icon svg) {
+    width: 14px !important;
+    height: 14px !important;
+}
+
+body.dashboard-body :where(
+    .summary-card__value,
+    .stat-card-modern > div > span,
+    .procurement-kpi-card__body strong,
+    .admin-dashboard-metric strong,
+    .admin-stat-kpi strong
+) {
+    font-size: clamp(1.2rem, 1.45vw, 1.55rem) !important;
+    line-height: 1.05 !important;
+}
+
+body.dashboard-body :where(
+    .summary-card__label,
+    .stat-card-modern > div > p,
+    .procurement-kpi-card__body span,
+    .admin-dashboard-metric span,
+    .admin-stat-kpi span
+) {
+    font-size: 0.72rem !important;
+    line-height: 1.2 !important;
+}
+
+body.dashboard-body :where(.summary-card__sublabel, .procurement-kpi-card__body small, .admin-dashboard-metric small) {
+    font-size: 0.66rem !important;
+    line-height: 1.2 !important;
+}
+
+body.dashboard-body :where(
+    .table-panel,
+    .document-records-card,
+    .papertrail-table-card,
+    .pt-ui-card,
+    .content-card,
+    .dashboard-card,
+    .module-card,
+    .section-card,
+    .papertrail-card,
+    .dashboard-widget,
+    .admin-dashboard-panel,
+    .procurement-recent-card,
+    .procurement-chart-card,
+    .procurement-ai-insights,
+    .procurement-quick-actions,
+    .settings-console,
+    .profile-card,
+    .form-panel
+) {
+    border-radius: 12px !important;
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.055) !important;
+}
+
+body.dashboard-body :where(
+    .dashboard-grid,
+    .dashboard-panels,
+    .dashboard-two-column,
+    .dashboard-insights-grid,
+    .procurement-analytics-grid,
+    .procurement-analytics-grid--with-signals,
+    .procurement-insight-grid,
+    .profile-layout,
+    .document-review-layout,
+    .budget-review-layout,
+    .signature-request-layout,
+    .bac-pr-detail-layout,
+    .rule-config-layout,
+    .records-overview-grid,
+    .admin-dashboard-content,
+    .hope-dashboard-content,
+    .budget-report-grid,
+    .dashboard-widget-grid,
+    .dashboard-widget-grid-minimal,
+    .ai-summary-main-grid
+) {
+    align-items: start !important;
+}
+
+body.dashboard-body :where(
+    .table-panel,
+    .document-records-card,
+    .papertrail-table-card,
+    .pt-ui-card,
+    .content-card,
+    .dashboard-card,
+    .module-card,
+    .section-card,
+    .papertrail-card,
+    .dashboard-widget,
+    .admin-dashboard-panel,
+    .procurement-recent-card,
+    .procurement-chart-card,
+    .procurement-ai-insights,
+    .procurement-quick-actions,
+    .settings-console,
+    .profile-card,
+    .form-panel,
+    .ai-summary-card,
+    .pt-ai-insight-card
+) {
+    align-self: start !important;
+    min-height: 0 !important;
+    height: auto !important;
+}
+
+body.dashboard-body .profile-main-column {
+    align-content: start !important;
+}
+
+body.dashboard-body .profile-side-column {
+    align-content: start !important;
+}
+
+body.dashboard-body .profile-activity-panel {
+    width: 100% !important;
+}
+
+@media (max-width: 1120px) {
+    body.dashboard-body .profile-side-column {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+body.dashboard-body :where(.summary-card-grid, .stat-grid.stat-grid-modern, .stat-grid-modern, .reports-summary-strip, .notification-summary-strip, .rule-config-summary, .metric-grid, .status-card-grid, .dashboard-stat-grid, .quick-card-grid, .enterprise-kpi-grid, .admin-dashboard-metric-grid) {
+    align-items: stretch !important;
+}
+
+body.dashboard-body .procurement-analytics-grid--with-signals .procurement-ai-insights {
+    height: auto !important;
+}
+
+body.dashboard-body :where(.ai-summary-main-grid, .ai-summary-card-stack) {
+    gap: 10px !important;
+}
+
+body.dashboard-body :where(
+    .document-records-card > header,
+    .table-panel > header,
+    .table-panel > .section-heading,
+    .table-panel > .panel-heading,
+    .table-panel > .card-header,
+    .table-panel > .module-header,
+    .pt-ui-card-header,
+    .widget-heading,
+    .procurement-card-heading,
+    .support-widget-heading,
+    .dashboard-tracking-card__header,
+    .papertrail-table-card > header,
+    .papertrail-table-card > div:first-child
+) {
+    gap: 8px !important;
+    padding: 11px 13px 10px !important;
+}
+
+body.dashboard-body :where(
+    .document-records-card h2,
+    .pt-ui-card h2,
+    .table-panel h2,
+    .widget-heading h2,
+    .papertrail-table-card h2,
+    .procurement-card-heading h2,
+    .support-widget-heading h2,
+    .dashboard-tracking-card__header h2
+) {
+    font-size: 0.94rem !important;
+    line-height: 1.15 !important;
+}
+
+body.dashboard-body :where(
+    .document-records-card p,
+    .pt-ui-card p,
+    .table-panel :where(.section-heading, .panel-heading, .card-header, .module-header) p:not(.eyebrow),
+    .papertrail-table-card p,
+    .procurement-card-heading p,
+    .support-widget-heading p
+) {
+    margin-top: 2px !important;
+    font-size: 0.72rem !important;
+    line-height: 1.3 !important;
+}
+
+body.dashboard-body :where(
+    .pt-ui-card-body,
+    .dashboard-widget,
+    .content-card,
+    .module-card,
+    .section-card,
+    .papertrail-card,
+    .admin-dashboard-panel > :not(.procurement-card-heading)
+) {
+    padding: 12px !important;
+}
+
+body.dashboard-body :where(
+    .document-filter-card,
+    .user-table-toolbar,
+    .office-table-toolbar,
+    .report-filter-toolbar,
+    .audit-filter-toolbar,
+    .budget-filter-toolbar,
+    .returned-filter-toolbar,
+    .reviewed-filter-toolbar,
+    .my-documents-filter-toolbar,
+    .returned-documents-filter-toolbar,
+    .ppmp-filter-toolbar,
+    .pr-filter-toolbar,
+    .app-filter-toolbar,
+    .budget-report-filter-toolbar,
+    .notification-filter-toolbar,
+    .svp-filter-toolbar,
+    .ai-verification-filter-toolbar,
+    .ai-summary-filter-grid,
+    .signature-filter-grid,
+    .pt-ui-table-toolbar,
+    .rule-config-search,
+    .table-toolbar,
+    .list-toolbar,
+    .filter-panel,
+    .filter-bar,
+    .filters-bar
+) {
+    gap: 6px !important;
+    padding: 9px 11px !important;
+}
+
+body.dashboard-body :where(
+    .document-filter-card,
+    .user-table-toolbar,
+    .office-table-toolbar,
+    .report-filter-toolbar,
+    .audit-filter-toolbar,
+    .budget-filter-toolbar,
+    .returned-filter-toolbar,
+    .reviewed-filter-toolbar,
+    .my-documents-filter-toolbar,
+    .returned-documents-filter-toolbar,
+    .ppmp-filter-toolbar,
+    .pr-filter-toolbar,
+    .app-filter-toolbar,
+    .budget-report-filter-toolbar,
+    .notification-filter-toolbar,
+    .svp-filter-toolbar,
+    .ai-verification-filter-toolbar,
+    .ai-summary-filter-grid,
+    .signature-filter-grid,
+    .pt-ui-table-toolbar,
+    .rule-config-search,
+    .table-toolbar,
+    .list-toolbar,
+    .filter-panel,
+    .filter-bar,
+    .filters-bar
+) > :where(.user-filter, .signature-filter-field, label, .ai-verification-field) {
+    flex-basis: 118px !important;
+    min-width: 108px !important;
+    max-width: 190px !important;
+    gap: 3px !important;
+}
+
+body.dashboard-body :where(
+    .document-filter-card,
+    .user-table-toolbar,
+    .office-table-toolbar,
+    .report-filter-toolbar,
+    .audit-filter-toolbar,
+    .budget-filter-toolbar,
+    .returned-filter-toolbar,
+    .reviewed-filter-toolbar,
+    .my-documents-filter-toolbar,
+    .returned-documents-filter-toolbar,
+    .ppmp-filter-toolbar,
+    .pr-filter-toolbar,
+    .app-filter-toolbar,
+    .budget-report-filter-toolbar,
+    .notification-filter-toolbar,
+    .svp-filter-toolbar,
+    .ai-verification-filter-toolbar,
+    .ai-summary-filter-grid,
+    .signature-filter-grid,
+    .pt-ui-table-toolbar,
+    .rule-config-search,
+    .table-toolbar,
+    .list-toolbar,
+    .filter-panel,
+    .filter-bar,
+    .filters-bar
+) :where(label, label span, .signature-filter-field label) {
+    font-size: 0.58rem !important;
+}
+
+body.dashboard-body :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+    select,
+    textarea
+) {
+    font-size: 0.78rem;
+}
+
+body.dashboard-body :where(
+    .document-filter-card,
+    .user-table-toolbar,
+    .office-table-toolbar,
+    .report-filter-toolbar,
+    .audit-filter-toolbar,
+    .budget-filter-toolbar,
+    .returned-filter-toolbar,
+    .reviewed-filter-toolbar,
+    .my-documents-filter-toolbar,
+    .returned-documents-filter-toolbar,
+    .ppmp-filter-toolbar,
+    .pr-filter-toolbar,
+    .app-filter-toolbar,
+    .budget-report-filter-toolbar,
+    .notification-filter-toolbar,
+    .svp-filter-toolbar,
+    .ai-verification-filter-toolbar,
+    .ai-summary-filter-grid,
+    .signature-filter-grid,
+    .pt-ui-table-toolbar,
+    .rule-config-search,
+    .table-toolbar,
+    .list-toolbar,
+    .filter-panel,
+    .filter-bar,
+    .filters-bar
+) :where(input, select),
+body.dashboard-body .papertrail-table-card :where(input:not([type="checkbox"]):not([type="radio"]), select),
+body.dashboard-body .dashboard-content > form:not(.pr-create-flow):not(.ppmp-builder-form):not(.app-editor-form):not(.supplemental-app-form):not(.rfq-editor-form):not(.abstract-editor-form):not(.po-editor-form):not(.resolution-editor-form) :where(input:not([type="checkbox"]):not([type="radio"]), select) {
+    height: 32px !important;
+    min-height: 32px !important;
+    border-radius: 9px !important;
+    padding: 0 9px !important;
+    font-size: 0.74rem !important;
+}
+
+body.dashboard-body .papertrail-table-card textarea,
+body.dashboard-body .dashboard-content > form:not(.pr-create-flow):not(.ppmp-builder-form):not(.app-editor-form):not(.supplemental-app-form):not(.rfq-editor-form):not(.abstract-editor-form):not(.po-editor-form):not(.resolution-editor-form) textarea {
+    min-height: 64px !important;
+    border-radius: 9px !important;
+    padding: 8px 9px !important;
+    font-size: 0.76rem !important;
+}
+
+body.dashboard-body :where(
+    .dashboard-action,
+    .secondary-action,
+    .filter-actions button,
+    .filter-actions a,
+    .settings-console-actions button,
+    .settings-console-actions a,
+    .papertrail-table-card button[type="submit"]:not(.icon-action)
+) {
+    min-height: 32px !important;
+    padding: 0 10px !important;
+    border-radius: 9px !important;
+    font-size: 0.76rem !important;
+}
+
+body.dashboard-body :where(
+    .document-records-table,
+    .admin-users-table,
+    .audit-table,
+    .reports-table,
+    .data-table,
+    .head-office-doc-table,
+    .documents-table,
+    .records-table,
+    .procurement-dashboard-table,
+    .papertrail-table-card table,
+    .table-panel:not(:has(.document-form-layout, .pr-document, .pr-preview-area, .ppmp-sheet, .ppmp-official-document, .app-landscape-page, .app-print-area, .po-document, .po-a4-page, .resolution-document, .rfq-a4-page, .abstract-a4-page, [id$="PrintPaper"], [id$="PrintArea"])) table
+) th {
+    padding: 8px 9px !important;
+    font-size: 0.6rem !important;
+    line-height: 1.2 !important;
+}
+
+body.dashboard-body :where(
+    .document-records-table,
+    .admin-users-table,
+    .audit-table,
+    .reports-table,
+    .data-table,
+    .head-office-doc-table,
+    .documents-table,
+    .records-table,
+    .procurement-dashboard-table,
+    .papertrail-table-card table,
+    .table-panel:not(:has(.document-form-layout, .pr-document, .pr-preview-area, .ppmp-sheet, .ppmp-official-document, .app-landscape-page, .app-print-area, .po-document, .po-a4-page, .resolution-document, .rfq-a4-page, .abstract-a4-page, [id$="PrintPaper"], [id$="PrintArea"])) table
+) td {
+    padding: 8px 9px !important;
+    font-size: 0.74rem !important;
+    line-height: 1.28 !important;
+}
+
+body.dashboard-body :where(.document-record-title, .document-record-meta, .muted-text) {
+    font-size: 0.68rem !important;
+    line-height: 1.22 !important;
+}
+
+body.dashboard-body :where(.document-status-badge, .status-pill, .attachment-badge, .document-records-type) {
+    min-height: 20px !important;
+    padding: 4px 7px !important;
+    font-size: 0.62rem !important;
+}
+
+body.dashboard-body :where(
+    .document-record-icon-btn,
+    .notification-icon-action,
+    .attachment-icon-action,
+    .procurement-icon-action,
+    .signature-icon-action,
+    .ai-verification-action,
+    .icon-action:not(.pt-action-button--labeled),
+    .pt-action-button--icon-only,
+    .action-buttons a:not(.pt-action-button--labeled),
+    .action-buttons button:not(.pt-action-button--labeled),
+    .table-actions a:not(.pt-action-button--labeled),
+    .table-actions button:not(.pt-action-button--labeled),
+    .record-actions a:not(.pt-action-button--labeled),
+    .record-actions button:not(.pt-action-button--labeled),
+    .document-record-actions a:not(.pt-action-button--labeled),
+    .document-record-actions button:not(.pt-action-button--labeled),
+    .document-draft-actions a:not(.pt-action-button--labeled),
+    .document-draft-actions button:not(.pt-action-button--labeled),
+    .document-draft-file-actions a:not(.pt-action-button--labeled),
+    .document-draft-file-actions button:not(.pt-action-button--labeled),
+    .attachment-actions a:not(.pt-action-button--labeled),
+    .attachment-actions button:not(.pt-action-button--labeled),
+    .notification-actions a:not(.pt-action-button--labeled),
+    .notification-actions button:not(.pt-action-button--labeled),
+    .signature-actions .btn,
+    .ai-verification-actions a:not(.pt-action-button--labeled),
+    .ai-verification-actions button:not(.pt-action-button--labeled),
+    .compact-action-row a:not(.pt-action-button--labeled),
+    .compact-action-row button:not(.pt-action-button--labeled),
+    .svp-card-actions a:not(.pt-action-button--labeled),
+    .svp-card-actions button:not(.pt-action-button--labeled),
+    .procurement-icon-actions a:not(.pt-action-button--labeled),
+    .procurement-icon-actions button:not(.pt-action-button--labeled),
+    .report-row-actions a:not(.pt-action-button--labeled),
+    .report-row-actions button:not(.pt-action-button--labeled),
+    .report-hero-actions a:not(.pt-action-button--labeled),
+    .report-hero-actions button:not(.pt-action-button--labeled),
+    .report-header-actions a:not(.pt-action-button--labeled),
+    .report-header-actions button:not(.pt-action-button--labeled)
+) {
+    width: 28px !important;
+    min-width: 28px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    border-radius: 9px !important;
+}
+
+body.dashboard-body :where(
+    .document-record-icon-btn,
+    .notification-icon-action,
+    .attachment-icon-action,
+    .procurement-icon-action,
+    .signature-icon-action,
+    .ai-verification-action,
+    .icon-action:not(.pt-action-button--labeled),
+    .pt-action-button--icon-only,
+    .action-buttons a:not(.pt-action-button--labeled),
+    .action-buttons button:not(.pt-action-button--labeled),
+    .table-actions a:not(.pt-action-button--labeled),
+    .table-actions button:not(.pt-action-button--labeled),
+    .record-actions a:not(.pt-action-button--labeled),
+    .record-actions button:not(.pt-action-button--labeled),
+    .document-record-actions a:not(.pt-action-button--labeled),
+    .document-record-actions button:not(.pt-action-button--labeled),
+    .document-draft-actions a:not(.pt-action-button--labeled),
+    .document-draft-actions button:not(.pt-action-button--labeled),
+    .document-draft-file-actions a:not(.pt-action-button--labeled),
+    .document-draft-file-actions button:not(.pt-action-button--labeled),
+    .attachment-actions a:not(.pt-action-button--labeled),
+    .attachment-actions button:not(.pt-action-button--labeled),
+    .notification-actions a:not(.pt-action-button--labeled),
+    .notification-actions button:not(.pt-action-button--labeled),
+    .signature-actions .btn,
+    .ai-verification-actions a:not(.pt-action-button--labeled),
+    .ai-verification-actions button:not(.pt-action-button--labeled),
+    .compact-action-row a:not(.pt-action-button--labeled),
+    .compact-action-row button:not(.pt-action-button--labeled),
+    .svp-card-actions a:not(.pt-action-button--labeled),
+    .svp-card-actions button:not(.pt-action-button--labeled),
+    .procurement-icon-actions a:not(.pt-action-button--labeled),
+    .procurement-icon-actions button:not(.pt-action-button--labeled),
+    .report-row-actions a:not(.pt-action-button--labeled),
+    .report-row-actions button:not(.pt-action-button--labeled),
+    .report-hero-actions a:not(.pt-action-button--labeled),
+    .report-hero-actions button:not(.pt-action-button--labeled),
+    .report-header-actions a:not(.pt-action-button--labeled),
+    .report-header-actions button:not(.pt-action-button--labeled)
+) svg {
+    width: 13px !important;
+    height: 13px !important;
+}
+
+body.dashboard-body :where(
+    .table-actions,
+    .action-buttons,
+    .record-actions,
+    .document-record-actions,
+    .document-draft-actions,
+    .document-draft-file-actions,
+    .attachment-actions,
+    .notification-actions,
+    .signature-actions,
+    .ai-verification-actions,
+    .compact-action-row,
+    .svp-card-actions,
+    .procurement-icon-actions,
+    .report-row-actions,
+    .report-hero-actions,
+    .report-header-actions
+) {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+    overflow: visible !important;
+}
+
+body.dashboard-body :where(
+    .table-actions,
+    .action-buttons,
+    .record-actions,
+    .document-record-actions,
+    .document-draft-actions,
+    .document-draft-file-actions,
+    .attachment-actions,
+    .notification-actions,
+    .signature-actions,
+    .ai-verification-actions,
+    .compact-action-row,
+    .svp-card-actions,
+    .procurement-icon-actions,
+    .report-row-actions,
+    .report-hero-actions,
+    .report-header-actions
+) form {
+    display: inline-flex !important;
+    margin: 0 !important;
+}
+
+body.dashboard-body :where(.pt-action-button--labeled) {
+    width: auto !important;
+    min-width: max-content !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 0 11px !important;
+    gap: 6px !important;
+    border-radius: 10px !important;
+    font-size: 0.72rem !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+
+body.dashboard-body :where(.pt-action-button--labeled) :where(svg, .pt-action-button__icon) {
+    width: 14px !important;
+    height: 14px !important;
+}
+
+body.dashboard-body :where(.pt-action-button--labeled .pt-action-button__label) {
+    display: inline-flex !important;
+    align-items: center !important;
+    font-size: 0.72rem !important;
+    font-weight: 850 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+
+body.dashboard-body .report-registry-row {
+    grid-template-columns: minmax(0, 1fr) auto max-content !important;
+}
+
+body.dashboard-body .report-row-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+    min-width: max-content !important;
+}
+
+@media (max-width: 980px) {
+    body.dashboard-body .report-registry-row {
+        grid-template-columns: 1fr !important;
+    }
+
+    body.dashboard-body .report-row-actions {
+        justify-content: flex-start !important;
+        min-width: 0 !important;
+    }
+}
+
+body.dashboard-body :where(.empty-state, .pt-ui-empty-state, .signature-empty-state, .document-records-empty, .attachments-empty, .procurement-empty-table) {
+    padding: 16px 14px !important;
+    min-height: 0 !important;
+}
+
+body.dashboard-body :where(.empty-state strong, .pt-ui-empty-state strong, .signature-empty-state strong, .document-records-empty strong, .attachments-empty strong) {
+    font-size: 0.86rem !important;
+}
+
+body.dashboard-body :where(.empty-state p, .pt-ui-empty-state p, .signature-empty-state p, .document-records-empty p, .attachments-empty p) {
+    margin-top: 4px !important;
+    font-size: 0.74rem !important;
+    line-height: 1.3 !important;
+}
+
+body.dashboard-body :where(.pt-pagination, .pagination, nav[role="navigation"]) {
+    gap: 5px !important;
+}
+
+body.dashboard-body :where(.pt-pagination .page-link, .pagination a, .pagination span) {
+    min-width: 28px !important;
+    height: 28px !important;
+    padding: 0 8px !important;
+    border-radius: 8px !important;
+    font-size: 0.7rem !important;
+}
+
+body.dashboard-body .assistant-workspace {
+    gap: 6px !important;
+    height: calc(100dvh - 82px) !important;
+}
+
+body.dashboard-body .assistant-page-toolbar {
+    gap: 8px !important;
+}
+
+body.dashboard-body .assistant-chat-card {
+    border-radius: 14px !important;
+}
+
+body.dashboard-body .assistant-chat-header {
+    padding: 8px 11px !important;
+}
+
+body.dashboard-body .assistant-chat-header h1 {
+    font-size: 0.94rem !important;
+}
+
+body.dashboard-body .assistant-chat-header p {
+    font-size: 0.7rem !important;
+}
+
+body.dashboard-body .assistant-chat-messages,
+body.dashboard-body .assistant-messages {
+    padding: 9px 11px !important;
+}
+
+body.dashboard-body .assistant-message {
+    gap: 8px !important;
+    margin-bottom: 8px !important;
+    line-height: 1.45 !important;
+}
+
+body.dashboard-body .assistant-avatar {
+    width: 30px !important;
+    height: 30px !important;
+    flex-basis: 30px !important;
+    border-radius: 10px !important;
+}
+
+body.dashboard-body .assistant-bubble {
+    padding: 8px 10px !important;
+    border-radius: 12px !important;
+    font-size: 0.8rem !important;
+}
+
+body.dashboard-body .assistant-starter-prompts,
+body.dashboard-body .assistant-suggestions {
+    gap: 6px !important;
+    padding: 8px 10px !important;
+}
+
+body.dashboard-body .assistant-starter-prompts button,
+body.dashboard-body .assistant-suggestions button {
+    min-height: 28px !important;
+    padding: 0 10px !important;
+    font-size: 0.72rem !important;
+}
+
+body.dashboard-body .assistant-input-area {
+    gap: 7px !important;
+    padding: 8px 10px !important;
+}
+
+body.dashboard-body .assistant-input-area textarea {
+    min-height: 38px !important;
+    border-radius: 12px !important;
+}
+
+body.dashboard-body .pt-crud-modal__dialog {
+    max-width: min(760px, calc(100vw - 32px)) !important;
+    border-radius: 16px !important;
+}
+
+body.dashboard-body .pt-crud-modal__header {
+    padding: 14px 18px 12px !important;
+}
+
+body.dashboard-body .pt-crud-modal__body {
+    padding: 0 !important;
+}
+
+body.dashboard-body .dashboard-parcel-progress {
+    grid-template-columns: repeat(var(--dashboard-timeline-steps, 5), minmax(0, 1fr)) !important;
+    gap: 4px !important;
+    min-width: min(100%, calc(var(--dashboard-timeline-steps, 5) * 78px)) !important;
+    margin-bottom: 8px !important;
+    padding-inline: 4px !important;
+}
+
+body.dashboard-body .dashboard-parcel-progress::before {
+    top: 25px !important;
+    right: 7% !important;
+    left: 7% !important;
+    height: 2px !important;
+}
+
+body.dashboard-body .dashboard-parcel-progress__stage {
+    gap: 5px !important;
+    min-width: 0 !important;
+}
+
+body.dashboard-body .dashboard-parcel-progress__stage:not(:last-child)::after {
+    top: 14px !important;
+    left: calc(50% + 16px) !important;
+    width: calc(100% - 32px) !important;
+    height: 2px !important;
+}
+
+body.dashboard-body .dashboard-parcel-progress__dot {
+    width: 28px !important;
+    height: 28px !important;
+    border-width: 1px !important;
+}
+
+body.dashboard-body .dashboard-parcel-progress__dot svg {
+    width: 13px !important;
+    height: 13px !important;
+}
+
+body.dashboard-body .dashboard-parcel-progress__stage span {
+    max-width: 100% !important;
+    font-size: 0.61rem !important;
+    line-height: 1.12 !important;
+    overflow-wrap: normal !important;
+    text-wrap: balance !important;
+}
+
+body.dashboard-body .document-tracking-progress-wrap {
+    margin-inline: 12px !important;
+    overflow-x: auto !important;
+}
+
+body.dashboard-body .document-tracking-progress {
+    min-width: 0 !important;
+    width: max(100%, 528px) !important;
+    gap: 4px !important;
+    padding-inline: 4px !important;
+}
+
+body.dashboard-body .progress-stage {
+    min-width: 0 !important;
+}
+
+body.dashboard-body .progress-stage:not(:last-child)::after {
+    top: 12px !important;
+    left: calc(50% + 15px) !important;
+    width: calc(100% - 30px) !important;
+}
+
+body.dashboard-body .progress-circle {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 10px !important;
+}
+
+body.dashboard-body .progress-label {
+    max-width: 82px !important;
+    margin-top: 5px !important;
+    font-size: 0.61rem !important;
+    line-height: 1.12 !important;
+}
+
+@media (max-width: 1100px) {
+    body.dashboard-body .pht-clock-widget {
+        display: none !important;
+    }
+}
+
+@media (max-width: 900px) {
+    body.dashboard-body:not(.modal-document-body) {
+        --pt-page-inline: 10px;
+        --pt-page-gap: 9px;
+    }
+
+    body.dashboard-body .dashboard-main,
+    body.dashboard-body.sidebar-collapsed .dashboard-main {
+        width: min(1180px, calc(100% - 18px)) !important;
+        margin: 0 auto !important;
+        padding-top: 8px !important;
+    }
+
+    body.dashboard-body .dashboard-topbar,
+    body.dashboard-body .dashboard-topbar.enterprise-topbar {
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        width: calc(100% - 18px) !important;
+        margin-top: 8px !important;
+    }
+
+    body.dashboard-body .dashboard-search {
+        min-width: 0 !important;
+        max-width: none !important;
+        flex-basis: auto !important;
+    }
+
+    body.dashboard-body .dashboard-profile .pt-user-profile-block__copy {
+        display: none !important;
+    }
+
+    body.dashboard-body .dashboard-profile .topbar-account-toggle.pt-user-profile-block {
+        min-width: 34px !important;
+        padding-right: 22px !important;
+    }
+
+    body.dashboard-body .dashboard-parcel-progress {
+        overflow-x: auto !important;
+        grid-template-columns: repeat(var(--dashboard-timeline-steps, 5), minmax(78px, 1fr)) !important;
+        padding-bottom: 6px !important;
+    }
+}
+
+@media (max-width: 640px) {
+    body.dashboard-body:not(.modal-document-body) {
+        --pt-page-inline: 8px;
+        --pt-page-gap: 8px;
+    }
+
+    body.dashboard-body .dashboard-topbar,
+    body.dashboard-body .dashboard-topbar.enterprise-topbar {
+        grid-template-columns: 1fr !important;
+        align-items: stretch !important;
+        padding: 7px !important;
+    }
+
+    body.dashboard-body .enterprise-topbar__right {
+        justify-content: space-between !important;
+    }
+
+    body.dashboard-body .dashboard-content > .dashboard-hero.admin-users-hero,
+    body.dashboard-body .dashboard-content > .dashboard-hero,
+    body.dashboard-body .dashboard-hero,
+    body.dashboard-body .enterprise-hero,
+    body.dashboard-body .page-hero {
+        min-height: 0 !important;
+        padding: 12px !important;
+    }
+
+    body.dashboard-body :where(
+        .summary-card,
+        .stat-card-modern,
+        .procurement-kpi-card,
+        .admin-dashboard-metric,
+        .admin-stat-kpi,
+        .dashboard-identity-card
+    ) {
+        min-height: 68px !important;
+    }
+
+    body.dashboard-body :where(
+        .document-filter-card,
+        .user-table-toolbar,
+        .office-table-toolbar,
+        .report-filter-toolbar,
+        .audit-filter-toolbar,
+        .budget-filter-toolbar,
+        .returned-filter-toolbar,
+        .reviewed-filter-toolbar,
+        .my-documents-filter-toolbar,
+        .returned-documents-filter-toolbar,
+        .ppmp-filter-toolbar,
+        .pr-filter-toolbar,
+        .app-filter-toolbar,
+        .budget-report-filter-toolbar,
+        .notification-filter-toolbar,
+        .svp-filter-toolbar,
+        .ai-verification-filter-toolbar,
+        .ai-summary-filter-grid,
+        .signature-filter-grid,
+        .pt-ui-table-toolbar,
+        .rule-config-search,
+        .table-toolbar,
+        .list-toolbar,
+        .filter-panel,
+        .filter-bar,
+        .filters-bar
+    ) > :where(.user-filter, .signature-filter-field, label, .ai-verification-field) {
+        max-width: none !important;
+        flex-basis: 100% !important;
+    }
+}

@@ -1,0 +1,611 @@
+:root {
+    --rfq-page-width: 216mm;
+    --rfq-page-min-height: 279mm;
+    --rfq-page-padding: 19mm;
+    --rfq-table-width: 150mm;
+    --rfq-font-size: 7.5pt;
+    --rfq-line-height: 1.05;
+    --rfq-item-row-height: 4.1mm;
+    --rfq-item-header-height: 4.4mm;
+}
+
+.rfq-toolbar,
+.rfq-source-picker {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding: 14px 16px;
+    border: 1px solid #d8dee8;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 10px 28px rgba(11, 35, 65, 0.06);
+}
+
+.rfq-toolbar > div {
+    display: grid;
+    gap: 2px;
+    margin-right: auto;
+}
+
+.rfq-toolbar strong {
+    color: #0b2341;
+    font-size: 0.98rem;
+}
+
+.rfq-toolbar span {
+    color: #64748b;
+    font-size: 0.84rem;
+}
+
+.rfq-source-picker {
+    justify-content: flex-start;
+}
+
+.rfq-source-picker label {
+    color: #0b2341;
+    font-weight: 800;
+    font-size: 0.72rem;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+}
+
+.rfq-source-picker select {
+    min-width: min(520px, 100%);
+    height: 38px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0 12px;
+    background: #fff;
+}
+
+.rfq-toolbar a,
+.rfq-toolbar button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: #0b2341;
+    font: 800 0.84rem/1 Figtree, Arial, sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.rfq-toolbar button {
+    border-color: #0b2341;
+    background: #0b2341;
+    color: #fff;
+}
+
+.rfq-document-wrap {
+    width: 100%;
+    overflow-x: auto;
+    display: flex;
+    justify-content: center;
+    padding: 24px 0 48px;
+    box-sizing: border-box;
+}
+
+.rfq-a4-page {
+    width: var(--rfq-page-width);
+    min-height: var(--rfq-page-min-height);
+    height: auto;
+    background: #fff;
+    color: #000;
+    box-sizing: border-box;
+    padding: var(--rfq-page-padding);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+    font-family: Arial, sans-serif;
+    font-size: var(--rfq-font-size);
+    line-height: var(--rfq-line-height);
+    overflow: visible;
+    margin: 0 auto;
+}
+
+.rfq-document,
+.rfq-document * {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif !important;
+    font-size: var(--rfq-font-size) !important;
+    line-height: var(--rfq-line-height) !important;
+    color: #000 !important;
+}
+
+.rfq-document {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: visible;
+}
+
+.rfq-a4-page.rfq-document {
+    width: var(--rfq-page-width);
+    max-width: none;
+}
+
+.rfq-excel-form {
+    width: var(--rfq-table-width) !important;
+    max-width: 100% !important;
+    margin: 0 auto;
+    table-layout: fixed;
+    border-collapse: collapse;
+    box-sizing: border-box;
+    overflow: visible;
+    min-width: 0 !important;
+    transform: none !important;
+}
+
+.rfq-excel-form * {
+    max-width: 100%;
+    text-overflow: clip !important;
+    transform: none !important;
+}
+
+.rfq-excel-form col:nth-child(1) {
+    width: 10% !important;
+}
+
+.rfq-excel-form col:nth-child(2) {
+    width: 40% !important;
+}
+
+.rfq-excel-form col:nth-child(3) {
+    width: 10% !important;
+}
+
+.rfq-excel-form col:nth-child(4) {
+    width: 14% !important;
+}
+
+.rfq-excel-form col:nth-child(5),
+.rfq-excel-form col:nth-child(6) {
+    width: 13% !important;
+}
+
+.rfq-excel-form td,
+.rfq-excel-form th {
+    border: 1px solid #000;
+    padding: 2px 3px;
+    vertical-align: top;
+    box-sizing: border-box;
+    min-width: 0 !important;
+    font-family: Arial, sans-serif;
+    font-size: var(--rfq-font-size);
+    line-height: var(--rfq-line-height);
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 16px;
+    position: static !important;
+    float: none !important;
+    color: #000;
+}
+
+.rfq-excel-form th {
+    background: #ffffff !important;
+    color: #000000 !important;
+    text-transform: none !important;
+}
+
+.rfq-no-border {
+    border: none !important;
+}
+
+.rfq-official-header-row,
+.rfq-official-header-cell {
+    border: none !important;
+}
+
+.rfq-official-header-cell {
+    padding: 0 0 10px !important;
+}
+
+.rfq-official-header {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr) 52px;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: var(--rfq-table-width);
+    min-height: 48px;
+    margin: 0 auto 10px;
+}
+
+.rfq-official-logo-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+}
+
+.rfq-official-logo {
+    display: block;
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+}
+
+.rfq-official-logo.bagong-pilipinas-logo {
+    width: 48px;
+    height: 42px;
+}
+
+.rfq-official-heading {
+    text-align: center;
+    font-family: Arial, sans-serif !important;
+    font-size: 11pt !important;
+    line-height: 1.08 !important;
+    color: #000 !important;
+}
+
+.rfq-official-municipality {
+    margin-top: 1px;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+}
+
+.rfq-header-cell {
+    border: none !important;
+    text-align: center;
+    font-weight: 400;
+}
+
+.rfq-title {
+    text-align: center;
+    font-weight: 700 !important;
+    font-size: var(--rfq-font-size) !important;
+    padding: 5px 0 8px !important;
+}
+
+.rfq-header-cell,
+.rfq-title,
+.rfq-bold,
+.rfq-label,
+.rfq-cell,
+.rfq-instruction,
+.rfq-description-cell {
+    font-family: Arial, sans-serif !important;
+    font-size: var(--rfq-font-size) !important;
+    line-height: var(--rfq-line-height) !important;
+    color: #000 !important;
+}
+
+.rfq-label {
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.rfq-bottom-line {
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid #000 !important;
+}
+
+.rfq-cell {
+    display: table-cell;
+    height: auto !important;
+    min-height: 16px !important;
+    outline: none;
+    background: transparent;
+    cursor: text;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+    overflow: visible !important;
+}
+
+.rfq-inline-editable {
+    display: inline !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    white-space: normal !important;
+}
+
+.rfq-cell:focus {
+    outline: 1px solid #2563eb;
+    background: rgba(250, 204, 21, 0.08);
+}
+
+.rfq-number,
+.rfq-money {
+    text-align: right;
+}
+
+.rfq-description-cell {
+    text-align: left;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+    overflow: visible !important;
+    height: auto !important;
+}
+
+.rfq-instruction {
+    text-align: justify;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+    overflow: visible !important;
+    height: auto !important;
+    padding: 3px 5px !important;
+}
+
+.rfq-center {
+    text-align: center;
+}
+
+.rfq-bold {
+    font-weight: 700;
+}
+
+.rfq-terms-title,
+.rfq-item-heading th {
+    text-align: center;
+    font-weight: 700;
+}
+
+.rfq-item-heading th {
+    height: var(--rfq-item-header-height) !important;
+    vertical-align: middle !important;
+}
+
+.rfq-term-row td,
+.rfq-meta-row td {
+    border: none !important;
+    padding: 1px 2px !important;
+}
+
+.rfq-term-label {
+    font-weight: 700 !important;
+    text-align: left;
+    white-space: nowrap !important;
+}
+
+.rfq-term-number {
+    display: inline-block;
+    min-width: 14px;
+}
+
+.rfq-item-row td {
+    height: var(--rfq-item-row-height) !important;
+    min-height: var(--rfq-item-row-height) !important;
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    vertical-align: middle;
+}
+
+.rfq-signature-row td {
+    height: auto !important;
+    min-height: 18px;
+}
+
+.rfq-print-area {
+    display: none;
+}
+
+.remove-rfq-row-btn {
+    print-color-adjust: exact;
+}
+
+.rfq-print-body {
+    margin: 0;
+    background: #fff;
+}
+
+.rfq-print-body .rfq-document-wrap {
+    padding: 0;
+}
+
+.rfq-print-body .rfq-a4-page {
+    box-shadow: none;
+    margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+    .rfq-toolbar,
+    .rfq-source-picker {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+@page {
+    size: letter portrait;
+    margin: 19mm;
+}
+
+@media print {
+    html,
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+        overflow: visible !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    body * {
+        visibility: hidden;
+    }
+
+    .sidebar,
+    .topbar,
+    .app-header,
+    .navbar,
+    .app-sidebar,
+    .main-sidebar,
+    .dashboard-sidebar,
+    .dashboard-topbar,
+    .dashboard-hero,
+    .rfq-toolbar,
+    .rfq-source-picker,
+    .remove-rfq-row-btn,
+    .rfq-document-wrap,
+    .no-print {
+        display: none !important;
+    }
+
+    #rfqPrintArea,
+    #rfqPrintArea * {
+        visibility: visible;
+    }
+
+    .rfq-print-area {
+        display: block !important;
+        position: static !important;
+        inset: auto !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+        overflow: visible !important;
+    }
+
+    #rfqPrintPaper {
+        display: block !important;
+        width: 100% !important;
+        min-height: auto !important;
+        height: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: #fff !important;
+        overflow: visible !important;
+        font-family: Arial, sans-serif !important;
+        font-size: var(--rfq-font-size) !important;
+        line-height: var(--rfq-line-height) !important;
+        color: #000 !important;
+        box-sizing: border-box !important;
+        page-break-after: auto !important;
+    }
+
+    #rfqPrintPaper .rfq-document {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        box-sizing: border-box !important;
+    }
+
+    #rfqPrintPaper table,
+    #rfqPrintPaper .rfq-excel-form {
+        width: var(--rfq-table-width) !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+        table-layout: fixed !important;
+        border-collapse: collapse !important;
+        box-sizing: border-box !important;
+        overflow: visible !important;
+        min-width: 0 !important;
+        transform: none !important;
+    }
+
+    #rfqPrintPaper th,
+    #rfqPrintPaper td {
+        border: 1px solid #000 !important;
+        padding: 2px 3px !important;
+        font-size: var(--rfq-font-size) !important;
+        line-height: var(--rfq-line-height) !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+        word-break: normal !important;
+        overflow: visible !important;
+        height: auto !important;
+        min-height: 16px !important;
+        vertical-align: top !important;
+        box-sizing: border-box !important;
+        min-width: 0 !important;
+        position: static !important;
+        float: none !important;
+        text-overflow: clip !important;
+    }
+
+    #rfqPrintPaper th {
+        background: #ffffff !important;
+        color: #000000 !important;
+        text-transform: none !important;
+    }
+
+    #rfqPrintPaper [contenteditable],
+    #rfqPrintPaper .rfq-cell {
+        outline: none !important;
+        background: transparent !important;
+    }
+
+    #rfqPrintPaper,
+    #rfqPrintPaper .rfq-document,
+    #rfqPrintPaper table,
+    #rfqPrintPaper .rfq-excel-form,
+    #rfqPrintPaper th,
+    #rfqPrintPaper td,
+    #rfqPrintPaper .rfq-cell,
+    #rfqPrintPaper .rfq-header-cell,
+    #rfqPrintPaper .rfq-title,
+    #rfqPrintPaper .rfq-bold,
+    #rfqPrintPaper .rfq-label,
+    #rfqPrintPaper .rfq-instruction,
+    #rfqPrintPaper .rfq-description-cell {
+        font-family: Arial, sans-serif !important;
+        font-size: var(--rfq-font-size) !important;
+        line-height: var(--rfq-line-height) !important;
+        color: #000 !important;
+    }
+
+    #rfqPrintPaper .rfq-no-border,
+    #rfqPrintPaper .rfq-header-cell,
+    #rfqPrintPaper .rfq-official-header-row,
+    #rfqPrintPaper .rfq-official-header-cell {
+        border: none !important;
+    }
+
+    #rfqPrintPaper .rfq-term-row td,
+    #rfqPrintPaper .rfq-meta-row td {
+        border: none !important;
+        padding: 1px 2px !important;
+    }
+
+    #rfqPrintPaper .rfq-inline-editable {
+        display: inline !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+    }
+
+    #rfqPrintPaper .rfq-bottom-line {
+        border-top: none !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-bottom: 1px solid #000 !important;
+    }
+
+    #rfqPrintPaper .rfq-item-heading th {
+        height: var(--rfq-item-header-height) !important;
+        vertical-align: middle !important;
+    }
+
+    #rfqPrintPaper .rfq-item-row {
+        page-break-inside: auto !important;
+        break-inside: auto !important;
+    }
+
+    #rfqPrintPaper .rfq-item-row td {
+        height: var(--rfq-item-row-height) !important;
+        min-height: var(--rfq-item-row-height) !important;
+        padding-top: 1px !important;
+        padding-bottom: 1px !important;
+        vertical-align: middle !important;
+    }
+}

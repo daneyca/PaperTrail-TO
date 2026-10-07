@@ -1,0 +1,251 @@
+.settings-tabbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 18px;
+}
+
+.settings-tabbar a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 38px;
+    padding: 9px 13px;
+    border: 1px solid #dbe3ef;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #10233f;
+    font-size: 0.82rem;
+    font-weight: 900;
+    text-decoration: none;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+}
+
+.settings-tabbar a:hover,
+.settings-tabbar a.is-active {
+    border-color: rgba(240, 180, 41, 0.55);
+    background: #fff8e6;
+    color: #0b2545;
+}
+
+.rule-config-summary {
+    margin-bottom: 18px;
+}
+
+.rule-config-layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.38fr) minmax(0, 1fr);
+    gap: 18px;
+    align-items: start;
+}
+
+.rule-config-form-panel,
+.rule-config-table-panel {
+    min-width: 0;
+}
+
+.rule-config-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    padding: 18px;
+    border-top: 1px solid #e5edf6;
+}
+
+.rule-config-form--compact {
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    padding: 14px 0 8px;
+    border-top: 0;
+}
+
+.rule-config-field {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.rule-config-field.is-wide,
+.rule-config-actions {
+    grid-column: 1 / -1;
+}
+
+.rule-config-field label,
+.rule-config-search label {
+    color: #10233f;
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.rule-config-field input,
+.rule-config-field select,
+.rule-config-field textarea,
+.rule-config-search input {
+    width: 100%;
+    max-width: 100%;
+    border: 1px solid #cfd8e5;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #10233f;
+    font-size: 0.86rem;
+    padding: 10px 11px;
+    box-sizing: border-box;
+}
+
+.rule-config-field textarea {
+    min-height: 92px;
+    resize: vertical;
+}
+
+.rule-config-check {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    min-height: 39px;
+    padding: 10px 11px;
+    border: 1px solid #dbe3ef;
+    border-radius: 9px;
+    background: #f8fbff;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+}
+
+.rule-config-check input {
+    width: 16px;
+    height: 16px;
+}
+
+.rule-config-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.rule-config-actions button,
+.rule-config-search button,
+.rule-config-search a,
+.rule-config-delete-form button {
+    min-height: 38px;
+    border: 0;
+    border-radius: 8px;
+    background: #0f2f57;
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 900;
+    padding: 0 14px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.rule-config-search a {
+    display: inline-flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #10233f;
+}
+
+.rule-config-delete-form {
+    margin: 8px 0 0;
+}
+
+.rule-config-delete-form button {
+    background: #b42318;
+}
+
+.rule-config-search {
+    display: grid;
+    grid-template-columns: minmax(240px, 1fr) auto;
+    gap: 12px;
+    align-items: end;
+    padding: 14px 18px;
+    border-top: 1px solid #e5edf6;
+}
+
+.rule-config-search label {
+    grid-column: 1 / -1;
+}
+
+.rule-config-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.84rem;
+}
+
+.rule-config-table th {
+    background: #edf4fb;
+    color: #10233f;
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    padding: 10px 12px;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.rule-config-table td {
+    border-top: 1px solid #e5edf6;
+    color: #1f2f46;
+    max-width: 260px;
+    padding: 10px 12px;
+    vertical-align: top;
+}
+
+.rule-config-long-cell span {
+    display: -webkit-box;
+    max-width: 360px;
+    overflow: hidden;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.rule-config-edit summary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 31px;
+    padding: 6px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    color: #0b2b50;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 900;
+}
+
+.rule-config-edit[open] {
+    min-width: min(760px, 75vw);
+}
+
+@media (max-width: 1180px) {
+    .rule-config-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 780px) {
+    .rule-config-form,
+    .rule-config-form--compact,
+    .rule-config-search {
+        grid-template-columns: 1fr;
+    }
+
+    .rule-config-actions,
+    .rule-config-search .filter-actions {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .rule-config-edit[open] {
+        min-width: 0;
+    }
+}
+
+@media print {
+    .settings-tabbar,
+    .rule-config-form-panel,
+    .rule-config-search,
+    .rule-config-edit {
+        display: none !important;
+    }
+}

@@ -1,0 +1,245 @@
+/* Dedicated AI document-assistance tools. Chatbot styles stay separate. */
+
+body.dashboard-body .ai-document-tools-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 38px;
+    padding: 3px 4px 3px 8px;
+    border: 1px solid #dbeafe;
+    border-radius: 14px;
+    background: rgba(248, 251, 255, 0.96);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.055);
+    vertical-align: middle;
+}
+
+body.dashboard-body .ai-document-tools-group__label {
+    color: #37506f;
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+body.dashboard-body .ai-feature-button {
+    --ai-feature-accent: #2563eb;
+    --ai-feature-border: #bfdbfe;
+    --ai-feature-bg: #eff6ff;
+    --ai-feature-hover: #dbeafe;
+    --ai-feature-ink: #0b2341;
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    border: 1px solid var(--ai-feature-border) !important;
+    border-radius: 12px !important;
+    background: linear-gradient(135deg, var(--ai-feature-bg), #ffffff) !important;
+    color: var(--ai-feature-accent) !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    transition: transform 160ms ease, border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease !important;
+}
+
+body.dashboard-body .ai-feature-button--completeness {
+    --ai-feature-accent: #059669;
+    --ai-feature-border: #a7f3d0;
+    --ai-feature-bg: #ecfdf5;
+    --ai-feature-hover: #d1fae5;
+}
+
+body.dashboard-body .ai-feature-button--routing {
+    --ai-feature-accent: #2563eb;
+    --ai-feature-border: #bfdbfe;
+    --ai-feature-bg: #eff6ff;
+    --ai-feature-hover: #dbeafe;
+}
+
+body.dashboard-body .ai-feature-button--risk {
+    --ai-feature-accent: #ea580c;
+    --ai-feature-border: #fed7aa;
+    --ai-feature-bg: #fff7ed;
+    --ai-feature-hover: #ffedd5;
+}
+
+body.dashboard-body .ai-feature-button:hover,
+body.dashboard-body .ai-feature-button:focus-visible {
+    background: var(--ai-feature-hover) !important;
+    border-color: var(--ai-feature-accent) !important;
+    color: var(--ai-feature-accent) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.11) !important;
+}
+
+body.dashboard-body .ai-feature-button:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--ai-feature-accent) 28%, transparent) !important;
+    outline-offset: 2px !important;
+}
+
+body.dashboard-body .ai-feature-button__icon {
+    display: grid !important;
+    place-items: center !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: inherit !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+body.dashboard-body .ai-feature-button__label {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+body.dashboard-body .ai-document-tools-group .ai-feature-button {
+    width: auto !important;
+    min-width: 104px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    gap: 6px !important;
+    padding: 0 9px 0 5px !important;
+    border-radius: 11px !important;
+}
+
+body.dashboard-body .ai-document-tools-group .ai-feature-button__icon {
+    flex: 0 0 26px !important;
+    width: 26px !important;
+    height: 26px !important;
+}
+
+body.dashboard-body .ai-document-tools-group .ai-feature-button__label {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    clip: auto !important;
+    color: var(--ai-feature-ink) !important;
+    font-size: 0.7rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+}
+
+body.dashboard-body .attachment-actions .ai-feature-button {
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    border-radius: 10px !important;
+}
+
+body.dashboard-body .ai-feature-icon {
+    width: 25px;
+    height: 25px;
+    display: block;
+    overflow: visible;
+}
+
+body.dashboard-body .ai-document-tools-group .ai-feature-icon {
+    width: 23px;
+    height: 23px;
+}
+
+body.dashboard-body .attachment-actions .ai-feature-icon {
+    width: 22px;
+    height: 22px;
+}
+
+body.dashboard-body .ai-feature-icon__paper {
+    fill: #ffffff;
+    stroke: var(--ai-feature-accent);
+    stroke-width: 2.4;
+    stroke-linejoin: round;
+}
+
+body.dashboard-body .ai-feature-icon__fold {
+    fill: color-mix(in srgb, var(--ai-feature-accent) 18%, #ffffff);
+    stroke: var(--ai-feature-accent);
+    stroke-width: 2.4;
+    stroke-linejoin: round;
+}
+
+body.dashboard-body .ai-feature-icon__check,
+body.dashboard-body .ai-feature-icon__line,
+body.dashboard-body .ai-feature-icon__path,
+body.dashboard-body .ai-feature-icon__bar,
+body.dashboard-body .ai-feature-icon__bang,
+body.dashboard-body .ai-feature-icon__spark {
+    fill: none;
+    stroke: var(--ai-feature-accent);
+    stroke-width: 2.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+body.dashboard-body .ai-feature-icon__line,
+body.dashboard-body .ai-feature-icon__path--soft,
+body.dashboard-body .ai-feature-icon__bar--mid,
+body.dashboard-body .ai-feature-icon__bar--low {
+    opacity: 0.55;
+}
+
+body.dashboard-body .ai-feature-icon__pin,
+body.dashboard-body .ai-feature-icon__warning {
+    fill: var(--ai-feature-accent);
+    stroke: var(--ai-feature-accent);
+    stroke-width: 1.7;
+    stroke-linejoin: round;
+}
+
+body.dashboard-body .ai-feature-icon__pin-hole,
+body.dashboard-body .ai-feature-icon__dot {
+    fill: #ffffff;
+}
+
+body.dashboard-body .ai-feature-icon__ai-badge {
+    fill: var(--ai-feature-accent);
+    stroke: #ffffff;
+    stroke-width: 1.7;
+}
+
+body.dashboard-body .ai-feature-icon__ai-text {
+    fill: #ffffff;
+    font-family: "Plus Jakarta Sans", Arial, sans-serif;
+    font-size: 7px;
+    font-weight: 950;
+    letter-spacing: -0.03em;
+    pointer-events: none;
+}
+
+body.dashboard-body .ai-feature-icon__spark {
+    stroke-width: 2.2;
+}
+
+@media (max-width: 720px) {
+    body.dashboard-body .ai-document-tools-group {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        width: 100%;
+    }
+
+    body.dashboard-body .ai-document-tools-group__label {
+        flex: 0 0 100%;
+        padding: 2px 2px 0;
+    }
+
+    body.dashboard-body .ai-document-tools-group .ai-feature-button {
+        flex: 1 1 118px;
+        min-width: 0 !important;
+    }
+}

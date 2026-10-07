@@ -1,0 +1,753 @@
+/* Compact visual density for procurement document workspaces.
+   UI only: this file tightens spacing without changing document workflow behavior. */
+
+body.dashboard-body .dashboard-content:has(.document-create-flow),
+body.dashboard-body .dashboard-content:has([data-pr-create-flow]),
+body.dashboard-body .dashboard-content:has(.pr-app-create-picker),
+body.dashboard-body .dashboard-content:has(.pr-app-confirm-workspace),
+body.dashboard-body .dashboard-content:has(.attachments-card),
+body.dashboard-body .dashboard-content:has(.document-records-card--compact-list) {
+    gap: 12px !important;
+    row-gap: 12px !important;
+}
+
+body.dashboard-body :where(
+    .document-create-flow,
+    .pr-app-create-picker,
+    .pr-app-confirm-workspace,
+    .pr-create-flow,
+    .document-form-layout
+) {
+    gap: 10px !important;
+}
+
+body.dashboard-body .document-create-source-card {
+    gap: 12px !important;
+    padding: clamp(14px, 1.8vw, 20px) !important;
+    border-radius: 15px !important;
+}
+
+body.dashboard-body .document-create-source-card__header {
+    gap: 10px !important;
+}
+
+body.dashboard-body .document-create-source-card__step {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 10px !important;
+    font-size: 0.78rem !important;
+}
+
+body.dashboard-body .document-create-source-card .eyebrow,
+body.dashboard-body .pr-page-kicker {
+    margin-bottom: 2px !important;
+    font-size: 0.66rem !important;
+    line-height: 1.15 !important;
+}
+
+body.dashboard-body .document-create-source-card h2,
+body.dashboard-body .pr-app-reference-heading h2,
+body.dashboard-body .pr-app-create-panel-heading h2 {
+    font-size: clamp(1rem, 1.5vw, 1.22rem) !important;
+    line-height: 1.15 !important;
+}
+
+body.dashboard-body .document-create-source-card p,
+body.dashboard-body .pr-page-subtitle,
+body.dashboard-body .pr-app-reference-heading p:not(.pr-page-kicker),
+body.dashboard-body .pr-app-create-panel-heading p:not(.pr-page-kicker) {
+    margin-top: 3px !important;
+    font-size: 0.8rem !important;
+    line-height: 1.35 !important;
+}
+
+body.dashboard-body .document-create-source-card__body form {
+    gap: 10px !important;
+}
+
+body.dashboard-body .document-create-source-card__body label,
+body.dashboard-body .pr-app-reference-filter label,
+body.dashboard-body .pr-context-label {
+    gap: 5px !important;
+    font-size: 0.66rem !important;
+}
+
+body.dashboard-body .document-create-source-card__body :where(select, textarea, input:not([type="checkbox"]):not([type="radio"])),
+body.dashboard-body .pr-app-reference-filter input,
+body.dashboard-body .pr-app-reference-filter select,
+body.dashboard-body .pr-context-select {
+    min-height: 36px !important;
+    border-radius: 10px !important;
+    padding: 7px 10px !important;
+    font-size: 0.82rem !important;
+}
+
+body.dashboard-body .document-create-source-card__body textarea {
+    min-height: 68px !important;
+}
+
+body.dashboard-body .document-create-source-card__actions {
+    gap: 8px !important;
+}
+
+body.dashboard-body .document-workflow-steps {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)) !important;
+    gap: 8px !important;
+    margin: 0 !important;
+}
+
+body.dashboard-body .document-create-form > .document-workflow-steps {
+    margin-bottom: 10px !important;
+}
+
+body.dashboard-body .document-workflow-step {
+    position: relative !important;
+    display: grid !important;
+    gap: 3px !important;
+    min-width: 0 !important;
+    padding: 9px 10px 9px 36px !important;
+    overflow: hidden !important;
+    border: 1px solid #dbe7f4 !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+    color: #66758b !important;
+}
+
+body.dashboard-body .document-workflow-step::before {
+    content: "" !important;
+    position: absolute !important;
+    left: 11px !important;
+    top: 50% !important;
+    width: 16px !important;
+    height: 16px !important;
+    border: 2px solid #cbd5e1 !important;
+    border-radius: 999px !important;
+    background: #ffffff !important;
+    transform: translateY(-50%) !important;
+}
+
+body.dashboard-body .document-workflow-step span {
+    color: inherit !important;
+    font-size: 0.6rem !important;
+    font-weight: 900 !important;
+    line-height: 1.1 !important;
+    text-transform: uppercase !important;
+}
+
+body.dashboard-body .document-workflow-step strong {
+    overflow: hidden !important;
+    color: #0b294b !important;
+    font-size: 0.76rem !important;
+    font-weight: 900 !important;
+    line-height: 1.2 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+body.dashboard-body .document-workflow-step.is-active {
+    border-color: #93c5fd !important;
+    background: #eff6ff !important;
+    color: #1d4ed8 !important;
+    box-shadow: inset 0 -3px 0 #2563eb !important;
+}
+
+body.dashboard-body .document-workflow-step.is-active::before {
+    border-color: #2563eb !important;
+    background: radial-gradient(circle at center, #2563eb 0 42%, #ffffff 44% 100%) !important;
+}
+
+body.dashboard-body .document-workflow-step.is-complete {
+    border-color: #bbf7d0 !important;
+    background: #f0fdf4 !important;
+    color: #047857 !important;
+}
+
+body.dashboard-body .document-workflow-step.is-complete::before {
+    border-color: #22c55e !important;
+    background: #22c55e !important;
+    box-shadow: inset 0 0 0 4px #f0fdf4 !important;
+}
+
+body.dashboard-body .document-create-proceed-button,
+body.dashboard-body .document-create-secondary-action,
+body.dashboard-body :where(.btn-pr-primary, .btn-pr-secondary, .btn-pr-dark),
+body.dashboard-body :where(.rfq-toolbar, .abstract-toolbar, .po-toolbar, .resolution-page-toolbar, .resolution-word-toolbar, .document-action-bar, .ppmp-sticky-actions) :where(a, button) {
+    min-height: 34px !important;
+    padding: 0 11px !important;
+    border-radius: 9px !important;
+    font-size: 0.78rem !important;
+}
+
+body.dashboard-body .pr-create-flow.pr-workspace {
+    padding: 14px 18px 32px !important;
+}
+
+body.dashboard-body :where(.pr-app-create-picker, .pr-app-confirm-workspace) {
+    gap: 10px !important;
+}
+
+body.dashboard-body .pr-create-workflow,
+body.dashboard-body .pr-app-confirm-workspace {
+    align-content: start !important;
+}
+
+body.dashboard-body .pr-page-header {
+    gap: 10px !important;
+    margin-bottom: 8px !important;
+}
+
+body.dashboard-body .pr-page-title {
+    margin: 2px 0 3px !important;
+    font-size: clamp(1.15rem, 1.9vw, 1.35rem) !important;
+}
+
+body.dashboard-body .pr-context-strip {
+    gap: 8px !important;
+    margin-bottom: 10px !important;
+    padding: 9px 11px !important;
+    border-radius: 11px !important;
+}
+
+body.dashboard-body .pr-context-strip.pr-context-card {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    align-items: stretch !important;
+    border: 1px solid #dbe7f4 !important;
+    background: rgba(248, 251, 255, 0.94) !important;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.045) !important;
+}
+
+body.dashboard-body .pr-context-item {
+    gap: 6px !important;
+    font-size: 0.78rem !important;
+}
+
+body.dashboard-body .pr-context-card .pr-context-item {
+    min-width: 0 !important;
+    padding: 8px 10px !important;
+    border: 1px solid #dbeafe !important;
+    border-radius: 10px !important;
+    background: #ffffff !important;
+}
+
+body.dashboard-body .pr-context-card .pr-context-item strong {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+body.dashboard-body .pr-workflow-steps {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin: 0 0 10px !important;
+}
+
+body.dashboard-body .pr-workflow-step {
+    position: relative !important;
+    display: grid !important;
+    gap: 3px !important;
+    min-width: 0 !important;
+    padding: 9px 11px 9px 38px !important;
+    overflow: hidden !important;
+    border: 1px solid #dbe7f4 !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+    color: #66758b !important;
+}
+
+body.dashboard-body .pr-workflow-step::before {
+    content: "" !important;
+    position: absolute !important;
+    left: 11px !important;
+    top: 50% !important;
+    width: 17px !important;
+    height: 17px !important;
+    border: 2px solid #cbd5e1 !important;
+    border-radius: 999px !important;
+    background: #ffffff !important;
+    transform: translateY(-50%) !important;
+}
+
+body.dashboard-body .pr-workflow-step span {
+    color: inherit !important;
+    font-size: 0.62rem !important;
+    font-weight: 900 !important;
+    line-height: 1.1 !important;
+    text-transform: uppercase !important;
+}
+
+body.dashboard-body .pr-workflow-step strong {
+    overflow: hidden !important;
+    color: #0b294b !important;
+    font-size: 0.78rem !important;
+    font-weight: 900 !important;
+    line-height: 1.2 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+body.dashboard-body .pr-workflow-step.is-active {
+    border-color: #93c5fd !important;
+    background: #eff6ff !important;
+    color: #1d4ed8 !important;
+    box-shadow: inset 0 -3px 0 #2563eb !important;
+}
+
+body.dashboard-body .pr-workflow-step.is-active::before {
+    border-color: #2563eb !important;
+    background: radial-gradient(circle at center, #2563eb 0 42%, #ffffff 44% 100%) !important;
+}
+
+body.dashboard-body .pr-workflow-step.is-complete {
+    border-color: #bbf7d0 !important;
+    background: #f0fdf4 !important;
+    color: #047857 !important;
+}
+
+body.dashboard-body .pr-workflow-step.is-complete::before {
+    border-color: #22c55e !important;
+    background: #22c55e !important;
+    box-shadow: inset 0 0 0 4px #f0fdf4 !important;
+}
+
+body.dashboard-body .pr-app-reference-card,
+body.dashboard-body .pr-app-confirm-card,
+body.dashboard-body .pr-app-create-panel {
+    gap: 10px !important;
+    padding: 12px !important;
+    border-radius: 14px !important;
+}
+
+body.dashboard-body .pr-app-reference-heading {
+    gap: 10px !important;
+}
+
+body.dashboard-body .pr-app-list-card .pr-app-reference-heading {
+    align-items: center !important;
+    padding-bottom: 8px !important;
+    border-bottom: 1px solid #e5edf6 !important;
+}
+
+body.dashboard-body .pr-app-list-card .pr-app-reference-filter {
+    max-width: 430px !important;
+}
+
+body.dashboard-body .pr-app-reference-badge {
+    min-height: 23px !important;
+    padding: 4px 8px !important;
+    font-size: 0.64rem !important;
+}
+
+body.dashboard-body .pr-app-reference-table-wrap {
+    border-radius: 11px !important;
+}
+
+body.dashboard-body .pr-app-reference-table th,
+body.dashboard-body .pr-app-reference-table td,
+body.dashboard-body .pr-ppmp-supply-table th,
+body.dashboard-body .pr-ppmp-supply-table td {
+    padding: 8px 10px !important;
+    font-size: 0.72rem !important;
+    line-height: 1.25 !important;
+}
+
+body.dashboard-body .pr-app-picker-table td strong,
+body.dashboard-body .pr-ppmp-supply-table td strong {
+    font-size: 0.76rem !important;
+}
+
+body.dashboard-body .pr-app-picker-table td small,
+body.dashboard-body .pr-ppmp-supply-table td small {
+    margin-top: 2px !important;
+    font-size: 0.68rem !important;
+}
+
+body.dashboard-body .pr-selected-app-details,
+body.dashboard-body .pr-selected-app-empty,
+body.dashboard-body .pr-confirm-info-banner,
+body.dashboard-body .pr-app-selected-reference {
+    gap: 7px !important;
+    padding: 9px 10px !important;
+    border-radius: 11px !important;
+}
+
+body.dashboard-body .pr-source-step-footer {
+    bottom: 8px !important;
+    gap: 10px !important;
+    padding: 10px 12px !important;
+    border-radius: 14px !important;
+}
+
+body.dashboard-body .pr-source-step-footer strong {
+    font-size: 0.86rem !important;
+}
+
+body.dashboard-body .pr-source-step-footer span {
+    font-size: 0.72rem !important;
+}
+
+body.dashboard-body :where(
+    .pr-action-toolbar,
+    .rfq-toolbar,
+    .abstract-toolbar,
+    .po-toolbar,
+    .resolution-page-toolbar,
+    .resolution-word-toolbar,
+    .document-action-bar,
+    .ppmp-sticky-actions
+) {
+    gap: 8px !important;
+    margin-bottom: 10px !important;
+    padding: 10px 12px !important;
+    border-radius: 11px !important;
+}
+
+body.dashboard-body :where(.pr-toolbar-group, .pr-source-step-actions) {
+    gap: 6px !important;
+}
+
+body.dashboard-body :where(.rfq-toolbar, .abstract-toolbar, .po-toolbar, .resolution-page-toolbar, .document-action-bar) > div {
+    gap: 1px !important;
+}
+
+body.dashboard-body :where(.rfq-toolbar, .abstract-toolbar, .po-toolbar, .resolution-page-toolbar, .document-action-bar) strong {
+    font-size: 0.9rem !important;
+}
+
+body.dashboard-body :where(.rfq-toolbar, .abstract-toolbar, .po-toolbar, .resolution-page-toolbar, .document-action-bar) span {
+    font-size: 0.76rem !important;
+}
+
+body.dashboard-body :where(.rfq-source-picker, .abstract-source-picker, .po-source-picker, .resolution-source-picker) {
+    gap: 9px !important;
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+body.dashboard-body :where(.rfq-source-picker, .abstract-source-picker, .po-source-picker, .resolution-source-picker) label {
+    display: grid !important;
+    gap: 5px !important;
+    min-width: min(100%, 360px) !important;
+    font-size: 0.68rem !important;
+}
+
+body.dashboard-body :where(.rfq-source-picker, .abstract-source-picker, .po-source-picker, .resolution-source-picker) select {
+    height: 36px !important;
+    min-width: min(100%, 520px) !important;
+    border-radius: 10px !important;
+    padding: 0 10px !important;
+    font-size: 0.82rem !important;
+}
+
+body.dashboard-body :where(.pr-preview-area, .rfq-document-wrap, .abstract-document-wrap, .po-document-wrap, .resolution-document-wrap, .app-print-area, .ppmp-entry-scroll) {
+    padding-top: 12px !important;
+    padding-bottom: 28px !important;
+}
+
+body.dashboard-body .pr-preview-area {
+    border-radius: 12px !important;
+}
+
+body.dashboard-body .document-records-card.document-draft-manager-card,
+body.dashboard-body .document-records-card.document-records-card--compact-list,
+body.dashboard-body .attachments-card {
+    border-radius: 13px !important;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05) !important;
+}
+
+body.dashboard-body .document-records-card.document-draft-manager-card,
+body.dashboard-body .attachments-card {
+    margin-block: 10px !important;
+}
+
+body.dashboard-body .document-records-card.document-draft-manager-card.document-draft-manager-card--create.is-empty {
+    display: grid !important;
+    gap: 0 !important;
+    margin-block: 6px 8px !important;
+    overflow: hidden !important;
+}
+
+body.dashboard-body .document-records-card.document-draft-manager-card > header,
+body.dashboard-body .document-records-card.document-records-card--compact-list > header,
+body.dashboard-body .attachments-header {
+    gap: 10px !important;
+    padding: 11px 14px !important;
+}
+
+body.dashboard-body .document-records-card.document-draft-manager-card h2,
+body.dashboard-body .document-records-card.document-records-card--compact-list h2,
+body.dashboard-body .attachments-header h2,
+body.dashboard-body .attachments-header h3 {
+    margin: 1px 0 2px !important;
+    font-size: 0.98rem !important;
+    line-height: 1.16 !important;
+}
+
+body.dashboard-body .document-records-card.document-draft-manager-card p,
+body.dashboard-body .document-records-card.document-records-card--compact-list p,
+body.dashboard-body .attachments-header > div > p,
+body.dashboard-body .attachments-header > div > span {
+    margin-top: 2px !important;
+    font-size: 0.76rem !important;
+    line-height: 1.28 !important;
+}
+
+body.dashboard-body .document-records-count {
+    min-width: 32px !important;
+    height: 32px !important;
+    padding: 0 9px !important;
+    font-size: 0.84rem !important;
+}
+
+body.dashboard-body .document-records-card.document-draft-manager-card--create.is-empty > header {
+    padding: 9px 12px !important;
+}
+
+body.dashboard-body .document-records-card.document-draft-manager-card--create.is-empty h2 {
+    margin: 0 !important;
+    font-size: 0.96rem !important;
+}
+
+body.dashboard-body .document-records-card.document-draft-manager-card--create.is-empty .document-records-count {
+    min-width: 30px !important;
+    height: 30px !important;
+}
+
+body.dashboard-body .document-draft-file-row {
+    grid-template-columns: 30px minmax(160px, 1fr) auto minmax(84px, auto) auto !important;
+    gap: 8px !important;
+    padding: 7px 12px !important;
+}
+
+body.dashboard-body .document-draft-file-icon {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 10px !important;
+}
+
+body.dashboard-body .document-draft-file-main strong {
+    font-size: 0.78rem !important;
+}
+
+body.dashboard-body .document-draft-file-main span,
+body.dashboard-body .document-draft-file-main small,
+body.dashboard-body .document-draft-file-date {
+    font-size: 0.69rem !important;
+}
+
+body.dashboard-body .document-draft-pagination {
+    gap: 8px !important;
+    padding: 8px 12px !important;
+}
+
+body.dashboard-body .document-draft-pagination-controls button {
+    min-width: 28px !important;
+    height: 28px !important;
+    border-radius: 8px !important;
+    font-size: 0.68rem !important;
+}
+
+body.dashboard-body .document-drafts-empty-compact,
+body.dashboard-body .document-drafts-empty,
+body.dashboard-body .document-records-empty,
+body.dashboard-body .attachments-empty,
+body.dashboard-body :where(.table-panel, .papertrail-table-card, .document-records-card, .dashboard-card, .procurement-recent-card) td[colspan]:has(> :where(.empty-state, .pt-ui-empty-state, .signature-empty-state, .document-records-empty, .attachments-empty, .procurement-empty-table)) {
+    min-height: 0 !important;
+    padding: 10px 12px !important;
+}
+
+body.dashboard-body .document-draft-manager-card--create.is-empty .document-drafts-empty-compact {
+    border-top: 1px solid #e5edf6 !important;
+    background: #fbfdff !important;
+    color: #52627a !important;
+}
+
+body.dashboard-body .document-records-table th,
+body.dashboard-body .attachments-table th {
+    padding: 8px 10px !important;
+    font-size: 0.66rem !important;
+}
+
+body.dashboard-body .document-records-table td,
+body.dashboard-body .attachments-table td {
+    padding: 8px 10px !important;
+    font-size: 0.78rem !important;
+    line-height: 1.25 !important;
+}
+
+body.dashboard-body .attachments-upload-form {
+    grid-template-columns: minmax(220px, 1.35fr) minmax(170px, 240px);
+    gap: 10px !important;
+    padding: 12px 14px !important;
+}
+
+body.dashboard-body .attachments-field {
+    gap: 4px !important;
+}
+
+body.dashboard-body .attachments-field label,
+body.dashboard-body .attachments-checkbox {
+    margin-bottom: 3px !important;
+    font-size: 0.68rem !important;
+}
+
+body.dashboard-body .attachments-field :where(input[type="file"], input[type="text"], select, textarea) {
+    min-height: 36px !important;
+    border-radius: 9px !important;
+    padding: 8px 10px !important;
+    font-size: 0.82rem !important;
+}
+
+body.dashboard-body .attachments-field input[type="file"]::file-selector-button {
+    padding: 6px 9px !important;
+    margin-right: 8px !important;
+}
+
+body.dashboard-body .attachments-actions-row {
+    gap: 9px !important;
+}
+
+body.dashboard-body .attachments-upload-btn {
+    height: 36px !important;
+    min-width: 84px !important;
+    padding: 0 13px !important;
+    border-radius: 9px !important;
+    font-size: 0.82rem !important;
+}
+
+body.dashboard-body .required-attachments-list {
+    padding: 10px 14px !important;
+}
+
+body.dashboard-body .required-attachments-list ul {
+    gap: 5px !important;
+}
+
+body.dashboard-body .required-attachments-list li {
+    padding: 4px 0 !important;
+}
+
+body.dashboard-body .attachments-readonly-note {
+    padding: 9px 14px !important;
+    font-size: 0.78rem !important;
+}
+
+body.dashboard-body .attachment-badge,
+body.dashboard-body .document-status-badge,
+body.dashboard-body .status-pill {
+    padding: 5px 8px !important;
+    font-size: 0.68rem !important;
+}
+
+body.dashboard-body .tracking-history,
+body.dashboard-body .document-tracking-progress-wrap,
+body.dashboard-body .document-tracking-timeline {
+    gap: 8px !important;
+}
+
+body.dashboard-body .tracking-history__heading,
+body.dashboard-body .document-tracking-timeline__item,
+body.dashboard-body .dashboard-tracking-history__item {
+    padding-block: 7px !important;
+}
+
+body.dashboard-body :where(.detail-grid, .budget-detail-grid, .metadata-grid) {
+    gap: 10px !important;
+}
+
+body.dashboard-body :where(.detail-grid, .budget-detail-grid, .metadata-grid) > div {
+    padding: 10px 11px !important;
+    border-radius: 11px !important;
+}
+
+body.dashboard-body :where(.budget-review-layout.reviewed-detail-layout, .budget-review-layout) {
+    gap: 12px !important;
+}
+
+body.dashboard-body :where(.table-panel, .budget-detail-panel, .budget-action-panel):has(.budget-action-form),
+body.dashboard-body :where(.table-panel, .budget-detail-panel, .budget-action-panel):has(.budget-detail-grid) {
+    border-radius: 14px !important;
+}
+
+body.dashboard-body :where(.budget-action-form) {
+    gap: 9px !important;
+}
+
+body.dashboard-body :where(.budget-action-form input, .budget-action-form select, .budget-action-form textarea) {
+    min-height: 36px !important;
+    border-radius: 9px !important;
+    padding: 8px 10px !important;
+}
+
+@media (max-width: 860px) {
+    body.dashboard-body .pr-context-strip.pr-context-card,
+    body.dashboard-body .pr-workflow-steps {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    body.dashboard-body .document-draft-file-row {
+        grid-template-columns: 30px minmax(0, 1fr) auto !important;
+    }
+
+    body.dashboard-body .pr-source-step-footer {
+        position: static !important;
+    }
+}
+
+@media (max-width: 640px) {
+    body.dashboard-body .pr-create-flow.pr-workspace {
+        padding: 10px 10px 26px !important;
+    }
+
+    body.dashboard-body .pr-context-strip.pr-context-card,
+    body.dashboard-body .pr-workflow-steps {
+        grid-template-columns: 1fr !important;
+    }
+
+    body.dashboard-body .pr-workflow-step {
+        padding-right: 10px !important;
+    }
+
+    body.dashboard-body .document-workflow-step strong,
+    body.dashboard-body .pr-workflow-step strong,
+    body.dashboard-body .pr-context-card .pr-context-item strong {
+        white-space: normal !important;
+    }
+
+    body.dashboard-body :where(
+        .pr-action-toolbar,
+        .rfq-toolbar,
+        .abstract-toolbar,
+        .po-toolbar,
+        .resolution-page-toolbar,
+        .document-action-bar,
+        .ppmp-sticky-actions
+    ) {
+        align-items: stretch !important;
+    }
+
+    body.dashboard-body :where(
+        .pr-action-toolbar,
+        .rfq-toolbar,
+        .abstract-toolbar,
+        .po-toolbar,
+        .resolution-page-toolbar,
+        .document-action-bar,
+        .ppmp-sticky-actions
+    ) :where(a, button) {
+        flex: 1 1 136px !important;
+    }
+
+    body.dashboard-body .document-create-source-card {
+        padding: 12px !important;
+    }
+
+    body.dashboard-body .attachments-upload-form {
+        grid-template-columns: 1fr !important;
+    }
+}

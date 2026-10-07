@@ -1,0 +1,1429 @@
+.app-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding: 14px 16px;
+    border: 1px solid #d8dee8;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 10px 28px rgba(11, 35, 65, 0.06);
+}
+
+.app-toolbar > div {
+    display: grid;
+    gap: 2px;
+    margin-right: auto;
+}
+
+.app-toolbar strong {
+    color: #0b2341;
+    font-size: 0.98rem;
+}
+
+.app-toolbar span {
+    color: #64748b;
+    font-size: 0.84rem;
+}
+
+.app-toolbar a,
+.app-toolbar button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: #0b2341;
+    font: 800 0.84rem/1 Figtree, Arial, sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.app-toolbar button {
+    border-color: #0b2341;
+    background: #0b2341;
+    color: #fff;
+}
+
+.app-editor-form .app-toolbar {
+    position: sticky;
+    top: 76px;
+    z-index: 45;
+    width: max-content;
+    max-width: calc(100vw - 48px);
+    margin: 0 0 12px auto;
+    padding: 8px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 16px 34px rgba(11, 35, 65, 0.14);
+}
+
+.app-editor-form .app-toolbar > div {
+    display: none;
+}
+
+.app-editor-form .app-toolbar a,
+.app-editor-form .app-toolbar button {
+    min-height: 36px;
+    padding: 0 13px;
+    white-space: nowrap;
+}
+
+.app-editor-form .app-worksheet-toolbar {
+    position: static;
+    top: auto;
+    z-index: auto;
+    width: min(100%, 297mm);
+    max-width: 100%;
+    margin: 6px auto 18px;
+    justify-content: flex-end;
+    box-sizing: border-box;
+}
+
+.app-editor-form .app-worksheet-toolbar + .app-document-wrap {
+    padding-top: 0;
+}
+
+.app-support-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.app-support-grid--single {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.app-metadata-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 14px 16px;
+    border: 1px solid #d8dee8;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 10px 28px rgba(11, 35, 65, 0.05);
+}
+
+.app-metadata-panel label {
+    display: block;
+    margin-bottom: 6px;
+    color: #0b2341;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.app-metadata-panel input {
+    width: 100%;
+    min-height: 38px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0 11px;
+    color: #0b2341;
+    background: #fff;
+}
+
+.app-version-readout {
+    min-height: 38px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 7px 11px;
+    background: #f8fafc;
+    color: #5f6f89;
+    font-size: 0.8rem;
+    line-height: 1.25;
+}
+
+.app-version-readout strong,
+.app-version-readout span {
+    display: block;
+}
+
+.app-version-readout strong {
+    color: #0b2341;
+    font-size: 0.88rem;
+}
+
+.app-version-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    margin-left: 8px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: #eaf2ff;
+    color: #1d4ed8;
+    font-size: 0.72rem;
+    font-weight: 800;
+    vertical-align: middle;
+}
+
+.app-add-to-app-action {
+    width: auto !important;
+    min-width: max-content !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 0 12px !important;
+    font-size: 0.74rem !important;
+}
+
+.app-add-to-app-action .pt-action-button__label {
+    display: inline-flex !important;
+    align-items: center !important;
+    font-size: 0.74rem !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+
+.app-support-panel,
+.app-return-note,
+.app-summary-strip {
+    border: 1px solid #d8dee8;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 10px 28px rgba(11, 35, 65, 0.05);
+}
+
+.app-support-panel {
+    padding: 16px;
+}
+
+.app-support-panel strong,
+.app-return-note strong,
+.app-return-note label {
+    display: block;
+    color: #0b2341;
+    font-weight: 800;
+}
+
+.app-support-panel p,
+.app-return-note p {
+    margin: 6px 0 0;
+    color: #5f6f89;
+    line-height: 1.45;
+}
+
+.app-ppmp-import-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.app-ppmp-import-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid #d8dee8;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.app-ppmp-import-row span {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+    color: #5f6f89;
+    font-size: 0.82rem;
+    line-height: 1.3;
+}
+
+.app-ppmp-import-row span strong {
+    color: #0b2341;
+    font-size: 0.86rem;
+}
+
+.app-ppmp-import-row button,
+.app-ppmp-import-row a {
+    border: 1px solid #0b2341;
+    border-radius: 7px;
+    background: #0b2341;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 800;
+    min-height: 34px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.app-ppmp-import-row button.is-remove {
+    border-color: #f4b4b4;
+    background: #fff;
+    color: #b42318;
+}
+
+.app-ppmp-import-row button.is-remove:hover {
+    border-color: #b42318;
+    background: #fff5f5;
+}
+
+.app-selected-ppmp {
+    display: grid;
+    gap: 12px;
+    margin-top: 12px;
+    padding: 14px;
+    border: 1px solid #c9d8f0;
+    border-radius: 8px;
+    background: #f8fbff;
+}
+
+.app-selected-ppmp__header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+}
+
+.app-selected-ppmp__header span {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.app-selected-ppmp__header small {
+    color: #2563eb;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.app-selected-ppmp__header strong {
+    color: #0b2341;
+    font-size: 1rem;
+}
+
+.app-selected-ppmp__header button,
+.app-add-more-ppmps button {
+    border: 1px solid #f4b11a;
+    border-radius: 8px;
+    background: #f8b91c;
+    color: #0b2341;
+    cursor: pointer;
+    font-weight: 900;
+    min-height: 38px;
+    padding: 0 14px;
+}
+
+.app-selected-ppmp__header button.is-remove,
+.app-add-more-ppmps button.is-remove {
+    border-color: #f4b4b4;
+    background: #fff;
+    color: #b42318;
+}
+
+.app-selected-ppmp__details {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+}
+
+.app-selected-ppmp__details div {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid #d8dee8;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.app-selected-ppmp__details dt {
+    color: #5f6f89;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.app-selected-ppmp__details dd {
+    margin: 0;
+    color: #0b2341;
+    font-size: 0.85rem;
+    font-weight: 800;
+}
+
+.app-import-feedback {
+    padding: 9px 10px;
+    border: 1px solid #9ee7c1;
+    border-radius: 8px;
+    background: #ecfdf3;
+    color: #087443 !important;
+    font-weight: 800;
+}
+
+.app-add-more-ppmps {
+    margin-top: 12px;
+    border-top: 1px solid #e5ebf3;
+    padding-top: 12px;
+}
+
+.app-add-more-ppmps summary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    border: 1px solid #d8dee8;
+    border-radius: 8px;
+    background: #fff;
+    color: #0b2341;
+    cursor: pointer;
+    font-weight: 900;
+    padding: 0 12px;
+}
+
+.app-summary-strip {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0;
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.app-summary-strip div {
+    display: grid;
+    gap: 5px;
+    padding: 13px 16px;
+    border-right: 1px solid #e5eaf1;
+}
+
+.app-summary-strip div:last-child {
+    border-right: 0;
+}
+
+.app-summary-strip span {
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.app-summary-strip strong {
+    color: #0b2341;
+    font-size: 0.92rem;
+}
+
+.app-return-note {
+    margin-bottom: 16px;
+    padding: 16px;
+}
+
+.app-return-note textarea {
+    width: 100%;
+    min-height: 90px;
+    margin: 8px 0 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 10px 12px;
+    resize: vertical;
+}
+
+.app-return-note button {
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid #0b2341;
+    border-radius: 8px;
+    background: #0b2341;
+    color: #fff;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.app-document-wrap {
+    width: 100%;
+    overflow-x: auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 24px 0 48px;
+    box-sizing: border-box;
+}
+
+.app-landscape-page {
+    width: 297mm;
+    min-width: 297mm;
+    min-height: 210mm;
+    background: #ffffff;
+    color: #000000;
+    box-sizing: border-box;
+    padding: 43.18mm 7.62mm 25.4mm 20.32mm;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+    font-family: Arial, sans-serif;
+    font-size: 5.8pt;
+    line-height: 1.05;
+    overflow: visible;
+}
+
+.app-document,
+.app-document * {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif !important;
+    font-size: 5.8pt !important;
+    line-height: 1.05 !important;
+    color: #000 !important;
+}
+
+.app-document {
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
+}
+
+.app-official-header,
+.app-header-text {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 6pt !important;
+    font-weight: 700;
+    line-height: 1.05 !important;
+    margin: 0 0 3px 0;
+}
+
+.app-municipality {
+    font-weight: 700;
+}
+
+.app-official-title,
+.app-title {
+    margin: 0 0 3px 0;
+    padding: 2px 0;
+    border-top: 1.5px solid #1f6b2a;
+    border-bottom: 1.5px solid #1f6b2a;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 9pt !important;
+    font-weight: 700;
+    line-height: 1.1 !important;
+}
+
+.app-official-title span,
+.app-title span {
+    font-size: 9pt !important;
+    font-weight: 700;
+}
+
+.app-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1.2fr;
+    gap: 0;
+    margin-bottom: 8px;
+    border: 1px solid #000;
+    border-bottom: 0;
+}
+
+.app-meta-grid > div {
+    min-height: 24px;
+    padding: 3px 5px;
+    border-right: 1px solid #000;
+}
+
+.app-meta-grid > div:last-child {
+    border-right: 0;
+}
+
+.app-meta-grid span {
+    display: block;
+    font-weight: 700;
+}
+
+.app-meta-grid strong {
+    display: block;
+    min-height: 13px;
+    font-weight: 400;
+}
+
+.app-table {
+    width: 100%;
+    max-width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-family: Arial, sans-serif !important;
+    font-size: 5.6pt !important;
+    line-height: 1.05 !important;
+    margin-top: 0;
+}
+
+.app-table th,
+.app-table td {
+    font-family: Arial, sans-serif !important;
+    font-size: 5.6pt !important;
+    line-height: 1.05 !important;
+    border: 1px solid #000;
+    padding: 1px 2px;
+    vertical-align: middle;
+    box-sizing: border-box;
+    white-space: normal;
+    overflow-wrap: normal;
+    word-break: normal;
+    height: 13px;
+    min-height: 13px;
+    background: #fff;
+}
+
+.app-table th {
+    text-align: center;
+    font-weight: 700;
+    vertical-align: middle;
+}
+
+.app-table td {
+    text-align: center;
+}
+
+.app-table th span {
+    font-weight: 400;
+}
+
+.app-cell,
+.app-editable-field,
+.app-signatory-field {
+    font-family: Arial, sans-serif !important;
+    min-height: 11px;
+    outline: none;
+    white-space: normal;
+    overflow-wrap: normal;
+    word-break: normal;
+}
+
+.app-cell:focus,
+.app-editable-field:focus,
+.app-signatory-field:focus {
+    outline: 1px solid #2563eb;
+    background: rgba(37, 99, 235, 0.06);
+}
+
+.app-center {
+    text-align: center !important;
+}
+
+.app-left {
+    text-align: left !important;
+}
+
+.app-right {
+    text-align: right !important;
+}
+
+.app-bold {
+    font-weight: 700;
+}
+
+.app-total-row td {
+    font-weight: 700;
+    background: #fff;
+}
+
+.app-total-label {
+    text-align: right !important;
+    font-weight: 700;
+}
+
+.app-schedule-merged-cell {
+    text-align: center !important;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
+.app-remarks-cell {
+    text-align: left !important;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
+.app-money {
+    text-align: right !important;
+    white-space: nowrap !important;
+}
+
+.app-signatories {
+    margin-top: 28px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    text-align: center;
+    font-size: 9pt;
+}
+
+.app-signatory-label {
+    min-height: 30px;
+    font-weight: 700;
+}
+
+.app-signatory-authority {
+    min-height: 22px;
+    text-align: left;
+}
+
+.app-electronic-signature-line {
+    display: flex;
+    align-items: end;
+    justify-content: center;
+    min-height: 34px;
+}
+
+.app-electronic-signature-line img {
+    max-width: 150px;
+    max-height: 34px;
+    object-fit: contain;
+}
+
+.app-electronic-signature-line span {
+    font-family: "Brush Script MT", "Segoe Script", cursive;
+    font-size: 1.1rem;
+}
+
+.app-signatory-name {
+    margin-top: 26px;
+    font-weight: 700;
+    border-bottom: 1px solid #000;
+    padding-bottom: 2px;
+}
+
+.app-signatory-title {
+    margin-top: 4px;
+}
+
+.app-signatory-title-select {
+    display: block;
+    width: 100%;
+    min-height: 24px;
+    border: 0;
+    border-bottom: 1px solid #000;
+    border-radius: 0;
+    background: #fff;
+    color: inherit;
+    font: inherit;
+    text-align: center;
+    text-align-last: center;
+    padding: 2px 20px 2px 4px;
+}
+
+.app-signatory-title-select:focus {
+    outline: 1px solid #2563eb;
+    background: rgba(37, 99, 235, 0.06);
+}
+
+.app-remarks {
+    min-height: 18px;
+    margin-top: 18px;
+}
+
+.app-print-area {
+    display: none;
+}
+
+.app-print-body {
+    margin: 0;
+    padding: 0;
+    width: 297mm;
+    background: #fff;
+}
+
+.app-print-page {
+    padding: 24px;
+}
+
+.app-print-paper {
+    width: 297mm;
+    min-width: 297mm;
+    min-height: 210mm;
+    padding: 43.18mm 7.62mm 25.4mm 20.32mm;
+    box-sizing: border-box;
+}
+
+.app-landscape-page {
+    padding: 6.5mm 20mm 8mm;
+    font-size: 5.8pt;
+}
+
+.app-document,
+.app-document * {
+    font-family: Arial, sans-serif !important;
+    color: #000 !important;
+}
+
+.app-official-header {
+    display: grid;
+    grid-template-columns: 28mm 1fr 28mm;
+    align-items: center;
+    width: 190mm;
+    max-width: 100%;
+    min-height: 17mm;
+    margin: 0 auto 2mm;
+    text-align: center;
+}
+
+.app-logo-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 15mm;
+}
+
+.app-logo-slot img {
+    max-width: 16.5mm;
+    max-height: 16.5mm;
+    object-fit: contain;
+}
+
+.app-bagong-slot img {
+    max-width: 22mm;
+    max-height: 16mm;
+}
+
+.app-header-text {
+    margin: 0;
+    font-size: 7.2pt !important;
+    font-weight: 400;
+    line-height: 1.04 !important;
+}
+
+.app-header-text > div,
+.app-header-text .app-editable-field {
+    font-size: 7.2pt !important;
+    line-height: 1.04 !important;
+}
+
+.app-municipality {
+    font-size: 7.2pt !important;
+    font-weight: 700;
+    line-height: 1.04 !important;
+}
+
+.app-official-title {
+    margin: 0 auto 0.8mm;
+    padding: 0;
+    border: 0;
+    text-align: center;
+    font-size: 10.2pt !important;
+    font-weight: 700;
+    line-height: 1.05 !important;
+    text-transform: uppercase;
+}
+
+.app-plan-type-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24mm;
+    min-height: 5.2mm;
+    margin: 0 0 0.8mm;
+    font-size: 7.2pt !important;
+    font-weight: 400;
+    line-height: 1 !important;
+}
+
+.app-plan-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 3mm;
+    font-style: normal;
+    white-space: nowrap;
+}
+
+.app-plan-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.app-plan-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 5mm;
+    height: 5mm;
+    border: 1px solid #16a34a;
+    background: #fff;
+    box-sizing: border-box;
+    flex: 0 0 auto;
+}
+
+.app-plan-option input[type="radio"]:checked + .app-plan-box::after,
+.app-plan-box.is-checked::after {
+    content: "";
+    display: block;
+    width: 2.5mm;
+    height: 2.5mm;
+    background: #16a34a;
+}
+
+.app-plan-option em {
+    font-style: normal;
+}
+
+.app-version-input {
+    width: 18mm;
+    border: 0;
+    border-bottom: 1px solid #000;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+    text-align: center;
+    font: inherit;
+}
+
+.app-table {
+    table-layout: fixed;
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 0;
+}
+
+.app-table th,
+.app-table td {
+    height: 4.2mm;
+    min-height: 4.2mm;
+    padding: 1px 2px;
+    border: 1px solid #000;
+    background: #fff;
+    font-size: 5.6pt !important;
+    line-height: 1.05 !important;
+    vertical-align: middle;
+    white-space: normal;
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
+}
+
+.app-table th {
+    text-align: center;
+    font-weight: 700;
+}
+
+.app-group-row th {
+    height: 3.2mm;
+    font-size: 5.5pt !important;
+    font-weight: 700;
+}
+
+.app-heading-row th {
+    height: 15mm;
+    font-size: 5.45pt !important;
+    line-height: 1.02 !important;
+}
+
+.app-column-row th {
+    height: 4mm;
+    background: #fff9bf;
+    font-size: 5.7pt !important;
+    font-weight: 400;
+}
+
+.app-category-row td {
+    height: 4.2mm;
+    font-weight: 700;
+    text-align: left;
+}
+
+.app-project-cell,
+.app-remarks-cell {
+    text-align: left !important;
+}
+
+.app-note-total-row {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 8mm;
+    margin-top: 1.5mm;
+    font-size: 5.8pt !important;
+    line-height: 1.1 !important;
+}
+
+.app-note-total-row p {
+    margin: 0;
+}
+
+.app-total-summary {
+    display: grid;
+    gap: 1.5mm;
+    font-weight: 700;
+}
+
+.app-total-summary div {
+    display: grid;
+    grid-template-columns: 1fr 24mm;
+    gap: 4mm;
+}
+
+.app-total-summary strong {
+    text-align: right;
+}
+
+.app-signatories {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16mm;
+    margin-top: 9mm;
+    font-size: 5.8pt !important;
+}
+
+.app-signatory {
+    display: grid;
+    align-content: start;
+    gap: 1.1mm;
+}
+
+.app-signatory-label {
+    min-height: 5mm;
+    text-align: left;
+    font-weight: 400;
+}
+
+.app-signatory-authority {
+    min-height: 4mm;
+    text-align: left;
+}
+
+.app-electronic-signature-line {
+    display: flex;
+    align-items: end;
+    justify-content: center;
+    min-height: 8mm;
+}
+
+.app-electronic-signature-line img {
+    max-width: 32mm;
+    max-height: 8mm;
+    object-fit: contain;
+}
+
+.app-electronic-signature-line span {
+    font-family: "Brush Script MT", "Segoe Script", cursive;
+    font-size: 8pt;
+}
+
+.app-signatory-name {
+    margin-top: 4mm;
+    border-bottom: 1px solid #000;
+    font-weight: 700;
+}
+
+.app-signatory-title,
+.app-signatory-office {
+    min-height: 3.6mm;
+    border-bottom: 1px solid #000;
+}
+
+.app-signatory-date {
+    margin-top: 4mm;
+    text-align: left;
+}
+
+@media (max-width: 1100px) {
+    .app-selected-ppmp__header,
+    .app-selected-ppmp__details {
+        grid-template-columns: 1fr;
+    }
+
+    .app-editor-form .app-toolbar {
+        top: 68px;
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+        overflow-x: auto;
+        justify-content: flex-start;
+    }
+
+    .app-support-grid,
+    .app-summary-strip,
+    .app-metadata-panel {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .app-summary-strip div {
+        border-bottom: 1px solid #e5eaf1;
+    }
+}
+
+@media (max-width: 700px) {
+    .app-toolbar,
+    .app-support-grid,
+    .app-summary-strip,
+    .app-metadata-panel {
+        align-items: stretch;
+        grid-template-columns: 1fr;
+    }
+
+    .app-toolbar {
+        flex-direction: column;
+    }
+
+    .app-toolbar > div {
+        margin-right: 0;
+    }
+
+    .app-editor-form .app-toolbar {
+        flex-direction: row;
+        align-items: center;
+    }
+}
+
+@page {
+    size: A4 landscape;
+    margin: 0;
+}
+
+@media print {
+    @page {
+        size: A4 landscape;
+        margin: 0;
+    }
+
+    html,
+    body {
+        width: 297mm !important;
+        min-width: 297mm !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        overflow: visible !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    body * {
+        visibility: hidden !important;
+    }
+
+    .sidebar,
+    .topbar,
+    .navbar,
+    .dashboard-sidebar,
+    .dashboard-topbar,
+    .dashboard-hero,
+    .app-header,
+    .app-toolbar,
+    .app-support-grid,
+    .app-summary-strip,
+    .app-metadata-panel,
+    .app-return-note,
+    .app-document-wrap,
+    .no-print,
+    button,
+    .btn {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    .app-print-area,
+    .app-print-area * {
+        visibility: visible !important;
+    }
+
+    .app-print-area {
+        display: block !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 297mm !important;
+        min-width: 297mm !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        overflow: visible !important;
+    }
+
+    #appPrintPaper {
+        display: block !important;
+        width: 297mm !important;
+        min-width: 297mm !important;
+        min-height: 210mm !important;
+        height: auto !important;
+        padding: 43.18mm 7.62mm 25.4mm 20.32mm !important;
+        margin: 0 auto !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: #ffffff !important;
+        overflow: visible !important;
+        box-sizing: border-box !important;
+        font-family: Arial, sans-serif !important;
+        font-size: 5.6pt !important;
+        line-height: 1.05 !important;
+        color: #000 !important;
+    }
+
+    #appPrintPaper .app-document {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: visible !important;
+        box-sizing: border-box !important;
+    }
+
+    #appPrintPaper .app-document,
+    #appPrintPaper .app-document * {
+        font-family: Arial, sans-serif !important;
+        font-size: 5.8pt !important;
+        line-height: 1.05 !important;
+        color: #000 !important;
+    }
+
+    #appPrintPaper .app-official-header,
+    #appPrintPaper .app-official-header * {
+        font-size: 6pt !important;
+        font-weight: 700 !important;
+        line-height: 1.05 !important;
+    }
+
+    #appPrintPaper .app-official-title,
+    #appPrintPaper .app-official-title * {
+        font-size: 10.2pt !important;
+        font-weight: 700 !important;
+        line-height: 1.05 !important;
+    }
+
+    #appPrintPaper table {
+        width: 100% !important;
+        max-width: 100% !important;
+        table-layout: fixed !important;
+        border-collapse: collapse !important;
+        font-size: 5.4pt !important;
+        line-height: 1.05 !important;
+    }
+
+    #appPrintPaper th,
+    #appPrintPaper td {
+        font-family: Arial, sans-serif !important;
+        font-size: 5.4pt !important;
+        line-height: 1.05 !important;
+        border: 1px solid #000 !important;
+        padding: 1px 2px !important;
+        white-space: normal !important;
+        overflow-wrap: normal !important;
+        word-break: normal !important;
+        vertical-align: middle !important;
+        box-sizing: border-box !important;
+        height: 12px !important;
+        min-height: 12px !important;
+        background: #fff !important;
+        color: #000 !important;
+    }
+
+    #appPrintPaper td {
+        text-align: center !important;
+    }
+
+    #appPrintPaper .app-left,
+    #appPrintPaper .app-remarks-cell {
+        text-align: left !important;
+    }
+
+    #appPrintPaper .app-right,
+    #appPrintPaper .app-money,
+    #appPrintPaper .app-total-label {
+        text-align: right !important;
+    }
+
+    #appPrintPaper .app-center,
+    #appPrintPaper .app-schedule-merged-cell {
+        text-align: center !important;
+    }
+
+    #appPrintPaper [contenteditable],
+    #appPrintPaper .app-cell,
+    #appPrintPaper .app-editable-field,
+    #appPrintPaper .app-signatory-field {
+        outline: none !important;
+        background: transparent !important;
+    }
+
+    #appPrintPaper .app-cell:focus {
+        outline: none !important;
+        background: transparent !important;
+    }
+
+    #appPrintPaper .app-schedule-merged-cell,
+    #appPrintPaper .app-remarks-cell {
+        overflow-wrap: break-word !important;
+    }
+
+    #appPrintPaper .app-money {
+        white-space: nowrap !important;
+    }
+}
+
+@media print {
+    .app-print-paper,
+    #appPrintPaper {
+        padding: 6.5mm 20mm 8mm !important;
+        font-family: Arial, sans-serif !important;
+        font-size: 5.8pt !important;
+        line-height: 1.05 !important;
+    }
+
+    #appPrintPaper .app-official-header {
+        display: grid !important;
+        grid-template-columns: 28mm 1fr 28mm !important;
+        align-items: center !important;
+        width: 190mm !important;
+        max-width: 100% !important;
+        min-height: 17mm !important;
+        margin: 0 auto 2mm !important;
+        text-align: center !important;
+    }
+
+    #appPrintPaper .app-logo-slot {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-height: 15mm !important;
+    }
+
+    #appPrintPaper .app-logo-slot img {
+        max-width: 16.5mm !important;
+        max-height: 16.5mm !important;
+        object-fit: contain !important;
+    }
+
+    #appPrintPaper .app-bagong-slot img {
+        max-width: 22mm !important;
+        max-height: 16mm !important;
+    }
+
+    #appPrintPaper .app-header-text,
+    #appPrintPaper .app-header-text * {
+        font-size: 7.2pt !important;
+        line-height: 1.04 !important;
+        font-weight: 400 !important;
+    }
+
+    #appPrintPaper .app-municipality {
+        font-size: 7.2pt !important;
+        font-weight: 700 !important;
+        line-height: 1.04 !important;
+    }
+
+    #appPrintPaper .app-official-title,
+    #appPrintPaper .app-official-title * {
+        margin: 0 auto 0.8mm !important;
+        padding: 0 !important;
+        border: 0 !important;
+        font-size: 10.2pt !important;
+        line-height: 1.05 !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+    }
+
+    #appPrintPaper .app-plan-type-row {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 24mm !important;
+        min-height: 5.2mm !important;
+        margin: 0 0 0.8mm !important;
+        font-size: 7.2pt !important;
+        line-height: 1 !important;
+    }
+
+    #appPrintPaper .app-plan-option {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 3mm !important;
+        white-space: nowrap !important;
+    }
+
+    #appPrintPaper .app-plan-box {
+        display: inline-flex !important;
+        width: 5mm !important;
+        height: 5mm !important;
+        border: 1px solid #16a34a !important;
+        background: #fff !important;
+    }
+
+    #appPrintPaper .app-plan-box.is-checked::after {
+        content: "" !important;
+        display: block !important;
+        width: 2.5mm !important;
+        height: 2.5mm !important;
+        background: #16a34a !important;
+    }
+
+    #appPrintPaper .app-table th,
+    #appPrintPaper .app-table td {
+        height: 4.2mm !important;
+        min-height: 4.2mm !important;
+        padding: 1px 2px !important;
+        font-size: 5.6pt !important;
+        line-height: 1.05 !important;
+        hyphens: none !important;
+    }
+
+    #appPrintPaper .app-group-row th {
+        height: 3.2mm !important;
+        font-size: 5.5pt !important;
+    }
+
+    #appPrintPaper .app-heading-row th {
+        height: 15mm !important;
+        font-size: 5.45pt !important;
+        line-height: 1.02 !important;
+    }
+
+    #appPrintPaper .app-column-row th {
+        height: 4mm !important;
+        background: #fff9bf !important;
+        font-size: 5.7pt !important;
+        font-weight: 400 !important;
+    }
+
+    #appPrintPaper .app-category-row td {
+        height: 4.2mm !important;
+        font-weight: 700 !important;
+        text-align: left !important;
+    }
+
+    #appPrintPaper .app-note-total-row {
+        display: grid !important;
+        grid-template-columns: 1.2fr 1fr !important;
+        gap: 8mm !important;
+        margin-top: 1.5mm !important;
+        font-size: 5.8pt !important;
+        line-height: 1.1 !important;
+    }
+
+    #appPrintPaper .app-total-summary div {
+        display: grid !important;
+        grid-template-columns: 1fr 24mm !important;
+        gap: 4mm !important;
+    }
+
+    #appPrintPaper .app-signatories {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 16mm !important;
+        margin-top: 9mm !important;
+        font-size: 5.8pt !important;
+    }
+
+    #appPrintPaper .app-electronic-signature-line {
+        min-height: 8mm !important;
+    }
+
+    #appPrintPaper .app-electronic-signature-line img {
+        max-width: 32mm !important;
+        max-height: 8mm !important;
+    }
+
+    #appPrintPaper .app-signatory-name,
+    #appPrintPaper .app-signatory-title,
+    #appPrintPaper .app-signatory-office {
+        border-bottom: 1px solid #000 !important;
+    }
+}

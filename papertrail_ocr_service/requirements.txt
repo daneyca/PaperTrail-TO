@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+python-multipart
+paddleocr
+paddlepaddle
+opencv-python
+Pillow
+python-dotenv
+pdf2image
+requests
+

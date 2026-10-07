@@ -1,0 +1,368 @@
+/*
+ * Compact document/detail information patterns.
+ * This intentionally targets record detail summaries, not dashboard statistic cards.
+ */
+
+body.dashboard-body .pt-document-info,
+body.dashboard-body .pr-details-card,
+body.dashboard-body .head-office-ppmp-summary,
+body.dashboard-body .signature-request-summary-card,
+body.dashboard-body .dashboard-content > .app-summary-strip,
+body.dashboard-body .dashboard-content > .bac-pr-summary-strip,
+body.dashboard-body .dashboard-content > .resolution-summary-strip,
+body.dashboard-body .dashboard-content > .svp-summary-strip {
+    overflow: hidden !important;
+    padding: 0 !important;
+    border: 1px solid #dbe4f0 !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.06) !important;
+}
+
+body.dashboard-body .pt-document-info__header,
+body.dashboard-body .pr-details-card-heading,
+body.dashboard-body .signature-request-summary-card__header {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+    padding: 16px 18px !important;
+    border-bottom: 1px solid #e5edf7 !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%) !important;
+}
+
+body.dashboard-body .pt-document-info__eyebrow,
+body.dashboard-body .pr-page-kicker {
+    margin: 0 0 4px !important;
+    color: #2563eb !important;
+    font-size: 0.68rem !important;
+    font-weight: 850 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.2 !important;
+    text-transform: uppercase !important;
+}
+
+body.dashboard-body .pt-document-info__title,
+body.dashboard-body .pr-details-card-heading h1,
+body.dashboard-body .pr-details-card-heading h2 {
+    margin: 0 !important;
+    color: #071739 !important;
+    font-size: clamp(1.05rem, 1.8vw, 1.35rem) !important;
+    font-weight: 850 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.16 !important;
+}
+
+body.dashboard-body .pt-document-info__description,
+body.dashboard-body .pr-details-card-heading p:not(.pr-page-kicker) {
+    max-width: 720px !important;
+    margin: 5px 0 0 !important;
+    color: #64748b !important;
+    font-size: 0.82rem !important;
+    line-height: 1.45 !important;
+}
+
+body.dashboard-body .pt-document-info__status {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    flex: 0 0 auto !important;
+}
+
+body.dashboard-body .pt-document-info__grid,
+body.dashboard-body .admin-modal-detail__grid,
+body.dashboard-body .admin-role-readonly-grid,
+body.dashboard-body .signature-request-info-grid,
+body.dashboard-body .pr-selected-app-details,
+body.dashboard-body .pr-details-grid,
+body.dashboard-body .head-office-ppmp-summary,
+body.dashboard-body .dashboard-content > .app-summary-strip,
+body.dashboard-body .dashboard-content > .bac-pr-summary-strip,
+body.dashboard-body .dashboard-content > .resolution-summary-strip,
+body.dashboard-body .dashboard-content > .svp-summary-strip,
+body.dashboard-body .dashboard-content :where(.detail-grid, .budget-detail-grid, .notification-detail-grid, .profile-detail-grid, .metadata-grid, .admin-role-readonly-grid, .admin-modal-detail__grid) {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(176px, 1fr)) !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 12px !important;
+}
+
+body.dashboard-body .dashboard-content > .app-summary-strip,
+body.dashboard-body .dashboard-content > .bac-pr-summary-strip,
+body.dashboard-body .dashboard-content > .resolution-summary-strip,
+body.dashboard-body .dashboard-content > .svp-summary-strip {
+    align-items: stretch !important;
+}
+
+body.dashboard-body .pt-document-info__item,
+body.dashboard-body .admin-modal-detail__grid > div,
+body.dashboard-body .admin-role-readonly-grid > div,
+body.dashboard-body .signature-request-info-grid > div,
+body.dashboard-body .pr-selected-app-details > div,
+body.dashboard-body .pr-details-item,
+body.dashboard-body .head-office-ppmp-summary > div,
+body.dashboard-body .dashboard-content > .app-summary-strip > div,
+body.dashboard-body .dashboard-content > .bac-pr-summary-strip > div,
+body.dashboard-body .dashboard-content > .resolution-summary-strip > div,
+body.dashboard-body .dashboard-content > .svp-summary-strip > div,
+body.dashboard-body .dashboard-content :where(.detail-grid, .budget-detail-grid, .notification-detail-grid, .profile-detail-grid, .metadata-grid, .admin-role-readonly-grid, .admin-modal-detail__grid) > div,
+body.dashboard-body .audit-detail-grid > .audit-detail-item {
+    min-height: 0 !important;
+    padding: 9px 10px !important;
+    border: 1px solid #dce7f5 !important;
+    border-radius: 12px !important;
+    background: #f8fbff !important;
+    box-shadow: none !important;
+}
+
+body.dashboard-body .pr-details-item,
+body.dashboard-body .head-office-ppmp-summary > div {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) !important;
+    gap: 8px !important;
+    align-items: center !important;
+}
+
+body.dashboard-body .pt-document-info__item,
+body.dashboard-body .admin-modal-detail__grid > div,
+body.dashboard-body .admin-role-readonly-grid > div,
+body.dashboard-body .signature-request-info-grid > div,
+body.dashboard-body .pr-selected-app-details > div,
+body.dashboard-body .dashboard-content > .app-summary-strip > div,
+body.dashboard-body .dashboard-content > .bac-pr-summary-strip > div,
+body.dashboard-body .dashboard-content > .resolution-summary-strip > div,
+body.dashboard-body .dashboard-content > .svp-summary-strip > div,
+body.dashboard-body .dashboard-content :where(.detail-grid, .budget-detail-grid, .notification-detail-grid, .profile-detail-grid, .metadata-grid, .admin-role-readonly-grid, .admin-modal-detail__grid) > div,
+body.dashboard-body .audit-detail-grid > .audit-detail-item {
+    display: grid !important;
+    gap: 3px !important;
+    align-content: start !important;
+}
+
+body.dashboard-body .pt-document-info__label,
+body.dashboard-body .pt-document-info__item dt,
+body.dashboard-body .admin-modal-detail__grid dt,
+body.dashboard-body .admin-role-readonly-grid dt,
+body.dashboard-body .signature-request-info-grid dt,
+body.dashboard-body .pr-selected-app-details dt,
+body.dashboard-body .pr-details-item span:not(.pr-details-icon),
+body.dashboard-body .head-office-ppmp-summary span:not(.head-office-ppmp-summary__icon),
+body.dashboard-body .dashboard-content > .app-summary-strip span,
+body.dashboard-body .dashboard-content > .bac-pr-summary-strip span,
+body.dashboard-body .dashboard-content > .resolution-summary-strip span,
+body.dashboard-body .dashboard-content > .svp-summary-strip span,
+body.dashboard-body .dashboard-content :where(.detail-grid, .budget-detail-grid, .notification-detail-grid, .profile-detail-grid, .metadata-grid, .admin-role-readonly-grid, .admin-modal-detail__grid) :where(span, dt),
+body.dashboard-body .audit-detail-grid > .audit-detail-item span {
+    margin: 0 !important;
+    color: #64748b !important;
+    font-size: 0.64rem !important;
+    font-weight: 750 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.2 !important;
+    text-transform: uppercase !important;
+}
+
+body.dashboard-body .pt-document-info__value,
+body.dashboard-body .pt-document-info__item dd,
+body.dashboard-body .admin-modal-detail__grid dd,
+body.dashboard-body .admin-role-readonly-grid dd,
+body.dashboard-body .signature-request-info-grid dd,
+body.dashboard-body .pr-selected-app-details dd,
+body.dashboard-body .pr-details-item strong,
+body.dashboard-body .head-office-ppmp-summary strong,
+body.dashboard-body .dashboard-content > .app-summary-strip strong,
+body.dashboard-body .dashboard-content > .bac-pr-summary-strip strong,
+body.dashboard-body .dashboard-content > .resolution-summary-strip strong,
+body.dashboard-body .dashboard-content > .svp-summary-strip strong,
+body.dashboard-body .dashboard-content :where(.detail-grid, .budget-detail-grid, .notification-detail-grid, .profile-detail-grid, .metadata-grid, .admin-role-readonly-grid, .admin-modal-detail__grid) :where(strong, dd),
+body.dashboard-body .audit-detail-grid > .audit-detail-item strong {
+    margin: 0 !important;
+    color: #071739 !important;
+    font-size: 0.84rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.32 !important;
+    overflow-wrap: anywhere !important;
+}
+
+body.dashboard-body .pr-details-icon,
+body.dashboard-body .head-office-ppmp-summary__icon {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 9px !important;
+}
+
+body.dashboard-body .pr-details-icon svg,
+body.dashboard-body .head-office-ppmp-summary__icon svg {
+    width: 14px !important;
+    height: 14px !important;
+}
+
+body.dashboard-body .dashboard-content > .bac-pr-summary-strip div:nth-child(4) strong,
+body.dashboard-body .dashboard-content > .app-summary-strip div:last-child,
+body.dashboard-body .dashboard-content > .resolution-summary-strip div:last-child {
+    grid-column: auto !important;
+    font-size: inherit !important;
+}
+
+body.dashboard-body .audit-detail-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(176px, 1fr)) !important;
+    gap: 8px !important;
+    padding: 12px !important;
+}
+
+body.dashboard-body .audit-detail-grid > .audit-json {
+    grid-column: 1 / -1 !important;
+}
+
+body.dashboard-body .audit-detail-grid > .audit-json pre {
+    max-height: 220px !important;
+    margin: 4px 0 0 !important;
+    padding: 10px !important;
+    overflow: auto !important;
+    border-radius: 10px !important;
+    background: #eef4fb !important;
+    color: #1e293b !important;
+    font-size: 0.76rem !important;
+    line-height: 1.45 !important;
+}
+
+body.dashboard-body .admin-modal-detail__identity {
+    padding: 12px !important;
+    border-radius: 14px !important;
+}
+
+body.dashboard-body .admin-role-readonly-body {
+    padding: 12px !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body .pt-document-info,
+html.papertrail-dark-mode body.dashboard-body .pr-details-card,
+html.papertrail-dark-mode body.dashboard-body .head-office-ppmp-summary,
+html.papertrail-dark-mode body.dashboard-body .signature-request-summary-card,
+html.papertrail-dark-mode body.dashboard-body .dashboard-content > .app-summary-strip,
+html.papertrail-dark-mode body.dashboard-body .dashboard-content > .bac-pr-summary-strip,
+html.papertrail-dark-mode body.dashboard-body .dashboard-content > .resolution-summary-strip,
+html.papertrail-dark-mode body.dashboard-body .dashboard-content > .svp-summary-strip {
+    border-color: rgba(71, 85, 105, 0.72) !important;
+    background: rgba(15, 23, 42, 0.9) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body .pt-document-info__header,
+html.papertrail-dark-mode body.dashboard-body .pr-details-card-heading,
+html.papertrail-dark-mode body.dashboard-body .signature-request-summary-card__header {
+    border-color: rgba(71, 85, 105, 0.72) !important;
+    background: rgba(15, 23, 42, 0.8) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body .pt-document-info__title,
+html.papertrail-dark-mode body.dashboard-body .pr-details-card-heading h1,
+html.papertrail-dark-mode body.dashboard-body .pr-details-card-heading h2,
+html.papertrail-dark-mode body.dashboard-body .pt-document-info__value,
+html.papertrail-dark-mode body.dashboard-body .pt-document-info__item dd,
+html.papertrail-dark-mode body.dashboard-body .admin-modal-detail__grid dd,
+html.papertrail-dark-mode body.dashboard-body .admin-role-readonly-grid dd,
+html.papertrail-dark-mode body.dashboard-body .signature-request-info-grid dd,
+html.papertrail-dark-mode body.dashboard-body .pr-selected-app-details dd,
+html.papertrail-dark-mode body.dashboard-body .pr-details-item strong,
+html.papertrail-dark-mode body.dashboard-body .head-office-ppmp-summary strong,
+html.papertrail-dark-mode body.dashboard-body .dashboard-content > .app-summary-strip strong,
+html.papertrail-dark-mode body.dashboard-body .dashboard-content > .bac-pr-summary-strip strong,
+html.papertrail-dark-mode body.dashboard-body .dashboard-content > .resolution-summary-strip strong,
+html.papertrail-dark-mode body.dashboard-body .dashboard-content > .svp-summary-strip strong,
+html.papertrail-dark-mode body.dashboard-body .dashboard-content :where(.detail-grid, .budget-detail-grid, .notification-detail-grid, .profile-detail-grid, .metadata-grid, .admin-role-readonly-grid, .admin-modal-detail__grid) :where(strong, dd),
+html.papertrail-dark-mode body.dashboard-body .audit-detail-grid > .audit-detail-item strong {
+    color: #f8fafc !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body .pt-document-info__description,
+html.papertrail-dark-mode body.dashboard-body .pr-details-card-heading p:not(.pr-page-kicker),
+html.papertrail-dark-mode body.dashboard-body .pt-document-info__label,
+html.papertrail-dark-mode body.dashboard-body .pt-document-info__item dt,
+html.papertrail-dark-mode body.dashboard-body .admin-modal-detail__grid dt,
+html.papertrail-dark-mode body.dashboard-body .admin-role-readonly-grid dt,
+html.papertrail-dark-mode body.dashboard-body .signature-request-info-grid dt,
+html.papertrail-dark-mode body.dashboard-body .pr-selected-app-details dt,
+html.papertrail-dark-mode body.dashboard-body .pr-details-item span:not(.pr-details-icon),
+html.papertrail-dark-mode body.dashboard-body .head-office-ppmp-summary span:not(.head-office-ppmp-summary__icon),
+html.papertrail-dark-mode body.dashboard-body .dashboard-content > .app-summary-strip span,
+html.papertrail-dark-mode body.dashboard-body .dashboard-content > .bac-pr-summary-strip span,
+html.papertrail-dark-mode body.dashboard-body .dashboard-content > .resolution-summary-strip span,
+html.papertrail-dark-mode body.dashboard-body .dashboard-content > .svp-summary-strip span,
+html.papertrail-dark-mode body.dashboard-body .dashboard-content :where(.detail-grid, .budget-detail-grid, .notification-detail-grid, .profile-detail-grid, .metadata-grid, .admin-role-readonly-grid, .admin-modal-detail__grid) :where(span, dt),
+html.papertrail-dark-mode body.dashboard-body .audit-detail-grid > .audit-detail-item span {
+    color: #cbd5e1 !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body .pt-document-info__item,
+html.papertrail-dark-mode body.dashboard-body .admin-modal-detail__grid > div,
+html.papertrail-dark-mode body.dashboard-body .admin-role-readonly-grid > div,
+html.papertrail-dark-mode body.dashboard-body .signature-request-info-grid > div,
+html.papertrail-dark-mode body.dashboard-body .pr-selected-app-details > div,
+html.papertrail-dark-mode body.dashboard-body .pr-details-item,
+html.papertrail-dark-mode body.dashboard-body .head-office-ppmp-summary > div,
+html.papertrail-dark-mode body.dashboard-body .dashboard-content > .app-summary-strip > div,
+html.papertrail-dark-mode body.dashboard-body .dashboard-content > .bac-pr-summary-strip > div,
+html.papertrail-dark-mode body.dashboard-body .dashboard-content > .resolution-summary-strip > div,
+html.papertrail-dark-mode body.dashboard-body .dashboard-content > .svp-summary-strip > div,
+html.papertrail-dark-mode body.dashboard-body .dashboard-content :where(.detail-grid, .budget-detail-grid, .notification-detail-grid, .profile-detail-grid, .metadata-grid, .admin-role-readonly-grid, .admin-modal-detail__grid) > div,
+html.papertrail-dark-mode body.dashboard-body .audit-detail-grid > .audit-detail-item {
+    border-color: rgba(71, 85, 105, 0.76) !important;
+    background: rgba(30, 41, 59, 0.74) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body .audit-detail-grid > .audit-json pre {
+    background: rgba(15, 23, 42, 0.9) !important;
+    color: #e2e8f0 !important;
+}
+
+@media (max-width: 860px) {
+    body.dashboard-body .pt-document-info__header,
+    body.dashboard-body .pr-details-card-heading,
+    body.dashboard-body .signature-request-summary-card__header {
+        align-items: flex-start !important;
+        flex-direction: column !important;
+        padding: 14px !important;
+    }
+
+    body.dashboard-body .pt-document-info__status {
+        justify-content: flex-start !important;
+    }
+
+    body.dashboard-body .pt-document-info__grid,
+    body.dashboard-body .admin-modal-detail__grid,
+    body.dashboard-body .admin-role-readonly-grid,
+    body.dashboard-body .signature-request-info-grid,
+    body.dashboard-body .pr-selected-app-details,
+    body.dashboard-body .pr-details-grid,
+    body.dashboard-body .head-office-ppmp-summary,
+    body.dashboard-body .dashboard-content > .app-summary-strip,
+    body.dashboard-body .dashboard-content > .bac-pr-summary-strip,
+    body.dashboard-body .dashboard-content > .resolution-summary-strip,
+    body.dashboard-body .dashboard-content > .svp-summary-strip,
+    body.dashboard-body .dashboard-content :where(.detail-grid, .budget-detail-grid, .notification-detail-grid, .profile-detail-grid, .metadata-grid, .admin-role-readonly-grid, .admin-modal-detail__grid),
+    body.dashboard-body .audit-detail-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 560px) {
+    body.dashboard-body .pt-document-info__grid,
+    body.dashboard-body .admin-modal-detail__grid,
+    body.dashboard-body .admin-role-readonly-grid,
+    body.dashboard-body .signature-request-info-grid,
+    body.dashboard-body .pr-selected-app-details,
+    body.dashboard-body .pr-details-grid,
+    body.dashboard-body .head-office-ppmp-summary,
+    body.dashboard-body .dashboard-content > .app-summary-strip,
+    body.dashboard-body .dashboard-content > .bac-pr-summary-strip,
+    body.dashboard-body .dashboard-content > .resolution-summary-strip,
+    body.dashboard-body .dashboard-content > .svp-summary-strip,
+    body.dashboard-body .dashboard-content :where(.detail-grid, .budget-detail-grid, .notification-detail-grid, .profile-detail-grid, .metadata-grid, .admin-role-readonly-grid, .admin-modal-detail__grid),
+    body.dashboard-body .audit-detail-grid {
+        grid-template-columns: 1fr !important;
+        padding: 10px !important;
+    }
+}

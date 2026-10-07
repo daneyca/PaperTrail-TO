@@ -1,0 +1,254 @@
+/* Authenticated PaperTrail shell consistency.
+   Visual-only overrides for the shared dashboard layout. */
+
+body.dashboard-body:not(.modal-document-body) {
+    --pt-auth-shell-inline: clamp(14px, 1.6vw, 24px);
+    --pt-auth-shell-gap: 12px;
+}
+
+body.dashboard-body:not(.modal-document-body) .dashboard-shell,
+body.dashboard-body:not(.modal-document-body) .dashboard-main {
+    background: var(--pt-saas-bg) !important;
+}
+
+body.dashboard-body:not(.modal-document-body) .dashboard-sidebar {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+body.dashboard-body:not(.modal-document-body) .dashboard-topbar,
+body.dashboard-body:not(.modal-document-body) .dashboard-topbar.enterprise-topbar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 900 !important;
+    width: auto !important;
+    max-width: none !important;
+    min-height: 58px !important;
+    margin: 0 !important;
+    padding: 8px var(--pt-auth-shell-inline) !important;
+    border-width: 0 0 1px !important;
+    border-style: solid !important;
+    border-color: var(--pt-saas-line) !important;
+    border-radius: 0 !important;
+    background: var(--pt-saas-surface) !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+body.dashboard-body:not(.modal-document-body) .dashboard-content {
+    padding: var(--pt-auth-shell-gap) var(--pt-auth-shell-inline) calc(var(--pt-auth-shell-inline) + 12px) !important;
+    gap: 14px !important;
+}
+
+body.dashboard-body:not(.modal-document-body) .dashboard-content > :where(section, article, div, form):not(.pt-loading-overlay):not(.stat-grid):not(.stat-grid-modern):not(.summary-card-grid):not(.reports-summary-strip):not(.notification-summary-strip):not(.rule-config-summary),
+body.dashboard-body:not(.modal-document-body) .dashboard-content :where(
+    .dashboard-hero,
+    .enterprise-hero,
+    .page-hero,
+    .section-card,
+    .content-card,
+    .dashboard-card,
+    .dashboard-identity-card,
+    .module-card,
+    .papertrail-card,
+    .papertrail-table-card,
+    .pt-ui-card,
+    .table-panel,
+    .document-records-card,
+    .document-submenu-panel,
+    .document-submenu-page,
+    .document-submenu-tile,
+    .dashboard-widget,
+    .dashboard-support-card,
+    .dashboard-tracking-card,
+    .admin-dashboard-panel,
+    .procurement-kpi-card,
+    .procurement-recent-card,
+    .procurement-chart-card,
+    .procurement-ai-insights,
+    .procurement-quick-actions,
+    .summary-card,
+    .stat-card-modern,
+    .quick-card,
+    .metric-card,
+    .status-card,
+    .form-panel,
+    .filter-panel,
+    .settings-console,
+    .settings-category-nav,
+    .settings-console-main,
+    .settings-list-panel,
+    .rule-config-form-panel,
+    .rule-config-table-panel,
+    .report-registry-panel,
+    .future-report-panel,
+    .profile-layout,
+    .profile-identity,
+    .profile-action-panel,
+    .profile-signature-compact,
+    .profile-edit-panel,
+    .profile-edit-panel--compact,
+    .signature-profile-preview-row,
+    .budget-detail-panel,
+    .budget-action-panel,
+    .assistant-connection-card,
+    .assistant-chat-card,
+    .ai-verification-hero,
+    .ai-verification-card,
+    .ai-verification-status-card,
+    .document-create-flow,
+    .document-create-source-card,
+    .document-create-split-layout,
+    .document-create-recent-pane,
+    .document-create-picker-pane,
+    .document-create-draft-card,
+    .document-create-drafts-empty,
+    .pr-create-split-workspace,
+    .pr-create-split-header,
+    .pr-create-split-layout,
+    .pr-create-drafts-pane,
+    .pr-create-app-pane,
+    .pr-create-draft-card,
+    .pr-create-drafts-empty,
+    .pr-create-stage-shell,
+    .pr-create-stage-panel,
+    .pr-create-source-stage,
+    .pr-create-form-stage,
+    .pr-create-source-split,
+    .pr-app-confirm-card,
+    .pr-context-card,
+    .pr-source-step-footer,
+    .pr-budget-guard,
+    .pr-app-reference-card,
+    .pr-app-selected-reference,
+    .po-create-split-layout,
+    .po-create-drafts-pane,
+    .po-create-source-pane,
+    .po-create-draft-card,
+    .po-create-drafts-empty,
+    .document-review-layout,
+    .document-preview-shell,
+    .document-preview-card,
+    .document-preview-frame,
+    .pr-document-preview-card,
+    .bac-resolution-preview,
+    .resolution-preview-shell,
+    .paper-preview-shell,
+    .attachments-panel,
+    .attachments-empty,
+    .document-attachments-panel,
+    .document-draft-file-row,
+    .rfq-toolbar,
+    .abstract-toolbar,
+    .po-toolbar,
+    .resolution-page-toolbar,
+    .document-action-bar,
+    .svp-workflow-panel,
+    .svp-posting-next-card,
+    .bac-pr-summary-strip,
+    .bac-pr-section-heading,
+    .head-office-ppmp-toolbar,
+    .head-office-ppmp-summary,
+    .head-office-ppmp-preview-card,
+    .admin-role-edit-card,
+    .admin-permissions-workspace,
+    .admin-role-future-card,
+    .permission-group,
+    .permission-item
+) {
+    border-radius: 0 !important;
+}
+
+body.dashboard-body:not(.modal-document-body) .dashboard-content :where(
+    .document-filter-card,
+    .user-table-toolbar,
+    .office-table-toolbar,
+    .report-filter-toolbar,
+    .audit-filter-toolbar,
+    .budget-filter-toolbar,
+    .returned-filter-toolbar,
+    .reviewed-filter-toolbar,
+    .my-documents-filter-toolbar,
+    .returned-documents-filter-toolbar,
+    .ppmp-filter-toolbar,
+    .pr-filter-toolbar,
+    .app-filter-toolbar,
+    .budget-report-filter-toolbar,
+    .notification-filter-toolbar,
+    .table-scroll,
+    .table-wrap,
+    .data-table-wrap,
+    .responsive-table,
+    .table-responsive,
+    .document-table-wrap,
+    .records-table-wrap,
+    .requests-table-wrap,
+    .signature-table-wrap,
+    .procurement-table-wrap,
+    .pr-create-app-table-wrap,
+    .pr-app-reference-table-wrap,
+    .ppmp-entry-scroll,
+    .official-app-form-card
+) {
+    border-radius: 0 !important;
+}
+
+body.dashboard-body:not(.modal-document-body) .dashboard-content :where(
+    .table-panel > header,
+    .table-panel > .section-heading,
+    .table-panel > .panel-heading,
+    .table-panel > .card-header,
+    .table-panel > .module-header,
+    .document-records-card > header,
+    .papertrail-table-card > header,
+    .pt-ui-card-header,
+    .widget-heading,
+    .settings-console-header,
+    .admin-role-card-header,
+    .permission-group-header,
+    .document-create-source-card__header,
+    .attachments-header
+) {
+    border-radius: 0 !important;
+}
+
+body.dashboard-body:not(.modal-document-body) .dashboard-content :where(
+    .detail-grid,
+    .budget-detail-grid,
+    .notification-detail-grid,
+    .profile-detail-grid,
+    .metadata-grid
+) > div,
+body.dashboard-body:not(.modal-document-body) .dashboard-content :where(
+    .document-workflow-step,
+    .pr-workflow-step,
+    .pr-budget-guard-grid > div,
+    .profile-detail-list div,
+    .signature-profile-meta div,
+    .profile-readonly-strip div,
+    .admin-role-readonly-grid > div
+) {
+    border-radius: 0 !important;
+}
+
+@media (max-width: 980px) {
+    body.dashboard-body:not(.modal-document-body) .dashboard-topbar,
+    body.dashboard-body:not(.modal-document-body) .dashboard-topbar.enterprise-topbar {
+        padding: 8px 12px 8px 68px !important;
+    }
+
+    body.dashboard-body:not(.modal-document-body) .dashboard-content {
+        padding: 12px 12px 24px !important;
+    }
+}
+
+@media (max-width: 520px) {
+    body.dashboard-body:not(.modal-document-body) .dashboard-topbar,
+    body.dashboard-body:not(.modal-document-body) .dashboard-topbar.enterprise-topbar {
+        padding: 8px 8px 8px 54px !important;
+    }
+
+    body.dashboard-body:not(.modal-document-body) .dashboard-content {
+        padding-inline: 8px !important;
+    }
+}

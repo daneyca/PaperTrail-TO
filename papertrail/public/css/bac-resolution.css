@@ -1,0 +1,1281 @@
+.resolution-workspace {
+    display: block;
+}
+
+.resolution-page-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding: 14px 16px;
+    border: 1px solid #d8dee8;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 10px 28px rgba(11, 35, 65, 0.06);
+}
+
+.resolution-page-toolbar > div {
+    display: grid;
+    gap: 2px;
+    margin-right: auto;
+}
+
+.resolution-page-toolbar strong {
+    color: #0b2341;
+    font-size: 0.98rem;
+}
+
+.resolution-page-toolbar span {
+    color: #64748b;
+    font-size: 0.84rem;
+}
+
+.resolution-page-toolbar a,
+.resolution-page-toolbar button,
+.resolution-print-toolbar a,
+.resolution-print-toolbar button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #0b2341;
+    font: 800 0.84rem/1 Figtree, Arial, sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.resolution-page-toolbar button,
+.resolution-print-toolbar button {
+    border-color: #0b2341;
+    background: #0b2341;
+    color: #ffffff;
+}
+
+.resolution-word-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 0 auto 12px;
+    padding: 10px 12px;
+    border: 1px solid #d8dee8;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 8px 22px rgba(11, 35, 65, 0.06);
+}
+
+.resolution-word-toolbar button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    min-height: 32px;
+    padding: 0 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #0b2341;
+    font: 800 0.78rem/1 Figtree, Arial, sans-serif;
+    cursor: pointer;
+}
+
+.resolution-word-toolbar button:hover,
+.resolution-word-toolbar button:focus {
+    border-color: #f5b82e;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(245, 184, 46, 0.18);
+}
+
+.resolution-word-toolbar .toolbar-divider {
+    width: 1px;
+    height: 24px;
+    margin: 0 4px;
+    background: #d8dee8;
+}
+
+.bac-resolution-signatory-manager {
+    margin: 0 0 16px;
+    overflow: hidden;
+    border: 1px solid #dbe5f2;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 16px 38px rgba(15, 23, 42, 0.08);
+}
+
+.bac-resolution-signatory-manager > header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 18px 20px;
+    border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(180deg, #ffffff, #f8fbff);
+}
+
+.bac-resolution-signatory-manager > header h2 {
+    margin: 0;
+    color: #0b2341;
+    font: 800 1rem/1.2 "Plus Jakarta Sans", Figtree, Arial, sans-serif;
+}
+
+.bac-resolution-signatory-manager > header p:not(.eyebrow) {
+    margin: 4px 0 0;
+    max-width: 720px;
+    color: #64748b;
+    font: 600 0.8rem/1.45 "Plus Jakarta Sans", Figtree, Arial, sans-serif;
+}
+
+.bac-resolution-signatory-manager > header > span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #1455d9;
+    font: 800 0.68rem/1 "Plus Jakarta Sans", Figtree, Arial, sans-serif;
+    white-space: nowrap;
+}
+
+.bac-resolution-signatory-manager__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 16px;
+}
+
+.bac-resolution-signatory-row {
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid #dbe5f2;
+    border-radius: 16px;
+    background: #ffffff;
+}
+
+.bac-resolution-signatory-row__title {
+    display: grid;
+    gap: 3px;
+}
+
+.bac-resolution-signatory-row__title span,
+.bac-resolution-signatory-row label,
+.bac-resolution-signatory-row small {
+    color: #64748b;
+    font: 800 0.66rem/1.25 "Plus Jakarta Sans", Figtree, Arial, sans-serif;
+    text-transform: uppercase;
+}
+
+.bac-resolution-signatory-row__title strong {
+    color: #0b2341;
+    font: 800 0.9rem/1.25 "Plus Jakarta Sans", Figtree, Arial, sans-serif;
+}
+
+.bac-resolution-signatory-row label {
+    display: grid;
+    gap: 6px;
+}
+
+.bac-resolution-signatory-row input,
+.bac-resolution-signatory-row select {
+    width: 100%;
+    min-height: 40px;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    background: #f8fbff;
+    color: #0b2341;
+    font: 700 0.8rem/1.25 "Plus Jakarta Sans", Figtree, Arial, sans-serif;
+}
+
+.bac-resolution-signatory-row input:focus,
+.bac-resolution-signatory-row select:focus {
+    border-color: #2563eb;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.13);
+}
+
+.bac-resolution-signature-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding: 14px 18px 0;
+}
+
+.bac-resolution-signature-summary-card {
+    display: grid;
+    gap: 5px;
+    padding: 12px 14px;
+    border: 1px solid #dbe5f2;
+    border-radius: 14px;
+    background: #f8fbff;
+}
+
+.bac-resolution-signature-summary-card span {
+    color: #64748b;
+    font: 800 0.66rem/1 "Plus Jakarta Sans", Figtree, Arial, sans-serif;
+    text-transform: uppercase;
+}
+
+.bac-resolution-signature-summary-card strong {
+    color: #0b2341;
+    font: 800 0.88rem/1.2 "Plus Jakarta Sans", Figtree, Arial, sans-serif;
+}
+
+.bac-resolution-signature-summary-card small {
+    color: #64748b;
+    font: 700 0.72rem/1.35 "Plus Jakarta Sans", Figtree, Arial, sans-serif;
+}
+
+.bac-resolution-signature-summary-card.is-signed {
+    border-color: rgba(34, 197, 94, 0.35);
+    background: #ecfdf5;
+}
+
+.bac-resolution-signature-summary-card.is-pending {
+    border-color: rgba(245, 158, 11, 0.35);
+    background: #fffbeb;
+}
+
+.bac-resolution-signature-summary-card.is-not_generated {
+    border-color: rgba(148, 163, 184, 0.35);
+    background: #f8fafc;
+}
+
+body.dashboard-body .bac-resolution-signature-tracking.pr-signatory-tracking-panel {
+    padding: 16px;
+    border-color: #d9e4f2;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #ffffff, #f8fbff);
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
+}
+
+body.dashboard-body .bac-resolution-signature-tracking .pr-signatory-tracking-heading {
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+body.dashboard-body .bac-resolution-signature-tracking .pr-signatory-tracking-heading h2 {
+    font-size: 1.05rem;
+}
+
+body.dashboard-body .bac-resolution-signature-tracking .pr-signatory-tracking-summary {
+    min-width: 180px;
+}
+
+body.dashboard-body .bac-resolution-signature-tracking .pr-signatory-tracking-summary strong {
+    font-size: 0.98rem;
+}
+
+body.dashboard-body .bac-resolution-signature-progress {
+    width: 100%;
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e8eef7;
+}
+
+body.dashboard-body .bac-resolution-signature-progress span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #2563eb, #16a34a);
+}
+
+body.dashboard-body .bac-resolution-signature-tracking .bac-resolution-signature-summary-grid {
+    padding: 12px 0 14px;
+}
+
+body.dashboard-body .bac-resolution-signature-tracking .bac-resolution-signature-summary-card {
+    min-height: 76px;
+    border-radius: 14px;
+}
+
+body.dashboard-body .bac-resolution-signature-tracking .pr-signatory-tracking-grid.bac-resolution-signature-tracking-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+body.dashboard-body .bac-resolution-signature-tracking .pr-signatory-tracking-card {
+    gap: 10px;
+    min-height: 148px;
+    padding: 14px;
+    border-radius: 14px;
+    background: #ffffff;
+}
+
+body.dashboard-body .bac-resolution-signature-tracking .pr-signatory-tracking-card.is-pending {
+    background: #fffaf0;
+}
+
+body.dashboard-body .bac-resolution-signature-tracking .pr-signatory-tracking-card.is-signed {
+    background: #f1fff7;
+}
+
+body.dashboard-body .bac-resolution-signature-tracking .pr-signatory-tracking-card.is-not_generated {
+    background: #f8fbff;
+}
+
+body.dashboard-body .bac-resolution-signature-tracking .pr-signatory-card-name {
+    display: block;
+    color: #0b2344;
+    font-size: 0.92rem;
+    font-weight: 900;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+body.dashboard-body .bac-resolution-signature-tracking .pr-signatory-card-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 12px;
+}
+
+body.dashboard-body .bac-resolution-signature-tracking .pr-signatory-card-meta div {
+    min-width: 0;
+}
+
+body.dashboard-body .bac-resolution-signature-tracking .pr-signatory-card-meta dd {
+    color: #334155;
+    font-weight: 750;
+}
+
+@media (max-width: 1180px) {
+    body.dashboard-body .bac-resolution-signature-tracking .pr-signatory-tracking-grid.bac-resolution-signature-tracking-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    body.dashboard-body .bac-resolution-signature-tracking .bac-resolution-signature-summary-grid,
+    body.dashboard-body .bac-resolution-signature-tracking .pr-signatory-tracking-grid.bac-resolution-signature-tracking-grid,
+    body.dashboard-body .bac-resolution-signature-tracking .pr-signatory-card-meta {
+        grid-template-columns: 1fr;
+    }
+}
+
+.resolution-document-wrap {
+    width: 100%;
+    overflow-x: auto;
+    display: flex;
+    justify-content: center;
+    padding: 24px 0 48px;
+    box-sizing: border-box;
+}
+
+.resolution-print-area {
+    display: none;
+}
+
+.resolution-paper,
+.bac-resolution-page,
+.resolution-a4-page,
+.bac-resolution-official-sheet,
+.bac-resolution-official-body,
+.bac-resolution-print-sheet {
+    width: 8.27in;
+    min-height: 11.69in;
+    height: auto;
+    margin: 0 auto;
+    padding: 0.5in 0.5in 0.5in 1in;
+    box-sizing: border-box;
+    overflow: visible;
+    position: relative;
+    background: #ffffff;
+    color: #000000;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+    font-family: "Times New Roman", Times, serif !important;
+    font-size: 11pt !important;
+    line-height: 1.15 !important;
+}
+
+.resolution-document {
+    width: 100%;
+    max-width: 100%;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0;
+    color: #000000;
+    font-family: "Times New Roman", Times, serif !important;
+    font-size: 11pt !important;
+    line-height: 1.15 !important;
+}
+
+.resolution-paper.resolution-document {
+    width: 8.27in;
+    max-width: 8.27in;
+}
+
+.bac-resolution-official-header {
+    display: grid;
+    grid-template-columns: 0.95in minmax(0, 1fr) 0.95in;
+    align-items: center;
+    column-gap: 0.28in;
+    width: 100%;
+    margin: 0 0 18pt;
+    text-align: center;
+}
+
+.bac-resolution-official-logo-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0.72in;
+}
+
+.bac-resolution-official-logo {
+    display: block;
+    width: 0.62in;
+    height: 0.62in;
+    object-fit: contain;
+}
+
+.bac-resolution-bagong-logo {
+    width: 0.78in;
+    height: 0.52in;
+}
+
+.bac-resolution-official-heading {
+    display: grid;
+    gap: 0;
+    justify-items: center;
+    align-content: center;
+    min-width: 0;
+}
+
+.bac-resolution-official-heading p {
+    margin: 0;
+    text-align: center;
+    font-size: 11pt !important;
+    line-height: 1.08 !important;
+}
+
+.bac-resolution-official-municipality {
+    font-weight: 700 !important;
+    text-transform: uppercase;
+}
+
+.resolution-document,
+.resolution-paper *,
+.resolution-document * {
+    box-sizing: border-box;
+    font-family: "Times New Roman", Times, serif !important;
+    font-size: 11pt !important;
+    color: #000000 !important;
+}
+
+.resolution-header {
+    max-width: 100%;
+    margin: 0 0 18pt;
+    text-align: center;
+}
+
+.resolution-header p {
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 11pt !important;
+    line-height: 1.15 !important;
+}
+
+.resolution-municipality {
+    font-size: 11pt !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+}
+
+.resolution-committee {
+    max-width: 100%;
+    margin: 18pt 0 20pt;
+    text-align: center;
+    font-size: 11pt !important;
+    font-weight: 700 !important;
+    line-height: 1.15 !important;
+    text-transform: uppercase;
+}
+
+.resolution-number {
+    margin-top: 18pt;
+    margin-bottom: 14pt;
+    text-align: center;
+    font-size: 11pt !important;
+    font-weight: 700 !important;
+    line-height: 1.15 !important;
+    text-decoration: underline;
+}
+
+.resolution-title {
+    max-width: 100%;
+    margin: 3.6pt auto 18pt;
+    text-align: center;
+    font-size: 11pt !important;
+    font-weight: 700 !important;
+    line-height: 1.15 !important;
+    text-transform: none;
+    overflow-wrap: break-word;
+}
+
+.resolution-title-field {
+    min-height: 52pt;
+    text-align: center;
+    font-weight: 700;
+    text-transform: none;
+}
+
+.resolution-paragraph {
+    margin-top: 3.6pt !important;
+    margin-bottom: 0 !important;
+    text-align: justify;
+    text-indent: 0.5in;
+    font-size: 11pt !important;
+    line-height: 1.15 !important;
+    overflow-wrap: break-word;
+}
+
+.resolution-paragraph p {
+    margin-top: 3.6pt !important;
+    margin-bottom: 0 !important;
+    text-align: justify;
+    text-indent: 0.5in;
+    font-size: 11pt !important;
+    line-height: 1.15 !important;
+}
+
+.resolution-paragraph strong {
+    font-weight: 700;
+}
+
+.resolution-now {
+    margin-top: 3.6pt !important;
+    margin-bottom: 0 !important;
+    text-align: justify;
+    text-indent: 0.5in;
+    font-size: 11pt !important;
+    line-height: 1.15 !important;
+    overflow-wrap: break-word;
+}
+
+.resolution-resolved-list {
+    margin-top: 3.6pt !important;
+    margin-bottom: 0 !important;
+    padding-left: 0.38in;
+    font-size: 11pt !important;
+    line-height: 1.15 !important;
+}
+
+.resolution-resolved-list li {
+    margin-top: 3.6pt !important;
+    margin-bottom: 0 !important;
+    padding-left: 0.05in;
+    text-align: justify;
+    font-size: 11pt !important;
+    line-height: 1.15 !important;
+    overflow-wrap: break-word;
+}
+
+.resolution-resolved-date {
+    margin-top: 3.6pt !important;
+    margin-bottom: 0 !important;
+    text-align: justify;
+    font-size: 11pt !important;
+    line-height: 1.15 !important;
+}
+
+.resolution-signature-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+.bac-resolution-signatures {
+    margin-top: 0;
+}
+
+.resolution-prepared {
+    width: 48%;
+    margin: 0.35in 0 0;
+    padding-top: 12pt;
+    display: grid;
+    grid-template-columns: max-content minmax(1.8in, 1fr);
+    align-items: start;
+    column-gap: 4pt;
+    text-align: center;
+}
+
+.resolution-prepared-title,
+.resolution-attested-title {
+    margin: 0 0 12pt;
+    text-align: left;
+    font-size: 11pt !important;
+    font-weight: 700 !important;
+    line-height: 1.15 !important;
+}
+
+.resolution-prepared-title {
+    padding-top: 1pt;
+}
+
+.resolution-prepared .resolution-sign-line {
+    width: 100%;
+}
+
+.resolution-prepared .resolution-inline-signatory-control {
+    margin-top: 7pt;
+}
+
+.bac-signature-grid,
+.resolution-signature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 0.75in;
+    row-gap: 0.45in;
+    margin-top: 0.45in;
+    align-items: end;
+    text-align: center;
+}
+
+.bac-signature-block,
+.resolution-signature-block {
+    min-width: 0;
+    padding-top: 18pt;
+    text-align: center;
+    font-size: 11pt !important;
+    line-height: 1.15 !important;
+}
+
+.bac-signature-line,
+.resolution-sign-line {
+    width: 75%;
+    height: 0;
+    margin: 0 auto 4pt;
+    border-top: 1px solid #000000;
+}
+
+.resolution-sign-name {
+    min-height: 14pt;
+    text-align: center;
+    font-size: 11pt !important;
+    font-weight: 700 !important;
+    line-height: 1.15 !important;
+    text-transform: none;
+    overflow-wrap: break-word;
+}
+
+.resolution-sign-title,
+.resolution-approved-label {
+    min-height: 11pt;
+    text-align: center;
+    font-size: 11pt !important;
+    line-height: 1.15 !important;
+    overflow-wrap: break-word;
+}
+
+.resolution-signature-block .resolution-editable,
+.resolution-chair .resolution-editable {
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+
+.resolution-inline-signatory-control {
+    display: grid;
+    gap: 2pt;
+    width: 100%;
+    min-width: 0;
+    text-align: center;
+}
+
+.resolution-sign-name-field,
+.resolution-sign-designation-field {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    margin: 0 auto !important;
+    padding: 0 2pt !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #000000 !important;
+    text-align: center !important;
+    font-family: "Times New Roman", Times, serif !important;
+    font-size: 11pt !important;
+    line-height: 1.15 !important;
+    text-transform: none !important;
+}
+
+.resolution-sign-name-field {
+    min-height: 14pt;
+    font-weight: 700 !important;
+}
+
+.resolution-sign-name-field::placeholder {
+    text-transform: none;
+}
+
+.resolution-sign-designation-field {
+    min-height: 16pt;
+    cursor: pointer;
+    appearance: auto;
+}
+
+.resolution-sign-name-field:focus,
+.resolution-sign-designation-field:focus {
+    outline: 1px solid rgba(37, 99, 235, 0.5) !important;
+    outline-offset: 2px;
+    background: rgba(239, 246, 255, 0.7) !important;
+}
+
+.resolution-chair {
+    width: 48%;
+    margin: 0.45in auto 0;
+    padding-top: 18pt;
+    text-align: center;
+}
+
+.resolution-chair .resolution-sign-line {
+    width: 100%;
+}
+
+.resolution-approved {
+    width: 48%;
+    margin-top: 0.52in;
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: start;
+    justify-items: start;
+    text-align: left;
+}
+
+.resolution-approved-title {
+    margin: 0;
+    padding-top: 1pt;
+    text-align: left;
+    font-size: 11pt !important;
+    font-weight: 700;
+    line-height: 1.15 !important;
+}
+
+.resolution-approved .resolution-inline-signatory-control {
+    margin-top: 0.36in;
+    margin-left: 0.22in;
+    justify-self: stretch;
+    text-align: center;
+}
+
+.resolution-approved-line {
+    width: 100%;
+    height: 0;
+    margin: 0 0 4pt;
+    border-top: 1px solid #000000;
+}
+
+.resolution-approved-name {
+    width: 100% !important;
+    min-height: 14pt;
+    text-align: center;
+    font-size: 11pt !important;
+    font-weight: 700 !important;
+    line-height: 1.15 !important;
+    text-transform: none;
+    overflow-wrap: break-word;
+}
+
+.resolution-approved-label {
+    width: 100% !important;
+}
+
+.resolution-date-approved {
+    grid-column: 1 / -1;
+    margin: 14pt 0 0;
+    font-size: 11pt !important;
+    line-height: 1.15 !important;
+}
+
+.resolution-editable,
+.editable-blank,
+.resolution-document input,
+.resolution-document textarea,
+.resolution-document select {
+    color: #000000 !important;
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    font-family: "Times New Roman", Times, serif !important;
+    font-size: 11pt !important;
+    line-height: 1.15 !important;
+    padding: 0;
+    margin: 0;
+}
+
+.resolution-editable[contenteditable="true"] {
+    cursor: text;
+    min-height: 1em;
+}
+
+.resolution-paper[contenteditable="true"] {
+    cursor: text;
+    outline: 1px solid rgba(11, 35, 65, 0.14);
+    outline-offset: 0;
+}
+
+.resolution-paper[contenteditable="true"]:focus {
+    outline: 2px solid rgba(245, 184, 46, 0.65);
+}
+
+.resolution-document p {
+    margin-top: 3.6pt;
+    margin-bottom: 0;
+}
+
+.resolution-document textarea {
+    display: block;
+    width: 100%;
+    resize: none;
+    overflow: hidden;
+}
+
+.resolution-editable:focus,
+.editable-blank:focus,
+.resolution-document input:focus,
+.resolution-document textarea:focus {
+    outline: 1px dotted #777777 !important;
+    background: rgba(250, 204, 21, 0.05) !important;
+}
+
+.editable-blank {
+    display: inline-block;
+    min-width: 80px;
+    border-bottom: 1px solid #000000 !important;
+    vertical-align: baseline;
+    line-height: 1.1 !important;
+    padding: 0 2pt;
+}
+
+.blank-short {
+    width: 70px;
+}
+
+.blank-medium {
+    width: 160px;
+}
+
+.blank-long {
+    min-width: 360px;
+}
+
+.resolution-word-indent {
+    margin-left: 6.11cm !important;
+    margin-right: 6.75cm !important;
+    margin-top: 3.6pt !important;
+    margin-bottom: 0 !important;
+}
+
+.resolution-number-field {
+    display: inline-block;
+    width: 130px;
+    text-align: center;
+    font-weight: 700;
+}
+
+.resolution-clause-field {
+    text-align: justify;
+    text-indent: 0.5in;
+}
+
+.resolution-resolved-list .resolution-clause-field {
+    text-indent: 0;
+}
+
+.resolution-document-meta {
+    display: none;
+}
+
+.resolution-print-body {
+    margin: 0;
+    background: #f1f5f9;
+}
+
+.resolution-print-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    max-width: 8.27in;
+    margin: 18px auto;
+    padding: 12px;
+    border: 1px solid #d8dee8;
+    border-radius: 10px;
+    background: #ffffff;
+}
+
+.resolution-print-toolbar p {
+    margin: 0;
+    color: #334155;
+    font: 700 0.9rem/1.4 Figtree, Arial, sans-serif;
+}
+
+@media (max-width: 900px) {
+    .resolution-page-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .bac-resolution-signatory-manager > header {
+        flex-direction: column;
+    }
+
+    .bac-resolution-signatory-manager__grid,
+    .bac-resolution-signature-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .resolution-print-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+        margin: 12px;
+    }
+}
+
+@page {
+    size: 210mm 297mm;
+    margin: 9mm 11mm 9mm 18mm;
+}
+
+@media print {
+    html,
+    body {
+        width: auto !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        overflow: visible !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .sidebar,
+    .topbar,
+    .app-header,
+    .app-sidebar,
+    .main-sidebar,
+    .navbar,
+    .dashboard-sidebar,
+    .dashboard-topbar,
+    .dashboard-hero,
+    .sidebar-toggle,
+    .sidebar-backdrop,
+    .session-alert,
+    .resolution-page-toolbar,
+    .resolution-word-toolbar,
+    .resolution-print-toolbar,
+    .resolution-screen-area,
+    .no-print,
+    button {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    .app-layout,
+    .dashboard-shell,
+    .dashboard-main,
+    .dashboard-content,
+    .main-content,
+    .content-wrapper,
+    .page-content,
+    .authenticated-content,
+    .resolution-workspace,
+    .resolution-editor-form,
+    .resolution-print-page {
+        display: block !important;
+        width: auto !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        overflow: visible !important;
+        box-shadow: none !important;
+        transform: none !important;
+        animation: none !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .resolution-document-wrap {
+        display: block !important;
+        width: auto !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        background: #ffffff !important;
+    }
+
+    .resolution-print-area {
+        display: block !important;
+        width: auto !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        overflow: visible !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .resolution-print-area .resolution-paper,
+    #resolutionPrintPaper {
+        display: block !important;
+        width: auto !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: #ffffff !important;
+        overflow: visible !important;
+        transform: none !important;
+        zoom: 1 !important;
+        font-family: "Times New Roman", Times, serif !important;
+        font-size: 10.6pt !important;
+        line-height: 1.1 !important;
+        color: #000000 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .pt-smooth-enter,
+    .pt-smooth-enter-soft,
+    .resolution-print-area,
+    .resolution-print-area * {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: none !important;
+        animation: none !important;
+    }
+
+    .resolution-paper,
+    .resolution-paper.resolution-document,
+    .resolution-document,
+    .bac-resolution-page,
+    .resolution-a4-page,
+    .bac-resolution-official-sheet,
+    .bac-resolution-official-body,
+    .bac-resolution-print-sheet {
+        width: auto !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+        overflow: visible !important;
+        box-shadow: none !important;
+        outline: none !important;
+        border: none !important;
+        background: #ffffff !important;
+        transform: none !important;
+        zoom: 1 !important;
+        page-break-after: auto !important;
+        break-after: auto !important;
+        page-break-before: auto !important;
+        break-before: auto !important;
+    }
+
+    .resolution-document,
+    .resolution-paper,
+    .resolution-paper *,
+    .resolution-document * {
+        font-family: "Times New Roman", Times, serif !important;
+        color: #000000 !important;
+        font-size: 10.6pt !important;
+        box-sizing: border-box !important;
+    }
+
+    .resolution-print-area .resolution-document,
+    #resolutionPrintPaper.resolution-document {
+        width: auto !important;
+        max-width: none !important;
+    }
+
+    .bac-resolution-official-header {
+        display: grid !important;
+        grid-template-columns: 0.95in minmax(0, 1fr) 0.95in !important;
+        align-items: center !important;
+        width: 100% !important;
+        column-gap: 0.24in !important;
+        margin: 0 0 10pt !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    .bac-resolution-official-logo-slot {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .bac-resolution-official-logo {
+        width: 0.5in !important;
+        height: 0.5in !important;
+        object-fit: contain !important;
+    }
+
+    .bac-resolution-bagong-logo {
+        width: 0.62in !important;
+        height: 0.42in !important;
+    }
+
+    .bac-resolution-official-heading p,
+    .bac-resolution-official-municipality {
+        font-size: 10.6pt !important;
+        line-height: 1.04 !important;
+    }
+
+    .resolution-document,
+    .bac-resolution-official-heading p,
+    .bac-resolution-official-municipality,
+    .resolution-header p,
+    .resolution-municipality,
+    .resolution-committee,
+    .resolution-number,
+    .resolution-title,
+    .resolution-paragraph,
+    .resolution-paragraph p,
+    .resolution-now,
+    .resolution-resolved-list,
+    .resolution-resolved-list li,
+    .resolution-resolved-date,
+    .resolution-editable,
+    .editable-blank,
+        .resolution-document input,
+        .resolution-document textarea,
+        .resolution-document select {
+        font-size: 10.6pt !important;
+        line-height: 1.1 !important;
+    }
+
+    .resolution-paper[contenteditable],
+    .resolution-paper[contenteditable="true"],
+    .resolution-paper[contenteditable="false"],
+    .resolution-editable,
+    [contenteditable="true"] {
+        outline: none !important;
+        background: transparent !important;
+    }
+
+    .resolution-title {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-top: 2pt !important;
+        margin-bottom: 8pt !important;
+        white-space: normal !important;
+        overflow-wrap: break-word !important;
+        word-break: normal !important;
+        text-align: center !important;
+        line-height: 1.08 !important;
+    }
+
+    .resolution-committee {
+        margin-top: 8pt !important;
+        margin-bottom: 8pt !important;
+    }
+
+    .resolution-number {
+        margin-top: 6pt !important;
+        margin-bottom: 6pt !important;
+    }
+
+    .resolution-paragraph,
+    .resolution-paragraph p,
+    .resolution-now,
+    .resolution-resolved-list,
+    .resolution-resolved-list li,
+    .resolution-resolved-date {
+        margin-top: 2.6pt !important;
+        margin-bottom: 0 !important;
+        line-height: 1.08 !important;
+        white-space: normal !important;
+        overflow-wrap: break-word !important;
+        page-break-inside: auto !important;
+        break-inside: auto !important;
+    }
+
+    .resolution-editable,
+    .editable-blank,
+    .resolution-document input,
+    .resolution-document textarea,
+    .resolution-document select {
+        border: none !important;
+        outline: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    .editable-blank {
+        border-bottom: 1px solid #000000 !important;
+        min-width: 80px !important;
+        max-width: 100% !important;
+        display: inline-block !important;
+        vertical-align: baseline !important;
+        white-space: normal !important;
+    }
+
+    .resolution-signature-section,
+    .bac-resolution-signatures {
+        margin-top: 8pt !important;
+        break-inside: auto !important;
+        page-break-inside: auto !important;
+    }
+
+    .resolution-attested-title {
+        margin-bottom: 3pt !important;
+    }
+
+    .bac-signature-grid,
+    .resolution-signature-grid {
+        margin-top: 12pt !important;
+        column-gap: 0.7in !important;
+        row-gap: 15pt !important;
+        break-inside: auto !important;
+        page-break-inside: auto !important;
+    }
+
+    .bac-signature-block,
+    .resolution-signature-block {
+        padding-top: 6pt !important;
+    }
+
+    .resolution-chair {
+        margin-top: 14pt !important;
+        padding-top: 4pt !important;
+        break-inside: auto !important;
+        page-break-inside: auto !important;
+    }
+
+    .resolution-approved {
+        margin-top: 14pt !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    .resolution-approved .resolution-inline-signatory-control {
+        margin-top: 10pt !important;
+    }
+
+    .resolution-date-approved {
+        margin-top: 4pt !important;
+    }
+}

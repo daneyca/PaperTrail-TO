@@ -1,0 +1,220 @@
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .pt-tw-card {
+        @apply rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md;
+    }
+
+    .pt-tw-button {
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-extrabold text-white transition hover:bg-blue-900 focus:outline-none focus:ring-4 focus:ring-blue-100;
+    }
+
+    .pt-tw-button-secondary {
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-extrabold text-slate-900 transition hover:border-blue-200 hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100;
+    }
+
+    .pt-ui-card {
+        @apply overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md;
+    }
+
+    .pt-ui-card-header {
+        @apply flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4;
+    }
+
+    .pt-ui-card-header h2 {
+        @apply m-0 text-lg font-extrabold leading-tight text-slate-950;
+    }
+
+    .pt-ui-card-header p:not(.pt-ui-eyebrow) {
+        @apply mt-1 max-w-3xl text-sm leading-6 text-slate-500;
+    }
+
+    .pt-ui-card-body {
+        @apply p-5;
+    }
+
+    .pt-ui-eyebrow {
+        @apply mb-2 text-xs font-black uppercase tracking-wide text-blue-600;
+    }
+
+    .pt-ui-page-header {
+        @apply flex flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:flex-row md:items-center md:justify-between;
+    }
+
+    .pt-ui-page-header h1 {
+        @apply m-0 text-3xl font-black leading-tight tracking-normal text-slate-950 md:text-4xl;
+    }
+
+    .pt-ui-page-header p:not(.pt-ui-eyebrow) {
+        @apply mt-2 max-w-4xl text-base leading-7 text-slate-600;
+    }
+
+    .pt-ui-page-actions {
+        @apply flex flex-wrap items-center gap-3;
+    }
+
+    .pt-ui-status,
+    .pt-ui-doc-type {
+        @apply inline-flex min-h-7 items-center rounded-full border px-3 py-1 text-xs font-black leading-none;
+    }
+
+    .pt-ui-status--draft,
+    .pt-ui-status--neutral {
+        @apply border-slate-200 bg-slate-100 text-slate-700;
+    }
+
+    .pt-ui-status--info {
+        @apply border-blue-200 bg-blue-50 text-blue-700;
+    }
+
+    .pt-ui-status--warning {
+        @apply border-amber-200 bg-amber-50 text-amber-700;
+    }
+
+    .pt-ui-status--success {
+        @apply border-emerald-200 bg-emerald-50 text-emerald-700;
+    }
+
+    .pt-ui-status--danger {
+        @apply border-rose-200 bg-rose-50 text-rose-700;
+    }
+
+    .pt-ui-doc-type {
+        @apply border-blue-200 bg-blue-50 text-blue-700;
+    }
+
+    .pt-ui-doc-type--ppmp {
+        @apply border-violet-200 bg-violet-50 text-violet-700;
+    }
+
+    .pt-ui-doc-type--app {
+        @apply border-emerald-200 bg-emerald-50 text-emerald-700;
+    }
+
+    .pt-ui-doc-type--pr {
+        @apply border-blue-200 bg-blue-50 text-blue-700;
+    }
+
+    .pt-ui-doc-type--rfq {
+        @apply border-cyan-200 bg-cyan-50 text-cyan-700;
+    }
+
+    .pt-ui-doc-type--abstract {
+        @apply border-indigo-200 bg-indigo-50 text-indigo-700;
+    }
+
+    .pt-ui-doc-type--po,
+    .pt-ui-doc-type--purchase-order {
+        @apply border-orange-200 bg-orange-50 text-orange-700;
+    }
+
+    .pt-ui-doc-type--bac-resolution {
+        @apply border-amber-200 bg-amber-50 text-amber-700;
+    }
+
+    .pt-ui-empty-state {
+        @apply grid place-items-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center;
+    }
+
+    .pt-ui-empty-icon {
+        @apply mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-blue-50 text-blue-700;
+    }
+
+    .pt-ui-empty-icon svg {
+        @apply h-6 w-6;
+    }
+
+    .pt-ui-empty-state strong {
+        @apply text-base font-black text-slate-950;
+    }
+
+    .pt-ui-empty-state p {
+        @apply mt-2 max-w-lg text-sm leading-6 text-slate-500;
+    }
+
+    .pt-ui-empty-actions {
+        @apply mt-5 flex flex-wrap items-center justify-center gap-3;
+    }
+
+    .pt-user-profile-block {
+        @apply inline-flex min-w-0 items-center gap-3 rounded-full border border-transparent px-2 py-1 text-left no-underline transition hover:border-blue-100 hover:bg-blue-50 focus:border-blue-200 focus:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-100;
+    }
+
+    .pt-user-avatar {
+        @apply grid shrink-0 place-items-center overflow-hidden rounded-full border border-blue-100 bg-blue-50 text-blue-900;
+    }
+
+    .pt-user-avatar--sm {
+        @apply h-9 w-9;
+    }
+
+    .pt-user-avatar--md {
+        @apply h-11 w-11;
+    }
+
+    .pt-user-avatar--lg {
+        @apply h-14 w-14;
+    }
+
+    .pt-user-avatar img {
+        @apply h-full w-full object-cover;
+    }
+
+    .pt-user-avatar__fallback {
+        @apply relative grid h-full w-full place-items-center;
+    }
+
+    .pt-user-avatar__fallback svg {
+        @apply h-5 w-5 fill-none stroke-current;
+        stroke-width: 1.9;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .pt-user-avatar__fallback small {
+        @apply absolute bottom-1 right-1 grid min-w-4 place-items-center rounded-full border border-white bg-slate-900 px-1 text-[0.55rem] font-black leading-4 text-white;
+    }
+
+    .pt-user-profile-block__copy {
+        @apply grid min-w-0;
+    }
+
+    .pt-user-profile-block__copy strong {
+        @apply truncate text-sm font-black leading-tight text-slate-950;
+    }
+
+    .pt-user-profile-block__copy span {
+        @apply mt-0.5 truncate text-xs font-medium text-slate-500;
+    }
+
+    .pt-ui-document-shell {
+        @apply grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px];
+    }
+
+    .pt-ui-document-main,
+    .pt-ui-document-side {
+        @apply min-w-0 rounded-2xl border border-slate-200 bg-white shadow-sm;
+    }
+
+    .pt-ui-document-preview {
+        @apply min-w-0 overflow-auto rounded-2xl border border-slate-200 bg-slate-50 p-4;
+    }
+
+    .pt-ui-table-shell {
+        @apply overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm;
+    }
+
+    .pt-ui-table-toolbar {
+        @apply grid gap-3 border-b border-slate-100 bg-white p-4 md:grid-cols-[minmax(220px,1fr)_repeat(3,minmax(140px,auto))];
+    }
+
+    .pt-ui-table-toolbar input,
+    .pt-ui-table-toolbar select {
+        @apply min-h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition focus:border-blue-300 focus:bg-white focus:ring-4 focus:ring-blue-100;
+    }
+
+    .pt-ui-table-scroll {
+        @apply w-full overflow-x-auto;
+    }
+}

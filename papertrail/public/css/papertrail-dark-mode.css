@@ -1,0 +1,549 @@
+/* PaperTrail soft dark theme.
+   UI theme only: loaded last so it normalizes older dark-mode rules without affecting light mode. */
+
+html.papertrail-dark-mode {
+    color-scheme: dark;
+    --pt-dark-bg: #0f2747;
+    --pt-dark-bg-2: #173b5f;
+    --pt-dark-surface: rgba(22, 52, 82, 0.88);
+    --pt-dark-surface-solid: #163452;
+    --pt-dark-surface-soft: rgba(255, 255, 255, 0.08);
+    --pt-dark-surface-muted: rgba(255, 255, 255, 0.12);
+    --pt-dark-border: rgba(255, 255, 255, 0.15);
+    --pt-dark-border-strong: rgba(255, 255, 255, 0.22);
+    --pt-dark-text: #f8fbff;
+    --pt-dark-muted: #b8c8dc;
+    --pt-dark-subtle: #91a8c2;
+    --pt-dark-blue: #8ec5ff;
+    --pt-dark-gold: #ffd36b;
+    --pt-saas-bg: #0f2747;
+    --pt-saas-surface: #163452;
+    --pt-saas-surface-soft: rgba(255, 255, 255, 0.08);
+    --pt-saas-navy: #f8fbff;
+    --pt-saas-navy-2: #dcecff;
+    --pt-saas-blue: #8ec5ff;
+    --pt-saas-ink: #f8fbff;
+    --pt-saas-muted: #b8c8dc;
+    --pt-saas-line: rgba(255, 255, 255, 0.15);
+    --pt-saas-shadow: 0 18px 42px rgba(2, 10, 24, 0.28);
+}
+
+html.papertrail-dark-mode body.dashboard-body,
+html.papertrail-dark-mode body.modal-document-body {
+    background:
+        radial-gradient(circle at 10% 0%, rgba(96, 165, 250, 0.24), transparent 28rem),
+        radial-gradient(circle at 84% 8%, rgba(245, 183, 32, 0.12), transparent 26rem),
+        linear-gradient(135deg, var(--pt-dark-bg), var(--pt-dark-bg-2)) !important;
+    color: var(--pt-dark-text) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body .dashboard-shell,
+html.papertrail-dark-mode body.dashboard-body .dashboard-main,
+html.papertrail-dark-mode body.dashboard-body .dashboard-content,
+html.papertrail-dark-mode body.modal-document-body .modal-document-content {
+    background: transparent !important;
+    color: var(--pt-dark-text) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .dashboard-sidebar,
+    .dashboard-topbar,
+    .topbar-account-dropdown,
+    .dashboard-profile > .pt-user-profile-block,
+    .dashboard-profile .topbar-account-toggle.pt-user-profile-block,
+    .notification-dropdown,
+    .dashboard-hero,
+    .enterprise-hero,
+    .page-hero,
+    .pt-workspace-welcome,
+    .table-panel,
+    .form-panel,
+    .papertrail-card,
+    .papertrail-table-card,
+    .papertrail-upload-card,
+    .papertrail-side-card,
+    .content-card,
+    .module-card,
+    .dashboard-card,
+    .dashboard-widget,
+    .dashboard-support-card,
+    .dashboard-tracking-card,
+    .dashboard-identity-card,
+    .document-records-card,
+    .document-submenu-panel,
+    .document-submenu-tile,
+    .pt-ui-card,
+    .settings-category-nav,
+    .settings-console-main,
+    .settings-list-panel,
+    .rule-config-form-panel,
+    .rule-config-table-panel,
+    .report-registry-panel,
+    .future-report-panel,
+    .profile-action-panel,
+    .profile-signature-compact,
+    .profile-edit-panel--compact,
+    .admin-role-edit-card,
+    .admin-permissions-workspace,
+    .admin-role-future-card,
+    .permission-group,
+    .permission-item,
+    .budget-detail-panel,
+    .budget-action-panel,
+    .procurement-recent-card,
+    .procurement-chart-card,
+    .procurement-ai-insights,
+    .procurement-quick-actions,
+    .assistant-connection-card,
+    .assistant-chat-card,
+    .assistant-bubble,
+    .assistant-chat-header,
+    .assistant-input-area,
+    .assistant-suggestions-container,
+    .pt-crud-modal__dialog,
+    .pt-confirm-dialog,
+    .profile-password-modal__dialog,
+    .signature-settings-card,
+    .signature-form-section,
+    .signature-tab-panel,
+    .signature-preview,
+    .signature-canvas-wrap
+) {
+    border-color: var(--pt-dark-border) !important;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.035)),
+        var(--pt-dark-surface) !important;
+    color: var(--pt-dark-text) !important;
+    box-shadow: 0 18px 42px rgba(2, 10, 24, 0.22) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .dashboard-hero,
+    .enterprise-hero,
+    .page-hero,
+    .pt-workspace-welcome
+) {
+    background:
+        radial-gradient(circle at 92% 10%, rgba(142, 197, 255, 0.2), transparent 24rem),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.045)),
+        rgba(22, 52, 82, 0.9) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .document-records-card > header,
+    .table-panel > :where(header, .section-heading, .panel-heading, .card-header, .module-header),
+    .pt-ui-card-header,
+    .widget-heading,
+    .settings-console-header,
+    .admin-role-card-header,
+    .permission-group-header,
+    .profile-password-modal__header,
+    .pt-crud-modal__header,
+    .assistant-chat-header,
+    .document-create-source-card__header,
+    .attachments-header
+) {
+    border-color: var(--pt-dark-border) !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    .dashboard-hero h1,
+    .enterprise-hero h1,
+    .page-hero h1,
+    .panel-heading h2,
+    .document-records-card h2,
+    .table-panel h2,
+    .pt-ui-card h2,
+    .summary-card strong,
+    .stat-card-modern strong,
+    .procurement-kpi-card strong,
+    .dashboard-identity-card strong,
+    .detail-grid strong,
+    .budget-detail-grid strong,
+    .metadata-grid strong,
+    .profile-detail-grid strong,
+    .document-workflow-step strong,
+    .pr-workflow-step strong
+) {
+    color: var(--pt-dark-text) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    p,
+    small,
+    .dashboard-hero p:not(.eyebrow),
+    .enterprise-hero p:not(.eyebrow),
+    .page-hero p:not(.eyebrow),
+    .panel-heading p:not(.eyebrow),
+    .document-records-card p,
+    .table-panel p,
+    .pt-ui-card p,
+    .section-label,
+    .eyebrow,
+    .pr-page-kicker,
+    .pr-page-subtitle,
+    .detail-grid span,
+    .budget-detail-grid span,
+    .metadata-grid span,
+    .profile-detail-grid span,
+    .document-workflow-step span,
+    .pr-workflow-step span
+) {
+    color: var(--pt-dark-muted) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea,
+    .dashboard-search input,
+    .form-panel .inline-check,
+    .settings-row-control input,
+    .settings-row-control select,
+    .settings-row-control textarea,
+    .rule-config-field input,
+    .rule-config-field select,
+    .rule-config-field textarea,
+    .rule-config-search input,
+    .assistant-input-area textarea,
+    .assistant-suggestion-btn,
+    .assistant-suggestions-reopen,
+    .assistant-attach-button
+) {
+    border-color: var(--pt-dark-border) !important;
+    background: rgba(12, 35, 61, 0.9) !important;
+    color: var(--pt-dark-text) !important;
+    box-shadow: none !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(input, textarea)::placeholder {
+    color: rgba(216, 231, 248, 0.58) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea,
+    .dashboard-search input
+):focus {
+    border-color: rgba(142, 197, 255, 0.72) !important;
+    box-shadow: 0 0 0 3px rgba(142, 197, 255, 0.18) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    table,
+    .user-management-table,
+    .papertrail-table,
+    .document-records-table,
+    .procurement-dashboard-table,
+    .attachments-table,
+    .rule-config-table,
+    .report-table
+) {
+    color: var(--pt-dark-text) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    thead,
+    th,
+    .user-management-table th,
+    .papertrail-table th,
+    .document-records-table th,
+    .procurement-dashboard-table th,
+    .attachments-table th,
+    .rule-config-table th,
+    .report-table th
+) {
+    border-color: var(--pt-dark-border) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #dcecff !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    td,
+    tr,
+    .user-management-table td,
+    .papertrail-table td,
+    .document-records-table td,
+    .procurement-dashboard-table td,
+    .attachments-table td,
+    .rule-config-table td,
+    .report-table td
+) {
+    border-color: rgba(255, 255, 255, 0.11) !important;
+    color: var(--pt-dark-text) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    tbody tr:hover,
+    .document-draft-file-row:hover,
+    .recent-email-item:hover,
+    .topbar-account-dropdown a:hover,
+    .topbar-account-dropdown button:hover,
+    .sidebar-nav a:hover,
+    .sidebar-submenu a:hover
+) {
+    background: rgba(142, 197, 255, 0.13) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .summary-card,
+    .stat-card-modern,
+    .procurement-kpi-card,
+    .admin-dashboard-metric,
+    .admin-stat-kpi,
+    .quick-card,
+    .metric-card,
+    .status-card,
+    .detail-grid > div,
+    .budget-detail-grid > div,
+    .metadata-grid > div,
+    .profile-detail-grid > div,
+    .document-workflow-step,
+    .pr-workflow-step,
+    .document-draft-file-row,
+    .attachments-row,
+    .permission-item,
+    .admin-role-readonly-grid > div
+) {
+    border-color: var(--pt-dark-border) !important;
+    background: rgba(255, 255, 255, 0.07) !important;
+    color: var(--pt-dark-text) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .document-workflow-step.is-active,
+    .pr-workflow-step.is-active
+) {
+    border-color: rgba(142, 197, 255, 0.62) !important;
+    background: rgba(96, 165, 250, 0.2) !important;
+    box-shadow: inset 0 -3px 0 #8ec5ff !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .document-workflow-step.is-complete,
+    .pr-workflow-step.is-complete
+) {
+    border-color: rgba(74, 222, 128, 0.46) !important;
+    background: rgba(22, 163, 74, 0.18) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body .dashboard-sidebar {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025)),
+        rgba(12, 35, 61, 0.95) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .sidebar-header,
+    .sidebar-logout,
+    .sidebar-submenu
+) {
+    border-color: var(--pt-dark-border) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .brand-text strong,
+    .sidebar-nav a,
+    .sidebar-dropdown-toggle,
+    .sidebar-logout button,
+    .sidebar-submenu a
+) {
+    color: var(--pt-dark-text) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .brand-text small,
+    .sidebar-label,
+    .sidebar-section-label,
+    .sidebar-submenu-heading
+) {
+    color: var(--pt-dark-subtle) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .sidebar-nav a.is-active,
+    .sidebar-submenu a.is-active,
+    .settings-tabbar a.is-active
+) {
+    border-color: rgba(142, 197, 255, 0.36) !important;
+    background: rgba(142, 197, 255, 0.16) !important;
+    color: #ffffff !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .dashboard-utility-button,
+    .notification-button,
+    .sidebar-collapse-button,
+    .document-create-secondary-action,
+    .secondary-action,
+    .btn-pr-secondary,
+    .pt-confirm-cancel,
+    .profile-password-modal__close,
+    .pt-crud-modal__close
+) {
+    border-color: var(--pt-dark-border) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: var(--pt-dark-text) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .dashboard-action,
+    .btn-pr-primary,
+    .document-create-proceed-button,
+    .pt-confirm-submit
+) {
+    border-color: rgba(255, 211, 107, 0.55) !important;
+    background: linear-gradient(135deg, #ffd36b, #f5b720) !important;
+    color: #061a33 !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .empty-state,
+    .pt-ui-empty-state,
+    .document-records-empty,
+    .document-drafts-empty-compact,
+    .attachments-empty,
+    .support-empty-state,
+    .notification-empty-state
+) {
+    border-color: var(--pt-dark-border) !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: var(--pt-dark-muted) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .status-pill,
+    .document-status-badge,
+    .attachment-badge,
+    .procurement-type-badge,
+    .signature-status-badge,
+    .severity-badge,
+    .pr-app-reference-badge,
+    .document-records-type
+) {
+    border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .document-create-source-card,
+    .pr-app-reference-card,
+    .pr-app-confirm-card,
+    .pr-context-card,
+    .pr-source-step-footer,
+    .rfq-toolbar,
+    .abstract-toolbar,
+    .po-toolbar,
+    .resolution-page-toolbar,
+    .document-action-bar,
+    .ppmp-sticky-actions
+) {
+    border-color: var(--pt-dark-border) !important;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.035)),
+        rgba(22, 52, 82, 0.9) !important;
+    color: var(--pt-dark-text) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .pr-preview-area,
+    .rfq-document-wrap,
+    .abstract-document-wrap,
+    .po-document-wrap,
+    .resolution-document-wrap,
+    .app-print-area,
+    .ppmp-entry-scroll
+) {
+    border-color: var(--pt-dark-border) !important;
+    background: rgba(7, 26, 51, 0.42) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .pt-crud-modal__body,
+    .pt-crud-modal__content,
+    .topbar-account-dropdown,
+    .profile-password-modal__dialog
+) {
+    background: var(--pt-dark-surface-solid) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .pt-crud-modal__backdrop,
+    .profile-password-modal__backdrop,
+    .pt-confirm-backdrop
+) {
+    background: rgba(3, 12, 27, 0.72) !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .pr-document,
+    .ppmp-sheet,
+    .ppmp-official-document,
+    .app-landscape-page,
+    .po-document,
+    .po-a4-page,
+    .resolution-document,
+    .rfq-a4-page,
+    .abstract-a4-page,
+    [id$="PrintPaper"]
+) {
+    background: #ffffff !important;
+    color: #000000 !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .pr-document,
+    .ppmp-sheet,
+    .ppmp-official-document,
+    .app-landscape-page,
+    .po-document,
+    .po-a4-page,
+    .resolution-document,
+    .rfq-a4-page,
+    .abstract-a4-page,
+    [id$="PrintPaper"]
+) :where(*) {
+    color: inherit !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .pr-document,
+    .ppmp-sheet,
+    .ppmp-official-document,
+    .app-landscape-page,
+    .po-document,
+    .po-a4-page,
+    .resolution-document,
+    .rfq-a4-page,
+    .abstract-a4-page,
+    [id$="PrintPaper"]
+) :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+    border-color: #000000 !important;
+    background: transparent !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(a:not(.dashboard-action):not(.btn-pr-primary):not(.document-create-proceed-button)) {
+    color: inherit;
+}
+
+html.papertrail-dark-mode body.dashboard-body :where(
+    .alert,
+    .session-alert,
+    .attachments-readonly-note,
+    .document-create-source-error
+) {
+    border-color: var(--pt-dark-border) !important;
+}
+
+@media (max-width: 900px) {
+    html.papertrail-dark-mode body.dashboard-body .sidebar-backdrop {
+        background: rgba(3, 12, 27, 0.55) !important;
+    }
+}

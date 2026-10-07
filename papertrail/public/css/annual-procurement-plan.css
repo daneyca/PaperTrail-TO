@@ -1,0 +1,766 @@
+.official-app-toolbar,
+.official-app-entry-toolbar,
+.official-app-form-card,
+.official-app-preview-shell {
+    border: 1px solid #d8dee8;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(11, 35, 65, 0.06);
+}
+
+.official-app-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding: 14px 16px;
+}
+
+.official-app-entry-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding: 14px 16px;
+}
+
+.official-app-entry-toolbar strong {
+    display: block;
+    color: #0b2341;
+}
+
+.official-app-entry-controls {
+    display: flex;
+    align-items: end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.official-app-entry-controls label {
+    display: grid;
+    gap: 5px;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.official-app-entry-controls input,
+.official-app-entry-controls select {
+    height: 36px;
+    min-width: 130px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0 10px;
+    color: #0b2341;
+    background: #fff;
+    font: 800 0.82rem/1 Figtree, Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+.official-app-entry-scroll {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+.official-app-entry-page {
+    max-width: none;
+}
+
+.official-app-toolbar div {
+    display: grid;
+    gap: 3px;
+}
+
+.official-app-toolbar strong {
+    color: #0b2341;
+    font-size: 1rem;
+}
+
+.official-app-toolbar span {
+    color: #64748b;
+    font-size: 0.86rem;
+}
+
+.official-app-toolbar-actions,
+.official-app-form-actions,
+.official-app-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.official-app-toolbar a,
+.official-app-toolbar button,
+.official-app-form-actions a,
+.official-app-form-actions button,
+.official-app-row-actions button,
+.official-app-input-table button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0 12px;
+    background: #fff;
+    color: #0b2341;
+    font: 800 0.82rem/1 Figtree, Arial, sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.official-app-toolbar button,
+.official-app-form-actions button,
+.official-app-row-actions button:first-child {
+    border-color: #0b2341;
+    background: #0b2341;
+    color: #fff;
+}
+
+.official-app-form-card {
+    margin-bottom: 16px;
+    padding: 20px;
+}
+
+.official-app-form-heading {
+    display: grid;
+    gap: 4px;
+    margin-bottom: 18px;
+}
+
+.official-app-form-heading--with-actions {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.official-app-form-heading h2 {
+    margin: 0;
+    color: #0b2341;
+    font-size: 1.2rem;
+}
+
+.official-app-form-heading span {
+    color: #64748b;
+}
+
+.official-app-form-grid,
+.official-app-signatory-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.official-app-form-card label,
+.official-app-signatory-grid legend {
+    display: block;
+    margin-bottom: 6px;
+    color: #0b2341;
+    font-size: 0.73rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.official-app-form-card input,
+.official-app-form-card select,
+.official-app-form-card textarea {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 9px 10px;
+    color: #0b2341;
+    background: #fff;
+    font: 600 0.86rem/1.25 Figtree, Arial, sans-serif;
+}
+
+.official-app-signatory-grid fieldset {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px;
+}
+
+.official-app-signatory-grid input {
+    margin-bottom: 10px;
+}
+
+.official-app-items-scroll {
+    overflow-x: auto;
+}
+
+.official-app-input-table {
+    width: 100%;
+    min-width: 1500px;
+    border-collapse: collapse;
+}
+
+.official-app-input-table th,
+.official-app-input-table td {
+    border-bottom: 1px solid #e2e8f0;
+    padding: 8px;
+    vertical-align: top;
+}
+
+.official-app-input-table th {
+    color: #0b2341;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.official-app-input-table textarea {
+    min-height: 58px;
+    resize: vertical;
+}
+
+.official-app-total-preview {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.official-app-total-preview div {
+    display: grid;
+    gap: 4px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.official-app-total-preview span {
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.official-app-total-preview strong {
+    color: #0b2341;
+    font-size: 1.05rem;
+}
+
+.official-app-form-actions {
+    justify-content: flex-end;
+    margin-top: 16px;
+}
+
+.official-app-preview-shell {
+    overflow-x: auto;
+    padding: 18px;
+}
+
+.official-app-page {
+    width: 297mm;
+    min-width: 297mm;
+    min-height: 210mm;
+    margin: 0 auto;
+    background: #fff;
+    color: #000;
+    padding: 8mm;
+    box-sizing: border-box;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+}
+
+.official-app-document,
+.official-app-document * {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif !important;
+    color: #000 !important;
+}
+
+.official-app-document {
+    width: 100%;
+    font-size: 7px;
+    line-height: 1.1;
+}
+
+.official-app-header {
+    display: grid;
+    grid-template-columns: 28mm 1fr 28mm;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+.official-app-logo-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 24mm;
+}
+
+.official-app-logo-slot img {
+    max-width: 22mm;
+    max-height: 22mm;
+    object-fit: contain;
+}
+
+.official-app-heading p,
+.official-app-heading h1 {
+    margin: 0;
+}
+
+.official-app-heading p {
+    font-size: 9px;
+    line-height: 1.15;
+}
+
+.official-app-municipality,
+.official-app-heading h1 {
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.official-app-heading h1 {
+    margin-top: 4px;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.official-app-plan-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 28mm;
+    border: 0;
+    padding: 1px 0 3px;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.official-app-entry-plan-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 28mm;
+    margin: 0 0 3px;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.official-app-check-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.official-app-check-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.official-app-checkbox {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 5mm;
+    height: 5mm;
+    border: 1px solid #16a34a;
+    background: #ffffff;
+    box-sizing: border-box;
+    flex: 0 0 auto;
+}
+
+.official-app-check-option input:checked + .official-app-checkbox::after,
+.official-app-checkbox.is-checked::after {
+    content: "";
+    display: block;
+    width: 2.6mm;
+    height: 2.6mm;
+    background: #16a34a;
+}
+
+.official-app-check-option em {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-style: normal;
+}
+
+.official-app-check-option em input {
+    width: 18mm;
+    border: none;
+    border-bottom: 1px solid #000;
+    border-radius: 0;
+    background: transparent;
+    font: inherit;
+    text-align: center;
+}
+
+.official-app-plan-row em {
+    font-style: normal;
+    margin-left: 4px;
+}
+
+.official-app-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+.official-app-table th,
+.official-app-table td {
+    border: 1px solid #000;
+    padding: 2px 3px;
+    vertical-align: top;
+    font-size: 7px;
+    line-height: 1.12;
+    word-break: normal;
+    overflow-wrap: anywhere;
+}
+
+.official-app-table tfoot td,
+.official-app-total-row td {
+    border: 1px solid #000;
+    padding: 2px 3px;
+    font-size: 6.6px;
+    font-weight: 800;
+    line-height: 1.08;
+    vertical-align: middle;
+}
+
+.official-app-total-row td:first-child {
+    text-align: right;
+}
+
+.official-app-table th {
+    text-align: center;
+    font-weight: 800;
+    vertical-align: middle;
+    overflow-wrap: normal;
+    word-break: normal;
+    white-space: normal;
+    hyphens: none;
+}
+
+.official-app-group-row th {
+    background: #ffffff;
+    font-size: 7px;
+    font-weight: 900;
+    line-height: 1.05;
+}
+
+.official-app-table thead tr:nth-child(2) th {
+    height: 16mm;
+    font-size: 7px;
+    line-height: 1.05;
+}
+
+.official-app-number-row th {
+    background: #fff7cc;
+    font-size: 7px;
+    font-weight: 400;
+    height: auto;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+.official-app-section-row td {
+    background: #ffffff;
+    font-weight: 800;
+    text-align: left;
+}
+
+.official-app-empty-row td {
+    height: 13px;
+}
+
+.official-app-center {
+    text-align: center;
+}
+
+.official-app-money {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.official-app-note {
+    margin: 4px 0 5px;
+    font-size: 7px;
+}
+
+.official-app-entry-table input,
+.official-app-entry-table select,
+.official-app-entry-table textarea,
+.official-app-entry-header input,
+.official-app-entry-signatures input {
+    width: 100%;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: #000 !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 6.4px !important;
+    font-weight: 700;
+    line-height: 1.08;
+    box-sizing: border-box;
+}
+
+.official-app-entry-header input {
+    display: inline-block;
+    width: auto;
+    min-width: 36mm;
+    padding: 0 2px;
+    text-align: center;
+}
+
+.official-app-fiscal-year {
+    margin-top: 2px !important;
+    font-weight: 800;
+}
+
+.official-app-fiscal-year input {
+    min-width: 11mm;
+    width: 11mm;
+    border-bottom: 1px solid #000;
+}
+
+.official-app-entry-table input,
+.official-app-entry-table select,
+.official-app-entry-table textarea {
+    min-height: 100%;
+    padding: 1px;
+    text-align: center;
+    resize: vertical;
+}
+
+.official-app-entry-table textarea {
+    min-height: 10mm;
+    overflow: hidden;
+}
+
+.official-app-entry-table td:nth-child(1) textarea,
+.official-app-entry-table td:nth-child(3) textarea,
+.official-app-entry-table td:nth-child(6) textarea,
+.official-app-entry-table td:nth-child(11) textarea,
+.official-app-entry-table td:nth-child(12) textarea {
+    text-align: left;
+}
+
+.official-app-entry-table input[type="number"] {
+    text-align: right;
+}
+
+.official-app-entry-table select {
+    appearance: none;
+    cursor: pointer;
+}
+
+.official-app-entry-table input:focus,
+.official-app-entry-table select:focus,
+.official-app-entry-table textarea:focus,
+.official-app-entry-header input:focus,
+.official-app-entry-signatures input:focus,
+.official-app-check-option em input:focus {
+    outline: 1px solid #d9a520;
+    background: rgba(255, 247, 204, 0.75);
+}
+
+.official-app-empty-row button,
+.official-app-cell-remove {
+    border: 1px solid rgba(11, 35, 65, 0.18);
+    border-radius: 5px;
+    background: #fff;
+    color: #0b2341;
+    font: 800 0.68rem/1 Figtree, Arial, sans-serif;
+    cursor: pointer;
+}
+
+.official-app-empty-row button {
+    min-height: 24px;
+    padding: 0 8px;
+}
+
+.official-app-cell-remove {
+    width: 100%;
+    min-height: 22px;
+    margin-top: 2px;
+    color: #9b1c1c;
+}
+
+.official-app-sheet-error,
+.official-app-entry-table .field-error {
+    margin: 2px 0 0;
+    color: #b91c1c !important;
+    font: 700 6px/1.1 Arial, sans-serif !important;
+}
+
+.official-app-entry-signatures input {
+    display: block;
+    min-height: 12px;
+    border-bottom: 1px solid #000;
+    text-align: center;
+}
+
+.official-app-entry-signatures input[type="date"] {
+    display: inline-block;
+    width: 30mm;
+    text-transform: none;
+}
+
+.official-app-totals {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border: 1px solid #000;
+    border-bottom: 0;
+}
+
+.official-app-totals div {
+    display: grid;
+    grid-template-columns: 1fr 28mm;
+    border-right: 1px solid #000;
+}
+
+.official-app-totals div:last-child {
+    border-right: 0;
+}
+
+.official-app-totals span,
+.official-app-totals strong {
+    padding: 3px;
+    font-size: 7px;
+}
+
+.official-app-totals strong {
+    border-left: 1px solid #000;
+    text-align: right;
+}
+
+.official-app-signatures {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    min-height: 34mm;
+}
+
+.official-app-signature {
+    display: grid;
+    align-content: start;
+    gap: 2px;
+    padding: 5px;
+    text-align: center;
+    font-size: 7px;
+}
+
+.official-app-signature strong {
+    text-align: left;
+}
+
+.official-app-sign-line {
+    min-height: 12px;
+    margin-top: 8px;
+    border-bottom: 1px solid #000;
+    font-weight: 800;
+}
+
+.official-app-signature em {
+    font-style: normal;
+    font-size: 6px;
+}
+
+@media (max-width: 1100px) {
+    .official-app-form-grid,
+    .official-app-signatory-grid,
+    .official-app-total-preview {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .official-app-toolbar,
+    .official-app-form-heading--with-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .official-app-form-grid,
+    .official-app-signatory-grid,
+    .official-app-total-preview {
+        grid-template-columns: 1fr;
+    }
+}
+
+@page {
+    size: A4 landscape;
+    margin: 6mm;
+}
+
+@media print {
+    @page {
+        size: A4 landscape;
+        margin: 6mm;
+    }
+
+    html,
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .no-print,
+    .dashboard-sidebar,
+    .dashboard-topbar,
+    .sidebar,
+    .topbar,
+    .official-app-toolbar {
+        display: none !important;
+    }
+
+    .dashboard-main,
+    .dashboard-content,
+    .official-app-preview-shell {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        box-shadow: none !important;
+        border: 0 !important;
+        background: #fff !important;
+    }
+
+    .official-app-page {
+        width: 285mm !important;
+        min-width: 285mm !important;
+        min-height: 198mm !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+
+    .official-app-document {
+        font-size: 6px !important;
+    }
+
+    .official-app-table th,
+    .official-app-table td {
+        font-size: 5.8px !important;
+        padding: 1px 2px !important;
+        line-height: 1.05 !important;
+        border: 1px solid #000 !important;
+        overflow-wrap: anywhere !important;
+    }
+
+    .official-app-heading h1 {
+        font-size: 11px !important;
+    }
+}
