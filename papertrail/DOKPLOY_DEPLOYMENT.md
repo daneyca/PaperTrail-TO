@@ -35,6 +35,16 @@ Dokploy/Traefik should route HTTP traffic to the `app` service on container port
 
 Do not expose the `database` service publicly.
 
+Adminer is available as an optional database UI service:
+
+```text
+Service: adminer
+Container port: 8080
+Default server: database
+```
+
+If you route Adminer through Dokploy, use a separate protected domain or temporary route, then disable/remove the route when you are done checking the database.
+
 ## Domains
 
 Configure these domains in Dokploy for the `app` service:
@@ -45,6 +55,14 @@ www.papertrail-to.online
 ```
 
 The application accepts both hosts. It does not force a redirect between `www` and non-`www`; Dokploy can add that later if a canonical host is desired.
+
+If you want browser access to Adminer, add a separate Dokploy domain such as:
+
+```text
+adminer.papertrail-to.online
+```
+
+Route it to the `adminer` service on port `8080`, and protect it in Dokploy because it is a database login page.
 
 ## DNS Records
 
@@ -57,6 +75,14 @@ Value: MY_VPS_IP
 
 CNAME
 Name: www
+Value: papertrail-to.online
+```
+
+Optional Adminer DNS, only if you choose to expose the Adminer UI through Dokploy:
+
+```text
+CNAME
+Name: adminer
 Value: papertrail-to.online
 ```
 
@@ -116,6 +142,8 @@ papertrail_database -> /var/lib/mysql
 
 `papertrail_storage` is required because PaperTrail stores uploads, profile photos, signatures, imported templates, generated office documents, file sessions, cache files, and logs under Laravel `storage/`.
 
+Adminer does not require persistent storage.
+
 ## Build And Runtime Commands
 
 Production asset build is handled inside the Dockerfile:
@@ -149,6 +177,27 @@ docker compose exec app php artisan migrate --force
 ```
 
 Do not run destructive commands such as `migrate:fresh` or database resets in production.
+
+## Adminer Login
+
+Use these values in Adminer:
+
+```text
+System: MySQL
+Server: database
+Username: DB_USERNAME value from Dokploy
+Password: DB_PASSWORD value from Dokploy
+Database: DB_DATABASE value from Dokploy
+```
+
+With the simple test env example:
+
+```text
+Server: database
+Username: papertrail
+Password: papertrail123
+Database: papertrail
+```
 
 ## Health Check
 

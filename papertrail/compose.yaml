@@ -98,6 +98,17 @@ services:
       retries: 10
       start_period: 30s
 
+  adminer:
+    image: adminer:4
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      ADMINER_DEFAULT_SERVER: database
+    expose:
+      - "8080"
+
 volumes:
   papertrail_storage:
   papertrail_database:
