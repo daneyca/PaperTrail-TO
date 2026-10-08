@@ -6,6 +6,7 @@
     @php
         $panelTitle = $panelTitle ?? trim(str_replace(' Submenu', '', $title));
         $showHelpPanel = ! empty($helpSteps ?? []);
+        $showActionsPanel = $showActionsPanel ?? true;
     @endphp
 
     <div class="document-submenu-page space-y-4">
@@ -16,7 +17,9 @@
             :back-route="$backRoute ?? null"
         />
 
-        <x-document-submenu.panel :title="$panelTitle" :cards="$cards" />
+        @if ($showActionsPanel)
+            <x-document-submenu.panel :title="$panelTitle" :cards="$cards" />
+        @endif
 
         <div class="grid gap-5 {{ $showHelpPanel ? 'xl:grid-cols-[minmax(0,1fr)_340px]' : '' }}">
             <x-documents.records-list

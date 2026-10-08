@@ -760,6 +760,7 @@ class DocumentSubmenuController extends Controller
             'title' => 'Competitive Bidding',
             'subtitle' => 'BACSEC-002 document preparation and evaluation work areas for competitive bidding procurement.',
             'backRoute' => 'bac-secretariat.dashboard',
+            'showActionsPanel' => false,
             'cards' => [
                 $this->disabledCard('Letter of Invitation to Observer', 'Prepare the observer invitation for bidding activities.', 'document', 'violet', $setupBadge),
                 $this->disabledCard('Checklist Requirements', 'Track technical and financial requirement completeness.', 'check', 'blue', $setupBadge),
