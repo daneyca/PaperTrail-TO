@@ -236,6 +236,8 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         Route::get('/competitive-bidding/checklist-requirements/financial', [DocumentSubmenuController::class, 'bacSecretariatFinancialChecklist'])->name('competitive-bidding.checklist.financial');
         Route::get('/competitive-bidding/abstract-of-bids/as-read', [BacAbstractController::class, 'createBidsAsRead'])->name('competitive-bidding.abstract-bids.as-read');
         Route::get('/competitive-bidding/abstract-of-bids/as-calculated', [BacAbstractController::class, 'createBidsAsCalculated'])->name('competitive-bidding.abstract-bids.as-calculated');
+        Route::get('/competitive-bidding/bid-evaluation', [DocumentSubmenuController::class, 'bacSecretariatBidEvaluation'])->name('competitive-bidding.bid-evaluation');
+        Route::get('/competitive-bidding/post-qualification-evaluation', [DocumentSubmenuController::class, 'bacSecretariatPostQualificationEvaluation'])->name('competitive-bidding.post-qualification-evaluation');
     });
 
     Route::get('/budget/review/menu', [DocumentSubmenuController::class, 'budgetReview'])

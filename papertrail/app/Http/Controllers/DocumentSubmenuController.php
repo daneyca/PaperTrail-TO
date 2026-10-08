@@ -140,6 +140,16 @@ class DocumentSubmenuController extends Controller
         return view('bac-secretariat.competitive-bidding.checklist-financial');
     }
 
+    public function bacSecretariatBidEvaluation(Request $request)
+    {
+        return view('bac-secretariat.competitive-bidding.bid-evaluation');
+    }
+
+    public function bacSecretariatPostQualificationEvaluation(Request $request)
+    {
+        return view('bac-secretariat.competitive-bidding.post-qualification-evaluation');
+    }
+
     public function bacMemberReviews(Request $request)
     {
         return $this->render($request, 'bac-member.reviews');
@@ -765,8 +775,8 @@ class DocumentSubmenuController extends Controller
                 $this->disabledCard('Letter of Invitation to Observer', 'Prepare the observer invitation for bidding activities.', 'document', 'violet', $setupBadge),
                 $this->disabledCard('Checklist Requirements', 'Track technical and financial requirement completeness.', 'check', 'blue', $setupBadge),
                 $this->disabledCard('Abstract of Bids', 'Prepare the bid abstract with As Read and As Calculated parts.', 'document', 'indigo', $setupBadge),
-                $this->disabledCard('Bid Evaluation', 'Record bid evaluation results and recommendation details.', 'check', 'violet', $setupBadge),
-                $this->disabledCard('Post Qualification Evaluation', 'Record post qualification evaluation findings.', 'check', 'emerald', $setupBadge),
+                $this->card('Bid Evaluation', 'Record bid evaluation results and recommendation details.', 'check', 'violet', 'bac-secretariat.competitive-bidding.bid-evaluation'),
+                $this->card('Post Qualification Evaluation', 'Record post qualification evaluation findings.', 'check', 'emerald', 'bac-secretariat.competitive-bidding.post-qualification-evaluation'),
                 $this->disabledCard('Post Qualification Report of Technical Working Group', 'Prepare the Technical Working Group post qualification report.', 'document', 'emerald', $setupBadge),
                 $this->disabledCard('Notice of Post Qualification', 'Prepare the notice issued after post qualification review.', 'document', 'amber', $setupBadge),
                 $this->disabledCard('BAC Resolution on Post Qualification', 'Prepare the BAC Resolution for post qualification results.', 'document', 'amber', $setupBadge),
