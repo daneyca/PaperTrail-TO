@@ -15,6 +15,7 @@ use App\Models\PurchaseOrder;
 use App\Models\Rfq;
 use App\Models\SignatureRequest;
 use App\Models\SupplementalApp;
+use App\Models\SupplierSignatureRequest;
 use App\Services\Templates\OfficialEditableTemplateService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -148,6 +149,36 @@ class DocumentSubmenuController extends Controller
     public function bacSecretariatPostQualificationEvaluation(Request $request)
     {
         return view('bac-secretariat.competitive-bidding.post-qualification-evaluation');
+    }
+
+    public function bacSecretariatPostQualificationTwgReport(Request $request)
+    {
+        return view('bac-secretariat.competitive-bidding.post-qualification-report-twg');
+    }
+
+    public function bacSecretariatNoticeOfPostQualification(Request $request)
+    {
+        return view('bac-secretariat.competitive-bidding.notice-of-post-qualification');
+    }
+
+    public function bacSecretariatBacResolutionOnPostQualification(Request $request)
+    {
+        return view('bac-secretariat.competitive-bidding.bac-resolution-on-post-qualification');
+    }
+
+    public function bacSecretariatNoticeOfAward(Request $request)
+    {
+        return view('bac-secretariat.competitive-bidding.notice-of-award');
+    }
+
+    public function bacSecretariatContractAgreement(Request $request)
+    {
+        return view('bac-secretariat.competitive-bidding.contract-agreement');
+    }
+
+    public function bacSecretariatNoticeToProceed(Request $request)
+    {
+        return view('bac-secretariat.competitive-bidding.notice-to-proceed');
     }
 
     public function bacMemberReviews(Request $request)
@@ -777,15 +808,16 @@ class DocumentSubmenuController extends Controller
                 $this->disabledCard('Abstract of Bids', 'Prepare the bid abstract with As Read and As Calculated parts.', 'document', 'indigo', $setupBadge),
                 $this->card('Bid Evaluation', 'Record bid evaluation results and recommendation details.', 'check', 'violet', 'bac-secretariat.competitive-bidding.bid-evaluation'),
                 $this->card('Post Qualification Evaluation', 'Record post qualification evaluation findings.', 'check', 'emerald', 'bac-secretariat.competitive-bidding.post-qualification-evaluation'),
-                $this->disabledCard('Post Qualification Report of Technical Working Group', 'Prepare the Technical Working Group post qualification report.', 'document', 'emerald', $setupBadge),
-                $this->disabledCard('Notice of Post Qualification', 'Prepare the notice issued after post qualification review.', 'document', 'amber', $setupBadge),
-                $this->disabledCard('BAC Resolution on Post Qualification', 'Prepare the BAC Resolution for post qualification results.', 'document', 'amber', $setupBadge),
+                $this->card('Post Qualification Report of Technical Working Group', 'Prepare the Technical Working Group post qualification report.', 'document', 'emerald', 'bac-secretariat.competitive-bidding.post-qualification-report-twg'),
+                $this->card('Notice of Post Qualification', 'Prepare the notice issued after post qualification review.', 'document', 'amber', 'bac-secretariat.competitive-bidding.notice-of-post-qualification'),
+                $this->card('BAC Resolution on Post Qualification', 'Prepare the BAC Resolution for post qualification results.', 'document', 'amber', 'bac-secretariat.competitive-bidding.bac-resolution-on-post-qualification'),
                 $this->disabledCard('Notice Issued by the BAC', 'Prepare BAC-issued notices for the bidding process.', 'document', 'blue', $setupBadge),
-                $this->disabledCard('Notice of Award of Contract', 'Prepare and monitor the Notice of Award of Contract.', 'check', 'emerald', $setupBadge),
+                $this->card('Notice of Award of Contract', 'Prepare and monitor the Notice of Award of Contract.', 'check', 'emerald', 'bac-secretariat.competitive-bidding.notice-of-award'),
                 $this->disabledCard('Performance Bond', 'Track performance bond submission and reference details.', 'document', 'orange', $setupBadge),
-                $this->disabledCard('Contract Agreement Form', 'Prepare or track the contract agreement form.', 'document', 'orange', $setupBadge),
+                $this->card('Contract Agreement Form', 'Prepare or track the contract agreement form.', 'document', 'orange', 'bac-secretariat.competitive-bidding.contract-agreement'),
                 $this->card('Purchase Order', 'Create or continue a Purchase Order.', 'po', 'orange', 'bac-secretariat.purchase-orders.create'),
-                $this->disabledCard('Notice to Proceed', 'Prepare and monitor the Notice to Proceed.', 'document', 'emerald', $setupBadge),
+                $this->card('Notice to Proceed', 'Prepare and monitor the Notice to Proceed.', 'document', 'emerald', 'bac-secretariat.competitive-bidding.notice-to-proceed'),
+                $this->card('Supplier Signatures', 'Create secure supplier signing links and validate uploaded signed copies.', 'signature', 'blue', 'supplier-signatures.index', [], [], $this->count(SupplierSignatureRequest::class)),
             ],
             'recentRecords' => [],
             'helpSteps' => [

@@ -79,6 +79,8 @@ use App\Http\Controllers\ElectronicSignatureController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfileSignatureController;
 use App\Http\Controllers\SignatureRequestController;
+use App\Http\Controllers\SupplierSignatureRequestController;
+use App\Http\Controllers\SupplierSigningController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -129,6 +131,12 @@ Route::middleware(['guest', 'no.cache'])->group(function () {
     Route::post('/forgot-password', [PasswordResetController::class, 'email'])->name('password.email');
     Route::get('/reset-password/{token}', [PasswordResetController::class, 'reset'])->name('password.reset');
     Route::post('/reset-password', [PasswordResetController::class, 'update'])->name('password.update');
+});
+
+Route::middleware('no.cache')->prefix('supplier-signing')->name('supplier-signing.')->group(function () {
+    Route::get('/{token}', [SupplierSigningController::class, 'show'])->name('show');
+    Route::post('/{token}', [SupplierSigningController::class, 'submit'])->name('submit');
+    Route::get('/{token}/source-document', [SupplierSigningController::class, 'downloadSource'])->name('source-document');
 });
 
 Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->group(function () {
@@ -238,6 +246,12 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         Route::get('/competitive-bidding/abstract-of-bids/as-calculated', [BacAbstractController::class, 'createBidsAsCalculated'])->name('competitive-bidding.abstract-bids.as-calculated');
         Route::get('/competitive-bidding/bid-evaluation', [DocumentSubmenuController::class, 'bacSecretariatBidEvaluation'])->name('competitive-bidding.bid-evaluation');
         Route::get('/competitive-bidding/post-qualification-evaluation', [DocumentSubmenuController::class, 'bacSecretariatPostQualificationEvaluation'])->name('competitive-bidding.post-qualification-evaluation');
+        Route::get('/competitive-bidding/post-qualification-report-twg', [DocumentSubmenuController::class, 'bacSecretariatPostQualificationTwgReport'])->name('competitive-bidding.post-qualification-report-twg');
+        Route::get('/competitive-bidding/notice-of-post-qualification', [DocumentSubmenuController::class, 'bacSecretariatNoticeOfPostQualification'])->name('competitive-bidding.notice-of-post-qualification');
+        Route::get('/competitive-bidding/bac-resolution-on-post-qualification', [DocumentSubmenuController::class, 'bacSecretariatBacResolutionOnPostQualification'])->name('competitive-bidding.bac-resolution-on-post-qualification');
+        Route::get('/competitive-bidding/notice-of-award', [DocumentSubmenuController::class, 'bacSecretariatNoticeOfAward'])->name('competitive-bidding.notice-of-award');
+        Route::get('/competitive-bidding/contract-agreement', [DocumentSubmenuController::class, 'bacSecretariatContractAgreement'])->name('competitive-bidding.contract-agreement');
+        Route::get('/competitive-bidding/notice-to-proceed', [DocumentSubmenuController::class, 'bacSecretariatNoticeToProceed'])->name('competitive-bidding.notice-to-proceed');
     });
 
     Route::get('/budget/review/menu', [DocumentSubmenuController::class, 'budgetReview'])
@@ -292,6 +306,18 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         Route::post('/{signatureRequest}/send-code', [SignatureRequestController::class, 'sendCode'])->name('send-code');
         Route::post('/{signatureRequest}/sign', [SignatureRequestController::class, 'sign'])->name('sign');
         Route::post('/{signatureRequest}/decline', [SignatureRequestController::class, 'decline'])->name('decline');
+    });
+
+    Route::middleware('role:bac-secretariat')->prefix('supplier-signatures')->name('supplier-signatures.')->group(function () {
+        Route::get('/', [SupplierSignatureRequestController::class, 'index'])->name('index');
+        Route::get('/create', [SupplierSignatureRequestController::class, 'create'])->name('create');
+        Route::post('/', [SupplierSignatureRequestController::class, 'store'])->name('store');
+        Route::get('/{supplierSignatureRequest}', [SupplierSignatureRequestController::class, 'show'])->name('show');
+        Route::get('/{supplierSignatureRequest}/source-document', [SupplierSignatureRequestController::class, 'downloadSource'])->name('source-document');
+        Route::get('/{supplierSignatureRequest}/signed-document', [SupplierSignatureRequestController::class, 'downloadSigned'])->name('signed-document');
+        Route::patch('/{supplierSignatureRequest}/accept', [SupplierSignatureRequestController::class, 'accept'])->name('accept');
+        Route::patch('/{supplierSignatureRequest}/reject', [SupplierSignatureRequestController::class, 'reject'])->name('reject');
+        Route::patch('/{supplierSignatureRequest}/cancel', [SupplierSignatureRequestController::class, 'cancel'])->name('cancel');
     });
 
     Route::middleware('requesting.office')->prefix('annual-procurement-plans')->name('annual-procurement-plans.')->group(function () {
