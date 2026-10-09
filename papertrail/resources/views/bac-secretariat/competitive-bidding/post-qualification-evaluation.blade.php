@@ -255,7 +255,12 @@
         <button type="button" onclick="window.print()">Print</button>
     </section>
 
-    <div class="post-qualification-wrap">
+    @include('bac-secretariat.competitive-bidding.partials.signature-routing-tools', [
+        'templateKey' => 'post_qualification_evaluation_summary',
+        'documentTitle' => 'Post Qualification Evaluation Summary Report',
+    ])
+
+    <div class="post-qualification-wrap" data-competitive-document>
         <section class="post-qualification-page">
             <h1 contenteditable="true">Post Qualification Evaluation Summary Report</h1>
 
@@ -430,23 +435,23 @@
             </div>
 
             <div class="post-qualification-signatures">
-                <div class="post-qualification-signature">
+                <div class="post-qualification-signature" data-cb-signatory data-cb-slot="twg_prepared_1" data-cb-label="Prepared by">
                     <span contenteditable="true">Prepared by:</span>
-                    <strong contenteditable="true">DARLY V. LIGTAS</strong>
-                    <span contenteditable="true">TWG</span>
+                    <strong contenteditable="true" data-cb-signatory-name>DARLY V. LIGTAS</strong>
+                    @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'twg'])
                 </div>
-                <div class="post-qualification-signature">
+                <div class="post-qualification-signature" data-cb-signatory data-cb-slot="twg_prepared_2" data-cb-label="Prepared by">
                     <span contenteditable="true">&nbsp;</span>
-                    <strong contenteditable="true">RICHIE D. SALAN</strong>
-                    <span contenteditable="true">TWG</span>
+                    <strong contenteditable="true" data-cb-signatory-name>RICHIE D. SALAN</strong>
+                    @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'twg'])
                 </div>
             </div>
 
             <div class="post-qualification-submitted">
                 <p contenteditable="true">Submitted by:</p>
-                <div class="post-qualification-signature">
-                    <strong contenteditable="true">ROEL J. BANO</strong>
-                    <span contenteditable="true">BAC Secretariat</span>
+                <div class="post-qualification-signature" data-cb-signatory data-cb-slot="submitted_by" data-cb-label="Submitted by">
+                    <strong contenteditable="true" data-cb-signatory-name>ROEL J. BANO</strong>
+                    @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'bac_secretariat'])
                 </div>
             </div>
         </section>

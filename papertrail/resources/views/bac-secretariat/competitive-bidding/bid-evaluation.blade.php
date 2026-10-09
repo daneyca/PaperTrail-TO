@@ -253,7 +253,12 @@
         <button type="button" onclick="window.print()">Print</button>
     </section>
 
-    <div class="bid-evaluation-wrap">
+    @include('bac-secretariat.competitive-bidding.partials.signature-routing-tools', [
+        'templateKey' => 'bid_evaluation_report',
+        'documentTitle' => 'Bid Evaluation Report',
+    ])
+
+    <div class="bid-evaluation-wrap" data-competitive-document>
         <section class="bid-evaluation-page">
             <h1 contenteditable="true">Bid Evaluation Report</h1>
 
@@ -414,35 +419,35 @@
 
             <div class="bid-evaluation-prepared">
                 <p contenteditable="true">Prepared by:</p>
-                <div class="bid-evaluation-signature">
-                    <strong contenteditable="true">ROSE F. ALVEN</strong>
-                    <span contenteditable="true">BAC Secretariat</span>
+                <div class="bid-evaluation-signature" data-cb-signatory data-cb-slot="prepared_by" data-cb-label="Prepared by">
+                    <strong contenteditable="true" data-cb-signatory-name>ROSE F. ALVEN</strong>
+                    @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'bac_secretariat'])
                 </div>
             </div>
 
             <div class="bid-evaluation-prepared">
                 <p contenteditable="true">Noted by:</p>
                 <div class="bid-evaluation-signatures">
-                    <div class="bid-evaluation-signature">
-                        <strong contenteditable="true">EDMAR T. TAMBIS</strong>
-                        <span contenteditable="true">BAC Chairperson</span>
+                    <div class="bid-evaluation-signature" data-cb-signatory data-cb-slot="bac_chairperson" data-cb-label="BAC Chairperson">
+                        <strong contenteditable="true" data-cb-signatory-name>EDMAR T. TAMBIS</strong>
+                        @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'bac_chairperson'])
                     </div>
                     <div></div>
-                    <div class="bid-evaluation-signature">
-                        <strong contenteditable="true">MELCHORA P. LACIERDA</strong>
-                        <span contenteditable="true">BAC Vice-Chairperson</span>
+                    <div class="bid-evaluation-signature" data-cb-signatory data-cb-slot="bac_vice_chairperson" data-cb-label="BAC Vice-Chairperson">
+                        <strong contenteditable="true" data-cb-signatory-name>MELCHORA P. LACIERDA</strong>
+                        @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'bac_vice_chairperson'])
                     </div>
-                    <div class="bid-evaluation-signature">
-                        <strong contenteditable="true">ROGELIO A. LAYO</strong>
-                        <span contenteditable="true">BAC Member</span>
+                    <div class="bid-evaluation-signature" data-cb-signatory data-cb-slot="bac_member_1" data-cb-label="BAC Member">
+                        <strong contenteditable="true" data-cb-signatory-name>ROGELIO A. LAYO</strong>
+                        @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'bac_member'])
                     </div>
-                    <div class="bid-evaluation-signature">
-                        <strong contenteditable="true">PERPETUA D. SALAN</strong>
-                        <span contenteditable="true">BAC Member</span>
+                    <div class="bid-evaluation-signature" data-cb-signatory data-cb-slot="bac_member_2" data-cb-label="BAC Member">
+                        <strong contenteditable="true" data-cb-signatory-name>PERPETUA D. SALAN</strong>
+                        @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'bac_member'])
                     </div>
-                    <div class="bid-evaluation-signature">
-                        <strong contenteditable="true">JESSA G. JESUS</strong>
-                        <span contenteditable="true">BAC Member</span>
+                    <div class="bid-evaluation-signature" data-cb-signatory data-cb-slot="bac_member_3" data-cb-label="BAC Member">
+                        <strong contenteditable="true" data-cb-signatory-name>JESSA G. JESUS</strong>
+                        @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'bac_member'])
                     </div>
                 </div>
             </div>

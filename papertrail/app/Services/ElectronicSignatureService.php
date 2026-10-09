@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\AnnualProcurementPlan;
 use App\Models\BacResolution;
 use App\Models\AbstractQuotation;
+use App\Models\CompetitiveBiddingSignatureDocument;
 use App\Models\DocumentRoutingHistory;
 use App\Models\ElectronicSignature;
 use App\Models\Office;
@@ -29,6 +30,7 @@ class ElectronicSignatureService
         return match (strtolower(str_replace('-', '_', $documentType))) {
             'app', 'annual_procurement_plan', 'annualprocurementplan' => 'app',
             'bac_resolution', 'bacresolution' => 'bac_resolution',
+            'competitive_bidding_document', 'competitive_bidding_signature_document' => 'competitive_bidding_document',
             'ppmp', 'project_procurement_management_plan' => 'ppmp',
             default => strtolower(str_replace('-', '_', $documentType)),
         };
@@ -40,6 +42,7 @@ class ElectronicSignatureService
             'abstract' => AbstractQuotation::find($documentId),
             'app' => AnnualProcurementPlan::find($documentId),
             'bac_resolution' => BacResolution::find($documentId),
+            'competitive_bidding_document' => CompetitiveBiddingSignatureDocument::find($documentId),
             'purchase_request' => ProcurementDocument::query()
                 ->whereIn('document_type', ['PR', 'Purchase Request'])
                 ->find($documentId),
@@ -78,6 +81,10 @@ class ElectronicSignatureService
 
         if ($type === 'app' && $document instanceof AnnualProcurementPlan) {
             return $this->canSignAppWithReason($user, $document, $type, $signatureRequest);
+        }
+
+        if ($type === 'competitive_bidding_document' && $document instanceof CompetitiveBiddingSignatureDocument) {
+            return $this->canSignCompetitiveBiddingDocumentWithReason($user, $document, $type, $signatureRequest);
         }
 
         if ($type !== 'bac_resolution' || ! $document instanceof BacResolution) {
@@ -319,14 +326,15 @@ class ElectronicSignatureService
                 ?? 'I confirm that I have reviewed this document and I approve/sign it electronically in PaperTrail.';
             $isPurchaseRequestSignature = $type === 'purchase_request' && $signatureRequest;
             $isPpmpSignature = $type === 'ppmp' && $signatureRequest;
-            $isRoutedDocumentSignature = in_array($type, ['purchase_request', 'bac_resolution', 'ppmp', 'abstract', 'app'], true) && $signatureRequest;
+            $isCompetitiveBiddingSignature = $type === 'competitive_bidding_document' && $signatureRequest;
+            $isRoutedDocumentSignature = in_array($type, ['purchase_request', 'bac_resolution', 'ppmp', 'abstract', 'app', 'competitive_bidding_document'], true) && $signatureRequest;
             $signerPosition = $isRoutedDocumentSignature
                 ? ($signatureRequest->requested_to_role ?: $signatureRequest->signatory_label ?: ($user->signer_position ?: ($user->position ?: $user->role)))
                 : ($user->signer_position ?: ($user->position ?: $user->role));
             $requestMetadata = $signatureRequest?->metadata ?: [];
             $typedSignatureName = $user->typed_signature_name ?: $user->name;
 
-            if ($isPurchaseRequestSignature && filled($requestMetadata['printed_name'] ?? null)) {
+            if (($isPurchaseRequestSignature || $isCompetitiveBiddingSignature) && filled($requestMetadata['printed_name'] ?? null)) {
                 $typedSignatureName = $requestMetadata['printed_name'];
             }
 
@@ -380,6 +388,12 @@ class ElectronicSignatureService
                 $ppmpSignatureResult = app(HeadOfficePpmpSignatureWorkflowService::class)->handleSigned($document, $user, $fullySigned);
             } elseif ($fullySigned && $type === 'app' && $document instanceof AnnualProcurementPlan) {
                 $this->applyAppSignatureOutcome($document, $user, $input['remarks'] ?? null);
+            } elseif ($type === 'competitive_bidding_document' && $document instanceof CompetitiveBiddingSignatureDocument) {
+                $document->forceFill([
+                    'status' => $fullySigned
+                        ? CompetitiveBiddingSignatureDocument::STATUS_FULLY_SIGNED
+                        : CompetitiveBiddingSignatureDocument::STATUS_PARTIALLY_SIGNED,
+                ])->save();
             } elseif ($fullySigned && $type === 'bac_resolution') {
                 $outcomeSignature = $signature;
                 $outcomeUser = $user;
@@ -403,6 +417,7 @@ class ElectronicSignatureService
                 'purchase_request' => 'Purchase Request',
                 'ppmp' => 'PPMP',
                 'abstract' => 'Abstract',
+                'competitive_bidding_document' => 'Competitive Bidding Document',
                 default => 'BAC Resolution',
             };
 
@@ -715,13 +730,23 @@ class ElectronicSignatureService
             ];
         }
 
+        if ($document instanceof CompetitiveBiddingSignatureDocument) {
+            $payload += [
+                'template_key' => $document->template_key,
+                'document_title' => $document->document_title,
+                'tracking_number' => $document->tracking_number,
+                'document_html_hash' => $document->document_html ? hash('sha256', $document->document_html) : null,
+                'signatories' => $document->signatories,
+            ];
+        }
+
         return hash('sha256', json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
     }
 
     private function createSignedSnapshot(Model $document, ElectronicSignature $signature, User $user): SignedDocumentSnapshot
     {
         $text = $this->documentTextSnapshot($document);
-        $html = $document instanceof BacResolution || $document instanceof AbstractQuotation || $document instanceof AnnualProcurementPlan ? $document->document_html : null;
+        $html = $document instanceof BacResolution || $document instanceof AbstractQuotation || $document instanceof AnnualProcurementPlan || $document instanceof CompetitiveBiddingSignatureDocument ? $document->document_html : null;
         $hash = hash('sha256', trim(($html ?: '') . "\n" . $text . "\n" . $signature->document_hash_before));
 
         return SignedDocumentSnapshot::create([
@@ -1011,6 +1036,16 @@ class ElectronicSignatureService
             ])));
         }
 
+        if ($document instanceof CompetitiveBiddingSignatureDocument) {
+            return trim(implode("\n", array_filter([
+                $document->displayNumber(),
+                $document->document_title,
+                $document->template_key,
+                $document->document_html ? trim(strip_tags($document->document_html)) : null,
+                json_encode($document->signatories ?: []),
+            ])));
+        }
+
         return trim(json_encode($document->getAttributes()));
     }
 
@@ -1026,6 +1061,10 @@ class ElectronicSignatureService
 
         if ($document instanceof AnnualProcurementPlan) {
             return 'APP ' . $document->displayNumber();
+        }
+
+        if ($document instanceof CompetitiveBiddingSignatureDocument) {
+            return $document->document_title . ' ' . $document->displayNumber();
         }
 
         if ($document instanceof ProcurementDocument) {
@@ -1052,6 +1091,10 @@ class ElectronicSignatureService
         }
 
         if ($document instanceof AnnualProcurementPlan) {
+            return $document->displayNumber();
+        }
+
+        if ($document instanceof CompetitiveBiddingSignatureDocument) {
             return $document->displayNumber();
         }
 
@@ -1161,6 +1204,25 @@ class ElectronicSignatureService
         return ['ok' => true, 'message' => 'This APP can be signed.', 'signature_request' => $requestForUser];
     }
 
+    private function canSignCompetitiveBiddingDocumentWithReason(User $user, CompetitiveBiddingSignatureDocument $document, string $type, ?SignatureRequest $signatureRequest = null): array
+    {
+        if ($document->status === CompetitiveBiddingSignatureDocument::STATUS_FULLY_SIGNED) {
+            return ['ok' => false, 'message' => 'This competitive bidding document is already fully signed.'];
+        }
+
+        $requestForUser = app(SignatureRequestService::class)->openRequestForUser($document, $type, $user, $signatureRequest);
+
+        if (! $requestForUser) {
+            return ['ok' => false, 'message' => 'Only assigned competitive bidding signers can sign this document.'];
+        }
+
+        if (app(SignatureRequestService::class)->signedSignatureForRequest($requestForUser)) {
+            return ['ok' => false, 'message' => 'Your assigned competitive bidding signature has already been signed.'];
+        }
+
+        return ['ok' => true, 'message' => 'This competitive bidding document can be signed.', 'signature_request' => $requestForUser];
+    }
+
     private function signatureSuccessMessage(string $type, bool $fullySigned, string $prSignatureResult, string $ppmpSignatureResult = 'ignored'): string
     {
         if ($type === 'purchase_request') {
@@ -1192,6 +1254,12 @@ class ElectronicSignatureService
             return $fullySigned
                 ? 'All APP signatures completed. The APP is now approved.'
                 : 'APP signature recorded. Other required signatures are still pending.';
+        }
+
+        if ($type === 'competitive_bidding_document') {
+            return $fullySigned
+                ? 'All competitive bidding document signatures completed.'
+                : 'Competitive bidding document signature recorded. Other required signatures are still pending.';
         }
 
         return $fullySigned

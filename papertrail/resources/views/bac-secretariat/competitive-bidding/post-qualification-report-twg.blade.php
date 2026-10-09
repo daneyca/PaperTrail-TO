@@ -258,7 +258,12 @@
         <button type="button" onclick="window.print()">Print</button>
     </section>
 
-    <div class="twg-report-wrap">
+    @include('bac-secretariat.competitive-bidding.partials.signature-routing-tools', [
+        'templateKey' => 'post_qualification_report_twg',
+        'documentTitle' => 'Post-Qualification Report of Technical Working Group',
+    ])
+
+    <div class="twg-report-wrap" data-competitive-document>
         <section class="twg-report-page">
             <div class="twg-report-heading" contenteditable="true">
                 Republic of the Philippines<br>
@@ -396,24 +401,24 @@
             </div>
 
             <div class="twg-signature-grid">
-                <div class="twg-signature-block">
+                <div class="twg-signature-block" data-cb-signatory data-cb-slot="prepared_by" data-cb-label="Prepared by">
                     <p contenteditable="true">Prepared by:</p>
-                    <strong contenteditable="true">DARLY A. LIGTAS</strong>
-                    <span contenteditable="true">Technical Working Group</span>
+                    <strong contenteditable="true" data-cb-signatory-name>DARLY A. LIGTAS</strong>
+                    @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'twg'])
                     <span class="twg-signature-line" contenteditable="true">Date</span>
                 </div>
 
-                <div class="twg-signature-block">
+                <div class="twg-signature-block" data-cb-signatory data-cb-slot="submitted_by" data-cb-label="Submitted by">
                     <p contenteditable="true">Submitted by:</p>
-                    <strong contenteditable="true">ROEL J. BANO</strong>
-                    <span contenteditable="true">BAC Secretariat</span>
+                    <strong contenteditable="true" data-cb-signatory-name>ROEL J. BANO</strong>
+                    @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'bac_secretariat'])
                     <span class="twg-signature-line" contenteditable="true">Date</span>
                 </div>
 
-                <div class="twg-signature-block">
+                <div class="twg-signature-block" data-cb-signatory data-cb-slot="noted_by" data-cb-label="Noted by">
                     <p contenteditable="true">Noted by:</p>
-                    <strong contenteditable="true">EDMAR T. TAMBIS</strong>
-                    <span contenteditable="true">BAC Chairperson</span>
+                    <strong contenteditable="true" data-cb-signatory-name>EDMAR T. TAMBIS</strong>
+                    @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'bac_chairperson'])
                     <span class="twg-signature-line" contenteditable="true">Date</span>
                 </div>
             </div>

@@ -235,7 +235,12 @@
         <button type="button" onclick="window.print()">Print</button>
     </section>
 
-    <div class="notice-proceed-wrap">
+    @include('bac-secretariat.competitive-bidding.partials.signature-routing-tools', [
+        'templateKey' => 'notice_to_proceed',
+        'documentTitle' => 'Notice to Proceed',
+    ])
+
+    <div class="notice-proceed-wrap" data-competitive-document>
         <section class="notice-proceed-page">
             <header class="notice-proceed-header">
                 <img src="{{ asset('images/logos/lgu-logo.png') }}" alt="LGU Tomas Oppus seal" class="notice-proceed-logo">
@@ -251,7 +256,7 @@
             <p class="notice-proceed-date" contenteditable="true">March 17, 2026</p>
 
             <div class="notice-proceed-addressee" contenteditable="true">
-                <div>Beth General Merchandise</div>
+                <div data-cb-supplier-name>Beth General Merchandise</div>
                 <div>Zone II, Sogod</div>
                 <div>Southern Leyte</div>
             </div>
@@ -274,12 +279,12 @@
                 <p class="notice-proceed-closing" contenteditable="true">Very truly yours,</p>
             </div>
 
-            <div class="notice-proceed-signature" contenteditable="true">
-                <strong>Hon. Rod Ivan Cuares Pano</strong>
-                <span>Municipal Mayor</span>
+            <div class="notice-proceed-signature" data-cb-signatory data-cb-slot="approved_by" data-cb-label="Approved by">
+                <strong contenteditable="true" data-cb-signatory-name>Hon. Rod Ivan Cuares Pano</strong>
+                @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'hope'])
             </div>
 
-            <div class="notice-proceed-conforme">
+            <div class="notice-proceed-conforme" data-cb-signatory data-cb-slot="supplier_conforme" data-cb-label="Supplier Conforme">
                 <div contenteditable="true">Conforme:</div>
                 <div class="notice-proceed-line">
                     <span>I acknowledge receipt of this Notice on</span>
@@ -287,7 +292,13 @@
                 </div>
                 <div class="notice-proceed-line">
                     <span>Name of the Representative of the Bidder</span>
-                    <span contenteditable="true"></span>
+                    <span contenteditable="true" data-cb-signatory-name></span>
+                </div>
+                <div class="notice-proceed-line cb-supplier-route-row no-print">
+                    <span>Routing Role</span>
+                    <span>
+                        @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'supplier', 'onlySupplier' => true])
+                    </span>
                 </div>
                 <div class="notice-proceed-line">
                     <span>Authorized Signature</span>

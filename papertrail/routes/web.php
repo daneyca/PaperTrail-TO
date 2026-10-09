@@ -31,6 +31,7 @@ use App\Http\Controllers\BacSecretariat\PpmpReviewController as BacPpmpReviewCon
 use App\Http\Controllers\BacSecretariat\PurchaseRequestController as BacPurchaseRequestController;
 use App\Http\Controllers\BacSecretariat\PurchaseOrderController as BacPurchaseOrderController;
 use App\Http\Controllers\BacSecretariat\BacResolutionController as BacResolutionController;
+use App\Http\Controllers\BacSecretariat\CompetitiveBiddingSignatureDocumentController;
 use App\Http\Controllers\BacSecretariat\RfqController as BacRfqController;
 use App\Http\Controllers\BacSecretariat\AbstractController as BacAbstractController;
 use App\Http\Controllers\BacSecretariat\ReportController as BacReportController;
@@ -252,6 +253,7 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         Route::get('/competitive-bidding/notice-of-award', [DocumentSubmenuController::class, 'bacSecretariatNoticeOfAward'])->name('competitive-bidding.notice-of-award');
         Route::get('/competitive-bidding/contract-agreement', [DocumentSubmenuController::class, 'bacSecretariatContractAgreement'])->name('competitive-bidding.contract-agreement');
         Route::get('/competitive-bidding/notice-to-proceed', [DocumentSubmenuController::class, 'bacSecretariatNoticeToProceed'])->name('competitive-bidding.notice-to-proceed');
+        Route::post('/competitive-bidding/signature-documents', [CompetitiveBiddingSignatureDocumentController::class, 'store'])->name('competitive-bidding.signature-documents.store');
     });
 
     Route::get('/budget/review/menu', [DocumentSubmenuController::class, 'budgetReview'])

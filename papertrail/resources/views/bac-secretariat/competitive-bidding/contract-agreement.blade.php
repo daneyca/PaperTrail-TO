@@ -339,7 +339,12 @@
         <button type="button" onclick="window.print()">Print</button>
     </section>
 
-    <div class="contract-agreement-wrap">
+    @include('bac-secretariat.competitive-bidding.partials.signature-routing-tools', [
+        'templateKey' => 'contract_agreement',
+        'documentTitle' => 'Contract Agreement',
+    ])
+
+    <div class="contract-agreement-wrap" data-competitive-document>
         <section class="contract-agreement-page">
             <header class="contract-agreement-header">
                 <img src="{{ asset('images/logos/lgu-logo.png') }}" alt="LGU Tomas Oppus seal" class="contract-agreement-logo">
@@ -414,16 +419,20 @@
             <div class="contract-agreement-signatures">
                 <div class="contract-agreement-party">
                     <div class="contract-agreement-party-label" contenteditable="true">For the Procuring Entity:</div>
-                    <strong contenteditable="true">Hon. Rod Ivan Cuares Pano</strong>
-                    <span contenteditable="true">Municipal Mayor</span>
+                    <div data-cb-signatory data-cb-slot="procuring_entity" data-cb-label="For the Procuring Entity">
+                        <strong contenteditable="true" data-cb-signatory-name>Hon. Rod Ivan Cuares Pano</strong>
+                        @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'hope'])
+                    </div>
                     <span contenteditable="true">LGU Tomas Oppus, Southern Leyte</span>
                 </div>
 
                 <div class="contract-agreement-party">
                     <div class="contract-agreement-party-label" contenteditable="true">For the Supplier/Contractor:</div>
-                    <strong contenteditable="true">Alana J. Palma</strong>
-                    <span contenteditable="true">Owner</span>
-                    <span contenteditable="true">Beth General Merchandise</span>
+                    <div data-cb-signatory data-cb-slot="supplier_contractor" data-cb-label="For the Supplier/Contractor">
+                        <strong contenteditable="true" data-cb-signatory-name>Alana J. Palma</strong>
+                        @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'supplier', 'onlySupplier' => true])
+                    </div>
+                    <span contenteditable="true" data-cb-supplier-name>Beth General Merchandise</span>
                 </div>
             </div>
         </section>
@@ -432,13 +441,13 @@
             <div class="contract-agreement-witnesses">
                 <p contenteditable="true">Signed in the presence of:</p>
                 <div class="contract-agreement-witness-grid">
-                    <div class="contract-agreement-witness">
-                        <strong contenteditable="true">Edmar T. Tambis</strong>
-                        <span contenteditable="true">Witness</span>
+                    <div class="contract-agreement-witness" data-cb-signatory data-cb-slot="witness_1" data-cb-label="Witness">
+                        <strong contenteditable="true" data-cb-signatory-name>Edmar T. Tambis</strong>
+                        @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'bac_chairperson'])
                     </div>
-                    <div class="contract-agreement-witness">
-                        <strong contenteditable="true">Richie D. Salan</strong>
-                        <span contenteditable="true">Witness</span>
+                    <div class="contract-agreement-witness" data-cb-signatory data-cb-slot="witness_2" data-cb-label="Witness">
+                        <strong contenteditable="true" data-cb-signatory-name>Richie D. Salan</strong>
+                        @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'twg'])
                     </div>
                 </div>
             </div>

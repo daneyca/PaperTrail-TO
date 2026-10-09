@@ -12,6 +12,7 @@
         $isPpmp = $signatureRequest->document_type === 'ppmp';
         $isAbstract = $signatureRequest->document_type === 'abstract';
         $isApp = $signatureRequest->document_type === 'app';
+        $isCompetitiveBiddingDocument = $signatureRequest->document_type === 'competitive_bidding_document';
         $signatureDesignation = filled($signatureRequest->requested_to_role)
             ? $signatureRequest->requested_to_role
             : ($signatureRequest->signatory_label ?? 'assigned signer');
@@ -26,6 +27,7 @@
             $isPpmp => 'PPMP form',
             $isAbstract => 'Abstract form',
             $isApp => 'APP form',
+            $isCompetitiveBiddingDocument => 'competitive bidding document',
             default => 'document',
         };
         $documentSignLabel = match (true) {
@@ -33,6 +35,7 @@
             $isPpmp => 'Sign PPMP Form',
             $isAbstract => 'Sign Abstract Form',
             $isApp => 'Sign APP Form',
+            $isCompetitiveBiddingDocument => 'Sign Competitive Bidding Document',
             default => 'Sign Document',
         };
         $statusText = $label($signatureRequest->status);
@@ -49,7 +52,7 @@
 
         <div class="hero-actions no-print">
             <a href="{{ route('signature-requests.index') }}" class="dashboard-action secondary-action">Back to Signature Requests</a>
-            @if ($signatureRequest->document_id)
+            @if ($signatureRequest->document_id && ! $isCompetitiveBiddingDocument)
                 <x-ai.completeness-check-button
                     :document-type="$signatureRequest->document_type"
                     :document-id="$signatureRequest->document_id"
@@ -155,6 +158,10 @@
                                 'mode' => 'show',
                                 'signatureSlots' => $signatureSlots,
                             ])
+                        </div>
+                    @elseif ($isCompetitiveBiddingDocument)
+                        <div class="signature-competitive-preview-area">
+                            {!! $document->document_html !!}
                         </div>
                     @else
                         <div class="signature-document-placeholder">

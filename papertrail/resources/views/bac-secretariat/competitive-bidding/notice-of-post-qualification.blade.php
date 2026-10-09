@@ -234,7 +234,12 @@
         <button type="button" onclick="window.print()">Print</button>
     </section>
 
-    <div class="notice-post-qualification-wrap">
+    @include('bac-secretariat.competitive-bidding.partials.signature-routing-tools', [
+        'templateKey' => 'notice_of_post_qualification',
+        'documentTitle' => 'Notice of Post-Qualification',
+    ])
+
+    <div class="notice-post-qualification-wrap" data-competitive-document>
         <section class="notice-post-qualification-page">
             <header class="notice-post-qualification-header">
                 <img src="{{ asset('images/logos/lgu-logo.png') }}" alt="LGU Tomas Oppus seal" class="notice-post-qualification-logo">
@@ -250,7 +255,7 @@
             <h1 class="notice-post-qualification-title" contenteditable="true">Notice of Post-Qualification</h1>
 
             <div class="notice-post-qualification-addressee" contenteditable="true">
-                <div>Beth General Merchandise</div>
+                <div data-cb-supplier-name>Beth General Merchandise</div>
                 <div>Zone II, Sogod</div>
                 <div>Southern Leyte</div>
             </div>
@@ -275,12 +280,12 @@
                 <p class="notice-post-qualification-closing" contenteditable="true">Very truly yours,</p>
             </div>
 
-            <div class="notice-post-qualification-signature" contenteditable="true">
-                <strong>Edmar T. Tambis</strong>
-                <span>BAC Chairperson</span>
+            <div class="notice-post-qualification-signature" data-cb-signatory data-cb-slot="signed_by" data-cb-label="Signed by">
+                <strong contenteditable="true" data-cb-signatory-name>Edmar T. Tambis</strong>
+                @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'bac_chairperson'])
             </div>
 
-            <div class="notice-post-qualification-conforme">
+            <div class="notice-post-qualification-conforme" data-cb-signatory data-cb-slot="supplier_conforme" data-cb-label="Supplier Conforme">
                 <div contenteditable="true">Conformed:</div>
                 <div class="notice-post-qualification-line">
                     <span>I acknowledge receipt of this Notice on</span>
@@ -288,7 +293,13 @@
                 </div>
                 <div class="notice-post-qualification-line">
                     <span>Name of the Representative of the Bidder</span>
-                    <span contenteditable="true"></span>
+                    <span contenteditable="true" data-cb-signatory-name></span>
+                </div>
+                <div class="notice-post-qualification-line cb-supplier-route-row no-print">
+                    <span>Routing Role</span>
+                    <span>
+                        @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'supplier', 'onlySupplier' => true])
+                    </span>
                 </div>
                 <div class="notice-post-qualification-line">
                     <span>Authorized Signature</span>

@@ -276,7 +276,12 @@
         <button type="button" onclick="window.print()">Print</button>
     </section>
 
-    <div class="bac-post-resolution-wrap">
+    @include('bac-secretariat.competitive-bidding.partials.signature-routing-tools', [
+        'templateKey' => 'bac_resolution_on_post_qualification',
+        'documentTitle' => 'BAC Resolution on Post Qualification',
+    ])
+
+    <div class="bac-post-resolution-wrap" data-competitive-document>
         <section class="bac-post-resolution-page">
             <header class="bac-post-resolution-header" contenteditable="true">
                 Republic of the Philippines<br>
@@ -347,37 +352,37 @@
             <p class="bac-post-resolution-closing" contenteditable="true">RESOLVED, by the Municipality of Tomas Oppus, Southern Leyte, this 4th day of March 2026.</p>
 
             <div class="bac-post-resolution-signatures">
-                <div class="bac-post-resolution-signature is-centered">
-                    <strong contenteditable="true">EDMAR T. TAMBIS</strong>
-                    <span contenteditable="true">BAC Chairperson</span>
+                <div class="bac-post-resolution-signature is-centered" data-cb-signatory data-cb-slot="bac_chairperson" data-cb-label="BAC Chairperson">
+                    <strong contenteditable="true" data-cb-signatory-name>EDMAR T. TAMBIS</strong>
+                    @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'bac_chairperson'])
                 </div>
 
-                <div class="bac-post-resolution-signature">
-                    <strong contenteditable="true">ROEL J. BANO</strong>
-                    <span contenteditable="true">BAC Vice-Chairperson</span>
+                <div class="bac-post-resolution-signature" data-cb-signatory data-cb-slot="bac_vice_chairperson" data-cb-label="BAC Vice-Chairperson">
+                    <strong contenteditable="true" data-cb-signatory-name>ROEL J. BANO</strong>
+                    @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'bac_vice_chairperson'])
                 </div>
 
-                <div class="bac-post-resolution-signature">
-                    <strong contenteditable="true">ROGELIO A. LAYO</strong>
-                    <span contenteditable="true">BAC Member</span>
+                <div class="bac-post-resolution-signature" data-cb-signatory data-cb-slot="bac_member_1" data-cb-label="BAC Member">
+                    <strong contenteditable="true" data-cb-signatory-name>ROGELIO A. LAYO</strong>
+                    @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'bac_member'])
                 </div>
 
-                <div class="bac-post-resolution-signature">
-                    <strong contenteditable="true">PERPETUA D. SALAN</strong>
-                    <span contenteditable="true">BAC Member</span>
+                <div class="bac-post-resolution-signature" data-cb-signatory data-cb-slot="bac_member_2" data-cb-label="BAC Member">
+                    <strong contenteditable="true" data-cb-signatory-name>PERPETUA D. SALAN</strong>
+                    @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'bac_member'])
                 </div>
 
-                <div class="bac-post-resolution-signature">
-                    <strong contenteditable="true">JESSA G. JESUS</strong>
-                    <span contenteditable="true">BAC Member</span>
+                <div class="bac-post-resolution-signature" data-cb-signatory data-cb-slot="bac_member_3" data-cb-label="BAC Member">
+                    <strong contenteditable="true" data-cb-signatory-name>JESSA G. JESUS</strong>
+                    @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'bac_member'])
                 </div>
             </div>
 
             <div class="bac-post-resolution-approved">
                 <p contenteditable="true">Approved by:</p>
-                <div class="bac-post-resolution-signature" style="text-align: left;">
-                    <strong contenteditable="true">HON. ROD IVAN CUARES PANO</strong>
-                    <span contenteditable="true">Municipal Mayor</span>
+                <div class="bac-post-resolution-signature" style="text-align: left;" data-cb-signatory data-cb-slot="approved_by" data-cb-label="Approved by">
+                    <strong contenteditable="true" data-cb-signatory-name>HON. ROD IVAN CUARES PANO</strong>
+                    @include('bac-secretariat.competitive-bidding.partials.signatory-role-select', ['selected' => 'hope'])
                     <div class="bac-post-resolution-date-line" contenteditable="true">Date</div>
                 </div>
             </div>
