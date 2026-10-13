@@ -7,6 +7,7 @@
     $officeName = trim((string) ($user?->assignedOffice?->name ?? $user?->office ?? ''));
     $roleName = trim((string) ($user?->assignedRole?->name ?? $user?->role ?? ''));
     $roleCode = trim((string) ($user?->assignedRole?->code ?? ''));
+    $positionName = trim((string) ($user?->position ?? ''));
     $roleDisplayLabel = function (?string $value): string {
         $value = trim((string) $value);
         $normalized = strtolower(trim(preg_replace('/[\s_\-]+/', ' ', $value) ?? $value));
@@ -19,7 +20,7 @@
             'head_office',
             'head of office / end user',
         ], true));
-    $displayRoleName = $isHeadOfficeEndUser ? '' : $roleDisplayLabel($roleName);
+    $displayRoleName = $isHeadOfficeEndUser ? '' : ($positionName !== '' ? $positionName : $roleDisplayLabel($roleName));
     $displayOfficeName = $isHeadOfficeEndUser ? $officeName : '';
     if ($displayOfficeName !== '' && $displayRoleName !== '' && strcasecmp($displayOfficeName, $displayRoleName) === 0) {
         $displayOfficeName = '';
