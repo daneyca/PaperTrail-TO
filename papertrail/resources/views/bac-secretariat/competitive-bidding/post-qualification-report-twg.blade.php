@@ -254,7 +254,7 @@
         <div>
             <strong>Post-Qualification Report</strong>
         </div>
-        <a href="{{ route('bac-secretariat.competitive-bidding.menu', ['task' => 'post-qualification-report-twg']) }}">Back</a>
+        <a href="{{ route('bac-secretariat.competitive-bidding.post-qualification-report-twg') }}">Back</a>
         <button type="button" onclick="window.print()">Print</button>
     </section>
 

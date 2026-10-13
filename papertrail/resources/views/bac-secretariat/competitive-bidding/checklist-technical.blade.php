@@ -360,7 +360,7 @@
             <strong>Technical Checklist Requirements</strong>
             <span>Editable official technical envelope checklist.</span>
         </div>
-        <a href="{{ route('bac-secretariat.competitive-bidding.menu', ['task' => 'technical-requirements-checklist']) }}">Back</a>
+        <a href="{{ route('bac-secretariat.competitive-bidding.checklist.technical') }}">Back</a>
         <button type="button" onclick="window.print()">Print</button>
     </section>
 

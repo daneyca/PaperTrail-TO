@@ -335,7 +335,7 @@
         <div>
             <strong>Contract Agreement</strong>
         </div>
-        <a href="{{ route('bac-secretariat.competitive-bidding.menu', ['task' => 'contract-agreement-form']) }}">Back</a>
+        <a href="{{ route('bac-secretariat.competitive-bidding.contract-agreement') }}">Back</a>
         <button type="button" onclick="window.print()">Print</button>
     </section>
 

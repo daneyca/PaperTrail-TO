@@ -249,7 +249,7 @@
         <div>
             <strong>Bid Evaluation Report</strong>
         </div>
-        <a href="{{ route('bac-secretariat.competitive-bidding.menu', ['task' => 'bid-evaluation']) }}">Back</a>
+        <a href="{{ route('bac-secretariat.competitive-bidding.bid-evaluation') }}">Back</a>
         <button type="button" onclick="window.print()">Print</button>
     </section>
 

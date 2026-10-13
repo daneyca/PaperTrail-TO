@@ -133,50 +133,110 @@ class DocumentSubmenuController extends Controller
 
     public function bacSecretariatTechnicalChecklist(Request $request)
     {
+        return $this->competitiveBiddingTemplateWorkspace('technical-checklist');
+    }
+
+    public function bacSecretariatTechnicalChecklistTemplate(Request $request)
+    {
         return view('bac-secretariat.competitive-bidding.checklist-technical');
     }
 
     public function bacSecretariatFinancialChecklist(Request $request)
     {
+        return $this->competitiveBiddingTemplateWorkspace('financial-checklist');
+    }
+
+    public function bacSecretariatFinancialChecklistTemplate(Request $request)
+    {
         return view('bac-secretariat.competitive-bidding.checklist-financial');
     }
 
+    public function bacSecretariatAbstractBidsAsRead(Request $request)
+    {
+        return $this->competitiveBiddingTemplateWorkspace('abstract-bids-as-read');
+    }
+
+    public function bacSecretariatAbstractBidsAsCalculated(Request $request)
+    {
+        return $this->competitiveBiddingTemplateWorkspace('abstract-bids-as-calculated');
+    }
+
     public function bacSecretariatBidEvaluation(Request $request)
+    {
+        return $this->competitiveBiddingTemplateWorkspace('bid-evaluation');
+    }
+
+    public function bacSecretariatBidEvaluationTemplate(Request $request)
     {
         return view('bac-secretariat.competitive-bidding.bid-evaluation');
     }
 
     public function bacSecretariatPostQualificationEvaluation(Request $request)
     {
+        return $this->competitiveBiddingTemplateWorkspace('post-qualification-evaluation');
+    }
+
+    public function bacSecretariatPostQualificationEvaluationTemplate(Request $request)
+    {
         return view('bac-secretariat.competitive-bidding.post-qualification-evaluation');
     }
 
     public function bacSecretariatPostQualificationTwgReport(Request $request)
+    {
+        return $this->competitiveBiddingTemplateWorkspace('post-qualification-report-twg');
+    }
+
+    public function bacSecretariatPostQualificationTwgReportTemplate(Request $request)
     {
         return view('bac-secretariat.competitive-bidding.post-qualification-report-twg');
     }
 
     public function bacSecretariatNoticeOfPostQualification(Request $request)
     {
+        return $this->competitiveBiddingTemplateWorkspace('notice-of-post-qualification');
+    }
+
+    public function bacSecretariatNoticeOfPostQualificationTemplate(Request $request)
+    {
         return view('bac-secretariat.competitive-bidding.notice-of-post-qualification');
     }
 
     public function bacSecretariatBacResolutionOnPostQualification(Request $request)
+    {
+        return $this->competitiveBiddingTemplateWorkspace('bac-resolution-on-post-qualification');
+    }
+
+    public function bacSecretariatBacResolutionOnPostQualificationTemplate(Request $request)
     {
         return view('bac-secretariat.competitive-bidding.bac-resolution-on-post-qualification');
     }
 
     public function bacSecretariatNoticeOfAward(Request $request)
     {
+        return $this->competitiveBiddingTemplateWorkspace('notice-of-award');
+    }
+
+    public function bacSecretariatNoticeOfAwardTemplate(Request $request)
+    {
         return view('bac-secretariat.competitive-bidding.notice-of-award');
     }
 
     public function bacSecretariatContractAgreement(Request $request)
     {
+        return $this->competitiveBiddingTemplateWorkspace('contract-agreement');
+    }
+
+    public function bacSecretariatContractAgreementTemplate(Request $request)
+    {
         return view('bac-secretariat.competitive-bidding.contract-agreement');
     }
 
     public function bacSecretariatNoticeToProceed(Request $request)
+    {
+        return $this->competitiveBiddingTemplateWorkspace('notice-to-proceed');
+    }
+
+    public function bacSecretariatNoticeToProceedTemplate(Request $request)
     {
         return view('bac-secretariat.competitive-bidding.notice-to-proceed');
     }
@@ -220,6 +280,136 @@ class DocumentSubmenuController extends Controller
         $menu = $this->withRecordListDefaults($key, $menu);
 
         return view('document-submenu.show', $menu);
+    }
+
+    private function competitiveBiddingTemplateWorkspace(string $key)
+    {
+        $documents = [
+            'technical-checklist' => [
+                'title' => 'Technical Checklist Requirements',
+                'documentType' => 'Technical Checklist',
+                'subtitle' => 'Open the technical eligibility checklist only when you are ready to prepare the official template.',
+                'templateRoute' => 'bac-secretariat.competitive-bidding.checklist.technical.template',
+                'icon' => 'check',
+                'accent' => 'blue',
+            ],
+            'financial-checklist' => [
+                'title' => 'Financial Checklist Requirements',
+                'documentType' => 'Financial Checklist',
+                'subtitle' => 'Open the financial eligibility checklist only when you are ready to prepare the official template.',
+                'templateRoute' => 'bac-secretariat.competitive-bidding.checklist.financial.template',
+                'icon' => 'check',
+                'accent' => 'blue',
+            ],
+            'abstract-bids-as-read' => [
+                'title' => 'Abstract of Bids as Read',
+                'documentType' => 'Abstract of Bids',
+                'subtitle' => 'Start or continue the as-read bid abstract from a dedicated template action.',
+                'templateRoute' => 'bac-secretariat.competitive-bidding.abstract-bids.as-read.template',
+                'icon' => 'document',
+                'accent' => 'indigo',
+            ],
+            'abstract-bids-as-calculated' => [
+                'title' => 'Abstract of Bids as Calculated',
+                'documentType' => 'Abstract of Bids',
+                'subtitle' => 'Start or continue the calculated bid abstract from a dedicated template action.',
+                'templateRoute' => 'bac-secretariat.competitive-bidding.abstract-bids.as-calculated.template',
+                'icon' => 'document',
+                'accent' => 'indigo',
+            ],
+            'bid-evaluation' => [
+                'title' => 'Bid Evaluation',
+                'documentType' => 'Bid Evaluation Report',
+                'subtitle' => 'Open the official bid evaluation report only when you are ready to prepare or print it.',
+                'templateRoute' => 'bac-secretariat.competitive-bidding.bid-evaluation.template',
+                'icon' => 'check',
+                'accent' => 'violet',
+            ],
+            'post-qualification-evaluation' => [
+                'title' => 'Post Qualification Evaluation',
+                'documentType' => 'Post Qualification Evaluation Summary Report',
+                'subtitle' => 'Open the official post qualification evaluation summary from a dedicated template action.',
+                'templateRoute' => 'bac-secretariat.competitive-bidding.post-qualification-evaluation.template',
+                'icon' => 'check',
+                'accent' => 'emerald',
+            ],
+            'post-qualification-report-twg' => [
+                'title' => 'Post Qualification Report of Technical Working Group',
+                'documentType' => 'Post Qualification Report',
+                'subtitle' => 'Open the TWG post qualification report only when you are ready to prepare the official form.',
+                'templateRoute' => 'bac-secretariat.competitive-bidding.post-qualification-report-twg.template',
+                'icon' => 'document',
+                'accent' => 'emerald',
+            ],
+            'notice-of-post-qualification' => [
+                'title' => 'Notice of Post Qualification',
+                'documentType' => 'Notice of Post Qualification',
+                'subtitle' => 'Prepare the supplier notice from a dedicated official-template action.',
+                'templateRoute' => 'bac-secretariat.competitive-bidding.notice-of-post-qualification.template',
+                'icon' => 'document',
+                'accent' => 'amber',
+            ],
+            'bac-resolution-on-post-qualification' => [
+                'title' => 'BAC Resolution on Post Qualification',
+                'documentType' => 'BAC Resolution',
+                'subtitle' => 'Open the official BAC resolution template only when you are ready to prepare the document.',
+                'templateRoute' => 'bac-secretariat.competitive-bidding.bac-resolution-on-post-qualification.template',
+                'icon' => 'document',
+                'accent' => 'amber',
+            ],
+            'notice-of-award' => [
+                'title' => 'Notice of Award of Contract',
+                'documentType' => 'Notice of Award',
+                'subtitle' => 'Prepare the official award notice from a dedicated template action.',
+                'templateRoute' => 'bac-secretariat.competitive-bidding.notice-of-award.template',
+                'icon' => 'check',
+                'accent' => 'emerald',
+            ],
+            'contract-agreement' => [
+                'title' => 'Contract Agreement Form',
+                'documentType' => 'Contract Agreement',
+                'subtitle' => 'Open the official contract agreement only when you are ready to prepare or print it.',
+                'templateRoute' => 'bac-secretariat.competitive-bidding.contract-agreement.template',
+                'icon' => 'document',
+                'accent' => 'orange',
+            ],
+            'notice-to-proceed' => [
+                'title' => 'Notice to Proceed',
+                'documentType' => 'Notice to Proceed',
+                'subtitle' => 'Prepare the official notice to proceed from a dedicated template action.',
+                'templateRoute' => 'bac-secretariat.competitive-bidding.notice-to-proceed.template',
+                'icon' => 'document',
+                'accent' => 'emerald',
+            ],
+        ];
+
+        $document = $documents[$key] ?? null;
+
+        abort_unless($document, 404);
+
+        return view('document-submenu.show', [
+            'eyebrow' => 'BACSEC-002',
+            'title' => $document['title'],
+            'subtitle' => $document['subtitle'],
+            'backRoute' => 'bac-secretariat.competitive-bidding.menu',
+            'backLabel' => 'Back to Competitive Bidding',
+            'panelTitle' => 'Template Actions',
+            'showActionsPanel' => true,
+            'cards' => [
+                $this->card(
+                    'Create / Open Template',
+                    "Open the official {$document['documentType']} template.",
+                    $document['icon'],
+                    $document['accent'],
+                    $document['templateRoute'],
+                ),
+            ],
+            'recentRecords' => [],
+            'recentRecordsTitle' => "Recent {$document['title']} Records",
+            'recentRecordsSubtitle' => "Created, submitted, or routed {$document['documentType']} records will appear here.",
+            'recentRecordsDocumentType' => $document['documentType'],
+            'recentRecordsEmptyMessage' => "No {$document['title']} records found.",
+        ]);
     }
 
     private function menu(string $key, Request $request): ?array

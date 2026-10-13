@@ -10,15 +10,30 @@
             <p>Manage fixed internal accounts for LGU procurement roles.</p>
         </div>
 
-        <a
-            href="{{ route('admin.users.create') }}"
-            class="dashboard-action"
-            data-crud-modal-trigger
-            data-crud-modal-title="Add Account"
-            data-crud-modal-eyebrow="User Management"
-            data-crud-modal-src="{{ route('admin.users.create', ['modal' => 1]) }}"
-            data-crud-modal-return="{{ route('admin.users.index') }}"
-        >Add Account</a>
+        <div class="hero-actions">
+            <form
+                method="POST"
+                action="{{ route('admin.users.clear-emails') }}"
+                data-confirm="This will remove all saved email addresses and email verification data from internal accounts. Users will need to add and verify their email again before receiving email-based codes or notices."
+                data-confirm-title="Clear All Account Emails?"
+                data-confirm-label="Clear Emails"
+                data-confirm-type="danger"
+            >
+                @csrf
+                @method('PATCH')
+                <button type="submit" class="dashboard-action secondary-action">Clear Emails</button>
+            </form>
+
+            <a
+                href="{{ route('admin.users.create') }}"
+                class="dashboard-action"
+                data-crud-modal-trigger
+                data-crud-modal-title="Add Account"
+                data-crud-modal-eyebrow="User Management"
+                data-crud-modal-src="{{ route('admin.users.create', ['modal' => 1]) }}"
+                data-crud-modal-return="{{ route('admin.users.index') }}"
+            >Add Account</a>
+        </div>
     </section>
 
     <section class="table-panel" aria-label="Accounts">

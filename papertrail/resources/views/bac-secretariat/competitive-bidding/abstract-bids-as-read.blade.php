@@ -79,7 +79,7 @@
                 <strong>Abstract of Bids as Read</strong>
                 <span>Editable official competitive bidding template.</span>
             </div>
-            <a href="{{ route('bac-secretariat.competitive-bidding.menu', ['task' => 'abstract-of-bids-as-read']) }}">Back</a>
+            <a href="{{ route('bac-secretariat.competitive-bidding.abstract-bids.as-read') }}">Back</a>
             <button type="submit" name="save_action" value="draft">Save Draft</button>
             <button type="submit" name="save_action" value="submit" onclick="return confirm('Submit this Abstract of Bids as Read?');">Submit</button>
             <button type="button" onclick="printAobAsReadDocument()">Print</button>

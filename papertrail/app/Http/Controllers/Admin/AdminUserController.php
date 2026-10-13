@@ -145,6 +145,46 @@ class AdminUserController extends Controller
             ->with('status', 'Account updated successfully.');
     }
 
+    public function clearEmails(Request $request): RedirectResponse
+    {
+        $query = User::query()
+            ->whereNotNull('user_id')
+            ->whereNotNull('email');
+
+        $clearedCount = (clone $query)->count();
+
+        $query->update([
+            'email' => null,
+            'email_verified_at' => null,
+            'email_verification_code_hash' => null,
+            'email_verification_code_sent_at' => null,
+            'email_verification_code_expires_at' => null,
+            'email_verification_attempts' => 0,
+            'updated_at' => now(),
+        ]);
+
+        AuditLogger::log(
+            'User Management',
+            'user_emails_cleared',
+            'Stored account email assignments were cleared by an administrator.',
+            null,
+            null,
+            null,
+            'warning',
+            [
+                'cleared_count' => $clearedCount,
+                'performed_by_user_id' => $request->user()?->user_id,
+            ],
+        );
+
+        return back()->with(
+            'status',
+            $clearedCount > 0
+                ? "Cleared email assignments from {$clearedCount} account(s)."
+                : 'No account emails were set.'
+        );
+    }
+
     public function updateStatus(Request $request, User $user): RedirectResponse
     {
         if ($request->user()->is($user)) {

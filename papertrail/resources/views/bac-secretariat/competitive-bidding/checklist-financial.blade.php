@@ -380,7 +380,7 @@
 
     <section class="financial-template-toolbar no-print">
         <strong>Financial Checklist Requirements</strong>
-        <a href="{{ route('bac-secretariat.competitive-bidding.menu', ['task' => 'financial-requirements-checklist']) }}">Back</a>
+        <a href="{{ route('bac-secretariat.competitive-bidding.checklist.financial') }}">Back</a>
         <button type="button" onclick="window.print()">Print</button>
     </section>
 

@@ -231,7 +231,7 @@
         <div>
             <strong>Notice of Award</strong>
         </div>
-        <a href="{{ route('bac-secretariat.competitive-bidding.menu', ['task' => 'notice-of-award-of-contract']) }}">Back</a>
+        <a href="{{ route('bac-secretariat.competitive-bidding.notice-of-award') }}">Back</a>
         <button type="button" onclick="window.print()">Print</button>
     </section>
 

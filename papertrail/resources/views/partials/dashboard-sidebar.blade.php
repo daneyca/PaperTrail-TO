@@ -273,7 +273,7 @@
         unset($item);
     }
 
-    if ($roleSlug === 'bac-secretariat' && $hasBacsec002PurchaseRequestCapability && ! $isBacsecPrSignatureOnly) {
+    if ($roleSlug === 'bac-secretariat' && ($hasBacsec002PurchaseRequestCapability || $isSvpPostingProcessor) && ! $isBacsecPrSignatureOnly) {
         $competitiveBiddingTask = fn (string $label, string $task) => [
             'label' => $label,
             'route' => 'bac-secretariat.competitive-bidding.menu',
@@ -291,7 +291,7 @@
             ],
         ];
 
-        $competitiveBiddingMenu = [
+        $bacsec002CompetitiveBiddingMenu = [
             'label' => 'Competitive Bidding',
             'icon' => 'workflow',
             'children' => [
@@ -300,33 +300,76 @@
                 [
                     'label' => 'Checklist Requirements',
                     'children' => [
-                        ['label' => 'Technical', 'route' => 'bac-secretariat.competitive-bidding.checklist.technical', 'active' => 'bac-secretariat.competitive-bidding.checklist.technical'],
-                        ['label' => 'Financial', 'route' => 'bac-secretariat.competitive-bidding.checklist.financial', 'active' => 'bac-secretariat.competitive-bidding.checklist.financial'],
+                        ['label' => 'Technical', 'route' => 'bac-secretariat.competitive-bidding.checklist.technical', 'active' => 'bac-secretariat.competitive-bidding.checklist.technical*'],
+                        ['label' => 'Financial', 'route' => 'bac-secretariat.competitive-bidding.checklist.financial', 'active' => 'bac-secretariat.competitive-bidding.checklist.financial*'],
                     ],
                 ],
                 [
                     'label' => 'Abstract of Bids',
                     'children' => [
-                        ['label' => 'As Read', 'route' => 'bac-secretariat.competitive-bidding.abstract-bids.as-read', 'active' => 'bac-secretariat.competitive-bidding.abstract-bids.as-read'],
-                        ['label' => 'As Calculated', 'route' => 'bac-secretariat.competitive-bidding.abstract-bids.as-calculated', 'active' => 'bac-secretariat.competitive-bidding.abstract-bids.as-calculated'],
+                        ['label' => 'As Read', 'route' => 'bac-secretariat.competitive-bidding.abstract-bids.as-read', 'active' => 'bac-secretariat.competitive-bidding.abstract-bids.as-read*'],
+                        ['label' => 'As Calculated', 'route' => 'bac-secretariat.competitive-bidding.abstract-bids.as-calculated', 'active' => 'bac-secretariat.competitive-bidding.abstract-bids.as-calculated*'],
                     ],
                 ],
-                ['label' => 'Bid Evaluation', 'route' => 'bac-secretariat.competitive-bidding.bid-evaluation', 'active' => 'bac-secretariat.competitive-bidding.bid-evaluation'],
-                ['label' => 'Post Qualification Evaluation', 'route' => 'bac-secretariat.competitive-bidding.post-qualification-evaluation', 'active' => 'bac-secretariat.competitive-bidding.post-qualification-evaluation'],
-                ['label' => 'Post Qualification Report of Technical Working Group', 'route' => 'bac-secretariat.competitive-bidding.post-qualification-report-twg', 'active' => 'bac-secretariat.competitive-bidding.post-qualification-report-twg'],
-                ['label' => 'Notice of Post Qualification', 'route' => 'bac-secretariat.competitive-bidding.notice-of-post-qualification', 'active' => 'bac-secretariat.competitive-bidding.notice-of-post-qualification'],
-                ['label' => 'BAC Resolution on Post Qualification', 'route' => 'bac-secretariat.competitive-bidding.bac-resolution-on-post-qualification', 'active' => 'bac-secretariat.competitive-bidding.bac-resolution-on-post-qualification'],
+                ['label' => 'Bid Evaluation', 'route' => 'bac-secretariat.competitive-bidding.bid-evaluation', 'active' => 'bac-secretariat.competitive-bidding.bid-evaluation*'],
+                ['label' => 'Post Qualification Evaluation', 'route' => 'bac-secretariat.competitive-bidding.post-qualification-evaluation', 'active' => 'bac-secretariat.competitive-bidding.post-qualification-evaluation*'],
+                ['label' => 'Post Qualification Report of Technical Working Group', 'route' => 'bac-secretariat.competitive-bidding.post-qualification-report-twg', 'active' => 'bac-secretariat.competitive-bidding.post-qualification-report-twg*'],
+                ['label' => 'Notice of Post Qualification', 'route' => 'bac-secretariat.competitive-bidding.notice-of-post-qualification', 'active' => 'bac-secretariat.competitive-bidding.notice-of-post-qualification*'],
+                ['label' => 'BAC Resolution on Post Qualification', 'route' => 'bac-secretariat.competitive-bidding.bac-resolution-on-post-qualification', 'active' => 'bac-secretariat.competitive-bidding.bac-resolution-on-post-qualification*'],
                 $competitiveBiddingTask('Notice Issued by the BAC', 'notice-issued-by-the-bac'),
-                ['label' => 'Notice of Award of Contract', 'route' => 'bac-secretariat.competitive-bidding.notice-of-award', 'active' => 'bac-secretariat.competitive-bidding.notice-of-award'],
+                ['label' => 'Notice of Award of Contract', 'route' => 'bac-secretariat.competitive-bidding.notice-of-award', 'active' => 'bac-secretariat.competitive-bidding.notice-of-award*'],
                 $competitiveBiddingTask('Performance Bond', 'performance-bond'),
-                ['label' => 'Contract Agreement Form', 'route' => 'bac-secretariat.competitive-bidding.contract-agreement', 'active' => 'bac-secretariat.competitive-bidding.contract-agreement'],
+                ['label' => 'Contract Agreement Form', 'route' => 'bac-secretariat.competitive-bidding.contract-agreement', 'active' => 'bac-secretariat.competitive-bidding.contract-agreement*'],
                 ['label' => 'Purchase Order', 'route' => 'bac-secretariat.purchase-orders.create', 'active' => ['bac-secretariat.purchase-orders.menu', 'bac-secretariat.purchase-orders.*']],
-                ['label' => 'Notice to Proceed', 'route' => 'bac-secretariat.competitive-bidding.notice-to-proceed', 'active' => 'bac-secretariat.competitive-bidding.notice-to-proceed'],
+                ['label' => 'Notice to Proceed', 'route' => 'bac-secretariat.competitive-bidding.notice-to-proceed', 'active' => 'bac-secretariat.competitive-bidding.notice-to-proceed*'],
                 ['label' => 'Supplier Signatures', 'route' => 'supplier-signatures.index', 'active' => 'supplier-signatures.*'],
             ],
         ];
 
-        array_splice($items, 2, 0, [$svpResolutionMenu, $competitiveBiddingMenu]);
+        $bacsec004CompetitiveBiddingMenu = [
+            'label' => 'Competitive Bidding',
+            'icon' => 'workflow',
+            'children' => [
+                $competitiveBiddingTask('Annual Investment Program', 'annual-investment-program'),
+                $competitiveBiddingTask('Annual Procurement Plan', 'annual-procurement-plan'),
+                $competitiveBiddingTask('Approved Budget for the Contract (ABC)', 'approved-budget-for-the-contract'),
+                $competitiveBiddingTask('Printout of the PhilGEPS (Bid Notice Abstract)', 'philgeps-bid-notice-abstract'),
+                $competitiveBiddingTask('Certification of the Head of the BAC Secretariat', 'bac-secretariat-head-certification'),
+                [
+                    'label' => 'Bidding Docs',
+                    'children' => [
+                        $competitiveBiddingTask('Invitation to Bid', 'invitation-to-bid'),
+                        $competitiveBiddingTask('Instructions to Bidders', 'instructions-to-bidders'),
+                        $competitiveBiddingTask('Bid Data Sheet', 'bid-data-sheet'),
+                        $competitiveBiddingTask('General Conditions of Contract', 'general-conditions-of-contract'),
+                        $competitiveBiddingTask('Special Conditions of Contract', 'special-conditions-of-contract'),
+                    ],
+                ],
+            ],
+        ];
+
+        $menusToInsert = [];
+
+        if ($hasBacsec002PurchaseRequestCapability) {
+            $menusToInsert[] = $svpResolutionMenu;
+        }
+
+        $menusToInsert[] = $isSvpPostingProcessor
+            ? $bacsec004CompetitiveBiddingMenu
+            : $bacsec002CompetitiveBiddingMenu;
+
+        $competitiveBiddingInsertIndex = 2;
+
+        if ($isSvpPostingProcessor) {
+            foreach ($items as $index => $item) {
+                if (($item['label'] ?? null) === 'Posting Management') {
+                    $competitiveBiddingInsertIndex = $index + 1;
+                    break;
+                }
+            }
+        }
+
+        array_splice($items, $competitiveBiddingInsertIndex, 0, $menusToInsert);
     }
 
     $canShowSignatureMenu = in_array($roleSlug, [

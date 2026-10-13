@@ -13,6 +13,7 @@
             :eyebrow="$eyebrow"
             :title="$title"
             :back-route="$backRoute ?? null"
+            :back-label="$backLabel ?? null"
         />
 
         @if ($showActionsPanel)
