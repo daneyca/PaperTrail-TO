@@ -2609,20 +2609,18 @@ class AnnualProcurementPlanController extends Controller
                 'office_code' => 'BAC',
             ],
             'budget officer', 'municipal budget officer' => [
-                'title' => 'Municipal Budget Officer',
+                'title' => 'Budget Officer',
                 'office' => 'Municipal Budget Office',
                 'role_code' => 'budget_officer',
                 'role_name' => User::ROLE_BUDGET,
                 'account_code' => 'BUDGET-001',
-                'office_code' => 'MBO',
             ],
             'accounting officer', 'municipal accountant' => [
-                'title' => 'Municipal Accountant',
+                'title' => 'Accounting Officer',
                 'office' => 'Municipal Accounting Office',
                 'role_code' => 'accounting_officer',
                 'role_name' => User::ROLE_ACCOUNTING,
                 'account_code' => 'ACCOUNTING-001',
-                'office_code' => 'MACCO',
             ],
             'municipal mayor' => [
                 'title' => 'Municipal Mayor',
@@ -2738,6 +2736,13 @@ class AnnualProcurementPlanController extends Controller
 
     private function accountCodeForSignatory(array $signatory): ?string
     {
+        if (
+            in_array($signatory['role_code'] ?? null, ['budget_officer', 'accounting_officer'], true)
+            && filled($signatory['account_code'] ?? null)
+        ) {
+            return $signatory['account_code'];
+        }
+
         $name = $this->cleanText($signatory['name'] ?? null);
 
         if ($name) {

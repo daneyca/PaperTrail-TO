@@ -4,6 +4,10 @@
 body.dashboard-body:not(.modal-document-body) {
     --pt-auth-shell-inline: clamp(14px, 1.6vw, 24px);
     --pt-auth-shell-gap: 12px;
+    --pt-auth-header-height: 66px;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
 }
 
 body.dashboard-body:not(.modal-document-body) .dashboard-shell,
@@ -11,9 +15,59 @@ body.dashboard-body:not(.modal-document-body) .dashboard-main {
     background: var(--pt-saas-bg) !important;
 }
 
+body.dashboard-body:not(.modal-document-body) .dashboard-shell {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+}
+
+body.dashboard-body:not(.modal-document-body) .dashboard-main {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    padding-top: 0 !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+}
+
 body.dashboard-body:not(.modal-document-body) .dashboard-sidebar {
+    height: 100vh;
+    height: 100dvh;
+    padding-top: 0 !important;
+    overflow: hidden !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+}
+
+body.dashboard-body:not(.modal-document-body) .dashboard-sidebar .sidebar-top {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+body.dashboard-body:not(.modal-document-body) .dashboard-sidebar .sidebar-header,
+body.dashboard-body:not(.modal-document-body) .dashboard-sidebar .sidebar-logout {
+    flex: 0 0 auto;
+}
+
+body.dashboard-body:not(.modal-document-body) .dashboard-sidebar .sidebar-header {
+    height: var(--pt-auth-header-height);
+    min-height: var(--pt-auth-header-height);
+    padding-block: 0 !important;
+}
+
+body.dashboard-body:not(.modal-document-body) .dashboard-sidebar .sidebar-nav {
+    flex: 1 1 auto;
+    min-height: 0;
+    align-content: start;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
 }
 
 body.dashboard-body:not(.modal-document-body) .dashboard-topbar,
@@ -23,7 +77,7 @@ body.dashboard-body:not(.modal-document-body) .dashboard-topbar.enterprise-topba
     z-index: 900 !important;
     width: auto !important;
     max-width: none !important;
-    min-height: 58px !important;
+    min-height: var(--pt-auth-header-height) !important;
     margin: 0 !important;
     padding: 8px var(--pt-auth-shell-inline) !important;
     border-width: 0 0 1px !important;

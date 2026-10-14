@@ -81,16 +81,15 @@
         'BAC Chair' => 'Bids and Awards Committee',
         'BAC Vice Chairperson' => 'Bids and Awards Committee',
         'BAC Member' => 'Bids and Awards Committee',
-        'Municipal Budget Officer' => 'Municipal Budget Office',
-        'Municipal Accountant' => 'Municipal Accounting Office',
+        'Budget Officer' => 'Municipal Budget Office',
+        'Accounting Officer' => 'Municipal Accounting Office',
         'Municipal Mayor' => 'Office of the Municipal Mayor',
-        'Head of Office / End User' => '',
         'Head of the Procuring Entity' => 'Office of the Municipal Mayor',
         'PR Numbering Staff' => '',
     ];
     $legacySignatoryDesignations = [
-        'Budget Officer' => 'Municipal Budget Officer',
-        'Accounting Officer' => 'Municipal Accountant',
+        'Municipal Budget Officer' => 'Budget Officer',
+        'Municipal Accountant' => 'Accounting Officer',
     ];
 
     $storedSignatories = collect(old('signatories_json') ? json_decode(old('signatories_json'), true) : ($app->signatories_json ?? []));
@@ -100,12 +99,16 @@
     $signatoryTitleWasManuallySelected = function (string $key) use ($storedSignatories): bool {
         return filter_var(data_get($storedSignatories, "{$key}.title_manually_selected", false), FILTER_VALIDATE_BOOLEAN);
     };
-    $signatoryTitle = function (string $key) use ($signatoryValue, $signatoryTitleWasManuallySelected, $legacySignatoryDesignations) {
+    $signatoryTitle = function (string $key) use ($signatoryValue, $signatoryTitleWasManuallySelected, $legacySignatoryDesignations, $isEditable) {
         if (! $signatoryTitleWasManuallySelected($key)) {
             return '';
         }
 
         $title = (string) $signatoryValue($key, 'title');
+
+        if ($isEditable && $title === 'Head of Office / End User') {
+            return '';
+        }
 
         return $legacySignatoryDesignations[$title] ?? $title;
     };
