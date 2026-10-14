@@ -2,8 +2,6 @@
     $user = auth()->user();
     $unreadNotifications = \App\Services\SystemNotificationService::unreadCount($user);
     $recentNotifications = \App\Services\SystemNotificationService::latestForUser($user, 5);
-    $profileHref = \Illuminate\Support\Facades\Route::has('profile.show') ? route('profile.show') : null;
-    $profileEditHref = \Illuminate\Support\Facades\Route::has('profile.edit') ? route('profile.edit') : null;
     $officeName = trim((string) ($user?->assignedOffice?->name ?? $user?->office ?? ''));
     $roleName = trim((string) ($user?->assignedRole?->name ?? $user?->role ?? ''));
     $roleCode = trim((string) ($user?->assignedRole?->code ?? ''));
@@ -34,6 +32,19 @@
 
 <header class="dashboard-topbar enterprise-topbar" aria-label="Dashboard toolbar">
     <div class="enterprise-topbar__left">
+        <button
+            class="sidebar-collapse-button topbar-sidebar-collapse"
+            type="button"
+            data-sidebar-collapse
+            aria-expanded="true"
+            aria-label="Collapse sidebar"
+            title="Toggle sidebar"
+        >
+            <svg class="collapse-icon collapse-icon-left" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M15 18 9 12l6-6" />
+            </svg>
+        </button>
+
         <form class="dashboard-search enterprise-topbar__search" role="search">
             <label class="sr-only" for="dashboard-search">Search documents</label>
             <span class="dashboard-search-icon" aria-hidden="true">
@@ -140,22 +151,6 @@
                 </button>
 
                 <div class="topbar-account-dropdown" data-user-menu-dropdown>
-                    @if ($profileHref)
-                        <a href="{{ $profileHref }}">
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                <path d="M20 21a8 8 0 0 0-16 0M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" />
-                            </svg>
-                            <span>View Profile</span>
-                        </a>
-                    @endif
-                    @if ($profileEditHref)
-                        <a href="{{ $profileEditHref }}">
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
-                            </svg>
-                            <span>Edit Profile</span>
-                        </a>
-                    @endif
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit">

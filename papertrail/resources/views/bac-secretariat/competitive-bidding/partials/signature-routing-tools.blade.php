@@ -1,6 +1,10 @@
 @php
     $templateKey = $templateKey ?? 'competitive_bidding_document';
     $documentTitle = $documentTitle ?? 'Competitive Bidding Document';
+    $biddingRecords = \App\Models\CompetitiveBiddingRecord::query()
+        ->where('status', \App\Models\CompetitiveBiddingRecord::STATUS_OPEN)
+        ->orderByDesc('created_at')
+        ->get(['reference_number', 'project_title']);
 @endphp
 
 <style>
@@ -26,7 +30,8 @@
         text-transform: uppercase;
     }
 
-    .cb-routing-panel input {
+    .cb-routing-panel input,
+    .cb-routing-panel select {
         min-height: 38px;
         border: 1px solid #cbd5e1;
         border-radius: 8px;
@@ -130,8 +135,15 @@
     <input type="hidden" name="signatories" data-cb-signatories>
 
     <label>
-        Reference No.
-        <input type="text" name="tracking_number" placeholder="Optional">
+        Bidding File
+        <select name="tracking_number" required>
+            <option value="">Select reference</option>
+            @foreach ($biddingRecords as $biddingRecord)
+                <option value="{{ $biddingRecord->reference_number }}" @selected(old('tracking_number') === $biddingRecord->reference_number)>
+                    {{ $biddingRecord->reference_number }} - {{ $biddingRecord->project_title }}
+                </option>
+            @endforeach
+        </select>
     </label>
 
     <a href="{{ route('supplier-signatures.index') }}">Supplier Links</a>

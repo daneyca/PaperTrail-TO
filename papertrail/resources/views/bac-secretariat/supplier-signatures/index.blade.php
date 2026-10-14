@@ -62,7 +62,6 @@
         </div>
 
         <div class="hero-actions">
-            <a href="{{ route('bac-secretariat.competitive-bidding.menu') }}" class="dashboard-action secondary-action">Back to Competitive Bidding</a>
             <a href="{{ route('supplier-signatures.create') }}" class="dashboard-action">New Supplier Link</a>
         </div>
     </section>

@@ -33,7 +33,7 @@ class CompetitiveBiddingSignatureDocumentController extends Controller
         $validated = $request->validate([
             'template_key' => ['required', 'string', 'max:120'],
             'document_title' => ['required', 'string', 'max:255'],
-            'tracking_number' => ['nullable', 'string', 'max:120'],
+            'tracking_number' => ['required', 'string', 'max:120', 'exists:competitive_bidding_records,reference_number'],
             'document_html' => ['required', 'string', 'max:2000000'],
             'signatories' => ['required', 'string', 'max:200000'],
         ]);
@@ -58,7 +58,7 @@ class CompetitiveBiddingSignatureDocumentController extends Controller
             $document = CompetitiveBiddingSignatureDocument::create([
                 'template_key' => $validated['template_key'],
                 'document_title' => $validated['document_title'],
-                'tracking_number' => $validated['tracking_number'] ?: null,
+                'tracking_number' => $validated['tracking_number'],
                 'document_html' => $this->cleanDocumentHtml($validated['document_html']),
                 'signatories' => $signatories,
                 'prepared_by_user_id' => $request->user()->id,

@@ -391,8 +391,6 @@ class DocumentSubmenuController extends Controller
             'eyebrow' => 'BACSEC-002',
             'title' => $document['title'],
             'subtitle' => $document['subtitle'],
-            'backRoute' => 'bac-secretariat.competitive-bidding.menu',
-            'backLabel' => 'Back to Competitive Bidding',
             'panelTitle' => 'Template Actions',
             'showActionsPanel' => true,
             'cards' => [
@@ -437,7 +435,7 @@ class DocumentSubmenuController extends Controller
             'bac-secretariat.abstract' => $this->bacSecretariatAbstractMenu(),
             'bac-secretariat.resolution' => $this->bacSecretariatResolutionMenu($user),
             'bac-secretariat.po' => $this->bacSecretariatPurchaseOrderMenu($user),
-            'bac-secretariat.competitive-bidding' => $this->bacSecretariatCompetitiveBiddingMenu(),
+            'bac-secretariat.competitive-bidding' => $this->bacSecretariatCompetitiveBiddingMenu($user),
             'bac-member.reviews' => $this->bacMemberReviewMenu(),
             'bac-chair.reviews' => $this->bacChairReviewMenu(),
             'budget.review' => $this->budgetReviewMenu(),
@@ -982,9 +980,36 @@ class DocumentSubmenuController extends Controller
         );
     }
 
-    private function bacSecretariatCompetitiveBiddingMenu(): array
+    private function bacSecretariatCompetitiveBiddingMenu($user): array
     {
         $setupBadge = 'For setup';
+
+        if ($user?->user_id === 'BACSEC-004') {
+            return [
+                'eyebrow' => 'BACSEC-004',
+                'title' => 'Competitive Bidding',
+                'subtitle' => 'BACSEC-004 planning, posting, observer invitation, bidding document, and purchase order work areas for competitive bidding procurement.',
+                'backRoute' => 'bac-secretariat.dashboard',
+                'showActionsPanel' => true,
+                'cards' => [
+                    $this->card('Submit Bidding Documents', 'Forward completed project documents to the BACSEC-002 supporting file.', 'upload', 'blue', 'bac-secretariat.competitive-bidding.supporting-submissions.index'),
+                    $this->disabledCard('Annual Investment Program', 'Maintain the AIP reference for competitive bidding records.', 'document', 'violet', $setupBadge),
+                    $this->disabledCard('Annual Procurement Plan', 'Maintain the APP reference for competitive bidding records.', 'document', 'blue', $setupBadge),
+                    $this->disabledCard('Approved Budget for the Contract (ABC)', 'Record the approved budget reference for competitive bidding.', 'document', 'indigo', $setupBadge),
+                    $this->disabledCard('Printout of the PhilGEPS (Bid Notice Abstract)', 'Attach or track the PhilGEPS bid notice abstract.', 'document', 'emerald', $setupBadge),
+                    $this->disabledCard('Certification of the Head of the BAC Secretariat', 'Prepare or attach the BAC Secretariat certification.', 'check', 'amber', $setupBadge),
+                    $this->disabledCard('Letter of Invitation to Observer', 'Prepare or attach the observer invitation for bidding activities.', 'document', 'violet', $setupBadge),
+                    $this->disabledCard('Bidding Docs', 'Organize invitation, instructions, data sheet, and contract condition documents.', 'document', 'blue', $setupBadge),
+                    $this->card('Purchase Order', 'Create or continue a Purchase Order after award processing.', 'po', 'orange', 'bac-secretariat.purchase-orders.create'),
+                ],
+                'recentRecords' => [],
+                'helpSteps' => [
+                    'Use this menu as the BACSEC-004 competitive bidding workspace.',
+                    'Use Submit Bidding Documents when a final file is ready for BACSEC-002 checking.',
+                    'Purchase Order opens the existing PaperTrail Purchase Order module.',
+                ],
+            ];
+        }
 
         return [
             'eyebrow' => 'BACSEC-002',
@@ -993,7 +1018,7 @@ class DocumentSubmenuController extends Controller
             'backRoute' => 'bac-secretariat.dashboard',
             'showActionsPanel' => false,
             'cards' => [
-                $this->disabledCard('Letter of Invitation to Observer', 'Prepare the observer invitation for bidding activities.', 'document', 'violet', $setupBadge),
+                $this->card('Supporting Documents', 'Maintain the complete bidding file and supplier-submitted attachments for each procurement.', 'document', 'blue', 'bac-secretariat.competitive-bidding.supporting-documents.index'),
                 $this->disabledCard('Checklist Requirements', 'Track technical and financial requirement completeness.', 'check', 'blue', $setupBadge),
                 $this->disabledCard('Abstract of Bids', 'Prepare the bid abstract with As Read and As Calculated parts.', 'document', 'indigo', $setupBadge),
                 $this->card('Bid Evaluation', 'Record bid evaluation results and recommendation details.', 'check', 'violet', 'bac-secretariat.competitive-bidding.bid-evaluation'),
@@ -1003,9 +1028,7 @@ class DocumentSubmenuController extends Controller
                 $this->card('BAC Resolution on Post Qualification', 'Prepare the BAC Resolution for post qualification results.', 'document', 'amber', 'bac-secretariat.competitive-bidding.bac-resolution-on-post-qualification'),
                 $this->disabledCard('Notice Issued by the BAC', 'Prepare BAC-issued notices for the bidding process.', 'document', 'blue', $setupBadge),
                 $this->card('Notice of Award of Contract', 'Prepare and monitor the Notice of Award of Contract.', 'check', 'emerald', 'bac-secretariat.competitive-bidding.notice-of-award'),
-                $this->disabledCard('Performance Bond', 'Track performance bond submission and reference details.', 'document', 'orange', $setupBadge),
                 $this->card('Contract Agreement Form', 'Prepare or track the contract agreement form.', 'document', 'orange', 'bac-secretariat.competitive-bidding.contract-agreement'),
-                $this->card('Purchase Order', 'Create or continue a Purchase Order.', 'po', 'orange', 'bac-secretariat.purchase-orders.create'),
                 $this->card('Notice to Proceed', 'Prepare and monitor the Notice to Proceed.', 'document', 'emerald', 'bac-secretariat.competitive-bidding.notice-to-proceed'),
                 $this->card('Supplier Signatures', 'Create secure supplier signing links and validate uploaded signed copies.', 'signature', 'blue', 'supplier-signatures.index', [], [], $this->count(SupplierSignatureRequest::class)),
             ],
@@ -1013,7 +1036,7 @@ class DocumentSubmenuController extends Controller
             'helpSteps' => [
                 'Use this menu as the BACSEC-002 competitive bidding workspace.',
                 'Items marked For setup are visible for workflow planning but do not yet create records.',
-                'Purchase Order opens the existing PaperTrail Purchase Order module.',
+                'Letter of Invitation, Performance Bond, and Purchase Order files should be attached to the related record instead of treated as BACSEC-002 task pages.',
             ],
         ];
     }

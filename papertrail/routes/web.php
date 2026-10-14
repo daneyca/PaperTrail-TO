@@ -32,6 +32,7 @@ use App\Http\Controllers\BacSecretariat\PurchaseRequestController as BacPurchase
 use App\Http\Controllers\BacSecretariat\PurchaseOrderController as BacPurchaseOrderController;
 use App\Http\Controllers\BacSecretariat\BacResolutionController as BacResolutionController;
 use App\Http\Controllers\BacSecretariat\CompetitiveBiddingSignatureDocumentController;
+use App\Http\Controllers\BacSecretariat\CompetitiveBiddingSupportingDocumentController;
 use App\Http\Controllers\BacSecretariat\RfqController as BacRfqController;
 use App\Http\Controllers\BacSecretariat\AbstractController as BacAbstractController;
 use App\Http\Controllers\BacSecretariat\ReportController as BacReportController;
@@ -241,6 +242,20 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         Route::get('/bac-resolutions/menu', [DocumentSubmenuController::class, 'bacSecretariatBacResolution'])->name('resolutions.menu');
         Route::get('/purchase-orders/menu', [DocumentSubmenuController::class, 'bacSecretariatPurchaseOrder'])->name('purchase-orders.menu');
         Route::get('/competitive-bidding/menu', [DocumentSubmenuController::class, 'bacSecretariatCompetitiveBidding'])->name('competitive-bidding.menu');
+        Route::get('/competitive-bidding/supporting-submissions', [CompetitiveBiddingSupportingDocumentController::class, 'sourceIndex'])->name('competitive-bidding.supporting-submissions.index');
+        Route::get('/competitive-bidding/supporting-submissions/{record}', [CompetitiveBiddingSupportingDocumentController::class, 'sourceShow'])->name('competitive-bidding.supporting-submissions.show');
+        Route::post('/competitive-bidding/supporting-submissions/{record}/items/{item}', [CompetitiveBiddingSupportingDocumentController::class, 'storeSourceAttachment'])->name('competitive-bidding.supporting-submissions.store');
+        Route::get('/competitive-bidding/supporting-documents', [CompetitiveBiddingSupportingDocumentController::class, 'index'])->name('competitive-bidding.supporting-documents.index');
+        Route::post('/competitive-bidding/supporting-documents', [CompetitiveBiddingSupportingDocumentController::class, 'store'])->name('competitive-bidding.supporting-documents.store');
+        Route::get('/competitive-bidding/supporting-documents/{record}', [CompetitiveBiddingSupportingDocumentController::class, 'show'])->name('competitive-bidding.supporting-documents.show');
+        Route::post('/competitive-bidding/supporting-documents/{record}/suppliers', [CompetitiveBiddingSupportingDocumentController::class, 'storeSupplier'])->name('competitive-bidding.supporting-documents.suppliers.store');
+        Route::patch('/competitive-bidding/supporting-documents/{record}/suppliers/{supplier}', [CompetitiveBiddingSupportingDocumentController::class, 'updateSupplier'])->name('competitive-bidding.supporting-documents.suppliers.update');
+        Route::patch('/competitive-bidding/supporting-documents/{record}/items/{item}', [CompetitiveBiddingSupportingDocumentController::class, 'updateItem'])->name('competitive-bidding.supporting-documents.items.update');
+        Route::get('/competitive-bidding/supporting-documents/{record}/items/{item}/system-document', [CompetitiveBiddingSupportingDocumentController::class, 'viewSystemDocument'])->name('competitive-bidding.supporting-documents.system-document');
+        Route::post('/competitive-bidding/supporting-documents/{record}/items/{item}/attachments', [CompetitiveBiddingSupportingDocumentController::class, 'storeAttachment'])->name('competitive-bidding.supporting-documents.attachments.store');
+        Route::get('/competitive-bidding/supporting-documents/{record}/items/{item}/attachments/{attachment}/view', [CompetitiveBiddingSupportingDocumentController::class, 'viewAttachment'])->name('competitive-bidding.supporting-documents.attachments.view');
+        Route::get('/competitive-bidding/supporting-documents/{record}/items/{item}/attachments/{attachment}/download', [CompetitiveBiddingSupportingDocumentController::class, 'downloadAttachment'])->name('competitive-bidding.supporting-documents.attachments.download');
+        Route::delete('/competitive-bidding/supporting-documents/{record}/items/{item}/attachments/{attachment}', [CompetitiveBiddingSupportingDocumentController::class, 'destroyAttachment'])->name('competitive-bidding.supporting-documents.attachments.destroy');
         Route::get('/competitive-bidding/checklist-requirements/technical', [DocumentSubmenuController::class, 'bacSecretariatTechnicalChecklist'])->name('competitive-bidding.checklist.technical');
         Route::get('/competitive-bidding/checklist-requirements/technical/template', [DocumentSubmenuController::class, 'bacSecretariatTechnicalChecklistTemplate'])->name('competitive-bidding.checklist.technical.template');
         Route::get('/competitive-bidding/checklist-requirements/financial', [DocumentSubmenuController::class, 'bacSecretariatFinancialChecklist'])->name('competitive-bidding.checklist.financial');

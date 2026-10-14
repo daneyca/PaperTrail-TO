@@ -101,7 +101,6 @@
                 'label' => 'Documents',
                 'icon' => 'planning',
                 'children' => [
-                    ['label' => 'PPMP', 'route' => 'head-office.ppmp.index', 'active' => 'head-office.ppmp.*'],
                     ['label' => 'My Documents', 'route' => 'head-office.documents.index', 'active' => ['head-office.documents.*', 'head-office.returned.*']],
                     ['label' => 'Status Tracking', 'route' => 'head-office.svp-tracking.index', 'active' => 'head-office.svp-tracking.*'],
                 ],
@@ -110,6 +109,7 @@
                 'label' => 'SVP / Alternative Procurement',
                 'icon' => 'workflow',
                 'children' => [
+                    ['label' => 'PPMP', 'route' => 'head-office.ppmp.index', 'active' => 'head-office.ppmp.*'],
                     ['label' => 'Create PR', 'route' => 'head-office.pr.create', 'active' => 'head-office.pr.create'],
                     ['label' => 'Received BAC Resolutions', 'route' => 'head-office.resolutions.index', 'active' => 'head-office.resolutions.*'],
                     ['label' => 'RFQ', 'route' => 'head-office.rfqs.create', 'active' => 'head-office.rfqs.*'],
@@ -296,7 +296,7 @@
             'icon' => 'workflow',
             'children' => [
                 ['label' => 'Competitive Bidding', 'section' => true],
-                $competitiveBiddingTask('Letter of Invitation to Observer', 'letter-of-invitation-to-observer'),
+                ['label' => 'Supporting Documents', 'route' => 'bac-secretariat.competitive-bidding.supporting-documents.index', 'active' => 'bac-secretariat.competitive-bidding.supporting-documents.*'],
                 [
                     'label' => 'Checklist Requirements',
                     'children' => [
@@ -318,9 +318,7 @@
                 ['label' => 'BAC Resolution on Post Qualification', 'route' => 'bac-secretariat.competitive-bidding.bac-resolution-on-post-qualification', 'active' => 'bac-secretariat.competitive-bidding.bac-resolution-on-post-qualification*'],
                 $competitiveBiddingTask('Notice Issued by the BAC', 'notice-issued-by-the-bac'),
                 ['label' => 'Notice of Award of Contract', 'route' => 'bac-secretariat.competitive-bidding.notice-of-award', 'active' => 'bac-secretariat.competitive-bidding.notice-of-award*'],
-                $competitiveBiddingTask('Performance Bond', 'performance-bond'),
                 ['label' => 'Contract Agreement Form', 'route' => 'bac-secretariat.competitive-bidding.contract-agreement', 'active' => 'bac-secretariat.competitive-bidding.contract-agreement*'],
-                ['label' => 'Purchase Order', 'route' => 'bac-secretariat.purchase-orders.create', 'active' => ['bac-secretariat.purchase-orders.menu', 'bac-secretariat.purchase-orders.*']],
                 ['label' => 'Notice to Proceed', 'route' => 'bac-secretariat.competitive-bidding.notice-to-proceed', 'active' => 'bac-secretariat.competitive-bidding.notice-to-proceed*'],
                 ['label' => 'Supplier Signatures', 'route' => 'supplier-signatures.index', 'active' => 'supplier-signatures.*'],
             ],
@@ -330,11 +328,13 @@
             'label' => 'Competitive Bidding',
             'icon' => 'workflow',
             'children' => [
+                ['label' => 'Submit Bidding Documents', 'route' => 'bac-secretariat.competitive-bidding.supporting-submissions.index', 'active' => 'bac-secretariat.competitive-bidding.supporting-submissions.*'],
                 $competitiveBiddingTask('Annual Investment Program', 'annual-investment-program'),
                 $competitiveBiddingTask('Annual Procurement Plan', 'annual-procurement-plan'),
                 $competitiveBiddingTask('Approved Budget for the Contract (ABC)', 'approved-budget-for-the-contract'),
                 $competitiveBiddingTask('Printout of the PhilGEPS (Bid Notice Abstract)', 'philgeps-bid-notice-abstract'),
                 $competitiveBiddingTask('Certification of the Head of the BAC Secretariat', 'bac-secretariat-head-certification'),
+                $competitiveBiddingTask('Letter of Invitation to Observer', 'letter-of-invitation-to-observer'),
                 [
                     'label' => 'Bidding Docs',
                     'children' => [
@@ -345,6 +345,7 @@
                         $competitiveBiddingTask('Special Conditions of Contract', 'special-conditions-of-contract'),
                     ],
                 ],
+                ['label' => 'Purchase Order', 'route' => 'bac-secretariat.purchase-orders.create', 'active' => ['bac-secretariat.purchase-orders.menu', 'bac-secretariat.purchase-orders.*']],
             ],
         ];
 
@@ -389,7 +390,16 @@
     $items = array_merge($items, [
         ['section' => 'Account'],
         ['label' => 'Email Activity', 'route' => 'email-activity.index', 'icon' => 'mail', 'active' => 'email-activity.*'],
-        ['label' => 'Profile', 'route' => 'profile.show', 'icon' => 'user', 'active' => 'profile.*'],
+        ['label' => 'Profile', 'route' => 'profile.show', 'icon' => 'user', 'active' => ['profile.show', 'profile.edit']],
+        [
+            'label' => 'Security & Recovery',
+            'icon' => 'settings',
+            'children' => [
+                ['label' => 'Change Password', 'route' => 'profile.show', 'active' => 'profile.show', 'query' => ['password' => 1]],
+                ['label' => 'Manage E-Signature', 'route' => 'profile.signature.edit', 'active' => 'profile.signature.*'],
+                ['label' => 'Email Recovery', 'route' => 'profile.show', 'active' => 'profile.show', 'query' => ['email_recovery' => 1]],
+            ],
+        ],
     ]);
 
     $routeMatches = function ($patterns): bool {
@@ -471,11 +481,6 @@
                     <small>LGU Procurement</small>
                 </span>
             </a>
-            <button class="sidebar-collapse-button" type="button" data-sidebar-collapse aria-expanded="true" aria-label="Collapse sidebar">
-                <svg class="collapse-icon collapse-icon-left" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path d="M15 18 9 12l6-6" />
-                </svg>
-            </button>
         </div>
 
         <nav class="sidebar-nav">

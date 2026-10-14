@@ -35,6 +35,17 @@ body.dashboard-body:not(.modal-document-body) .dashboard-topbar.enterprise-topba
     backdrop-filter: none !important;
 }
 
+body.dashboard-body:not(.modal-document-body) .topbar-sidebar-collapse {
+    display: inline-grid !important;
+    flex: 0 0 32px !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    margin: 0 !important;
+    place-items: center !important;
+    border-radius: 9px !important;
+}
+
 body.dashboard-body:not(.modal-document-body) .dashboard-content {
     padding: var(--pt-auth-shell-gap) var(--pt-auth-shell-inline) calc(var(--pt-auth-shell-inline) + 12px) !important;
     gap: 14px !important;
@@ -232,6 +243,10 @@ body.dashboard-body:not(.modal-document-body) .dashboard-content :where(
 }
 
 @media (max-width: 980px) {
+    body.dashboard-body:not(.modal-document-body) .topbar-sidebar-collapse {
+        display: none !important;
+    }
+
     body.dashboard-body:not(.modal-document-body) .dashboard-topbar,
     body.dashboard-body:not(.modal-document-body) .dashboard-topbar.enterprise-topbar {
         padding: 8px 12px 8px 68px !important;

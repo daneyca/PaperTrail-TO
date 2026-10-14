@@ -422,6 +422,43 @@ body.dashboard-body .procurement-analytics-grid--with-signals .procurement-ai-in
     height: auto !important;
 }
 
+@media (min-width: 1181px) {
+    body.dashboard-body:not(.modal-document-body) .enterprise-dashboard .procurement-analytics-grid.procurement-analytics-grid--with-signals {
+        align-items: stretch !important;
+        grid-auto-rows: 1fr !important;
+    }
+
+    body.dashboard-body:not(.modal-document-body) .enterprise-dashboard .procurement-analytics-grid.procurement-analytics-grid--with-signals > :where(.procurement-chart-card, .procurement-ai-insights) {
+        display: grid !important;
+        grid-template-rows: auto minmax(0, 1fr) !important;
+        align-self: stretch !important;
+        height: 100% !important;
+        min-height: 376px !important;
+    }
+
+    body.dashboard-body:not(.modal-document-body) .enterprise-dashboard .procurement-analytics-grid.procurement-analytics-grid--with-signals .procurement-chart-card {
+        align-content: stretch !important;
+    }
+
+    body.dashboard-body:not(.modal-document-body) .enterprise-dashboard .procurement-analytics-grid.procurement-analytics-grid--with-signals .procurement-chart {
+        display: grid !important;
+        align-items: center !important;
+        justify-items: center !important;
+        align-self: stretch !important;
+        height: 100% !important;
+        min-height: 0 !important;
+    }
+
+    body.dashboard-body:not(.modal-document-body) .enterprise-dashboard .procurement-analytics-grid.procurement-analytics-grid--with-signals .procurement-chart > .apexcharts-canvas {
+        max-width: 100% !important;
+    }
+
+    body.dashboard-body:not(.modal-document-body) .enterprise-dashboard .procurement-analytics-grid.procurement-analytics-grid--with-signals .procurement-insight-grid {
+        height: 100% !important;
+        align-content: stretch !important;
+    }
+}
+
 body.dashboard-body :where(.ai-summary-main-grid, .ai-summary-card-stack) {
     gap: 10px !important;
 }
@@ -1195,4 +1232,33 @@ body.dashboard-body .progress-label {
         max-width: none !important;
         flex-basis: 100% !important;
     }
+}
+body.dashboard-body .profile-header .hero-actions {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 112px !important;
+    overflow: visible !important;
+}
+
+body.dashboard-body .profile-header .profile-edit-header-button {
+    display: inline-flex !important;
+    width: auto !important;
+    min-width: 112px !important;
+    min-height: 34px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 14px !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
+}
+
+body.dashboard-body .signature-actions .signature-sign-button {
+    width: auto !important;
+    min-width: 72px !important;
+    min-height: 34px !important;
+    padding: 0 16px !important;
+    font-size: 0.76rem !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
 }

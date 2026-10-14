@@ -162,12 +162,14 @@
                                 <td>
                                     <div class="signature-actions">
                                         @if ($canSignNow)
-                                            <a class="btn btn-primary signature-icon-action" href="{{ route('signature-requests.show', $requestItem) }}" title="{{ $signActionLabel }}" aria-label="{{ $signActionLabel }}">
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                    <path d="M12 20h9" />
-                                                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
-                                                </svg>
-                                                <span>{{ $signActionLabel }}</span>
+                                            <a
+                                                class="btn btn-primary signature-sign-button pt-action-button--labeled"
+                                                href="{{ route('signature-requests.show', $requestItem) }}"
+                                                title="{{ $signActionLabel }}"
+                                                aria-label="{{ $signActionLabel }}"
+                                                data-action-icon="false"
+                                            >
+                                                Sign
                                             </a>
                                         @elseif ($isSignedRequest)
                                             <a class="btn btn-secondary signature-icon-action" href="{{ route('signature-requests.show', $requestItem) }}" title="View Signed Document" aria-label="View Signed Document">

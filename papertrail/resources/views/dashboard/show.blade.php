@@ -600,20 +600,19 @@
                 @if ($announcementsUrl)
                     <a class="enterprise-announcement-action" href="{{ $announcementsUrl }}">
                         <x-papertrail.icon name="bell" />
-                        Alerts
+                        Notifications
                     </a>
                 @endif
             </div>
         </section>
 
-        <section class="enterprise-kpi-grid hope-kpi-row row" aria-label="{{ $isAdminDashboard ? 'Administration summary' : 'Procurement summary' }}">
+        <section class="enterprise-kpi-grid hope-kpi-row {{ $isAdminDashboard ? 'admin-kpi-grid' : '' }} row" aria-label="{{ $isAdminDashboard ? 'Administration summary' : 'Procurement summary' }}">
             @if ($isAdminDashboard)
                 @foreach ($adminKpis as $kpi)
                     <div class="col-12 col-sm-6 col-xl">
                         <x-dashboard.summary-card
                             :label="$kpi['label'] ?? 'System Metric'"
                             :value="$kpi['value'] ?? '0'"
-                            :description="$kpi['description'] ?? 'Administration metric'"
                             :tone="$kpi['tone'] ?? 'blue'"
                             :icon="$kpi['icon'] ?? 'shield'"
                             :href="$kpi['href'] ?? null"
@@ -648,7 +647,6 @@
                     <x-dashboard.summary-card
                         label="Total Documents"
                         :value="$totalDocuments"
-                        description="Visible procurement records"
                         tone="blue"
                         icon="document"
                     />
@@ -657,7 +655,6 @@
                     <x-dashboard.summary-card
                         label="Pending Actions"
                         :value="$pendingActions"
-                        description="Needs review or routing"
                         tone="purple"
                         icon="clock"
                     />
@@ -666,7 +663,6 @@
                     <x-dashboard.summary-card
                         label="Returned"
                         :value="$returnedDocuments"
-                        description="Requires correction"
                         tone="orange"
                         icon="return"
                     />
@@ -675,7 +671,6 @@
                     <x-dashboard.summary-card
                         label="Completed"
                         :value="$completedDocuments"
-                        description="Approved or accepted"
                         tone="green"
                         icon="check"
                     />

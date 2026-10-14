@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="{{ asset('css/signature-requests.css') }}">
     <link rel="stylesheet" href="{{ asset('css/document-drafts.css') }}">
     <link rel="stylesheet" href="{{ asset('css/document-attachments.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/competitive-bidding-supporting-documents.css') }}?v={{ file_exists(public_path('css/competitive-bidding-supporting-documents.css')) ? filemtime(public_path('css/competitive-bidding-supporting-documents.css')) : time() }}">
     <link rel="stylesheet" href="{{ asset('css/document-records.css') }}?v={{ filemtime(public_path('css/document-records.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/ppmp.css') }}?v={{ filemtime(public_path('css/ppmp.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/rule-configuration.css') }}">
