@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ChatbotConversation;
 use App\Services\AuditLogger;
+use App\Services\OpenAIService;
 use App\Services\ProcurementChatbotService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -12,7 +13,7 @@ use Illuminate\View\View;
 
 class ProcurementChatbotController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, OpenAIService $openAI): View
     {
         $user = $request->user();
 
@@ -23,6 +24,7 @@ class ProcurementChatbotController extends Controller
             'activeConversation' => null,
             'messages' => collect(),
             'starterQuestions' => $this->starterQuestions(),
+            'openAiConfigured' => $openAI->isConfigured(),
         ]);
     }
 
@@ -51,6 +53,8 @@ class ProcurementChatbotController extends Controller
                 'history_url' => $conversation ? route('assistant.history', $conversation) : route('assistant.index'),
                 'type' => $result['type'] ?? 'text',
                 'response' => $result['response'],
+                'error' => $result['error'] ?? null,
+                'fallback' => $result['fallback'] ?? false,
                 'ai_message' => $result['ai_message'] ?? $result['response'],
                 'tracking_data' => $result['tracking_data'] ?? null,
                 'assistant_message' => $assistantMessage ? [
@@ -68,11 +72,11 @@ class ProcurementChatbotController extends Controller
 
         return redirect($route)->with(
             $result['ok'] ? 'status' : 'error',
-            $result['ok'] ? 'AI Assistant replied.' : $result['response']
+            $result['ok'] ? 'AI Assistant replied.' : ($result['error'] ?? $result['response'])
         );
     }
 
-    public function history(Request $request, ChatbotConversation $conversation): View
+    public function history(Request $request, ChatbotConversation $conversation, OpenAIService $openAI): View
     {
         abort_unless((int) $conversation->user_id === (int) $request->user()->id, 403);
 
@@ -84,6 +88,7 @@ class ProcurementChatbotController extends Controller
             'activeConversation' => $conversation,
             'messages' => $conversation->messages,
             'starterQuestions' => $this->starterQuestions(),
+            'openAiConfigured' => $openAI->isConfigured(),
         ]);
     }
 

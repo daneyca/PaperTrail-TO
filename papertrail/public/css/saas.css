@@ -11694,7 +11694,7 @@ body.dashboard-body .pt-loading-overlay {
     justify-content: stretch;
     min-height: min(560px, calc(100vh - 180px));
     border: 1px solid rgba(219, 230, 244, 0.86);
-    border-radius: 22px;
+    border-radius: 0;
     background: rgba(248, 251, 255, 0.9);
     opacity: 0;
     pointer-events: none;
@@ -11710,11 +11710,11 @@ body.dashboard-body .pt-loading-overlay.is-visible {
 
 body.dashboard-body .pt-content-loading {
     width: 100%;
-    padding: clamp(14px, 2vw, 22px);
+    padding: 0;
 }
 
 body.dashboard-body .pt-skeleton {
-    border-radius: 12px;
+    border-radius: 0;
     background: linear-gradient(90deg, #eef4fb 25%, #f8fbff 38%, #eef4fb 63%);
     background-size: 400% 100%;
     animation: ptSkeleton 1.35s ease infinite;
@@ -11788,11 +11788,11 @@ html.papertrail-dark-mode body.dashboard-body .pt-skeleton {
     body.dashboard-body .pt-loading-overlay {
         inset: 10px;
         min-height: min(520px, calc(100vh - 150px));
-        border-radius: 18px;
+        border-radius: 0;
     }
 
     body.dashboard-body .pt-content-loading {
-        padding: 12px;
+        padding: 0;
     }
 
     body.dashboard-body .pt-skeleton-card-grid {

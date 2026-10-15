@@ -17,7 +17,12 @@
             </a>
 
             <div class="assistant-connection-card" aria-label="OpenAI connection status">
-                <strong class="assistant-status-pill">OpenAI Connected</strong>
+                <strong
+                    class="assistant-status-pill {{ $openAiConfigured ? 'is-configured' : 'is-unavailable' }}"
+                    data-assistant-connection-status
+                >
+                    {{ $openAiConfigured ? 'AI Configured' : 'AI Not Configured' }}
+                </strong>
             </div>
         </div>
 
@@ -169,6 +174,7 @@
             const messages = document.querySelector('[data-assistant-messages]');
             const loading = document.querySelector('[data-assistant-loading]');
             const error = document.querySelector('[data-assistant-error]');
+            const connectionStatus = document.querySelector('[data-assistant-connection-status]');
             const conversationInput = document.querySelector('[data-assistant-conversation-id]');
             const suggestions = document.querySelector('[data-assistant-suggestions]');
             const suggestionsReopen = document.querySelector('[data-assistant-suggestions-reopen]');
@@ -515,12 +521,24 @@
                     scrollChatToBottom();
 
                     if (!response.ok || !data.ok) {
+                        error.textContent = data.error || 'AI Assistant is temporarily unavailable. Please try again later.';
                         error.hidden = false;
+                        connectionStatus?.classList.remove('is-configured');
+                        connectionStatus?.classList.add('is-unavailable');
+                        if (connectionStatus) {
+                            connectionStatus.textContent = 'AI Unavailable';
+                        }
                     }
                 } catch (requestError) {
                     appendMessage('assistant', 'AI Assistant is temporarily unavailable. Please try again later.');
                     scrollChatToBottom();
+                    error.textContent = 'The deployment server could not complete the AI request.';
                     error.hidden = false;
+                    connectionStatus?.classList.remove('is-configured');
+                    connectionStatus?.classList.add('is-unavailable');
+                    if (connectionStatus) {
+                        connectionStatus.textContent = 'AI Unavailable';
+                    }
                 } finally {
                     setLoading(false);
                     sendButton.disabled = false;

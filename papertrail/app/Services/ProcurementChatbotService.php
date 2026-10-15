@@ -161,6 +161,9 @@ class ProcurementChatbotService
                 'assistant_message' => $assistantMessage,
             ];
         } catch (Throwable $exception) {
+            $failureMessage = $this->openAI->userFacingError($exception);
+            $fallbackResponse = $this->fallbackResponse($message);
+
             Log::error('PaperTrail chatbot request failed.', [
                 'user_id' => $user->id,
                 'conversation_id' => $conversation->id,
@@ -170,7 +173,7 @@ class ProcurementChatbotService
 
             $assistantMessage = $conversation->messages()->create([
                 'role' => ChatbotMessage::ROLE_ASSISTANT,
-                'message' => self::FALLBACK_MESSAGE,
+                'message' => $fallbackResponse,
             ]);
 
             $conversation->touch();
@@ -179,13 +182,16 @@ class ProcurementChatbotService
                 'conversation_id' => $conversation->id,
                 'message_id' => $assistantMessage->id,
                 'error_class' => $exception::class,
+                'fallback_used' => true,
             ], 'warning');
 
             return [
                 'ok' => false,
                 'type' => 'text',
                 'conversation' => $conversation,
-                'response' => self::FALLBACK_MESSAGE,
+                'response' => $fallbackResponse,
+                'error' => $failureMessage,
+                'fallback' => true,
                 'tracking_data' => null,
                 'ai_message' => null,
                 'assistant_message' => $assistantMessage,
@@ -531,6 +537,39 @@ RESPONSE;
         return preg_match('/\bBAC[-\s]?RES[-\s]?\d{4}[-\s]?[A-Z0-9-]*\d+\b/i', $message) === 1
             || preg_match('/\b(PPMP|APP|SAIP|SUPP[-\s]?APP|PR|PO|RFQ|ABSTRACT|ABS|IAR)[-\s]?\d{4}[-\s]?[A-Z0-9-]*\d+\b/i', $message) === 1
             || preg_match('/\b[A-Z]{2,8}[-\s]?\d{4}[-\s]?[A-Z0-9-]*\d+\b/i', $message) === 1;
+    }
+
+    private function fallbackResponse(string $message): string
+    {
+        $value = Str::of($message)->lower()->squish()->toString();
+
+        if (str_contains($value, 'what is papertrail')) {
+            return 'PaperTrail is the LGU procurement document workflow system. It records procurement documents, routes them to the correct offices and signatories, tracks their current status, and keeps notifications and audit history.';
+        }
+
+        if ((str_contains($value, 'after') || str_contains($value, 'next'))
+            && (preg_match('/\bpr\b/i', $value) === 1 || str_contains($value, 'purchase request'))) {
+            return 'After a Purchase Request is submitted, PaperTrail completes the required PR signatures and returns it to the creator. The creator then sends it to PR Numbering Staff for an official PR number. After numbering, it returns to the End User or BACSEC-002 for submission to BAC Secretariat, where it is received and validated. Check Status Tracking and Notifications for the current handler and next action.';
+        }
+
+        if ((str_contains($value, 'create') || str_contains($value, 'prepare'))
+            && (preg_match('/\bpr\b/i', $value) === 1 || str_contains($value, 'purchase request'))) {
+            return 'Open SVP / Alternative Procurement, select Create PR, complete the required project and item details, choose the required signatories, and save the draft. Review the form before submitting it for signatures and official PR number assignment.';
+        }
+
+        if (str_contains($value, 'pending bac chair signature')) {
+            return 'Pending BAC Chair Signature means the document has already been routed to the BAC Chair and is waiting for review and signing. The assigned BAC Chair should open Signatures, select Pending Signatures, review the document, and choose Sign or Return for Correction.';
+        }
+
+        if (str_contains($value, 'supporting document') || str_contains($value, 'upload')) {
+            return 'Open the related document record and use its Supporting Documents or Attachments section. Select the correct category, choose the file, add a short description when useful, and upload it. The assigned reviewer can then verify or return the submission.';
+        }
+
+        if (str_contains($value, 'draft')) {
+            return 'Open the document module where the draft was created, filter the list by Draft status, and select the document to continue editing. Review all required fields and attachments before submitting it to the next workflow step.';
+        }
+
+        return self::FALLBACK_MESSAGE.' You can still provide a document tracking number to check its live PaperTrail status, or open the relevant module to review its current stage and required action.';
     }
 
     private function safeUserContext(User $user): array

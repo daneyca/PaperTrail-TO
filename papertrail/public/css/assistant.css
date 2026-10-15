@@ -157,6 +157,12 @@ body.dashboard-body .dashboard-content > .assistant-workspace {
     white-space: nowrap;
 }
 
+.assistant-status-pill.is-unavailable {
+    border-color: #fecaca;
+    background: #fef2f2;
+    color: #b91c1c !important;
+}
+
 .assistant-chat-messages,
 .assistant-messages {
     flex: 1 1 auto;

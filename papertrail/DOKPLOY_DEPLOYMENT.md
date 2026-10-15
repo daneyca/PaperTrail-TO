@@ -131,6 +131,50 @@ MAIL_FROM_ADDRESS=no-reply@papertrail-to.online
 
 Set `OPENAI_API_KEY` only if AI features should call OpenAI in production.
 
+## Production AI Diagnostics
+
+The assistant status must be tested inside the running `app` container. A configured key does not by itself prove that the container can reach OpenAI.
+
+In the Dokploy terminal for the `app` service, run:
+
+```text
+php artisan papertrail:openai-status
+```
+
+Expected output:
+
+```text
+API Key:
+Configured
+
+Connection:
+Ready
+```
+
+If the key is missing or was changed in Dokploy, set these environment variables without wrapping quotes or spaces:
+
+```text
+OPENAI_API_KEY=YOUR_OPENAI_API_KEY
+OPENAI_MODEL=gpt-4.1-mini
+OPENAI_REQUEST_TIMEOUT=30
+```
+
+Then redeploy or recreate the `app` container so Compose receives the updated environment. Restarting only Apache is not enough. After redeployment, refresh Laravel's cached configuration and test again:
+
+```text
+php artisan optimize:clear
+php artisan config:cache
+php artisan papertrail:openai-status
+```
+
+If the key is configured but the connection still fails, test outbound HTTPS from the same container:
+
+```text
+curl -I --max-time 15 https://api.openai.com/v1/models
+```
+
+An HTTP response proves DNS and outbound port `443` are working. A timeout, DNS error, or connection refusal means the VPS or hosting firewall is blocking the request. Application logs are written to Dokploy through `LOG_CHANNEL=stderr`; search the app logs for `PaperTrail OpenAI request failed` to see the safe failure category.
+
 ## Persistent Volumes
 
 The Compose file defines:

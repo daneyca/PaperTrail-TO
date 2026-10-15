@@ -49,7 +49,7 @@ class OpenAIService
                 'message' => $exception->getMessage(),
             ]);
 
-            throw new RuntimeException($this->safeErrorMessage($exception), previous: $exception);
+            throw new RuntimeException($this->userFacingError($exception), previous: $exception);
         }
     }
 
@@ -104,7 +104,7 @@ class OpenAIService
                 'message' => $exception->getMessage(),
             ]);
 
-            throw new RuntimeException($this->safeErrorMessage($exception), previous: $exception);
+            throw new RuntimeException($this->userFacingError($exception), previous: $exception);
         }
     }
 
@@ -118,33 +118,44 @@ class OpenAIService
         return (string) config('services.openai.model', 'gpt-4.1-mini');
     }
 
-    private function safeErrorMessage(Throwable $exception): string
+    public function userFacingError(Throwable $exception): string
     {
         $message = strtolower($exception->getMessage());
 
-        if (str_contains($message, 'api key is missing')) {
-            return 'OpenAI API key is not configured.';
+        if (str_contains($message, 'api key is missing')
+            || str_contains($message, 'api key is not configured')
+            || str_contains($message, 'not configured')) {
+            return 'AI service is not configured on this deployment.';
         }
 
         if (str_contains($message, 'incorrect api key')
             || str_contains($message, 'invalid api key')
             || str_contains($message, 'unauthorized')
+            || str_contains($message, 'authentication failed')
             || str_contains($message, '401')) {
-            return 'OpenAI authentication failed. Please check API configuration.';
+            return 'AI service authentication failed on this deployment.';
         }
 
         if (str_contains($message, 'timed out')
             || str_contains($message, 'timeout')
             || str_contains($message, 'could not resolve')
             || str_contains($message, 'failed to connect')
-            || str_contains($message, 'connection')) {
-            return 'Unable to connect to OpenAI service.';
+            || str_contains($message, 'unable to connect')
+            || str_contains($message, 'cannot reach')
+            || str_contains($message, 'connection refused')) {
+            return 'The deployment server cannot reach the AI service.';
+        }
+
+        if (str_contains($message, 'insufficient_quota')
+            || str_contains($message, 'billing')
+            || str_contains($message, 'quota')) {
+            return 'AI service usage or billing limit has been reached.';
         }
 
         if (str_contains($message, 'rate limit') || str_contains($message, '429')) {
-            return 'OpenAI rate limit reached. Please try again later.';
+            return 'AI service rate limit reached. Please try again later.';
         }
 
-        return 'OpenAI service returned an error. Please check API configuration.';
+        return 'AI service returned an error on this deployment.';
     }
 }
