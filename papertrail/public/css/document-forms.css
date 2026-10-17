@@ -122,8 +122,9 @@ body.dashboard-body .pr-page-subtitle {
 }
 
 body.dashboard-body .pr-create-split-workspace {
-    max-width: 1240px;
-    padding-top: 18px;
+    max-width: none;
+    margin: 0;
+    padding: 4px 0 56px;
 }
 
 body.dashboard-body .pr-create-split-header {
@@ -381,7 +382,7 @@ body.dashboard-body .pr-create-app-pane .pr-app-select-btn {
 
 @media (max-width: 860px) {
     body.dashboard-body .pr-create-split-workspace {
-        padding-inline: 14px;
+        padding-inline: 0;
     }
 
     body.dashboard-body .pr-create-split-header {

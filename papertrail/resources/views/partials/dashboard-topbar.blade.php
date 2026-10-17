@@ -56,13 +56,15 @@
         </form>
     </div>
 
-    <div class="enterprise-topbar__right">
+    <div class="enterprise-topbar__middle">
         <div class="pht-clock-widget" data-pht-clock aria-live="polite">
             <span>Philippine Standard Time (PHT)</span>
             <strong data-pht-date>{{ now('Asia/Manila')->format('l, F d, Y') }}</strong>
             <time data-pht-time datetime="{{ now('Asia/Manila')->toIso8601String() }}">{{ now('Asia/Manila')->format('h:i:s A') }}</time>
         </div>
+    </div>
 
+    <div class="enterprise-topbar__right">
         <div class="dashboard-utility-group" aria-label="Dashboard utilities">
             <button class="dashboard-utility-button" type="button" data-theme-toggle aria-label="Switch to dark mode" title="Theme">
                 <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">

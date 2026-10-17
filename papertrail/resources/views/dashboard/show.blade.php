@@ -578,7 +578,9 @@
     >
         <section class="enterprise-hero hope-hero pt-workspace-welcome">
             <div class="enterprise-hero__copy">
-                <p class="eyebrow">{{ $isAdminDashboard ? 'System Administration' : ($isSignatureOnlyDashboard ? 'E-Signature Workspace' : 'Your procurement workspace') }}</p>
+                @if ($isAdminDashboard || $isSignatureOnlyDashboard)
+                    <p class="eyebrow">{{ $isAdminDashboard ? 'System Administration' : 'E-Signature Workspace' }}</p>
+                @endif
                 <h1>{{ $greeting }}, {{ $firstName }}!</h1>
             </div>
 

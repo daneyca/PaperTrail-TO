@@ -498,7 +498,7 @@
             };
 
             if (isLoading && !options.immediate && !prefersReducedMotion.matches) {
-                progressiveLoadingTimer = window.setTimeout(applyState, 120);
+                progressiveLoadingTimer = window.setTimeout(applyState, 400);
                 return;
             }
 
@@ -581,10 +581,6 @@
             }
 
             setDashboardProgressiveLoading(true);
-        });
-
-        window.addEventListener('beforeunload', () => {
-            setDashboardProgressiveLoading(true, { immediate: true });
         });
 
         window.addEventListener('pageshow', () => {

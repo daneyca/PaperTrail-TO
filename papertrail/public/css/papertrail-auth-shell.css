@@ -89,6 +89,58 @@ body.dashboard-body:not(.modal-document-body) .dashboard-topbar.enterprise-topba
     backdrop-filter: none !important;
 }
 
+body.dashboard-body:not(.modal-document-body) .enterprise-topbar__middle {
+    display: none !important;
+}
+
+@media (min-width: 641px) {
+    body.dashboard-body:not(.modal-document-body) .dashboard-topbar.enterprise-topbar {
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        align-items: center !important;
+        column-gap: 14px !important;
+    }
+
+    body.dashboard-body:not(.modal-document-body) .enterprise-topbar__left,
+    body.dashboard-body:not(.modal-document-body) .enterprise-topbar__right {
+        width: auto !important;
+        min-width: 0 !important;
+    }
+
+    body.dashboard-body:not(.modal-document-body) .enterprise-topbar__right {
+        flex-wrap: nowrap !important;
+        justify-content: flex-end !important;
+    }
+
+    body.dashboard-body:not(.modal-document-body) .dashboard-search {
+        flex: 0 1 340px !important;
+        width: min(100%, 340px) !important;
+        max-width: 340px !important;
+        min-width: 0 !important;
+    }
+}
+
+@media (min-width: 1101px) {
+    body.dashboard-body:not(.modal-document-body) .dashboard-topbar.enterprise-topbar {
+        display: flex !important;
+    }
+
+    body.dashboard-body:not(.modal-document-body) .enterprise-topbar__left {
+        flex: 0 1 380px;
+    }
+
+    body.dashboard-body:not(.modal-document-body) .enterprise-topbar__middle {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        margin-inline: auto;
+    }
+
+    body.dashboard-body:not(.modal-document-body) .enterprise-topbar__right {
+        flex: 0 0 auto;
+    }
+}
+
 body.dashboard-body:not(.modal-document-body) .topbar-sidebar-collapse {
     display: inline-grid !important;
     flex: 0 0 32px !important;
@@ -312,6 +364,10 @@ body.dashboard-body:not(.modal-document-body) .dashboard-content :where(
 }
 
 @media (max-width: 520px) {
+    body.dashboard-body:not(.modal-document-body) .enterprise-topbar__right {
+        grid-template-areas: "utilities profile" !important;
+    }
+
     body.dashboard-body:not(.modal-document-body) .dashboard-topbar,
     body.dashboard-body:not(.modal-document-body) .dashboard-topbar.enterprise-topbar {
         padding: 8px 8px 8px 54px !important;

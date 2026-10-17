@@ -213,7 +213,7 @@ class DatabaseSeeder extends Seeder
             User::updateOrCreate(
                 ['user_id' => $userId],
                 [
-                    'name' => $name,
+                    'name' => $existingUser?->name ?? $name,
                     'office_id' => $office?->id,
                     'office' => $office?->name,
                     'role_id' => $assignedRole?->id,
@@ -264,7 +264,7 @@ class DatabaseSeeder extends Seeder
             User::updateOrCreate(
                 ['user_id' => $userId],
                 [
-                    'name' => $name,
+                    'name' => $existing?->name ?? $name,
                     'office_id' => $office?->id,
                     'office' => $office?->name,
                     'role_id' => $headOfficeRole?->id,

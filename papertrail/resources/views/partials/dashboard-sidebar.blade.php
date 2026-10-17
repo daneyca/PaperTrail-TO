@@ -29,19 +29,19 @@
             ->count();
     });
 
-    $pendingPrNumberCount = $safeCount(fn () => \App\Models\ProcurementDocument::query()
+    $pendingPrNumberCount = $roleSlug === 'pr-numbering' ? $safeCount(fn () => \App\Models\ProcurementDocument::query()
         ->where('status', \App\Models\ProcurementDocument::STATUS_PENDING_PR_NUMBER_ASSIGNMENT)
         ->where('pr_number_status', \App\Models\ProcurementDocument::PR_NUMBER_STATUS_PENDING_ASSIGNMENT)
-        ->count());
+        ->count()) : 0;
 
-    $pendingPpmpReviewCount = $safeCount(fn () => \App\Models\ProcurementDocument::query()
+    $pendingPpmpReviewCount = $roleSlug === 'bac-secretariat' ? $safeCount(fn () => \App\Models\ProcurementDocument::query()
         ->whereIn('status', [
             \App\Models\ProcurementDocument::STATUS_PENDING_PPMP_REVIEW,
             \App\Models\ProcurementDocument::STATUS_UNDER_PPMP_REVIEW,
         ])
-        ->count());
+        ->count()) : 0;
 
-    $submittedPrCount = $safeCount(function () use ($user) {
+    $submittedPrCount = $roleSlug === 'bac-secretariat' ? $safeCount(function () use ($user) {
         if (! $user) {
             return 0;
         }
@@ -57,7 +57,7 @@
                 ])->orWhereHas('bacResolutions');
             })
             ->count();
-    });
+    }) : 0;
 
     $signatureMenu = [
         'label' => 'Signatures',

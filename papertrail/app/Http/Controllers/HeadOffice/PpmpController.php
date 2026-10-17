@@ -859,22 +859,27 @@ class PpmpController extends Controller
 
     private function summary(User $user): array
     {
-        $base = $this->officePpmpQuery($user);
+        $rows = $this->officePpmpQuery($user)
+            ->selectRaw('status, COUNT(*) as document_count, SUM(total_amount) as amount')
+            ->groupBy('status')
+            ->get();
+        $count = fn (string $status): int => (int) ($rows->firstWhere('status', $status)?->document_count ?? 0);
 
         return [
-            'total' => (clone $base)->count(),
-            'draft' => (clone $base)->where('status', ProcurementDocument::STATUS_PPMP_DRAFT)->count(),
-            'submitted' => (clone $base)->where('status', ProcurementDocument::STATUS_PENDING_PPMP_REVIEW)->count(),
-            'reviewed' => (clone $base)->where('status', ProcurementDocument::STATUS_UNDER_PPMP_REVIEW)->count(),
-            'returned' => (clone $base)->whereIn('status', [ProcurementDocument::STATUS_RETURNED_BY_BAC_SECRETARIAT, ProcurementDocument::STATUS_PPMP_SIGNATURE_RETURNED])->count(),
-            'accepted' => (clone $base)->where('status', ProcurementDocument::STATUS_ACCEPTED_FOR_APP_CONSOLIDATION)->count(),
-            'pending' => (clone $base)->whereIn('status', [
+            'total' => (int) $rows->sum('document_count'),
+            'draft' => $count(ProcurementDocument::STATUS_PPMP_DRAFT),
+            'submitted' => $count(ProcurementDocument::STATUS_PENDING_PPMP_REVIEW),
+            'reviewed' => $count(ProcurementDocument::STATUS_UNDER_PPMP_REVIEW),
+            'returned' => $count(ProcurementDocument::STATUS_RETURNED_BY_BAC_SECRETARIAT)
+                + $count(ProcurementDocument::STATUS_PPMP_SIGNATURE_RETURNED),
+            'accepted' => $count(ProcurementDocument::STATUS_ACCEPTED_FOR_APP_CONSOLIDATION),
+            'pending' => array_sum(array_map($count, [
                 ProcurementDocument::STATUS_PPMP_DRAFT,
                 ProcurementDocument::STATUS_PPMP_PENDING_SIGNATORIES,
                 ProcurementDocument::STATUS_PPMP_SIGNATORIES_COMPLETED,
                 ProcurementDocument::STATUS_PENDING_PPMP_REVIEW,
-            ])->count(),
-            'budget' => (clone $base)->sum('total_amount'),
+            ])),
+            'budget' => (float) $rows->sum('amount'),
         ];
     }
 

@@ -19,9 +19,7 @@
 
     <section class="dashboard-hero admin-users-hero ppmp-page-hero">
         <div>
-            <p class="eyebrow">Head of Office / End User</p>
-            <h1>PPMP</h1>
-            <p>Prepare, revise, and track Project Procurement Plans for your office.</p>
+            <h1>Project Procurement Management Plan</h1>
         </div>
         <div class="hero-actions">
             <a href="{{ route('head-office.ppmp.create') }}" class="dashboard-action">Create PPMP</a>
