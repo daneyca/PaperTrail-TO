@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\SendWorkflowEmail;
 use App\Models\SystemNotification;
 use App\Models\User;
 use App\Notifications\ProcurementWorkflowNotification;
@@ -152,7 +153,7 @@ class NotificationDispatchService
         }
 
         try {
-            $user->notify(new ProcurementWorkflowNotification(
+            SendWorkflowEmail::dispatch($user->id, new ProcurementWorkflowNotification(
                 subject: $subject,
                 message: $message,
                 actionUrl: $url,
@@ -161,15 +162,17 @@ class NotificationDispatchService
                 trackingNumber: $metadata['tracking_number'] ?? $this->trackingNumber($related),
                 status: $metadata['status'] ?? $this->status($related),
                 metadata: $metadata,
-            ));
+            ), $related)->onQueue('mail')->afterCommit();
 
-            $this->auditEmail('Email Notification Sent', 'Workflow email notification sent.', $user, $related, [
-                'subject' => $subject,
-                'recipient_user_id' => $user->user_id,
-                'recipient_email_present' => filled($user->email),
-            ]);
+            if (config('queue.default') !== 'sync') {
+                $this->auditEmail('Email Notification Queued', 'Workflow email notification queued.', $user, $related, [
+                    'subject' => $subject,
+                    'recipient_user_id' => $user->user_id,
+                    'recipient_email_present' => true,
+                ]);
+            }
         } catch (Throwable $exception) {
-            Log::error('PaperTrail workflow email failed.', [
+            Log::error('PaperTrail workflow email could not be queued.', [
                 'subject' => $subject,
                 'user_id' => $user->id,
                 'user_identifier' => $user->user_id,
@@ -178,7 +181,7 @@ class NotificationDispatchService
                 'exception' => $exception->getMessage(),
             ]);
 
-            $this->auditEmail('Email Notification Failed', 'Workflow email notification failed.', $user, $related, [
+            $this->auditEmail('Email Notification Failed', 'Workflow email notification could not be queued.', $user, $related, [
                 'subject' => $subject,
                 'recipient_user_id' => $user->user_id,
                 'error' => $exception->getMessage(),

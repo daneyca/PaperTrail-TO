@@ -114,7 +114,7 @@ TRUSTED_HOSTS=^papertrail-to\.online$,^www\.papertrail-to\.online$
 CORS_ALLOWED_ORIGINS=https://papertrail-to.online,https://www.papertrail-to.online
 
 LOG_CHANNEL=stderr
-QUEUE_CONNECTION=sync
+QUEUE_CONNECTION=database
 FILESYSTEM_DISK=local
 ```
 
@@ -206,6 +206,8 @@ apache2-foreground
 
 The entrypoint prepares writable Laravel directories, creates the public storage symlink, and caches config/views. It intentionally does not run `route:cache` because the application currently has closure routes.
 
+The entrypoint also applies the small `jobs` table migration before Apache starts. Workflow emails are stored there so document submissions do not wait for SMTP. The separate `mail-worker` Compose service sends them and retries failures. Keep `QUEUE_CONNECTION=database` in Dokploy's Environment tab; a previously saved `QUEUE_CONNECTION=sync` overrides the Compose default and keeps email sending inside requests. Check that both `app` and `mail-worker` are running after deployment.
+
 ## Migrations
 
 Run migrations manually after the first successful deployment and before opening the app to users:
@@ -221,6 +223,21 @@ docker compose exec app php artisan migrate --force
 ```
 
 Do not run destructive commands such as `migrate:fresh` or database resets in production.
+
+The dashboard document indexes are applied by this regular migration command. To check email delivery in the `app` container, run:
+
+```text
+php artisan queue:monitor database:mail --max=10
+php artisan queue:failed
+```
+
+`Email Notification Queued` means the request finished and mail is awaiting the worker. `Email Notification Sent` means the worker delivered it. A failed job remains available for investigation and retry.
+
+For local development, set `QUEUE_CONNECTION=database`, run `php artisan migrate`, and keep a separate terminal running:
+
+```text
+php artisan queue:work database --queue=mail --sleep=2 --tries=3 --timeout=60
+```
 
 ## Adminer Login
 

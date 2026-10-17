@@ -107,6 +107,7 @@ class DashboardWidgetService
         $logs = AuditLog::query()
             ->where('module', 'Email Notifications')
             ->whereIn('action', [
+                'Email Notification Queued',
                 'Email Notification Sent',
                 'Email Notification Failed',
                 'Email Notification Skipped',
@@ -239,12 +240,14 @@ class DashboardWidgetService
             'description' => $log->description ?: 'Email notification recorded.',
             'recipient' => $metadata['recipient_user_id'] ?? $log->user_identifier ?? null,
             'status' => match ($log->action) {
+                'Email Notification Queued' => 'Queued',
                 'Email Notification Sent' => 'Sent',
                 'Email Notification Failed' => 'Failed',
                 'Email Notification Skipped' => 'Skipped',
                 default => $log->status ?: 'Recorded',
             },
             'tone' => match ($log->action) {
+                'Email Notification Queued' => 'muted',
                 'Email Notification Sent' => 'success',
                 'Email Notification Failed' => 'danger',
                 'Email Notification Skipped' => 'warning',

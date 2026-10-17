@@ -28,6 +28,8 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
+    private ?array $headOfficeDocumentCounts = null;
+
     public function redirect(Request $request): RedirectResponse
     {
         $user = Auth::user();
@@ -285,6 +287,7 @@ class DashboardController extends Controller
     private function headOfficeDocumentDashboard(?User $user): array
     {
         $base = $this->headOfficeDocumentBase($user);
+        $counts = $this->headOfficeDocumentCounts($user);
         $returnedStatuses = [
             ProcurementDocument::STATUS_RETURNED_BY_PR_NUMBERING_STAFF,
             ProcurementDocument::STATUS_RETURNED_BY_BAC_SECRETARIAT,
@@ -305,7 +308,7 @@ class DashboardController extends Controller
                 'accent' => 'ppmp',
                 'icon' => 'ppmp',
                 'href' => $this->routeUrl('head-office.ppmp.index'),
-                'count' => (clone $base)->whereIn('document_type', ['PPMP'])->count(),
+                'count' => $counts['by_type']['PPMP'] ?? 0,
                 'actionLabel' => 'View PPMP',
             ],
             [
@@ -316,7 +319,7 @@ class DashboardController extends Controller
                 'accent' => 'pr',
                 'icon' => 'pr',
                 'href' => $this->routeUrl('head-office.pr.index'),
-                'count' => (clone $base)->whereIn('document_type', ['PR', 'Purchase Request'])->count(),
+                'count' => ($counts['by_type']['PR'] ?? 0) + ($counts['by_type']['Purchase Request'] ?? 0),
                 'actionLabel' => 'View PR',
             ],
             [
@@ -327,7 +330,7 @@ class DashboardController extends Controller
                 'accent' => 'documents',
                 'icon' => 'document',
                 'href' => $this->routeUrl('head-office.documents.index'),
-                'count' => (clone $base)->count(),
+                'count' => $counts['total'],
                 'actionLabel' => 'View My Documents',
             ],
             [
@@ -338,7 +341,7 @@ class DashboardController extends Controller
                 'accent' => 'returned',
                 'icon' => 'return',
                 'href' => $this->routeUrl('head-office.documents.index', ['tab' => 'returned']),
-                'count' => (clone $base)->whereIn('status', $returnedStatuses)->count(),
+                'count' => $this->headOfficeStatusCount($counts, $returnedStatuses),
                 'actionLabel' => 'View Returned',
             ],
         ];
@@ -367,14 +370,14 @@ class DashboardController extends Controller
             ->all();
 
         return [
-            'totalDocuments' => (clone $base)->count(),
+            'totalDocuments' => $counts['total'],
             'documentCards' => $documentCards,
             'documents' => $documents,
             'selectedDocument' => $documents[0] ?? null,
             'tabs' => array_merge([
                 [
                     'label' => 'All Documents',
-                    'count' => (clone $base)->count(),
+                    'count' => $counts['total'],
                     'href' => $this->routeUrl('head-office.documents.index'),
                     'active' => true,
                 ],
@@ -406,6 +409,39 @@ class DashboardController extends Controller
             $builder->orWhere('submitted_by_user_id', $user->id)
                 ->orWhere('prepared_by_user_id', $user->id);
         });
+    }
+
+    private function headOfficeDocumentCounts(?User $user): array
+    {
+        if ($this->headOfficeDocumentCounts !== null) {
+            return $this->headOfficeDocumentCounts;
+        }
+
+        $counts = ['total' => 0, 'null_status' => 0, 'by_type' => [], 'by_status' => []];
+
+        foreach ($this->headOfficeDocumentBase($user)
+            ->selectRaw('document_type, status, COUNT(*) as aggregate')
+            ->groupBy('document_type', 'status')
+            ->get() as $row) {
+            $count = (int) $row->aggregate;
+            $counts['total'] += $count;
+            $counts['by_type'][$row->document_type] = ($counts['by_type'][$row->document_type] ?? 0) + $count;
+
+            if ($row->status === null) {
+                $counts['null_status'] += $count;
+            } else {
+                $counts['by_status'][$row->status] = ($counts['by_status'][$row->status] ?? 0) + $count;
+            }
+        }
+
+        return $this->headOfficeDocumentCounts = $counts;
+    }
+
+    private function headOfficeStatusCount(array $counts, array $statuses, bool $exclude = false): int
+    {
+        $matching = array_sum(array_map(fn (string $status): int => $counts['by_status'][$status] ?? 0, $statuses));
+
+        return $exclude ? $counts['total'] - $counts['null_status'] - $matching : $matching;
     }
 
     private function dashboardDocumentRow(ProcurementDocument $document): array
@@ -634,15 +670,7 @@ class DashboardController extends Controller
             return [];
         }
 
-        $base = ProcurementDocument::query()
-            ->where(function ($query) use ($user) {
-                if ($user->office_id) {
-                    $query->where('submitting_office_id', $user->office_id);
-                }
-
-                $query->orWhere('submitted_by_user_id', $user->id)
-                    ->orWhere('prepared_by_user_id', $user->id);
-            });
+        $counts = $this->headOfficeDocumentCounts($user);
 
         $draftStatuses = [
             ProcurementDocument::STATUS_PPMP_DRAFT,
@@ -675,10 +703,10 @@ class DashboardController extends Controller
         ];
 
         return [
-            ['label' => 'Submitted', 'value' => (string) (clone $base)->whereNotIn('status', $draftStatuses)->count(), 'tone' => 'navy', 'href' => $this->routeUrl('head-office.documents.index')],
-            ['label' => 'Returned', 'value' => (string) (clone $base)->whereIn('status', $returnedStatuses)->count(), 'tone' => 'gold', 'href' => $this->routeUrl('head-office.documents.index', ['tab' => 'returned'])],
-            ['label' => 'Approved / Accepted', 'value' => (string) (clone $base)->whereIn('status', $approvedStatuses)->count(), 'tone' => 'green', 'href' => $this->routeUrl('head-office.documents.index', ['status' => 'approved'])],
-            ['label' => 'Pending', 'value' => (string) (clone $base)->whereNotIn('status', array_merge($returnedStatuses, $approvedStatuses))->count(), 'tone' => 'blue', 'href' => $this->routeUrl('head-office.documents.index', ['status' => 'pending'])],
+            ['label' => 'Submitted', 'value' => (string) $this->headOfficeStatusCount($counts, $draftStatuses, true), 'tone' => 'navy', 'href' => $this->routeUrl('head-office.documents.index')],
+            ['label' => 'Returned', 'value' => (string) $this->headOfficeStatusCount($counts, $returnedStatuses), 'tone' => 'gold', 'href' => $this->routeUrl('head-office.documents.index', ['tab' => 'returned'])],
+            ['label' => 'Approved / Accepted', 'value' => (string) $this->headOfficeStatusCount($counts, $approvedStatuses), 'tone' => 'green', 'href' => $this->routeUrl('head-office.documents.index', ['status' => 'approved'])],
+            ['label' => 'Pending', 'value' => (string) $this->headOfficeStatusCount($counts, array_merge($returnedStatuses, $approvedStatuses), true), 'tone' => 'blue', 'href' => $this->routeUrl('head-office.documents.index', ['status' => 'pending'])],
         ];
     }
 

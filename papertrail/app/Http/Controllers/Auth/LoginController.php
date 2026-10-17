@@ -215,18 +215,15 @@ class LoginController extends Controller
             User::ROLE_BAC_CHAIR,
             User::ROLE_BAC_VICE_CHAIRPERSON,
             User::ROLE_APPROVING_AUTHORITY,
-            User::ROLE_PR_NUMBERING,
-        ];
-        $hiddenLoginRoles = [
             User::ROLE_BUDGET,
             User::ROLE_ACCOUNTING,
+            User::ROLE_PR_NUMBERING,
         ];
 
         return Role::where('status', Role::STATUS_ACTIVE)
             ->where('is_system', true)
             ->where('code', '!=', '099')
             ->where('name', '!=', 'President of the Philippines')
-            ->whereNotIn('name', $hiddenLoginRoles)
             ->orderBy('id')
             ->pluck('name')
             ->sortBy(fn (string $role) => array_search($role, $roleOrder, true) === false
