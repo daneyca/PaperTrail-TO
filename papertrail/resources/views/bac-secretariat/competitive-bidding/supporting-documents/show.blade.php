@@ -5,7 +5,7 @@
 @section('content')
     <section class="cb-support-detail-header pt-smooth-enter">
         <div>
-            <p class="cb-support-eyebrow">BACSEC-002 · Supporting Documents</p>
+            <p class="cb-support-eyebrow">BACSEC-001 · Supporting Documents</p>
             <h1>{{ $record->reference_number }}</h1>
             <p>{{ $record->project_title }}</p>
         </div>

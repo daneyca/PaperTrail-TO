@@ -149,7 +149,7 @@ class DocumentResolverService
 
         if ($this->hasAnyRole($user, ['bac_secretariat', User::ROLE_BAC_SECRETARIAT])) {
             if ($document instanceof SvpPostingRecord) {
-                return $user->user_id === 'BACSEC-004' && $this->isModifiable($document);
+                return $user->user_id === 'BACSEC-003' && $this->isModifiable($document);
             }
 
             if ($document instanceof ProcurementDocument) {

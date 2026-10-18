@@ -481,7 +481,8 @@ class BacResolutionController extends Controller
 
     private function activeUserByRoleCodeOrId(string $roleName, string $roleCode, string $fallbackUserId): ?User
     {
-        return $this->activeUserByRoleName($roleName)
+        return User::where('status', User::STATUS_ACTIVE)->where('user_id', $fallbackUserId)->first()
+            ?? $this->activeUserByRoleName($roleName)
             ?? $this->activeUserByRoleCode($roleCode)
             ?? User::where('status', User::STATUS_ACTIVE)->where('user_id', $fallbackUserId)->first();
     }

@@ -137,7 +137,7 @@
                                 'pr_submitted' => 'PR Submitted',
                                 'pr_received_by_bac_secretariat' => 'Received',
                                 'under_pr_validation' => 'Under Validation',
-                                'ready_for_bac_resolution' => 'PR Copy Sent to BACSEC-002',
+                                'ready_for_bac_resolution' => 'PR Copy Sent to BACSEC-001',
                                 'returned_by_bac_secretariat' => 'Returned',
                                 'returned_by_budget' => 'Returned',
                                 'returned_by_accounting' => 'Returned',

@@ -160,7 +160,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function hasBacsec002PurchaseRequestCapability(): bool
     {
-        return $this->user_id === 'BACSEC-002'
+        return $this->user_id === 'BACSEC-001'
             && ($this->hasRole('bac_secretariat') || $this->hasRole(self::ROLE_BAC_SECRETARIAT));
     }
 

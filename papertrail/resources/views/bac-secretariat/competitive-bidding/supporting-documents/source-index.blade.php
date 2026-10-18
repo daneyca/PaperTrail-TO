@@ -5,9 +5,9 @@
 @section('content')
     <section class="cb-support-hero pt-smooth-enter">
         <div>
-            <p class="cb-support-eyebrow">BACSEC-004 &middot; Competitive Bidding</p>
+            <p class="cb-support-eyebrow">BACSEC-003 &middot; Competitive Bidding</p>
             <h1>Submit Bidding Documents</h1>
-            <p>Final project documents ready for BACSEC-002 checking.</p>
+            <p>Final project documents ready for BACSEC-001 checking.</p>
         </div>
     </section>
 

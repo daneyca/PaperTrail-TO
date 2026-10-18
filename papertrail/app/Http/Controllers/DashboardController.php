@@ -995,7 +995,7 @@ class DashboardController extends Controller
 
     private function isBacsecPrSignatureOnly(?User $user): bool
     {
-        return $user?->user_id === 'BACSEC-003'
+        return $user?->user_id === 'BACSEC-002'
             && ($user->hasRole('bac_secretariat') || $user->hasRole(User::ROLE_BAC_SECRETARIAT));
     }
 

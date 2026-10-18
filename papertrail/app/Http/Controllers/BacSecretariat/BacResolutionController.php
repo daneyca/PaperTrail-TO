@@ -1003,7 +1003,7 @@ class BacResolutionController extends Controller
         $viceChair = $this->activeUserByRoleOrCode(User::ROLE_BAC_VICE_CHAIRPERSON, 'bac_vice_chairperson', 'BACVICE-001');
         $preparedBy = $user && ($user->hasRole('bac_secretariat') || $user->hasRole(User::ROLE_BAC_SECRETARIAT))
             ? $user
-            : $this->activeUserByRoleOrCode(User::ROLE_BAC_SECRETARIAT, 'bac_secretariat', 'BACSEC-002');
+            : $this->activeUserByRoleOrCode(User::ROLE_BAC_SECRETARIAT, 'bac_secretariat', 'BACSEC-001');
 
         return [
             'prepared_by' => $this->defaultSignerPayload($preparedBy, 'BAC Secretariat', 'Prepared By', 1),
@@ -1216,7 +1216,7 @@ class BacResolutionController extends Controller
         }
 
         if (str_contains($normalized, 'secretariat')) {
-            return $this->activeUserByRoleOrCode(User::ROLE_BAC_SECRETARIAT, 'bac_secretariat', 'BACSEC-002');
+            return $this->activeUserByRoleOrCode(User::ROLE_BAC_SECRETARIAT, 'bac_secretariat', 'BACSEC-001');
         }
 
         if (str_contains($normalized, 'procuring entity')
@@ -1327,6 +1327,14 @@ class BacResolutionController extends Controller
 
     private function activeUserByRoleOrCode(string $roleName, string $roleCode, string $fallbackUserId): ?User
     {
+        $primary = $fallbackUserId === 'BACSEC-001'
+            ? User::where('user_id', $fallbackUserId)->where('status', User::STATUS_ACTIVE)->first()
+            : null;
+
+        if ($primary) {
+            return $primary;
+        }
+
         return User::query()
             ->where('status', User::STATUS_ACTIVE)
             ->where(function (Builder $query) use ($roleName, $roleCode, $fallbackUserId) {

@@ -123,9 +123,9 @@ class PpmpReviewController extends Controller
                 'started_at' => now(),
             ]);
 
-            $this->recordRouting($document, $request->user(), 'PPMP APP Consolidation Started', $oldStatus, $document->status, 'BACSEC-004 started PPMP APP consolidation review.');
+            $this->recordRouting($document, $request->user(), 'PPMP APP Consolidation Started', $oldStatus, $document->status, 'BACSEC-003 started PPMP APP consolidation review.');
 
-            AuditLogger::log('BAC Secretariat PPMP Review', 'PPMP APP Consolidation Started', 'BACSEC-004 started PPMP APP consolidation review.', $document, ['status' => $oldStatus], ['status' => $document->status]);
+            AuditLogger::log('BAC Secretariat PPMP Review', 'PPMP APP Consolidation Started', 'BACSEC-003 started PPMP APP consolidation review.', $document, ['status' => $oldStatus], ['status' => $document->status]);
         });
 
         return back()->with('status', 'PPMP APP consolidation review started.');

@@ -19,7 +19,7 @@ use Illuminate\View\View;
 
 class SvpPostingController extends Controller
 {
-    private const POSTING_PROCESSOR_USER_ID = 'BACSEC-004';
+    private const POSTING_PROCESSOR_USER_ID = 'BACSEC-003';
 
     public function __construct(private readonly SvpChainService $chains)
     {
@@ -34,7 +34,7 @@ class SvpPostingController extends Controller
 
         $this->applySearch($query, $request);
 
-        AuditLogger::log('SVP Posting', 'Pending Posting Viewed', 'BACSEC-004 viewed pending SVP posting tasks.');
+        AuditLogger::log('SVP Posting', 'Pending Posting Viewed', 'BACSEC-003 viewed pending SVP posting tasks.');
 
         return view('bac-secretariat.svp-posting.pending', [
             'chains' => $query->latest('updated_at')->paginate(10)->withQueryString(),
@@ -64,7 +64,7 @@ class SvpPostingController extends Controller
             ->latest('updated_at')
             ->get();
 
-        AuditLogger::log('SVP Posting', 'Create Posting Viewed', 'BACSEC-004 opened the SVP posting form.', $selectedChain);
+        AuditLogger::log('SVP Posting', 'Create Posting Viewed', 'BACSEC-003 opened the SVP posting form.', $selectedChain);
 
         return view('bac-secretariat.svp-posting.create', [
             'chain' => $selectedChain?->loadMissing(['sourcePrDocument.submittingOffice', 'bacResolution', 'latestPostingRecord']),
@@ -162,7 +162,7 @@ class SvpPostingController extends Controller
                 ->with($result['ok'] ? 'status' : 'error', $result['message']);
         }
 
-        AuditLogger::log('SVP Posting', 'Posting Record Saved', 'BACSEC-004 saved an SVP posting record.', $postingRecord);
+        AuditLogger::log('SVP Posting', 'Posting Record Saved', 'BACSEC-003 saved an SVP posting record.', $postingRecord);
 
         return redirect()
             ->route('bac-secretariat.svp-posting.show', $postingRecord)
@@ -174,7 +174,7 @@ class SvpPostingController extends Controller
         $this->authorizePostingUser($request);
         $postingRecord->load(['chain.sourcePrDocument.submittingOffice', 'sourcePrDocument.submittingOffice', 'attachments.uploadedBy', 'createdBy', 'completedBy']);
 
-        AuditLogger::log('SVP Posting', 'Posting Record Viewed', 'BACSEC-004 viewed an SVP posting record.', $postingRecord);
+        AuditLogger::log('SVP Posting', 'Posting Record Viewed', 'BACSEC-003 viewed an SVP posting record.', $postingRecord);
 
         return view('bac-secretariat.svp-posting.show', [
             'postingRecord' => $postingRecord,
@@ -194,7 +194,7 @@ class SvpPostingController extends Controller
 
         $this->applyPostingSearch($query, $request);
 
-        AuditLogger::log('SVP Posting', 'Posted Records Viewed', 'BACSEC-004 viewed SVP posted records.');
+        AuditLogger::log('SVP Posting', 'Posted Records Viewed', 'BACSEC-003 viewed SVP posted records.');
 
         return view('bac-secretariat.svp-posting.posted', [
             'postingRecords' => $query->latest('updated_at')->paginate(10)->withQueryString(),
@@ -228,7 +228,7 @@ class SvpPostingController extends Controller
             });
         });
 
-        AuditLogger::log('SVP Posting', 'Posting History Viewed', 'BACSEC-004 viewed SVP posting history.');
+        AuditLogger::log('SVP Posting', 'Posting History Viewed', 'BACSEC-003 viewed SVP posting history.');
 
         return view('bac-secretariat.svp-posting.history', [
             'events' => $query->latest()->paginate(15)->withQueryString(),

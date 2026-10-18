@@ -15,7 +15,7 @@ class HeadOfficePpmpSignatureWorkflowService
     private const DOCUMENT_TYPE = 'ppmp';
     private const COMBINED_SIGNATURE_SLOT = 'prepared_and_submitted_by';
     private const LEGACY_SPLIT_SIGNATURE_SLOTS = ['prepared_by', 'submitted_by'];
-    private const EXCLUDED_USER_IDS = ['BACSEC-002'];
+    private const EXCLUDED_USER_IDS = ['BACSEC-001'];
 
     private const SIGNATURE_SLOTS = [
         self::COMBINED_SIGNATURE_SLOT => [
@@ -339,7 +339,7 @@ class HeadOfficePpmpSignatureWorkflowService
             'PPMP Signed',
             $oldStatus,
             ProcurementDocument::STATUS_PPMP_SIGNATORIES_COMPLETED,
-            'The required PPMP electronic signature is complete. The PPMP is ready for submission to BACSEC-004 for APP consolidation.',
+            'The required PPMP electronic signature is complete. The PPMP is ready for submission to BACSEC-003 for APP consolidation.',
             $fromOfficeId,
             $ownerOfficeId,
         );
@@ -347,7 +347,7 @@ class HeadOfficePpmpSignatureWorkflowService
         SystemNotificationService::notify(
             $creator,
             'PPMP Signed',
-            "The required signature for {$document->tracking_number} is complete. Submit the PPMP to BACSEC-004 for APP consolidation when ready.",
+            "The required signature for {$document->tracking_number} is complete. Submit the PPMP to BACSEC-003 for APP consolidation when ready.",
             SystemNotification::TYPE_SUCCESS,
             'PPMP Signatures',
             $document,

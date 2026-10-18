@@ -5,7 +5,7 @@
 @section('content')
     <section class="cb-support-detail-header pt-smooth-enter">
         <div>
-            <p class="cb-support-eyebrow">BACSEC-004 &middot; Submit to BACSEC-002</p>
+            <p class="cb-support-eyebrow">BACSEC-003 &middot; Submit to BACSEC-001</p>
             <h1>{{ $record->reference_number }}</h1>
             <p>{{ $record->project_title }}</p>
         </div>
@@ -40,7 +40,7 @@
         <header class="cb-support-panel-header">
             <div>
                 <p class="cb-support-eyebrow">Project Documents</p>
-                <h2 id="bacsec004-submissions-heading">BACSEC-004 Submission Queue</h2>
+                <h2 id="bacsec003-submissions-heading">BACSEC-003 Submission Queue</h2>
             </div>
             <span class="cb-support-progress">{{ $submittedCount }} / {{ $itemCount }} submitted</span>
         </header>
@@ -65,7 +65,7 @@
                                     </div>
                                     <span class="cb-support-status cb-support-status--{{ $statusClass }}">{{ $item->statusLabel() }}</span>
                                     @if ($item->remarks)
-                                        <small class="cb-support-review-note">BACSEC-002: {{ $item->remarks }}</small>
+                                        <small class="cb-support-review-note">BACSEC-001: {{ $item->remarks }}</small>
                                     @endif
                                     @if ($item->submitted_at)
                                         <small>Version {{ $item->source_version }} submitted {{ $item->submitted_at->format('M d, Y h:i A') }}</small>
@@ -96,7 +96,7 @@
                                     <input type="file" name="attachment" required accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" aria-label="Choose final file for {{ $item->requirement_name }}">
                                     <button type="submit" class="cb-support-primary">
                                         <x-papertrail.icon name="upload" />
-                                        {{ $item->source_version > 0 ? 'Submit Revision' : 'Submit to BACSEC-002' }}
+                                        {{ $item->source_version > 0 ? 'Submit Revision' : 'Submit to BACSEC-001' }}
                                     </button>
                                 </form>
                             </article>

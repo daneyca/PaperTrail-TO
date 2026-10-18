@@ -171,7 +171,7 @@ class CompetitiveBiddingDocumentHandoffService
         string $message
     ): void {
         $user = User::query()
-            ->where('user_id', 'BACSEC-002')
+            ->where('user_id', 'BACSEC-001')
             ->where('status', User::STATUS_ACTIVE)
             ->first();
 
@@ -197,7 +197,7 @@ class CompetitiveBiddingDocumentHandoffService
     ): void {
         $submitter = $item->submittedBy;
 
-        if (! $submitter || $submitter->user_id === 'BACSEC-002') {
+        if (! $submitter || $submitter->user_id === 'BACSEC-001') {
             return;
         }
 

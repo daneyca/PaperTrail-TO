@@ -388,7 +388,7 @@ class DocumentSubmenuController extends Controller
         abort_unless($document, 404);
 
         return view('document-submenu.show', [
-            'eyebrow' => 'BACSEC-002',
+            'eyebrow' => 'BACSEC-001',
             'title' => $document['title'],
             'subtitle' => $document['subtitle'],
             'panelTitle' => 'Template Actions',
@@ -471,7 +471,7 @@ class DocumentSubmenuController extends Controller
             'helpSteps' => [
                 'Create or continue a PPMP draft.',
                 'Upload supporting files when a scanned source is needed.',
-                'Complete the required e-signature before submitting the PPMP to BACSEC-004 for APP consolidation processing.',
+                'Complete the required e-signature before submitting the PPMP to BACSEC-003 for APP consolidation processing.',
                 'Track returned remarks or accepted records from tracking pages.',
             ],
         ];
@@ -984,15 +984,15 @@ class DocumentSubmenuController extends Controller
     {
         $setupBadge = 'For setup';
 
-        if ($user?->user_id === 'BACSEC-004') {
+        if ($user?->user_id === 'BACSEC-003') {
             return [
-                'eyebrow' => 'BACSEC-004',
+                'eyebrow' => 'BACSEC-003',
                 'title' => 'Competitive Bidding',
-                'subtitle' => 'BACSEC-004 planning, posting, observer invitation, bidding document, and purchase order work areas for competitive bidding procurement.',
+                'subtitle' => 'BACSEC-003 planning, posting, observer invitation, bidding document, and purchase order work areas for competitive bidding procurement.',
                 'backRoute' => 'bac-secretariat.dashboard',
                 'showActionsPanel' => true,
                 'cards' => [
-                    $this->card('Submit Bidding Documents', 'Forward completed project documents to the BACSEC-002 supporting file.', 'upload', 'blue', 'bac-secretariat.competitive-bidding.supporting-submissions.index'),
+                    $this->card('Submit Bidding Documents', 'Forward completed project documents to the BACSEC-001 supporting file.', 'upload', 'blue', 'bac-secretariat.competitive-bidding.supporting-submissions.index'),
                     $this->disabledCard('Annual Investment Program', 'Maintain the AIP reference for competitive bidding records.', 'document', 'violet', $setupBadge),
                     $this->disabledCard('Annual Procurement Plan', 'Maintain the APP reference for competitive bidding records.', 'document', 'blue', $setupBadge),
                     $this->disabledCard('Approved Budget for the Contract (ABC)', 'Record the approved budget reference for competitive bidding.', 'document', 'indigo', $setupBadge),
@@ -1004,17 +1004,17 @@ class DocumentSubmenuController extends Controller
                 ],
                 'recentRecords' => [],
                 'helpSteps' => [
-                    'Use this menu as the BACSEC-004 competitive bidding workspace.',
-                    'Use Submit Bidding Documents when a final file is ready for BACSEC-002 checking.',
+                    'Use this menu as the BACSEC-003 competitive bidding workspace.',
+                    'Use Submit Bidding Documents when a final file is ready for BACSEC-001 checking.',
                     'Purchase Order opens the existing PaperTrail Purchase Order module.',
                 ],
             ];
         }
 
         return [
-            'eyebrow' => 'BACSEC-002',
+            'eyebrow' => 'BACSEC-001',
             'title' => 'Competitive Bidding',
-            'subtitle' => 'BACSEC-002 document preparation and evaluation work areas for competitive bidding procurement.',
+            'subtitle' => 'BACSEC-001 document preparation and evaluation work areas for competitive bidding procurement.',
             'backRoute' => 'bac-secretariat.dashboard',
             'showActionsPanel' => false,
             'cards' => [
@@ -1034,9 +1034,9 @@ class DocumentSubmenuController extends Controller
             ],
             'recentRecords' => [],
             'helpSteps' => [
-                'Use this menu as the BACSEC-002 competitive bidding workspace.',
+                'Use this menu as the BACSEC-001 competitive bidding workspace.',
                 'Items marked For setup are visible for workflow planning but do not yet create records.',
-                'Letter of Invitation, Performance Bond, and Purchase Order files should be attached to the related record instead of treated as BACSEC-002 task pages.',
+                'Letter of Invitation, Performance Bond, and Purchase Order files should be attached to the related record instead of treated as BACSEC-001 task pages.',
             ],
         ];
     }

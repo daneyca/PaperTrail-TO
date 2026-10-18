@@ -4,11 +4,8 @@
     $user = auth()->user();
     $roleSlug = $user?->roleSlug() ?? '';
 
-    $isCompetitiveBiddingBacsec = $user?->user_id === 'BACSEC-002';
-    $isSvpPostingProcessor = $user?->user_id === 'BACSEC-004';
-    $isPrSignatureOnlyBacsec = $user?->user_id === 'BACSEC-003';
-    $isBacsec002PrSigner = $user?->user_id === 'BACSEC-002';
-    $isBacsecPrSignatureOnly = $user?->user_id === 'BACSEC-003';
+    $isSvpPostingProcessor = $user?->user_id === 'BACSEC-003';
+    $isBacsecPrSignatureOnly = $user?->user_id === 'BACSEC-002';
     $hasBacsec002PurchaseRequestCapability = $user?->hasBacsec002PurchaseRequestCapability() ?? false;
 
     $safeCount = function (callable $callback): int {
@@ -181,7 +178,7 @@
                 'icon' => 'workflow',
                 'children' => [
                     ['label' => 'Incoming Documents', 'route' => 'bac-secretariat.incoming.index', 'active' => 'bac-secretariat.incoming.*'],
-                    ['label' => 'Purchase Requests', 'route' => 'bac-secretariat.pr.index', 'active' => 'bac-secretariat.pr.*'],
+                    ['label' => 'Purchase Requests', 'route' => 'bac-secretariat.pr.index', 'active' => 'bac-secretariat.pr.*', 'count' => $submittedPrCount],
                     ['label' => 'BAC Resolution', 'route' => 'bac-secretariat.resolutions.create', 'active' => 'bac-secretariat.resolutions.*'],
                     ['label' => 'RFQ', 'route' => 'bac-secretariat.rfqs.create', 'active' => 'bac-secretariat.rfqs.*'],
                     ['label' => 'Abstract', 'route' => 'bac-secretariat.abstracts.create', 'active' => 'bac-secretariat.abstracts.*'],
@@ -247,11 +244,11 @@
         ['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'dashboard'],
     ];
 
-    if ($roleSlug === 'bac-secretariat' && ($isCompetitiveBiddingBacsec || $isBacsecPrSignatureOnly)) {
+    if ($roleSlug === 'bac-secretariat' && $isBacsecPrSignatureOnly) {
         $items = array_values(array_filter($items, fn ($item) => ($item['label'] ?? null) !== 'Planning'));
     }
 
-    if ($roleSlug === 'bac-secretariat' && ($isPrSignatureOnlyBacsec || $isBacsec002PrSigner || $isBacsecPrSignatureOnly)) {
+    if ($roleSlug === 'bac-secretariat' && $isBacsecPrSignatureOnly) {
         $items = array_values(array_filter($items, fn ($item) => ($item['label'] ?? null) !== 'Small Value Procurement'));
     }
 
@@ -279,16 +276,6 @@
             'route' => 'bac-secretariat.competitive-bidding.menu',
             'active' => 'bac-secretariat.competitive-bidding.menu',
             'query' => ['task' => $task],
-        ];
-
-        $svpResolutionMenu = [
-            'label' => 'Small Value Procurement',
-            'icon' => 'workflow',
-            'children' => [
-                ['label' => 'PR / Resolution', 'section' => true],
-                ['label' => 'Submitted PRs', 'route' => 'bac-secretariat.pr.index', 'active' => 'bac-secretariat.pr.*', 'query' => ['status' => 'submitted'], 'count' => $submittedPrCount],
-                ['label' => 'BAC Resolution Records', 'route' => 'bac-secretariat.resolutions.create', 'active' => ['bac-secretariat.resolutions.menu', 'bac-secretariat.resolutions.*']],
-            ],
         ];
 
         $bacsec002CompetitiveBiddingMenu = [
@@ -324,7 +311,7 @@
             ],
         ];
 
-        $bacsec004CompetitiveBiddingMenu = [
+        $bacsec003CompetitiveBiddingMenu = [
             'label' => 'Competitive Bidding',
             'icon' => 'workflow',
             'children' => [
@@ -351,12 +338,8 @@
 
         $menusToInsert = [];
 
-        if ($hasBacsec002PurchaseRequestCapability) {
-            $menusToInsert[] = $svpResolutionMenu;
-        }
-
         $menusToInsert[] = $isSvpPostingProcessor
-            ? $bacsec004CompetitiveBiddingMenu
+            ? $bacsec003CompetitiveBiddingMenu
             : $bacsec002CompetitiveBiddingMenu;
 
         $competitiveBiddingInsertIndex = 2;

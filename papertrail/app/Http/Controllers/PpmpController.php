@@ -22,7 +22,7 @@ use Illuminate\View\View;
 
 class PpmpController extends Controller
 {
-    private const APP_CONSOLIDATION_HANDLER_USER_ID = 'BACSEC-004';
+    private const APP_CONSOLIDATION_HANDLER_USER_ID = 'BACSEC-003';
     private const HEAD_OFFICE_SIGNATURE_REQUIRED_MESSAGE = 'PPMP requires Head of Office e-signature before submission to BAC Secretariat for APP consolidation.';
 
     private const PLAN_TYPES = [
@@ -245,7 +245,7 @@ class PpmpController extends Controller
         if (! $target['office'] || ! $target['user']) {
             return redirect()
                 ->route('ppmps.show', $ppmp)
-                ->with('error', 'BACSEC-004 APP consolidation routing target is not configured.');
+                ->with('error', 'BACSEC-003 APP consolidation routing target is not configured.');
         }
 
         DB::transaction(function () use ($request, $ppmp, $oldValues, $target) {
@@ -261,12 +261,12 @@ class PpmpController extends Controller
             $ppmp->refresh()->load('items');
             $this->ensureBacReviewDocument($ppmp, $user, true, $target);
 
-            AuditLogger::log('PPMP', 'PPMP Submitted', 'End User submitted a PPMP to BACSEC-004 for APP consolidation.', $ppmp, $oldValues, $this->auditSummary($ppmp->refresh()));
+            AuditLogger::log('PPMP', 'PPMP Submitted', 'End User submitted a PPMP to BACSEC-003 for APP consolidation.', $ppmp, $oldValues, $this->auditSummary($ppmp->refresh()));
         });
 
         return redirect()
             ->route('ppmps.show', $ppmp)
-            ->with('status', 'PPMP submitted to BACSEC-004 for APP consolidation.');
+            ->with('status', 'PPMP submitted to BACSEC-003 for APP consolidation.');
     }
 
     public function destroy(Ppmp $ppmp): RedirectResponse
@@ -493,7 +493,7 @@ class PpmpController extends Controller
         $target ??= $this->appConsolidationTarget();
 
         if (! $target['office'] || ! $target['user']) {
-            Log::warning('PPMP submitted but BACSEC-004 APP consolidation target is missing.', [
+            Log::warning('PPMP submitted but BACSEC-003 APP consolidation target is missing.', [
                 'ppmp_id' => $ppmp->id,
             ]);
 
@@ -539,10 +539,10 @@ class PpmpController extends Controller
         $this->recordRouting(
             $document,
             $user ?: $owner,
-            'PPMP Submitted to BACSEC-004 for APP Consolidation',
+            'PPMP Submitted to BACSEC-003 for APP Consolidation',
             Ppmp::STATUS_DRAFT,
             ProcurementDocument::STATUS_PENDING_PPMP_REVIEW,
-            'PPMP routed to BACSEC-004 for APP consolidation processing.',
+            'PPMP routed to BACSEC-003 for APP consolidation processing.',
             $ppmp->office_id ?: $owner?->office_id,
             $target['office']->id,
         );
@@ -562,7 +562,7 @@ class PpmpController extends Controller
                     route('bac-secretariat.ppmp.show', $document),
                 );
             } else {
-                Log::warning('PPMP submitted but BACSEC-004 notification target is missing.', [
+                Log::warning('PPMP submitted but BACSEC-003 notification target is missing.', [
                     'ppmp_id' => $ppmp->id,
                     'procurement_document_id' => $document->id,
                 ]);
@@ -834,7 +834,7 @@ class PpmpController extends Controller
     private function requiresHeadOfficeSignatureWorkflow(?User $user): bool
     {
         return $user
-            && $user->user_id !== 'BACSEC-002'
+            && $user->user_id !== 'BACSEC-001'
             && ($user->hasRole('head_office') || $user->hasRole(User::ROLE_HEAD_OFFICE));
     }
 }

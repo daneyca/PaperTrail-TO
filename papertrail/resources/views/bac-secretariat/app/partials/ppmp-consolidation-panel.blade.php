@@ -198,7 +198,7 @@
 @elseif ($acceptedPpmps->isNotEmpty())
         <p>{{ $acceptedPpmps->count() }} approved PPMP record{{ $acceptedPpmps->count() === 1 ? '' : 's' }} for CY {{ $app?->fiscal_year ?? now()->year }} can be added {{ $createMode ? 'after saving this APP as a draft' : 'from an editable APP draft' }}.</p>
 @elseif ($pendingPpmps->isEmpty())
-    <p>Approved PPMP records will be available for import after BACSEC-004 review.</p>
+    <p>Approved PPMP records will be available for import after BACSEC-003 review.</p>
 @else
     <p>Open the incoming PPMP record above, then accept it for APP consolidation.</p>
 @endif

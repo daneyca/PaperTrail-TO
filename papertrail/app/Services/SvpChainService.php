@@ -22,7 +22,7 @@ use Illuminate\Support\Str;
 
 class SvpChainService
 {
-    private const POSTING_PROCESSOR_USER_ID = 'BACSEC-004';
+    private const POSTING_PROCESSOR_USER_ID = 'BACSEC-003';
     public const POSTING_MIN_AMOUNT = 50000.0;
     public const POSTING_MAX_AMOUNT = 200000.0;
 
@@ -360,7 +360,7 @@ class SvpChainService
                     && $chain->current_status === ProcurementDocument::STATUS_SVP_POSTING_REQUIRED) {
                     return [
                         'ok' => true,
-                        'message' => 'Posting has already been assigned to BACSEC-004. BAC Resolution may continue in parallel.',
+                        'message' => 'Posting has already been assigned to BACSEC-003. BAC Resolution may continue in parallel.',
                     ];
                 }
 
@@ -439,8 +439,8 @@ class SvpChainService
             || $chain?->current_stage === SvpProcurementChain::STAGE_POSTING) {
             return [
                 'key' => 'posting_required',
-                'label' => 'For BACSEC-004 Posting',
-                'description' => 'BACSEC-004 must complete the PhilGEPS posting/publication step before RFQ preparation.',
+                'label' => 'For BACSEC-003 Posting',
+                'description' => 'BACSEC-003 must complete the PhilGEPS posting/publication step before RFQ preparation.',
                 'button_label' => null,
                 'confirm' => null,
                 'tone' => 'warning',
@@ -462,10 +462,10 @@ class SvpChainService
         if ($this->requiresPosting($amount)) {
             return [
                 'key' => 'send_to_posting',
-                'label' => 'Send to BACSEC-004 Posting',
+                'label' => 'Send to BACSEC-003 Posting',
                 'description' => 'Amount is above PHP 50,000 and below PHP 200,000, so posting/publication is required before RFQ.',
-                'button_label' => 'Acknowledge / Send to BACSEC-004 Posting',
-                'confirm' => 'Acknowledge this BAC Resolution and route the PR to BACSEC-004 for PhilGEPS posting before RFQ?',
+                'button_label' => 'Acknowledge / Send to BACSEC-003 Posting',
+                'confirm' => 'Acknowledge this BAC Resolution and route the PR to BACSEC-003 for PhilGEPS posting before RFQ?',
                 'tone' => 'warning',
             ];
         }
@@ -511,7 +511,7 @@ class SvpChainService
 
                 return [
                     'ok' => true,
-                    'message' => 'Posting has already been assigned to BACSEC-004.',
+                    'message' => 'Posting has already been assigned to BACSEC-003.',
                 ];
             }
 
@@ -579,7 +579,7 @@ class SvpChainService
             if (! $this->canCompletePosting($chain, $actor)) {
                 return [
                     'ok' => false,
-                    'message' => 'Only BACSEC-004 can complete an active SVP posting task.',
+                    'message' => 'Only BACSEC-003 can complete an active SVP posting task.',
                 ];
             }
 
@@ -605,7 +605,7 @@ class SvpChainService
                 'assigned_to_user_id' => $assignedUserId,
                 'route_destination_role' => User::ROLE_HEAD_OFFICE,
                 'route_destination_office_id' => $toOfficeId,
-                'route_remarks' => 'SVP posting completed by BACSEC-004. Requesting office may proceed with RFQ.',
+                'route_remarks' => 'SVP posting completed by BACSEC-003. Requesting office may proceed with RFQ.',
             ]);
 
             DocumentRoutingHistory::create([
@@ -616,7 +616,7 @@ class SvpChainService
                 'action' => 'SVP Posting Completed',
                 'status_from' => $oldStatus,
                 'status_to' => ProcurementDocument::STATUS_READY_FOR_RFQ,
-                'comments' => $remarks ?: 'BACSEC-004 completed the SVP posting step. PR is ready for RFQ.',
+                'comments' => $remarks ?: 'BACSEC-003 completed the SVP posting step. PR is ready for RFQ.',
                 'action_at' => now(),
             ]);
 
@@ -666,7 +666,7 @@ class SvpChainService
                 );
             }
 
-            AuditLogger::log('SVP Posting', 'SVP Posting Completed', 'BACSEC-004 completed the SVP posting step.', $chain);
+            AuditLogger::log('SVP Posting', 'SVP Posting Completed', 'BACSEC-003 completed the SVP posting step.', $chain);
 
             return [
                 'ok' => true,
@@ -702,7 +702,7 @@ class SvpChainService
         );
         $postingStepDescription = match (true) {
             $amount <= 0 => 'Amount pending before posting path can be confirmed.',
-            $postingRequired => 'Required for SVP above PHP 50,000 and below PHP 200,000. Assigned to BACSEC-004.',
+            $postingRequired => 'Required for SVP above PHP 50,000 and below PHP 200,000. Assigned to BACSEC-003.',
             $amount <= self::POSTING_MIN_AMOUNT => 'Not required at or below PHP 50,000.',
             default => 'Amount exceeds the configured SVP posting band; review procurement mode before RFQ.',
         };
@@ -845,7 +845,7 @@ class SvpChainService
         if (! $postingUser) {
             return [
                 'ok' => false,
-                'message' => 'BACSEC-004 posting processor account was not found.',
+                'message' => 'BACSEC-003 posting processor account was not found.',
             ];
         }
 
@@ -861,7 +861,7 @@ class SvpChainService
         $this->addEvent($chain->refresh(), [
             'document_type' => 'Purchase Request',
             'document_id' => $sourceDocument->id,
-            'action' => $historyAction ?: 'Posting required - assigned to BACSEC-004',
+            'action' => $historyAction ?: 'Posting required - assigned to BACSEC-003',
             'stage' => SvpProcurementChain::STAGE_POSTING,
             'status' => ProcurementDocument::STATUS_SVP_POSTING_REQUIRED,
             'from_role' => User::ROLE_HEAD_OFFICE,
@@ -885,11 +885,11 @@ class SvpChainService
                 ?: $this->notificationUrl('bac-secretariat.svp-monitoring.show', $chain),
         );
 
-        AuditLogger::log('SVP Routing', 'Posting Assigned', 'SVP posting was assigned to BACSEC-004 while BAC Resolution remains pending.', $chain);
+        AuditLogger::log('SVP Routing', 'Posting Assigned', 'SVP posting was assigned to BACSEC-003 while BAC Resolution remains pending.', $chain);
 
         return [
             'ok' => true,
-            'message' => 'Posting is required and has been assigned to BACSEC-004. BAC Resolution may continue in parallel.',
+            'message' => 'Posting is required and has been assigned to BACSEC-003. BAC Resolution may continue in parallel.',
         ];
     }
 
@@ -957,7 +957,7 @@ class SvpChainService
         if (! $postingUser) {
             return [
                 'ok' => false,
-                'message' => 'BACSEC-004 posting processor account was not found.',
+                'message' => 'BACSEC-003 posting processor account was not found.',
             ];
         }
 
@@ -972,7 +972,7 @@ class SvpChainService
             'assigned_to_user_id' => $postingUser->id,
             'route_destination_role' => User::ROLE_BAC_SECRETARIAT,
             'route_destination_office_id' => $toOfficeId,
-            'route_remarks' => 'SVP amount requires posting after BAC Resolution. Assigned to BACSEC-004 before RFQ.',
+            'route_remarks' => 'SVP amount requires posting after BAC Resolution. Assigned to BACSEC-003 before RFQ.',
         ]);
 
         DocumentRoutingHistory::create([
@@ -983,7 +983,7 @@ class SvpChainService
             'action' => $historyAction ?: 'BAC Resolution Completed - Posting Required',
             'status_from' => $oldStatus,
             'status_to' => ProcurementDocument::STATUS_SVP_POSTING_REQUIRED,
-            'comments' => $remarks ?: 'SVP amount is PHP '.number_format($amount, 2).'. Posting is required and assigned to BACSEC-004 before RFQ.',
+            'comments' => $remarks ?: 'SVP amount is PHP '.number_format($amount, 2).'. Posting is required and assigned to BACSEC-003 before RFQ.',
             'action_at' => now(),
         ]);
 
@@ -998,7 +998,7 @@ class SvpChainService
         $this->addEvent($chain, [
             'document_type' => 'BAC Resolution',
             'document_id' => $resolution->id,
-            'action' => 'Posting required - assigned to BACSEC-004',
+            'action' => 'Posting required - assigned to BACSEC-003',
             'stage' => SvpProcurementChain::STAGE_POSTING,
             'status' => ProcurementDocument::STATUS_SVP_POSTING_REQUIRED,
             'from_role' => User::ROLE_HEAD_OFFICE,
@@ -1025,18 +1025,18 @@ class SvpChainService
         SystemNotificationService::notify(
             $resolution->preparedBy,
             'BAC Resolution Completed',
-            "BAC Resolution {$resolution->displayNumber()} is complete. Posting was assigned to BACSEC-004.",
+            "BAC Resolution {$resolution->displayNumber()} is complete. Posting was assigned to BACSEC-003.",
             SystemNotification::TYPE_INFO,
             'BAC Resolution',
             $resolution,
             $this->notificationUrl('bac-secretariat.svp-monitoring.show', $chain),
         );
 
-        AuditLogger::log('SVP Routing', 'Posting Assigned', 'SVP posting was assigned to BACSEC-004 based on PR amount.', $chain);
+        AuditLogger::log('SVP Routing', 'Posting Assigned', 'SVP posting was assigned to BACSEC-003 based on PR amount.', $chain);
 
         return [
             'ok' => true,
-            'message' => 'Posting is required and has been assigned to BACSEC-004.',
+            'message' => 'Posting is required and has been assigned to BACSEC-003.',
         ];
     }
 

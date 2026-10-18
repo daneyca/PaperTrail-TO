@@ -115,7 +115,7 @@
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('head-office.pr.submit', $document) }}" onsubmit="return confirm('Send a copy of this completed Purchase Request to BACSEC-002 for BAC Resolution preparation?');">
+                <form method="POST" action="{{ route('head-office.pr.submit', $document) }}" onsubmit="return confirm('Send a copy of this completed Purchase Request to BACSEC-001 for BAC Resolution preparation?');">
                     @csrf
                     <button type="submit" class="btn-pr-primary">{{ $nextWorkflowAction['button_label'] }}</button>
                 </form>

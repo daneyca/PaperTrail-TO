@@ -9,7 +9,7 @@ return [
                 'label' => 'Prepared By',
                 'role_code' => 'bac_secretariat',
                 'role_name' => 'BAC Secretariat',
-                'account_code' => 'BACSEC-002',
+                'account_code' => 'BACSEC-001',
                 'order' => 1,
                 'required' => true,
             ],

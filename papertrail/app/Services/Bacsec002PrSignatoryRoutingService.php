@@ -13,7 +13,7 @@ use Illuminate\Support\Collection;
 
 class Bacsec002PrSignatoryRoutingService
 {
-    private const CREATOR_USER_ID = 'BACSEC-002';
+    private const CREATOR_USER_ID = 'BACSEC-001';
     private const DOCUMENT_TYPE = 'purchase_request';
 
     private const SIGNATORY_COLUMNS = [
@@ -26,7 +26,7 @@ class Bacsec002PrSignatoryRoutingService
     private const DESIGNATION_ROUTES = [
         'bac secretariat' => [
             'label' => 'BAC Secretariat',
-            'user_ids' => ['BACSEC-003'],
+            'user_ids' => ['BACSEC-002'],
             'names' => ['Meagan C. Matutes', 'Meagan Matutes'],
         ],
         'oic municipal budget officer' => [
@@ -190,12 +190,12 @@ class Bacsec002PrSignatoryRoutingService
             'PR Signatory Requests Generated',
             $oldStatus,
             ProcurementDocument::STATUS_PR_PENDING_SIGNATORIES,
-            'Signature requests were generated from BACSEC-002 selected signatory designations.',
+            'Signature requests were generated from BACSEC-001 selected signatory designations.',
             $fromOfficeId,
             $document->current_office_id,
         );
 
-        AuditLogger::log('Purchase Request Signature Workflow', 'pr_signatory_requests_generated', 'BACSEC-002 PR designation-based signature requests were generated.', $document, ['status' => $oldStatus], [
+        AuditLogger::log('Purchase Request Signature Workflow', 'pr_signatory_requests_generated', 'BACSEC-001 PR designation-based signature requests were generated.', $document, ['status' => $oldStatus], [
             'status' => ProcurementDocument::STATUS_PR_PENDING_SIGNATORIES,
             'signature_request_count' => $requests->count(),
             'signing_mode' => 'parallel',
@@ -451,7 +451,7 @@ class Bacsec002PrSignatoryRoutingService
                 $request->forceFill([
                     'is_required' => false,
                     'status' => SignatureRequest::STATUS_SKIPPED,
-                    'remarks' => trim(($request->remarks ? $request->remarks . "\n" : '') . 'Skipped by BACSEC-002 parallel PR signature routing.'),
+                    'remarks' => trim(($request->remarks ? $request->remarks . "\n" : '') . 'Skipped by BACSEC-001 parallel PR signature routing.'),
                 ])->save();
             });
 
@@ -571,10 +571,10 @@ class Bacsec002PrSignatoryRoutingService
         $this->recordRouting(
             $document->refresh(),
             $actor,
-            'PR Signatories Completed and Returned to BACSEC-002',
+            'PR Signatories Completed and Returned to BACSEC-001',
             $oldStatus,
             ProcurementDocument::STATUS_PR_SIGNATORIES_COMPLETED,
-            'All required Purchase Request signatories have signed. Purchase Request returned to BACSEC-002 for PR number submission.',
+            'All required Purchase Request signatories have signed. Purchase Request returned to BACSEC-001 for PR number submission.',
             $fromOfficeId,
             $creatorOfficeId,
         );
@@ -591,12 +591,12 @@ class Bacsec002PrSignatoryRoutingService
             );
         }
 
-        AuditLogger::log('Purchase Request Signature Workflow', 'pr_signatories_completed_returned_to_creator', 'BACSEC-002 Purchase Request signatures were completed and returned to BACSEC-002 for PR number submission.', $document, ['status' => $oldStatus], [
+        AuditLogger::log('Purchase Request Signature Workflow', 'pr_signatories_completed_returned_to_creator', 'BACSEC-001 Purchase Request signatures were completed and returned to BACSEC-001 for PR number submission.', $document, ['status' => $oldStatus], [
             'status' => ProcurementDocument::STATUS_PR_SIGNATORIES_COMPLETED,
             'tracking_number' => $document->tracking_number,
         ]);
 
-        app(SvpChainService::class)->findOrCreateFromPr($document->refresh(), $actor, 'PR signatories completed and returned to BACSEC-002');
+        app(SvpChainService::class)->findOrCreateFromPr($document->refresh(), $actor, 'PR signatories completed and returned to BACSEC-001');
     }
 
     private function notifyCreatorOfSignerCompletion(ProcurementDocument $document, User $actor): void
@@ -639,7 +639,7 @@ class Bacsec002PrSignatoryRoutingService
             route('head-office.pr.show', $document),
         );
 
-        AuditLogger::log('Purchase Request Signature Workflow', 'pr_signer_completion_notified_creator', 'BACSEC-002 PR creator was notified after a signer completed a signature.', $document, null, [
+        AuditLogger::log('Purchase Request Signature Workflow', 'pr_signer_completion_notified_creator', 'BACSEC-001 PR creator was notified after a signer completed a signature.', $document, null, [
             'tracking_number' => $tracking,
             'creator_user_id' => $creator->user_id,
             'signer_user_id' => $actor->user_id,

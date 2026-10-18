@@ -141,7 +141,7 @@ class SvpMonitoringController extends Controller
                     });
             });
 
-        if ($user?->user_id === 'BACSEC-004') {
+        if ($user?->user_id === 'BACSEC-003') {
             $query->where(function (Builder $posting) {
                 $posting->where('current_stage', SvpProcurementChain::STAGE_POSTING)
                     ->orWhere('current_stage', SvpProcurementChain::STAGE_POSTING_COMPLETED)

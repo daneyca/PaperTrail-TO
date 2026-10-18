@@ -19,9 +19,9 @@ class CompetitiveBiddingSupportingDocumentsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_bacsec_002_creates_a_separate_supporting_document_file(): void
+    public function test_bacsec_001_creates_a_separate_supporting_document_file(): void
     {
-        $user = $this->bacSecretariatUser('BACSEC-002');
+        $user = $this->bacSecretariatUser('BACSEC-001');
 
         $response = $this->actingAs($user)->post(route('bac-secretariat.competitive-bidding.supporting-documents.store'), [
             'reference_number' => 'CB-2026-001',
@@ -46,7 +46,7 @@ class CompetitiveBiddingSupportingDocumentsTest extends TestCase
 
     public function test_each_supplier_receives_its_own_attachment_guide(): void
     {
-        $user = $this->bacSecretariatUser('BACSEC-002');
+        $user = $this->bacSecretariatUser('BACSEC-001');
         $record = $this->createRecord($user);
 
         $response = $this->actingAs($user)->post(
@@ -65,7 +65,7 @@ class CompetitiveBiddingSupportingDocumentsTest extends TestCase
     public function test_attachment_is_required_before_a_guide_item_can_be_verified(): void
     {
         Storage::fake('local');
-        $user = $this->bacSecretariatUser('BACSEC-002');
+        $user = $this->bacSecretariatUser('BACSEC-001');
         $record = $this->createRecord($user);
         $item = $record->projectItems()->firstOrFail();
 
@@ -91,7 +91,7 @@ class CompetitiveBiddingSupportingDocumentsTest extends TestCase
 
     public function test_missing_supplier_document_is_flagged_and_performance_bond_activates_after_award(): void
     {
-        $user = $this->bacSecretariatUser('BACSEC-002');
+        $user = $this->bacSecretariatUser('BACSEC-001');
         $record = $this->createRecord($user);
         $supplier = app(CompetitiveBiddingSupportingDocumentService::class)->addSupplier($record, [
             'supplier_name' => 'Ballpen Trading',
@@ -116,54 +116,54 @@ class CompetitiveBiddingSupportingDocumentsTest extends TestCase
         $this->assertTrue($performanceBond->fresh('supplier')->isEffectivelyRequired());
     }
 
-    public function test_other_bac_secretariat_accounts_cannot_manage_the_bacsec_002_file(): void
+    public function test_other_bac_secretariat_accounts_cannot_manage_the_bacsec_001_file(): void
     {
-        $user = $this->bacSecretariatUser('BACSEC-004');
+        $user = $this->bacSecretariatUser('BACSEC-003');
 
         $this->actingAs($user)
             ->get(route('bac-secretariat.competitive-bidding.supporting-documents.index'))
             ->assertForbidden();
     }
 
-    public function test_bacsec_004_submits_a_project_document_to_bacsec_002_for_checking(): void
+    public function test_bacsec_003_submits_a_project_document_to_bacsec_001_for_checking(): void
     {
         Storage::fake('local');
-        $bacsec002 = $this->bacSecretariatUser('BACSEC-002');
-        $bacsec004 = $this->bacSecretariatUser('BACSEC-004');
-        $record = $this->createRecord($bacsec002);
+        $bacsec001 = $this->bacSecretariatUser('BACSEC-001');
+        $bacsec003 = $this->bacSecretariatUser('BACSEC-003');
+        $record = $this->createRecord($bacsec001);
         $item = $record->projectItems()->where('requirement_key', 'annual_investment_program')->firstOrFail();
 
-        $this->actingAs($bacsec004)
+        $this->actingAs($bacsec003)
             ->get(route('bac-secretariat.competitive-bidding.supporting-submissions.index'))
             ->assertOk()
             ->assertSee('Submit Bidding Documents')
             ->assertSee($record->reference_number);
 
-        $this->actingAs($bacsec004)->post(
+        $this->actingAs($bacsec003)->post(
             route('bac-secretariat.competitive-bidding.supporting-submissions.store', [$record, $item]),
             ['attachment' => UploadedFile::fake()->create('final-aip.pdf', 120, 'application/pdf')]
         )->assertRedirect();
 
         $item->refresh();
         $this->assertSame(CompetitiveBiddingSupportingItem::STATUS_ATTACHED, $item->status);
-        $this->assertSame($bacsec004->id, $item->submitted_by_user_id);
+        $this->assertSame($bacsec003->id, $item->submitted_by_user_id);
         $this->assertSame(1, $item->source_version);
         $this->assertTrue($item->attachments()->exists());
-        $this->assertTrue(SystemNotification::where('user_id', $bacsec002->id)->where('related_id', $item->id)->exists());
+        $this->assertTrue(SystemNotification::where('user_id', $bacsec001->id)->where('related_id', $item->id)->exists());
 
-        $this->actingAs($bacsec004)
+        $this->actingAs($bacsec003)
             ->get(route('bac-secretariat.competitive-bidding.supporting-submissions.show', $record))
             ->assertOk()
-            ->assertSee('BACSEC-004 Submission Queue')
+            ->assertSee('BACSEC-003 Submission Queue')
             ->assertSee('final-aip.pdf');
 
-        $this->actingAs($bacsec002)
+        $this->actingAs($bacsec001)
             ->get(route('bac-secretariat.competitive-bidding.supporting-documents.show', $record))
             ->assertOk()
-            ->assertSee('BACSEC-004')
+            ->assertSee('BACSEC-003')
             ->assertSee('Version 1');
 
-        $this->actingAs($bacsec002)->patch(
+        $this->actingAs($bacsec001)->patch(
             route('bac-secretariat.competitive-bidding.supporting-documents.items.update', [$record, $item]),
             [
                 'status' => CompetitiveBiddingSupportingItem::STATUS_FOR_CORRECTION,
@@ -172,26 +172,26 @@ class CompetitiveBiddingSupportingDocumentsTest extends TestCase
         )->assertRedirect();
 
         $this->assertTrue(SystemNotification::query()
-            ->where('user_id', $bacsec004->id)
+            ->where('user_id', $bacsec003->id)
             ->where('related_id', $item->id)
             ->where('title', 'Supporting document needs attention')
             ->exists());
 
-        $this->actingAs($bacsec004)
+        $this->actingAs($bacsec003)
             ->get(route('bac-secretariat.competitive-bidding.supporting-submissions.show', $record))
             ->assertOk()
             ->assertSee('Replace the unsigned final page.');
     }
 
-    public function test_bacsec_004_cannot_submit_a_bacsec_002_owned_requirement(): void
+    public function test_bacsec_003_cannot_submit_a_bacsec_001_owned_requirement(): void
     {
         Storage::fake('local');
-        $bacsec002 = $this->bacSecretariatUser('BACSEC-002');
-        $bacsec004 = $this->bacSecretariatUser('BACSEC-004');
-        $record = $this->createRecord($bacsec002);
+        $bacsec001 = $this->bacSecretariatUser('BACSEC-001');
+        $bacsec003 = $this->bacSecretariatUser('BACSEC-003');
+        $record = $this->createRecord($bacsec001);
         $item = $record->projectItems()->where('requirement_key', 'bid_evaluation_report')->firstOrFail();
 
-        $this->actingAs($bacsec004)->post(
+        $this->actingAs($bacsec003)->post(
             route('bac-secretariat.competitive-bidding.supporting-submissions.store', [$record, $item]),
             ['attachment' => UploadedFile::fake()->create('report.pdf', 120, 'application/pdf')]
         )->assertForbidden();
@@ -199,8 +199,8 @@ class CompetitiveBiddingSupportingDocumentsTest extends TestCase
 
     public function test_fully_signed_system_document_is_linked_to_the_matching_bidding_file(): void
     {
-        $bacsec002 = $this->bacSecretariatUser('BACSEC-002');
-        $record = $this->createRecord($bacsec002);
+        $bacsec001 = $this->bacSecretariatUser('BACSEC-001');
+        $record = $this->createRecord($bacsec001);
         $item = $record->projectItems()->where('requirement_key', 'bid_evaluation_report')->firstOrFail();
         $document = CompetitiveBiddingSignatureDocument::create([
             'template_key' => 'bid_evaluation_report',
@@ -209,7 +209,7 @@ class CompetitiveBiddingSupportingDocumentsTest extends TestCase
             'document_html' => '<main>Bid Evaluation Report</main>',
             'signatories' => [],
             'status' => CompetitiveBiddingSignatureDocument::STATUS_PENDING_SIGNATURES,
-            'prepared_by_user_id' => $bacsec002->id,
+            'prepared_by_user_id' => $bacsec001->id,
         ]);
 
         $document->update(['status' => CompetitiveBiddingSignatureDocument::STATUS_FULLY_SIGNED]);
@@ -220,12 +220,12 @@ class CompetitiveBiddingSupportingDocumentsTest extends TestCase
         $this->assertSame($document->id, $item->source_id);
         $this->assertTrue($item->hasSubmittedEvidence());
 
-        $this->actingAs($bacsec002)
+        $this->actingAs($bacsec001)
             ->get(route('bac-secretariat.competitive-bidding.supporting-documents.system-document', [$record, $item]))
             ->assertOk()
             ->assertSee('Bid Evaluation Report');
 
-        $this->actingAs($bacsec002)->patch(
+        $this->actingAs($bacsec001)->patch(
             route('bac-secretariat.competitive-bidding.supporting-documents.items.update', [$record, $item]),
             ['status' => CompetitiveBiddingSupportingItem::STATUS_VERIFIED]
         )->assertRedirect();

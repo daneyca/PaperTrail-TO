@@ -197,7 +197,7 @@
         <section class="svp-posting-next-card" aria-label="Posting required">
             <div>
                 <p class="eyebrow">Posting Required</p>
-                <h3>Open BACSEC-004 Posting</h3>
+                <h3>Open BACSEC-003 Posting</h3>
                 <p>Record posting dates, evidence, and completion before this PR returns to the requesting office for RFQ preparation.</p>
             </div>
             <a href="{{ route('bac-secretariat.svp-posting.create', $chain) }}" class="dashboard-action">Open Posting</a>

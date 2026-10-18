@@ -7,7 +7,7 @@
         <div>
             <p class="eyebrow">Posting Management</p>
             <h1>Pending Posting</h1>
-            <p>Review SVP transactions above PHP 50,000 and below PHP 200,000 assigned to BACSEC-004 after BAC Resolution completion.</p>
+            <p>Review SVP transactions above PHP 50,000 and below PHP 200,000 assigned to BACSEC-003 after BAC Resolution completion.</p>
         </div>
 
         <a href="{{ route('bac-secretariat.svp-posting.create') }}" class="dashboard-action">Create Posting</a>
@@ -58,7 +58,7 @@
                                     {{ str($postingStatus)->replace('_', ' ')->title() }}
                                 </span>
                             </td>
-                            <td>{{ $pr?->assignedTo?->name ?? 'BACSEC-004' }}</td>
+                            <td>{{ $pr?->assignedTo?->name ?? 'BACSEC-003' }}</td>
                             <td>
                                 <div class="table-actions">
                                     <a href="{{ route('bac-secretariat.svp-posting.create', $chain) }}" title="Open Posting" aria-label="Open Posting">

@@ -72,7 +72,7 @@
             </div>
             <div>
                 <span>Created By</span>
-                <strong>{{ $postingRecord->createdBy?->name ?? 'BACSEC-004' }}</strong>
+                <strong>{{ $postingRecord->createdBy?->name ?? 'BACSEC-003' }}</strong>
             </div>
             <div>
                 <span>Posted By</span>

@@ -22,8 +22,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CompetitiveBiddingSupportingDocumentController extends Controller
 {
-    private const BACSEC_002_USER_ID = 'BACSEC-002';
-    private const BACSEC_004_USER_ID = 'BACSEC-004';
+    private const BACSEC_002_USER_ID = 'BACSEC-001';
+    private const BACSEC_004_USER_ID = 'BACSEC-003';
 
     public function __construct(
         private readonly CompetitiveBiddingSupportingDocumentService $supportingDocuments,
@@ -80,7 +80,7 @@ class CompetitiveBiddingSupportingDocumentController extends Controller
         AuditLogger::log(
             'Competitive Bidding Supporting Documents',
             'Supporting File Created',
-            'BACSEC-002 created a competitive bidding supporting-document file.',
+            'BACSEC-001 created a competitive bidding supporting-document file.',
             $record
         );
 
@@ -108,7 +108,7 @@ class CompetitiveBiddingSupportingDocumentController extends Controller
         AuditLogger::log(
             'Competitive Bidding Supporting Documents',
             'Supporting File Viewed',
-            'BACSEC-002 viewed a competitive bidding supporting-document file.',
+            'BACSEC-001 viewed a competitive bidding supporting-document file.',
             $record
         );
 
@@ -149,7 +149,7 @@ class CompetitiveBiddingSupportingDocumentController extends Controller
         AuditLogger::log(
             'Competitive Bidding Supporting Documents',
             'Supplier File Added',
-            'BACSEC-002 added a supplier file to the competitive bidding record.',
+            'BACSEC-001 added a supplier file to the competitive bidding record.',
             $supplier,
             null,
             ['supplier_name' => $supplier->supplier_name]
@@ -177,7 +177,7 @@ class CompetitiveBiddingSupportingDocumentController extends Controller
         AuditLogger::log(
             'Competitive Bidding Supporting Documents',
             'Supplier Review Updated',
-            'BACSEC-002 updated the supplier review decision.',
+            'BACSEC-001 updated the supplier review decision.',
             $supplier,
             $oldValues,
             $supplier->only(['review_status', 'decision_remarks'])
@@ -229,7 +229,7 @@ class CompetitiveBiddingSupportingDocumentController extends Controller
         AuditLogger::log(
             'Competitive Bidding Supporting Documents',
             'Supporting Requirement Reviewed',
-            "BACSEC-002 reviewed guide item {$item->guide_number}.",
+            "BACSEC-001 reviewed guide item {$item->guide_number}.",
             $item,
             $oldValues,
             $item->only(['status', 'remarks', 'checked_by_user_id', 'checked_at']),
@@ -274,7 +274,7 @@ class CompetitiveBiddingSupportingDocumentController extends Controller
         AuditLogger::log(
             'Competitive Bidding Supporting Documents',
             'Supporting Document Attached',
-            "BACSEC-002 attached a file to guide item {$item->guide_number}.",
+            "BACSEC-001 attached a file to guide item {$item->guide_number}.",
             $attachment,
             null,
             null,
@@ -354,7 +354,7 @@ class CompetitiveBiddingSupportingDocumentController extends Controller
         AuditLogger::log(
             'Competitive Bidding Supporting Documents',
             'Supporting Attachment Removed',
-            "BACSEC-002 removed an attachment from guide item {$item->guide_number}.",
+            "BACSEC-001 removed an attachment from guide item {$item->guide_number}.",
             $item,
             null,
             null,
@@ -429,14 +429,14 @@ class CompetitiveBiddingSupportingDocumentController extends Controller
         $this->handoffs->notifyBacsec002(
             $record,
             $item,
-            'BACSEC-004 submitted a bidding document',
+            'BACSEC-003 submitted a bidding document',
             "{$item->requirement_name} was submitted for {$record->reference_number}."
         );
 
         AuditLogger::log(
             'Competitive Bidding Supporting Documents',
-            'Document Submitted to BACSEC-002',
-            "BACSEC-004 submitted guide item {$item->guide_number} to BACSEC-002.",
+            'Document Submitted to BACSEC-001',
+            "BACSEC-003 submitted guide item {$item->guide_number} to BACSEC-001.",
             $attachment,
             null,
             null,
@@ -444,7 +444,7 @@ class CompetitiveBiddingSupportingDocumentController extends Controller
             ['record_id' => $record->id, 'item_id' => $item->id, 'version' => $item->fresh()->source_version]
         );
 
-        return back()->with('status', "{$item->requirement_name} submitted to BACSEC-002 for checking.");
+        return back()->with('status', "{$item->requirement_name} submitted to BACSEC-001 for checking.");
     }
 
     public function viewSystemDocument(

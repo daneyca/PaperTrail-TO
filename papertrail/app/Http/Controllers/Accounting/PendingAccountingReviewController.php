@@ -339,6 +339,12 @@ class PendingAccountingReviewController extends Controller
 
     private function bacSecretariatUser(): ?User
     {
+        $primary = User::where('user_id', 'BACSEC-001')->where('status', User::STATUS_ACTIVE)->first();
+
+        if ($primary) {
+            return $primary;
+        }
+
         return User::where(function (Builder $query) {
                 $query->where('role', User::ROLE_BAC_SECRETARIAT)
                     ->orWhere('user_id', 'BACSEC-001');

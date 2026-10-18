@@ -103,7 +103,7 @@
         $submittedUserId = \App\Models\User::query()->whereKey($document->submitted_by_user_id)->value('user_id');
     }
 
-    $isBacsec002PrDocument = $isBacsec002PrCreator || $submittedUserId === 'BACSEC-002';
+    $isBacsec002PrDocument = $isBacsec002PrCreator || $submittedUserId === 'BACSEC-001';
     $endUserSignatoryRoutingService = app(\App\Services\EndUserPrSignatoryRoutingService::class);
     $isEndUserPrDocument = ! $isBacsec002PrDocument && (
         ($document->exists ?? false)

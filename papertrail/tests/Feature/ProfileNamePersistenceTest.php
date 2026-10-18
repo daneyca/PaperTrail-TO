@@ -21,7 +21,7 @@ class ProfileNamePersistenceTest extends TestCase
             'password' => 'password123',
             'status' => User::STATUS_ACTIVE,
         ]);
-        $workflow = User::where('user_id', 'BACSEC-004')->firstOrFail();
+        $workflow = User::where('user_id', 'BACSEC-003')->firstOrFail();
 
         $this->actingAs($headOffice)
             ->patch(route('profile.update'), ['name' => 'Maria Santos'])
@@ -33,7 +33,7 @@ class ProfileNamePersistenceTest extends TestCase
         $this->seed(DatabaseSeeder::class);
 
         $this->assertDatabaseHas('users', ['user_id' => 'MCR-001', 'name' => 'Maria Santos']);
-        $this->assertDatabaseHas('users', ['user_id' => 'BACSEC-004', 'name' => 'Darius Malabad']);
+        $this->assertDatabaseHas('users', ['user_id' => 'BACSEC-003', 'name' => 'Darius Malabad']);
 
         $this->post(route('logout'))->assertRedirect(route('login'));
 

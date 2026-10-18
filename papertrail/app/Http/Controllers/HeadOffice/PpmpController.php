@@ -25,7 +25,7 @@ use Illuminate\View\View;
 
 class PpmpController extends Controller
 {
-    private const APP_CONSOLIDATION_HANDLER_USER_ID = 'BACSEC-004';
+    private const APP_CONSOLIDATION_HANDLER_USER_ID = 'BACSEC-003';
     private const SIGNATURE_REQUIRED_MESSAGE = 'PPMP requires Head of Office e-signature before submission to BAC Secretariat for APP consolidation.';
 
     private const PLAN_TYPES = [
@@ -372,7 +372,7 @@ class PpmpController extends Controller
             $target = $this->appConsolidationTarget();
 
             if (!$target['office'] || !$target['user']) {
-                return back()->with('error', 'BACSEC-004 APP consolidation routing target is not configured.');
+                return back()->with('error', 'BACSEC-003 APP consolidation routing target is not configured.');
             }
 
             DB::transaction(function () use ($request, $document, $target) {
@@ -381,7 +381,7 @@ class PpmpController extends Controller
 
             return redirect()
                 ->route('head-office.ppmp.show', $document)
-                ->with('status', 'PPMP submitted to BACSEC-004 for APP consolidation.');
+                ->with('status', 'PPMP submitted to BACSEC-003 for APP consolidation.');
         }
 
         if (!$this->canModify($document)) {
@@ -770,7 +770,7 @@ class PpmpController extends Controller
             'PPMP Submitted to BAC',
             $oldStatus,
             ProcurementDocument::STATUS_PENDING_PPMP_REVIEW,
-            'Signed PPMP routed to BACSEC-004 for APP consolidation.',
+            'Signed PPMP routed to BACSEC-003 for APP consolidation.',
             $fromOffice,
             $appConsolidationOffice->id,
         );

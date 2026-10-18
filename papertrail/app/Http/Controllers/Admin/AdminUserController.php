@@ -19,7 +19,7 @@ class AdminUserController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = User::query()->whereNotNull('user_id');
+        $query = User::query()->whereNotNull('user_id')->where('user_id', '!=', 'BACSEC-RETIRED-001');
 
         if ($request->filled('search')) {
             $search = $request->string('search')->toString();

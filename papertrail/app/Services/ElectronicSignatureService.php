@@ -1227,7 +1227,7 @@ class ElectronicSignatureService
     {
         if ($type === 'purchase_request') {
             return match ($prSignatureResult) {
-                'completed_signatories' => 'All PR signatures completed. Purchase Request returned to BACSEC-002 for PR number submission.',
+                'completed_signatories' => 'All PR signatures completed. Purchase Request returned to BACSEC-001 for PR number submission.',
                 'submitted_to_pr_numbering' => 'All PR signatures completed. Purchase Request submitted to PR Numbering Staff.',
                 default => $fullySigned
                     ? 'All PR signatures completed.'
@@ -1293,7 +1293,8 @@ class ElectronicSignatureService
 
     private function bacSecretariatTarget(): array
     {
-        $user = User::query()
+        $user = User::where('user_id', 'BACSEC-001')->where('status', User::STATUS_ACTIVE)->first()
+            ?: User::query()
             ->where('status', User::STATUS_ACTIVE)
             ->where(function ($query) {
                 $query->where('role', User::ROLE_BAC_SECRETARIAT)

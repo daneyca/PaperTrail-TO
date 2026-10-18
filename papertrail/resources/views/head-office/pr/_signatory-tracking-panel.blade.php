@@ -7,7 +7,7 @@
     }
 
     $endUserSignatoryTrackingService = app(\App\Services\EndUserPrSignatoryRoutingService::class);
-    $signatoryTrackingService = $submittedUserId === 'BACSEC-002'
+    $signatoryTrackingService = $submittedUserId === 'BACSEC-001'
         ? app(\App\Services\Bacsec002PrSignatoryRoutingService::class)
         : (($trackingDocument?->exists ?? false) && $endUserSignatoryTrackingService->hasSignatureRouting($trackingDocument)
             ? $endUserSignatoryTrackingService

@@ -14,7 +14,7 @@
         <div>
             <p class="eyebrow">Posting Management</p>
             <h1>Create Posting</h1>
-            <p>Record the posting details and evidence for SVP transactions assigned to BACSEC-004.</p>
+            <p>Record the posting details and evidence for SVP transactions assigned to BACSEC-003.</p>
         </div>
 
         <a href="{{ route('bac-secretariat.svp-posting.pending') }}" class="dashboard-action secondary-action">Pending Posting</a>
@@ -76,7 +76,7 @@
                     </div>
                     <div>
                         <span>Assigned Account</span>
-                        <strong>BACSEC-004</strong>
+                        <strong>BACSEC-003</strong>
                     </div>
                 </section>
 

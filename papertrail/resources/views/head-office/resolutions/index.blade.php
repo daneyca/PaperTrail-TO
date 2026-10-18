@@ -19,7 +19,7 @@
     <section class="stat-grid stat-grid-modern head-office-summary-grid" aria-label="Received BAC Resolution summary">
         <x-dashboard.stat-card href="{{ route('head-office.resolutions.index') }}" value="{{ $summary['received'] }}" label="Total Received" accent="gold" class="{{ blank($activeStatus) && blank($activeWorkflow) ? 'is-filter-active' : '' }}" />
         <x-dashboard.stat-card href="{{ route('head-office.resolutions.index', ['status' => 'awaiting']) }}" value="{{ $summary['awaiting'] }}" label="Awaiting Acknowledgment" accent="navy" class="{{ $activeStatus === 'awaiting' ? 'is-filter-active' : '' }}" />
-        <x-dashboard.stat-card href="{{ route('head-office.resolutions.index', ['workflow' => 'posting_required']) }}" value="{{ $summary['postingRequired'] }}" label="For BACSEC-004 Posting" accent="gold" class="{{ $activeWorkflow === 'posting_required' ? 'is-filter-active' : '' }}" />
+        <x-dashboard.stat-card href="{{ route('head-office.resolutions.index', ['workflow' => 'posting_required']) }}" value="{{ $summary['postingRequired'] }}" label="For BACSEC-003 Posting" accent="gold" class="{{ $activeWorkflow === 'posting_required' ? 'is-filter-active' : '' }}" />
         <x-dashboard.stat-card href="{{ route('head-office.resolutions.index', ['workflow' => 'ready_for_rfq']) }}" value="{{ $summary['readyForRfq'] }}" label="Ready for RFQ" accent="green" class="{{ $activeWorkflow === 'ready_for_rfq' ? 'is-filter-active' : '' }}" />
     </section>
 

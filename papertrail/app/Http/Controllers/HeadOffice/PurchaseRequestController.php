@@ -567,7 +567,7 @@ class PurchaseRequestController extends Controller
         return redirect()
             ->route('head-office.pr.show', $document)
             ->with('status', $submitToBac
-                ? 'Purchase Request copy sent to BACSEC-002 for BAC Resolution preparation.'
+                ? 'Purchase Request copy sent to BACSEC-001 for BAC Resolution preparation.'
                 : ($submitSignedPrToNumbering
                     ? 'Purchase Request submitted for PR number assignment.'
                     : ($useSignatoryRouting
@@ -744,15 +744,15 @@ class PurchaseRequestController extends Controller
         return [
             'next_process' => 'BAC Resolution',
             'assigned_office' => 'BAC Secretariat',
-            'assigned_account' => 'BACSEC-002',
-            'recipient' => 'BACSEC-002',
-            'button_label' => 'Send PR Copy to BACSEC-002',
+            'assigned_account' => 'BACSEC-001',
+            'recipient' => 'BACSEC-001',
+            'button_label' => 'Send PR Copy to BACSEC-001',
             'amount_path' => $requiresPosting
                 ? 'Posting required after BAC Resolution'
                 : 'Posting not required at or below PHP 50,000',
             'description' => $requiresPosting
-                ? 'Send a copy of this completed PR to BACSEC-002 so the BAC Resolution can be prepared. After that, it will move to BACSEC-004 for posting because the amount is above PHP 50,000 and below PHP 200,000.'
-                : 'Send a copy of this completed PR to BACSEC-002 so the BAC Resolution can be prepared.',
+                ? 'Send a copy of this completed PR to BACSEC-001 so the BAC Resolution can be prepared. After that, it will move to BACSEC-003 for posting because the amount is above PHP 50,000 and below PHP 200,000.'
+                : 'Send a copy of this completed PR to BACSEC-001 so the BAC Resolution can be prepared.',
         ];
     }
 
@@ -1775,7 +1775,7 @@ class PurchaseRequestController extends Controller
             'bac_secretariat_status' => 'pending_action',
             'route_destination_role' => User::ROLE_BAC_SECRETARIAT,
             'route_destination_office_id' => $bacsecOfficeId,
-            'route_remarks' => 'Pending Action: PR copy sent to BACSEC-002 for BAC Resolution preparation.',
+            'route_remarks' => 'Pending Action: PR copy sent to BACSEC-001 for BAC Resolution preparation.',
             'routed_by_user_id' => $user->id,
             'routed_at' => now(),
         ])->save();
@@ -1783,10 +1783,10 @@ class PurchaseRequestController extends Controller
         $this->recordRouting(
             $document,
             $user,
-            'PR Copy Sent to BACSEC-002',
+            'PR Copy Sent to BACSEC-001',
             $oldStatus,
             ProcurementDocument::STATUS_READY_FOR_BAC_RESOLUTION,
-            'A completed Purchase Request copy was sent to BACSEC-002 for BAC Resolution preparation.',
+            'A completed Purchase Request copy was sent to BACSEC-001 for BAC Resolution preparation.',
             $fromOffice,
             $bacsecOfficeId,
         );
@@ -1801,7 +1801,7 @@ class PurchaseRequestController extends Controller
             route('bac-secretariat.pr.show', $document),
         );
 
-        AuditLogger::log('Purchase Request Submission', 'pr_copy_sent_to_bacsec002', 'Requesting Office sent a finalized Purchase Request copy to BACSEC-002.', $document, $oldValues, [
+        AuditLogger::log('Purchase Request Submission', 'pr_copy_sent_to_bacsec002', 'Requesting Office sent a finalized Purchase Request copy to BACSEC-001.', $document, $oldValues, [
             'status' => ProcurementDocument::STATUS_READY_FOR_BAC_RESOLUTION,
             'pr_no' => $document->pr_no,
             'current_office_id' => $document->current_office_id,
@@ -1819,19 +1819,19 @@ class PurchaseRequestController extends Controller
         app(SvpChainService::class)->addEvent($chain->refresh(), [
             'document_type' => 'Purchase Request',
             'document_id' => $document->id,
-            'action' => 'PR Copy Sent to BACSEC-002',
+            'action' => 'PR Copy Sent to BACSEC-001',
             'stage' => SvpProcurementChain::STAGE_BAC_RESOLUTION,
             'status' => ProcurementDocument::STATUS_READY_FOR_BAC_RESOLUTION,
             'from_office_id' => $fromOffice,
             'to_office_id' => $bacsecOfficeId,
             'performed_by_user_id' => $user->id,
-            'remarks' => 'Completed PR copy sent to BACSEC-002. RFQ/posting readiness may proceed while BAC Resolution remains tracked.',
+            'remarks' => 'Completed PR copy sent to BACSEC-001. RFQ/posting readiness may proceed while BAC Resolution remains tracked.',
         ]);
 
         app(SvpChainService::class)->routePrForRfqPreparation(
             $document->refresh(),
             $user,
-            'Completed PR copy sent to BACSEC-002. BAC Resolution remains part of the workflow while RFQ/posting readiness proceeds.',
+            'Completed PR copy sent to BACSEC-001. BAC Resolution remains part of the workflow while RFQ/posting readiness proceeds.',
         );
     }
 
@@ -1892,7 +1892,7 @@ class PurchaseRequestController extends Controller
     private function bacsec002ReferenceTarget(): array
     {
         $user = User::where('status', User::STATUS_ACTIVE)
-            ->where('user_id', 'BACSEC-002')
+            ->where('user_id', 'BACSEC-001')
             ->first();
 
         return ['office' => $user?->assignedOffice, 'user' => $user];

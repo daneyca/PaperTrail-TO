@@ -135,7 +135,7 @@
                         <td colspan="7">
                             <div class="empty-state">
                                 <strong>No consolidated APP items available</strong>
-                                <p>APP items for this fiscal year will appear here after BACSEC-004 submits or approves the APP. Draft APP worksheets are not shown.</p>
+                                <p>APP items for this fiscal year will appear here after BACSEC-003 submits or approves the APP. Draft APP worksheets are not shown.</p>
                             </div>
                         </td>
                     </tr>

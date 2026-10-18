@@ -385,8 +385,8 @@ class PrNumberingController extends Controller
     private function isBacsec002PurchaseRequest(ProcurementDocument $document, ?User $submitter = null): bool
     {
         return in_array($document->document_type, ['PR', 'Purchase Request'], true)
-            && ($submitter?->user_id === 'BACSEC-002'
-                || User::whereKey($document->submitted_by_user_id)->where('user_id', 'BACSEC-002')->exists());
+            && ($submitter?->user_id === 'BACSEC-001'
+                || User::whereKey($document->submitted_by_user_id)->where('user_id', 'BACSEC-001')->exists());
     }
 
     private function activeHeadOfficeUserFor(Office $office): ?User
@@ -414,7 +414,8 @@ class PrNumberingController extends Controller
             ->orWhere('name', 'BAC Secretariat')
             ->first();
 
-        $user = User::where('status', User::STATUS_ACTIVE)
+        $user = User::where('user_id', 'BACSEC-001')->where('status', User::STATUS_ACTIVE)->first()
+            ?: User::where('status', User::STATUS_ACTIVE)
             ->where(function (Builder $query) {
                 $query->whereHas('assignedRole', function (Builder $roleQuery) {
                     $roleQuery->where('code', 'bac_secretariat')

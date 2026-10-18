@@ -371,6 +371,13 @@ class DocumentConfirmationController extends Controller
 
     private function activeUserByRoleOrUserId(string $role, ?string $userId = null): ?User
     {
+        if ($userId === 'BACSEC-001') {
+            $primary = User::where('user_id', $userId)->where('status', User::STATUS_ACTIVE)->first();
+            if ($primary) {
+                return $primary;
+            }
+        }
+
         return User::where('status', User::STATUS_ACTIVE)
             ->where(function (Builder $query) use ($role, $userId) {
                 if ($role === User::ROLE_APPROVING_AUTHORITY) {

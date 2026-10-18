@@ -769,9 +769,9 @@ class AiDelayRiskService
         return match ($status) {
             ProcurementDocument::STATUS_PPMP_DRAFT => 'Complete the required Head of Office e-signature before submitting this PPMP.',
             ProcurementDocument::STATUS_PPMP_PENDING_SIGNATORIES => 'Complete the pending Head of Office e-signature.',
-            ProcurementDocument::STATUS_PPMP_SIGNATORIES_COMPLETED => 'Submit the signed PPMP to BACSEC-004 for APP consolidation.',
-            ProcurementDocument::STATUS_PENDING_PPMP_REVIEW => 'BACSEC-004 should start APP consolidation review.',
-            ProcurementDocument::STATUS_UNDER_PPMP_REVIEW => 'BACSEC-004 should accept for APP consolidation or return with remarks.',
+            ProcurementDocument::STATUS_PPMP_SIGNATORIES_COMPLETED => 'Submit the signed PPMP to BACSEC-003 for APP consolidation.',
+            ProcurementDocument::STATUS_PENDING_PPMP_REVIEW => 'BACSEC-003 should start APP consolidation review.',
+            ProcurementDocument::STATUS_UNDER_PPMP_REVIEW => 'BACSEC-003 should accept for APP consolidation or return with remarks.',
             ProcurementDocument::STATUS_ACCEPTED_FOR_APP_CONSOLIDATION => 'Include the accepted PPMP in APP consolidation.',
             ProcurementDocument::STATUS_PR_DRAFT => 'Submit the PR for official PR number assignment.',
             ProcurementDocument::STATUS_PENDING_PR_NUMBER_ASSIGNMENT => 'PR Numbering Staff should assign the official PR number.',

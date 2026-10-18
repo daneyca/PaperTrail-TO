@@ -268,7 +268,7 @@ class EndUserPrSignatoryRoutingService
                 ?: $this->activeHeadOfficeUserByOffice(['MTO'], ['Municipal Treasurers Office', 'Municipal Treasurer Office']),
             'accounting officer' => $this->activeUserByIds(['ACCOUNTING-001', 'ACC-001'])
                 ?: $this->activeHeadOfficeUserByOffice(['Accounting', 'MACCO'], ['Municipal Accounting Office', 'Accounting Office']),
-            'bac secretariat' => $this->activeUserByIds(['BACSEC-003', 'BACSEC-001', 'BACSEC-004'])
+            'bac secretariat' => $this->activeUserByIds(['BACSEC-002', 'BACSEC-001', 'BACSEC-003'])
                 ?: $this->activeUserByOffice(['BACSEC'], ['BAC Secretariat']),
             default => null,
         };
@@ -931,6 +931,6 @@ class EndUserPrSignatoryRoutingService
 
     private function isBacsec002(User $user): bool
     {
-        return $user->user_id === 'BACSEC-002';
+        return $user->user_id === 'BACSEC-001';
     }
 }

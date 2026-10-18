@@ -119,7 +119,7 @@
                                 $signatureTaskLabel = ! $isPpmp && $requestItem->signatory_label && $requestItem->signatory_label !== $signatureDesignation
                                     ? $requestItem->signatory_label
                                     : null;
-                                $isBacsec002ResolutionUser = auth()->user()?->user_id === 'BACSEC-002';
+                                $isBacsec002ResolutionUser = auth()->user()?->user_id === 'BACSEC-001';
                                 $isSvpRequest = ! $isBacsec002ResolutionUser && (bool) $requestItem->is_svp_signature_request;
                                 $documentContextLabel = $requestItem->document_context_label ?: ($isPurchaseRequest || $isPpmp ? null : $requestItem->document_label);
                                 $requestDocumentTypeLabel = $documentTypeLabel($requestItem->document_type);

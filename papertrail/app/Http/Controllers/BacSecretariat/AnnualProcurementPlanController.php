@@ -2581,7 +2581,7 @@ class AnnualProcurementPlanController extends Controller
                 'office' => 'Bids and Awards Committee Secretariat',
                 'role_code' => 'bac_secretariat',
                 'role_name' => User::ROLE_BAC_SECRETARIAT,
-                'account_code' => 'BACSEC-004',
+                'account_code' => 'BACSEC-003',
                 'office_code' => 'BACSEC',
             ],
             'bac chair' => [

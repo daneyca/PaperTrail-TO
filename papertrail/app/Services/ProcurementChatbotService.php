@@ -549,7 +549,7 @@ RESPONSE;
 
         if ((str_contains($value, 'after') || str_contains($value, 'next'))
             && (preg_match('/\bpr\b/i', $value) === 1 || str_contains($value, 'purchase request'))) {
-            return 'After a Purchase Request is submitted, PaperTrail completes the required PR signatures and returns it to the creator. The creator then sends it to PR Numbering Staff for an official PR number. After numbering, it returns to the End User or BACSEC-002 for submission to BAC Secretariat, where it is received and validated. Check Status Tracking and Notifications for the current handler and next action.';
+            return 'After a Purchase Request is submitted, PaperTrail completes the required PR signatures and returns it to the creator. The creator then sends it to PR Numbering Staff for an official PR number. After numbering, it returns to the End User or BACSEC-001 for submission to BAC Secretariat, where it is received and validated. Check Status Tracking and Notifications for the current handler and next action.';
         }
 
         if ((str_contains($value, 'create') || str_contains($value, 'prepare'))

@@ -85,7 +85,7 @@
                 <div>
                     <p class="eyebrow">Incoming PPMPs</p>
                     <h2>Needs Review Before APP Import</h2>
-                    <p>Submitted PPMP records assigned to BACSEC-004 appear here before they become available for APP consolidation.</p>
+                    <p>Submitted PPMP records assigned to BACSEC-003 appear here before they become available for APP consolidation.</p>
                 </div>
             </div>
 

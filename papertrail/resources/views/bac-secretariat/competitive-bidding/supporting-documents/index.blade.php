@@ -5,7 +5,7 @@
 @section('content')
     <section class="cb-support-hero pt-smooth-enter">
         <div>
-            <p class="cb-support-eyebrow">BACSEC-002 · Competitive Bidding</p>
+            <p class="cb-support-eyebrow">BACSEC-001 · Competitive Bidding</p>
             <h1>Supporting Documents</h1>
             <p>Complete bidding files and supplier-submitted attachments.</p>
         </div>

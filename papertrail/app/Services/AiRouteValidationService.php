@@ -357,19 +357,19 @@ class AiRouteValidationService
                 ProcurementDocument::STAGE_PPMP_SIGNATORIES_COMPLETED,
                 ProcurementDocument::STATUS_PENDING_PPMP_REVIEW,
                 ProcurementDocument::STAGE_PPMP_SUBMITTED_TO_BAC,
-                'BACSEC-004',
-                'Submit the signed PPMP to BACSEC-004 for APP consolidation.'
+                'BACSEC-003',
+                'Submit the signed PPMP to BACSEC-003 for APP consolidation.'
             ),
             ProcurementDocument::STATUS_PENDING_PPMP_REVIEW => $this->route(
-                'BACSEC-004',
+                'BACSEC-003',
                 ProcurementDocument::STAGE_PPMP_SUBMITTED_TO_BAC,
                 ProcurementDocument::STATUS_UNDER_PPMP_REVIEW,
                 ProcurementDocument::STAGE_PPMP_UNDER_APP_CONSOLIDATION,
-                'BACSEC-004',
+                'BACSEC-003',
                 'Start APP consolidation review.'
             ),
             ProcurementDocument::STATUS_UNDER_PPMP_REVIEW => $this->route(
-                'BACSEC-004',
+                'BACSEC-003',
                 ProcurementDocument::STAGE_PPMP_UNDER_APP_CONSOLIDATION,
                 ProcurementDocument::STATUS_ACCEPTED_FOR_APP_CONSOLIDATION,
                 ProcurementDocument::STAGE_ACCEPTED_FOR_APP_CONSOLIDATION,

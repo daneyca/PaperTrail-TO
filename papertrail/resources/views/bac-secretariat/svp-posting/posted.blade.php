@@ -7,7 +7,7 @@
         <div>
             <p class="eyebrow">Posting Management</p>
             <h1>Posted Records</h1>
-            <p>Review SVP posting records created by BACSEC-004 and posted for workflow continuation.</p>
+            <p>Review SVP posting records created by BACSEC-003 and posted for workflow continuation.</p>
         </div>
 
         <a href="{{ route('bac-secretariat.svp-posting.pending') }}" class="dashboard-action secondary-action">Pending Posting</a>
@@ -76,7 +76,7 @@
                             <td colspan="8">
                                 <div class="empty-state">
                                     <strong>No posted records yet</strong>
-                                    <p>Posting records appear here after BACSEC-004 marks a sample posting as posted or closed.</p>
+                                    <p>Posting records appear here after BACSEC-003 marks a sample posting as posted or closed.</p>
                                 </div>
                             </td>
                         </tr>
