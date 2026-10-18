@@ -16,6 +16,7 @@ use App\Models\Rfq;
 use App\Models\SignatureRequest;
 use App\Models\SupplementalApp;
 use App\Models\SupplierSignatureRequest;
+use App\Models\User;
 use App\Services\Templates\OfficialEditableTemplateService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -129,6 +130,19 @@ class DocumentSubmenuController extends Controller
     public function bacSecretariatCompetitiveBidding(Request $request)
     {
         return $this->render($request, 'bac-secretariat.competitive-bidding');
+    }
+
+    public function bacSecretariatPreBidConferenceMinutesTemplate(Request $request)
+    {
+        abort_unless($request->user()?->user_id === 'BACSEC-002', 403);
+
+        $bacMembers = User::query()
+            ->where('role', User::ROLE_BAC_MEMBER)
+            ->where('status', User::STATUS_ACTIVE)
+            ->orderBy('user_id')
+            ->get(['id', 'user_id', 'name']);
+
+        return view('bac-secretariat.competitive-bidding.pre-bid-conference-minutes', compact('bacMembers'));
     }
 
     public function bacSecretariatTechnicalChecklist(Request $request)

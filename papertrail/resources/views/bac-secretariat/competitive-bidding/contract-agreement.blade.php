@@ -478,7 +478,7 @@
             <div class="contract-agreement-body" style="margin-top: 10px;">
                 <p contenteditable="true">known to me and to me known to be the same persons who executed the foregoing Contract Agreement, and they acknowledged to me that the same is their free and voluntary act and deed as well as that of the entities they represent.</p>
 
-                <p contenteditable="true">This Contract Agreement consists of 3 pages, including this page on which this acknowledgment is written, and has been signed by the parties and their witnesses on each and every page thereof.</p>
+                <p contenteditable="true">This Contract Agreement, including this acknowledgment, has been signed by the parties and their witnesses on each and every page thereof.</p>
 
                 <p contenteditable="true">WITNESS MY HAND AND SEAL on the date and place first above written.</p>
             </div>

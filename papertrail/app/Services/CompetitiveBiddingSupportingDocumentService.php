@@ -22,6 +22,7 @@ class CompetitiveBiddingSupportingDocumentService
         ['6.4', 'general_conditions_contract', 'Bidding Documents', 'bidding', 'General Conditions of Contract', 'BACSEC-003'],
         ['6.5', 'special_conditions_contract', 'Bidding Documents', 'bidding', 'Special Conditions of Contract', 'BACSEC-003'],
         ['27', 'invitation_to_observer', 'BAC Proceedings', 'bidding', 'Letter of Invitation to Observer', 'BACSEC-003'],
+        ['PB', 'pre_bid_conference_minutes', 'BAC Proceedings', 'bidding', 'Minutes of the Pre-Bid Conference', 'BACSEC-002', false],
         ['28', 'technical_financial_checklist_copy', 'BAC Proceedings', 'bidding', 'Completed Checklist of Technical and Financial Requirements', 'BACSEC-001'],
         ['29', 'abstract_bids_read_calculated', 'BAC Proceedings', 'evaluation', 'Abstract of Bids as Read and as Calculated, signed by the BAC', 'BACSEC-001'],
         ['30', 'bid_opening_minutes_attendance', 'BAC Proceedings', 'evaluation', 'Minutes of Bid Opening with Attendance', 'BACSEC-001'],
@@ -145,7 +146,7 @@ class CompetitiveBiddingSupportingDocumentService
                 'phase' => $phase,
                 'requirement_name' => $name,
                 'document_source' => $source,
-                'is_required' => true,
+                'is_required' => $requirements[$index][6] ?? true,
                 'status' => CompetitiveBiddingSupportingItem::STATUS_PENDING,
             ]);
         }

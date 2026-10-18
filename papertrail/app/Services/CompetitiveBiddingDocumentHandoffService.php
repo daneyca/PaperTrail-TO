@@ -17,6 +17,7 @@ class CompetitiveBiddingDocumentHandoffService
     public const SOURCE_MANUAL_UPLOAD = 'manual_upload';
 
     private const SIGNATURE_REQUIREMENT_MAP = [
+        'pre_bid_conference_minutes' => 'pre_bid_conference_minutes',
         'bid_evaluation_report' => 'bid_evaluation_report',
         'post_qualification_evaluation_summary' => 'post_qualification_summary',
         'post_qualification_report_twg' => 'twg_post_qualification_report',

@@ -250,6 +250,13 @@
 
     if ($roleSlug === 'bac-secretariat' && $isBacsecPrSignatureOnly) {
         $items = array_values(array_filter($items, fn ($item) => ($item['label'] ?? null) !== 'Small Value Procurement'));
+        array_splice($items, 2, 0, [[
+            'label' => 'Competitive Bidding',
+            'icon' => 'workflow',
+            'children' => [
+                ['label' => 'Pre-Bid Conference Minutes', 'route' => 'bac-secretariat.competitive-bidding.pre-bid-minutes.template'],
+            ],
+        ]]);
     }
 
     if ($roleSlug === 'bac-secretariat' && $isSvpPostingProcessor) {

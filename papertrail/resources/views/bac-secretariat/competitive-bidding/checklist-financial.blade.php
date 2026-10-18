@@ -335,7 +335,7 @@
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 0;
+                margin: 12mm 13mm 10mm;
             }
 
             .financial-template-toolbar,
@@ -350,8 +350,7 @@
             }
 
             .financial-template-wrap {
-                display: flex !important;
-                justify-content: center !important;
+                display: block !important;
                 width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
@@ -360,13 +359,18 @@
             }
 
             .financial-template-page {
-                width: 210mm !important;
-                max-width: 210mm !important;
-                min-height: 297mm !important;
+                width: auto !important;
+                max-width: none !important;
+                min-height: 0 !important;
                 margin: 0 !important;
-                padding: 12mm 13mm 10mm !important;
+                padding: 0 !important;
+                border: 0 !important;
                 box-shadow: none !important;
             }
+
+            .financial-template-form { min-height: 0 !important; }
+            .financial-template-page thead { display: table-header-group; }
+            .financial-template-page tr { break-inside: avoid; }
 
             .financial-rich-field,
             .financial-date,

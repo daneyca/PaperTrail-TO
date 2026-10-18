@@ -242,6 +242,7 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         Route::get('/bac-resolutions/menu', [DocumentSubmenuController::class, 'bacSecretariatBacResolution'])->name('resolutions.menu');
         Route::get('/purchase-orders/menu', [DocumentSubmenuController::class, 'bacSecretariatPurchaseOrder'])->name('purchase-orders.menu');
         Route::get('/competitive-bidding/menu', [DocumentSubmenuController::class, 'bacSecretariatCompetitiveBidding'])->name('competitive-bidding.menu');
+        Route::get('/competitive-bidding/pre-bid-conference-minutes/template', [DocumentSubmenuController::class, 'bacSecretariatPreBidConferenceMinutesTemplate'])->name('competitive-bidding.pre-bid-minutes.template');
         Route::get('/competitive-bidding/supporting-submissions', [CompetitiveBiddingSupportingDocumentController::class, 'sourceIndex'])->name('competitive-bidding.supporting-submissions.index');
         Route::get('/competitive-bidding/supporting-submissions/{record}', [CompetitiveBiddingSupportingDocumentController::class, 'sourceShow'])->name('competitive-bidding.supporting-submissions.show');
         Route::post('/competitive-bidding/supporting-submissions/{record}/items/{item}', [CompetitiveBiddingSupportingDocumentController::class, 'storeSourceAttachment'])->name('competitive-bidding.supporting-submissions.store');

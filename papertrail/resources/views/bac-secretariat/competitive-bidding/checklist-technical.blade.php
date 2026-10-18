@@ -306,11 +306,6 @@
             line-height: 1.25 !important;
         }
 
-        .technical-page-break {
-            margin-top: 18px;
-            border-bottom: 2px dashed #b9b9b9;
-        }
-
         @media (max-width: 980px) {
             .technical-checklist-wrap {
                 justify-content: flex-start;
@@ -320,7 +315,7 @@
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 0;
+                margin: 14mm 18mm 12mm;
             }
 
             .technical-checklist-toolbar,
@@ -334,8 +329,7 @@
             }
 
             .technical-checklist-wrap {
-                display: flex !important;
-                justify-content: center !important;
+                display: block !important;
                 width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
@@ -344,14 +338,18 @@
             }
 
             .technical-checklist-page {
-                width: 210mm !important;
-                max-width: 210mm !important;
-                min-height: 297mm !important;
+                width: auto !important;
+                max-width: none !important;
+                min-height: 0 !important;
                 margin: 0 !important;
-                padding: 14mm 18mm 12mm !important;
+                padding: 0 !important;
+                border: 0 !important;
                 box-shadow: none !important;
-                break-after: page;
+                break-after: auto;
             }
+
+            .technical-checklist-page thead { display: table-header-group; }
+            .technical-checklist-page tr { break-inside: avoid; }
         }
     </style>
 
@@ -512,7 +510,6 @@
 
             <p class="technical-footer-note" contenteditable="true">On the Bid Opening day, the BAC may find it useful to use this form to keep track of the results of the preliminary examination of bids. This form, once accomplished, may be used by the BAC Secretariat as a reference in writing up the minutes of the bid opening.</p>
 
-            <div class="technical-page-break"></div>
         </section>
     </div>
 @endsection

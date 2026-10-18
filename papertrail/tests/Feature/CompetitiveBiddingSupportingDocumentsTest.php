@@ -33,7 +33,8 @@ class CompetitiveBiddingSupportingDocumentsTest extends TestCase
         $record = CompetitiveBiddingRecord::where('reference_number', 'CB-2026-001')->firstOrFail();
 
         $response->assertRedirect(route('bac-secretariat.competitive-bidding.supporting-documents.show', $record));
-        $this->assertSame(24, $record->projectItems()->count());
+        $this->assertSame(25, $record->projectItems()->count());
+        $this->assertFalse($record->projectItems()->where('requirement_key', 'pre_bid_conference_minutes')->firstOrFail()->is_required);
         $this->assertTrue(Route::has('bac-secretariat.competitive-bidding.checklist.technical'));
         $this->assertTrue(Route::has('bac-secretariat.competitive-bidding.checklist.financial'));
 

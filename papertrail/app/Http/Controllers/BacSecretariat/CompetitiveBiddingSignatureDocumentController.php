@@ -18,6 +18,8 @@ class CompetitiveBiddingSignatureDocumentController extends Controller
 {
     private const DOCUMENT_TYPE = 'competitive_bidding_document';
 
+    private const PRE_BID_MEMBER_SLOTS = ['member_1', 'member_2', 'member_3'];
+
     private const ROLE_OPTIONS = [
         'bac_secretariat' => ['label' => 'BAC Secretariat', 'role' => User::ROLE_BAC_SECRETARIAT, 'type' => 'internal'],
         'twg' => ['label' => 'Technical Working Group', 'role' => User::ROLE_BAC_MEMBER, 'type' => 'internal'],
@@ -38,6 +40,11 @@ class CompetitiveBiddingSignatureDocumentController extends Controller
             'signatories' => ['required', 'string', 'max:200000'],
         ]);
 
+        if ($validated['template_key'] === 'pre_bid_conference_minutes') {
+            abort_unless($request->user()?->user_id === 'BACSEC-002', 403);
+            $validated['document_title'] = 'Minutes of the Pre-Bid Conference';
+        }
+
         $signatories = json_decode($validated['signatories'], true);
 
         if (! is_array($signatories)) {
@@ -54,7 +61,11 @@ class CompetitiveBiddingSignatureDocumentController extends Controller
             ]);
         }
 
-        [$document, $internalCount, $supplierCount] = DB::transaction(function () use ($request, $validated, $signatories) {
+        $preBidMemberRecipients = $validated['template_key'] === 'pre_bid_conference_minutes'
+            ? $this->preBidMemberRecipients($signatories)
+            : [];
+
+        [$document, $internalCount, $supplierCount] = DB::transaction(function () use ($request, $validated, $signatories, $preBidMemberRecipients) {
             $document = CompetitiveBiddingSignatureDocument::create([
                 'template_key' => $validated['template_key'],
                 'document_title' => $validated['document_title'],
@@ -99,6 +110,14 @@ class CompetitiveBiddingSignatureDocumentController extends Controller
                     continue;
                 }
 
+                $recipientId = null;
+
+                if ($document->template_key === 'pre_bid_conference_minutes') {
+                    $recipientId = $signatory['slot'] === 'prepared_by'
+                        ? $request->user()->id
+                        : ($preBidMemberRecipients[$signatory['slot']] ?? null);
+                }
+
                 SignatureRequest::create([
                     'request_uuid' => (string) Str::uuid(),
                     'document_type' => self::DOCUMENT_TYPE,
@@ -111,7 +130,7 @@ class CompetitiveBiddingSignatureDocumentController extends Controller
                     'signing_mode' => 'parallel',
                     'is_required' => true,
                     'requested_by_user_id' => $request->user()->id,
-                    'requested_to_user_id' => null,
+                    'requested_to_user_id' => $recipientId,
                     'requested_to_role' => $role['role'],
                     'status' => SignatureRequest::STATUS_PENDING,
                     'metadata' => [
@@ -147,6 +166,50 @@ class CompetitiveBiddingSignatureDocumentController extends Controller
         return back()->with('status', $message);
     }
 
+    private function preBidMemberRecipients(array $signatories): array
+    {
+        $recipients = [];
+
+        foreach ($signatories as $signatory) {
+            if ($signatory['role_key'] === 'bac_member'
+                && ! in_array($signatory['slot'], self::PRE_BID_MEMBER_SLOTS, true)) {
+                throw ValidationException::withMessages([
+                    'signatories' => 'Only the three BAC Member signatories can sign these minutes.',
+                ]);
+            }
+        }
+
+        foreach (self::PRE_BID_MEMBER_SLOTS as $slot) {
+            $matches = array_values(array_filter($signatories, fn (array $signatory) => $signatory['slot'] === $slot));
+
+            if (count($matches) !== 1
+                || $matches[0]['role_key'] !== 'bac_member'
+                || ! $matches[0]['recipient_user_id']) {
+                throw ValidationException::withMessages([
+                    'signatories' => 'Select an account for each BAC Member before forwarding.',
+                ]);
+            }
+
+            $user = User::query()->find($matches[0]['recipient_user_id']);
+
+            if (! $user || ! $user->isActive() || ! $user->hasRole(User::ROLE_BAC_MEMBER)) {
+                throw ValidationException::withMessages([
+                    'signatories' => 'Each selected signer must have an active BAC Member account.',
+                ]);
+            }
+
+            if (in_array($user->id, $recipients, true)) {
+                throw ValidationException::withMessages([
+                    'signatories' => 'Select a different account for each BAC Member.',
+                ]);
+            }
+
+            $recipients[$slot] = $user->id;
+        }
+
+        return $recipients;
+    }
+
     private function normalizeSignatories(array $signatories): array
     {
         return collect($signatories)
@@ -171,6 +234,7 @@ class CompetitiveBiddingSignatureDocumentController extends Controller
                     'name' => $name,
                     'role_key' => $roleKey,
                     'role_label' => self::ROLE_OPTIONS[$roleKey]['label'],
+                    'recipient_user_id' => filter_var($signatory['recipient_user_id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) ?: null,
                     'supplier_name' => $supplierName,
                 ];
             })
