@@ -35,7 +35,6 @@
         const captchaImage = document.querySelector('#captcha-image');
         const captchaRefresh = document.querySelector('#captcha-refresh');
         const securityCodeInput = document.querySelector('#security_code');
-        const loginForm = document.querySelector('.pt-login-form');
 
         function toggleOfficeSelector() {
             if (!roleSelect || !officeSelector) {
@@ -77,16 +76,5 @@
             securityCodeInput.focus();
         });
 
-        loginForm?.addEventListener('submit', () => {
-            if (!loginForm.checkValidity()) {
-                return;
-            }
-
-            try {
-                sessionStorage.setItem('papertrail_show_dashboard_loading_after_login', 'true');
-            } catch (error) {
-                // Loading hint is optional.
-            }
-        });
     </script>
 @endpush

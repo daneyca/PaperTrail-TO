@@ -77,25 +77,6 @@
             @endif
 
             <div id="dashboardContent" class="dashboard-content stagger-root">
-                <div class="pt-loading-overlay" data-progressive-loading hidden aria-hidden="true">
-                    <div class="pt-content-loading" role="status" aria-live="polite">
-                        <span class="sr-only">Loading page content</span>
-                        <div class="pt-skeleton pt-skeleton-header"></div>
-                        <div class="pt-skeleton-card-grid" aria-hidden="true">
-                            <div class="pt-skeleton pt-skeleton-card"></div>
-                            <div class="pt-skeleton pt-skeleton-card"></div>
-                            <div class="pt-skeleton pt-skeleton-card"></div>
-                            <div class="pt-skeleton pt-skeleton-card"></div>
-                        </div>
-                        <div class="pt-skeleton-table" aria-hidden="true">
-                            <div class="pt-skeleton pt-skeleton-row"></div>
-                            <div class="pt-skeleton pt-skeleton-row"></div>
-                            <div class="pt-skeleton pt-skeleton-row"></div>
-                            <div class="pt-skeleton pt-skeleton-row"></div>
-                            <div class="pt-skeleton pt-skeleton-row"></div>
-                        </div>
-                    </div>
-                </div>
                 @yield('content')
             </div>
         </main>
@@ -157,7 +138,7 @@
         const sessionHeartbeatToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         const sessionHeartbeatInterval = 60 * 1000;
         const sessionIdleLimit = Math.max(@json((int) config('session.lifetime', 10) * 60 * 1000), 60 * 1000);
-        let lastSessionHeartbeatAt = 0;
+        let lastSessionHeartbeatAt = Date.now();
         let lastUserActivityAt = Date.now();
         let sessionIdleTimer = null;
         let sessionTimedOut = false;
@@ -461,48 +442,17 @@
             }
         });
 
-        const dashboardContent = document.querySelector('#dashboardContent');
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-        const progressiveLoadingOverlay = dashboardContent?.querySelector('[data-progressive-loading]');
-        let progressiveLoadingTimer = null;
-        let progressiveInitialLoadingActive = false;
+        let navigationLoadingTimer = null;
 
-        if (dashboardContent && !prefersReducedMotion.matches) {
-            const sectionDelays = [0, 120, 220, 300, 380];
+        function setNavigationLoading(isLoading) {
+            window.clearTimeout(navigationLoadingTimer);
+            document.body.classList.remove('pt-route-loading');
 
-            dashboardContent.querySelectorAll(':scope > :not([data-progressive-loading])').forEach((item, index) => {
-                item.classList.add('pt-smooth-enter');
-                item.style.setProperty('--pt-delay', `${sectionDelays[index] ?? 380}ms`);
-            });
-
-            dashboardContent.querySelectorAll('tbody tr, .report-registry-row, .future-report-row, .settings-row, .activity-list li, .task-list li').forEach((item, index) => {
-                if (index > 8) return;
-
-                item.classList.add('pt-smooth-enter-soft');
-                item.style.setProperty('--pt-delay', `${Math.min(360 + index * 45, 620)}ms`);
-            });
-        }
-
-        function setDashboardProgressiveLoading(isLoading, options = {}) {
-            if (!dashboardContent || !progressiveLoadingOverlay) {
-                return;
+            if (isLoading) {
+                navigationLoadingTimer = window.setTimeout(() => {
+                    document.body.classList.add('pt-route-loading');
+                }, 160);
             }
-
-            window.clearTimeout(progressiveLoadingTimer);
-
-            const applyState = () => {
-                dashboardContent.classList.toggle('is-soft-loading', isLoading);
-                progressiveLoadingOverlay.hidden = !isLoading;
-                progressiveLoadingOverlay.classList.toggle('is-visible', isLoading);
-                progressiveLoadingOverlay.setAttribute('aria-hidden', String(!isLoading));
-            };
-
-            if (isLoading && !options.immediate && !prefersReducedMotion.matches) {
-                progressiveLoadingTimer = window.setTimeout(applyState, 400);
-                return;
-            }
-
-            applyState();
         }
 
         function isSamePageHashLink(url) {
@@ -512,7 +462,7 @@
                 && Boolean(url.hash);
         }
 
-        function shouldShowProgressiveLoadingForLink(link, event) {
+        function shouldShowNavigationLoadingForLink(link, event) {
             if (
                 event.defaultPrevented
                 || event.button !== 0
@@ -552,12 +502,15 @@
             const target = event.target instanceof Element ? event.target : null;
             const link = target?.closest('a[href]');
 
-            if (!shouldShowProgressiveLoadingForLink(link, event)) {
+            if (!shouldShowNavigationLoadingForLink(link, event)) {
                 return;
             }
 
-            link.classList.add('is-loading');
-            setDashboardProgressiveLoading(true);
+            queueMicrotask(() => {
+                if (!event.defaultPrevented) {
+                    setNavigationLoading(true);
+                }
+            });
         });
 
         document.addEventListener('submit', (event) => {
@@ -580,37 +533,16 @@
                 return;
             }
 
-            setDashboardProgressiveLoading(true);
+            queueMicrotask(() => {
+                if (!event.defaultPrevented) {
+                    setNavigationLoading(true);
+                }
+            });
         });
 
         window.addEventListener('pageshow', () => {
-            if (progressiveInitialLoadingActive) {
-                return;
-            }
-
-            setDashboardProgressiveLoading(false, { immediate: true });
+            setNavigationLoading(false);
         });
-
-        function consumeLoginDashboardLoadingFlag() {
-            try {
-                const shouldShow = sessionStorage.getItem('papertrail_show_dashboard_loading_after_login') === 'true';
-                sessionStorage.removeItem('papertrail_show_dashboard_loading_after_login');
-
-                return shouldShow;
-            } catch (error) {
-                return false;
-            }
-        }
-
-        if (consumeLoginDashboardLoadingFlag()) {
-            progressiveInitialLoadingActive = true;
-            setDashboardProgressiveLoading(true, { immediate: true });
-
-            window.setTimeout(() => {
-                progressiveInitialLoadingActive = false;
-                setDashboardProgressiveLoading(false, { immediate: true });
-            }, prefersReducedMotion.matches ? 350 : 760);
-        }
 
         document.addEventListener('click', (event) => {
             const selectButton = event.target.closest('[data-select-group]');
@@ -1521,6 +1453,7 @@
     </script>
     @stack('vendor-scripts')
     @stack('scripts')
+    <script src="{{ asset('js/dashboard-stagger.js') }}?v={{ filemtime(public_path('js/dashboard-stagger.js')) }}" defer></script>
     <script src="{{ asset('js/papertrail-action-icons.js') }}?v={{ filemtime(public_path('js/papertrail-action-icons.js')) }}" defer></script>
     <script src="{{ asset('js/signature-pad-basic.js') }}?v={{ file_exists(public_path('js/signature-pad-basic.js')) ? filemtime(public_path('js/signature-pad-basic.js')) : time() }}" defer></script>
 </body>

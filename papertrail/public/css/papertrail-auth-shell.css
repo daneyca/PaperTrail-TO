@@ -157,7 +157,26 @@ body.dashboard-body:not(.modal-document-body) .dashboard-content {
     gap: 14px !important;
 }
 
-body.dashboard-body:not(.modal-document-body) .dashboard-content > :where(section, article, div, form):not(.pt-loading-overlay):not(.stat-grid):not(.stat-grid-modern):not(.summary-card-grid):not(.reports-summary-strip):not(.notification-summary-strip):not(.rule-config-summary),
+@media screen and (prefers-reduced-motion: no-preference) {
+    body.dashboard-body:not(.modal-document-body) .dashboard-content .pt-stagger-item {
+        animation: ptDashboardItemEnter 370ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+        animation-delay: var(--pt-stagger-delay, 0ms);
+    }
+}
+
+@keyframes ptDashboardItemEnter {
+    from {
+        opacity: 0.25;
+        translate: 0 10px;
+    }
+
+    to {
+        opacity: 1;
+        translate: 0 0;
+    }
+}
+
+body.dashboard-body:not(.modal-document-body) .dashboard-content > :where(section, article, div, form):not(.stat-grid):not(.stat-grid-modern):not(.summary-card-grid):not(.reports-summary-strip):not(.notification-summary-strip):not(.rule-config-summary),
 body.dashboard-body:not(.modal-document-body) .dashboard-content :where(
     .dashboard-hero,
     .enterprise-hero,

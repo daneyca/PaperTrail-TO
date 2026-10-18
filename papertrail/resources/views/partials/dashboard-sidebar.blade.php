@@ -106,7 +106,7 @@
                 ],
             ],
             [
-                'label' => 'SVP / Alternative Procurement',
+                'label' => 'Small Value Procurement',
                 'icon' => 'workflow',
                 'children' => [
                     ['label' => 'PPMP', 'route' => 'head-office.ppmp.index', 'active' => 'head-office.ppmp.*'],
@@ -177,7 +177,7 @@
                 ],
             ],
             [
-                'label' => 'SVP / Alternative Procurement',
+                'label' => 'Small Value Procurement',
                 'icon' => 'workflow',
                 'children' => [
                     ['label' => 'Incoming Documents', 'route' => 'bac-secretariat.incoming.index', 'active' => 'bac-secretariat.incoming.*'],
@@ -252,12 +252,12 @@
     }
 
     if ($roleSlug === 'bac-secretariat' && ($isPrSignatureOnlyBacsec || $isBacsec002PrSigner || $isBacsecPrSignatureOnly)) {
-        $items = array_values(array_filter($items, fn ($item) => ($item['label'] ?? null) !== 'SVP / Alternative Procurement'));
+        $items = array_values(array_filter($items, fn ($item) => ($item['label'] ?? null) !== 'Small Value Procurement'));
     }
 
     if ($roleSlug === 'bac-secretariat' && $isSvpPostingProcessor) {
         foreach ($items as &$item) {
-            if (($item['label'] ?? null) === 'SVP / Alternative Procurement') {
+            if (($item['label'] ?? null) === 'Small Value Procurement') {
                 $item['label'] = 'Posting Management';
                 $item['children'] = array_values(array_filter($item['children'] ?? [], fn ($child) => ! empty($child['posting_only'])));
             }
@@ -266,7 +266,7 @@
         $items = array_values(array_filter($items, fn ($item) => ($item['label'] ?? null) !== 'Monitoring'));
     } elseif ($roleSlug === 'bac-secretariat') {
         foreach ($items as &$item) {
-            if (($item['label'] ?? null) === 'SVP / Alternative Procurement') {
+            if (($item['label'] ?? null) === 'Small Value Procurement') {
                 $item['children'] = array_values(array_filter($item['children'] ?? [], fn ($child) => empty($child['posting_only'])));
             }
         }
@@ -282,7 +282,7 @@
         ];
 
         $svpResolutionMenu = [
-            'label' => 'SVP / Alternative Procurement',
+            'label' => 'Small Value Procurement',
             'icon' => 'workflow',
             'children' => [
                 ['label' => 'PR / Resolution', 'section' => true],
