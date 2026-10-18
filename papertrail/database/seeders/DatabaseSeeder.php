@@ -235,7 +235,7 @@ class DatabaseSeeder extends Seeder
             ['MEO-001', 'Municipal Engineering Office', 'MEO'],
             ['MPDO-001', 'Municipal Planning and Development Office', 'MPDO'],
             ['HRMO-001', 'Human Resource Management Office', 'HRMO'],
-            ['LEGISLATIVE-0011', 'Municipal Legislative Office', 'LEGISLATIVE'],
+            ['LEGISLATIVE-001', 'Municipal Legislative Office', 'LEGISLATIVE'],
             ['MAO-001', 'Municipal Agriculture Office', 'MAO'],
             ['MENRO-001', 'Municipal Environment and Natural Resources Office', 'MENRO'],
             ['RHU-001', 'Rural Health Unit', 'RHU'],
