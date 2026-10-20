@@ -1,626 +1,185 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Financial Checklist Requirements | PaperTrail')
+@section('title', 'Financial Envelope Checklist | PaperTrail')
 
 @php
-    $dateLabel = now()->format('F j, Y');
-    $title = 'Checklist of Financial Envelope Requirements';
-    $projectName = 'Procurement of Materials for the Improvement of Felicity Dream Square';
-    $projectLocation = 'Dream Square';
-    $bidderName = 'Canlupao Hardware and Construction Supplies';
-    $envelopeCopy = 'Shall contain the following information / documents and shall comply only if the bidder has complied with the requirements in the Technical Envelope.';
-    $requirements = [
-        'Duly signed Bid Form as prescribed.',
-        'Audited Financial Statement, showing, among others, the prospective total and current assets and liabilities, "stamped" received by the BIR.',
-        'Latest Income Tax Return.',
+    $slots = [
+        ['key' => 'member_3', 'label' => 'BAC Member', 'role' => 'bac_member', 'user_id' => 'BACMEM-003', 'name' => 'Jessa G. Resus', 'account_role' => \App\Models\User::ROLE_BAC_MEMBER],
+        ['key' => 'member_1', 'label' => 'BAC Member', 'role' => 'bac_member', 'user_id' => 'BACMEM-001', 'name' => 'Perpetua D. Salan', 'account_role' => \App\Models\User::ROLE_BAC_MEMBER],
+        ['key' => 'member_2', 'label' => 'BAC Member', 'role' => 'bac_member', 'user_id' => 'BACMEM-002', 'name' => 'Rogelio A. Layo', 'account_role' => \App\Models\User::ROLE_BAC_MEMBER],
+        ['key' => 'vice_chairperson', 'label' => 'BAC Vice-Chairperson', 'role' => 'bac_vice_chairperson', 'user_id' => 'BACVICE-001', 'name' => 'Roel J. Bano', 'account_role' => \App\Models\User::ROLE_BAC_VICE_CHAIRPERSON],
+        ['key' => 'chairperson', 'label' => 'BAC Chairperson', 'role' => 'bac_chairperson', 'user_id' => 'BACCHAIR-001', 'name' => 'Edmar T. Tambis', 'account_role' => \App\Models\User::ROLE_BAC_CHAIR],
     ];
-    $note = 'Note: Any missing or non-complying document in the above-mentioned checklist is a ground for outright rejection of the bid.';
-    $footerNote = 'On the Bid Opening day, the BAC may find it useful to use this form to keep track of the results of the preliminary examination of bids. This form, once accomplished, may be used by the BAC Secretariat as a reference in writing up the minutes of the bid opening.';
-    $bacMembers = ['EDMAR', 'ROGELIO', 'PERPETUA', 'ROLANDO', 'BREX', 'RICHIE'];
+    $requirements = [
+        'Duly signed Bid Form as prescribe.',
+        'Audited Financial Statement, showing, among others, the prospective total and current assets and liabilities, "stamped" received by the BIR',
+        'Latest Income Tax Return',
+    ];
+    $isBacSecretariatOne = auth()->user()?->user_id === 'BACSEC-001';
 @endphp
 
 @section('content')
     <style>
-        .financial-template-toolbar,
-        .financial-rich-toolbar {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 12px;
-            padding: 12px 14px;
-            border: 1px solid #d8dee8;
-            border-radius: 8px;
-            background: #fff;
-            box-shadow: 0 10px 28px rgba(11, 35, 65, 0.06);
-        }
-
-        .financial-template-toolbar strong {
-            margin-right: auto;
-            color: #0b2341;
-            font-size: 0.98rem;
-        }
-
-        .financial-template-toolbar a,
-        .financial-template-toolbar button,
-        .financial-rich-toolbar button,
-        .financial-rich-toolbar select {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 36px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            background: #fff;
-            color: #0b2341;
-            font: 800 0.84rem/1 Figtree, Arial, sans-serif;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .financial-template-toolbar a,
-        .financial-template-toolbar button {
-            padding: 0 14px;
-        }
-
-        .financial-template-toolbar button {
-            border-color: #0b2341;
-            background: #0b2341;
-            color: #fff;
-        }
-
-        .financial-rich-toolbar {
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-        }
-
-        .financial-rich-toolbar button {
-            width: 36px;
-            padding: 0;
-        }
-
-        .financial-rich-toolbar select {
-            min-width: 112px;
-            padding: 0 10px;
-        }
-
-        .financial-rich-toolbar .tool-separator {
-            width: 1px;
-            height: 28px;
-            background: #d8dee8;
-        }
-
-        .financial-template-wrap {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            overflow: auto;
-            padding: 18px 12px 42px;
-        }
-
-        .financial-template-page {
-            flex: 0 0 auto;
-            width: 210mm !important;
-            max-width: 210mm !important;
-            min-height: 297mm !important;
-            padding: 12mm 13mm 10mm !important;
-            border: 1px solid #000;
-            background: #fff;
-            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
-            color: #000;
-            font-family: Arial, sans-serif;
-            font-size: 9pt !important;
-            line-height: 1.25 !important;
-            box-sizing: border-box;
-        }
-
-        .financial-template-page * {
-            box-sizing: border-box;
-            color: #000;
-        }
-
-        .financial-template-form {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            min-height: 275mm;
-        }
-
-        .financial-rich-field {
-            min-height: 16px;
-            outline: none;
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
-        }
-
-        .financial-rich-field:focus {
-            background: #eff6ff;
-            box-shadow: inset 0 0 0 1px #2563eb;
-        }
-
-        .financial-title {
-            margin: 0 0 10mm;
-            text-align: center;
-            font-size: 10.5pt !important;
-            font-weight: 700;
-        }
-
-        .financial-field,
-        .financial-textarea {
-            width: 100%;
-            border-bottom: 1px solid #000;
-            background: transparent;
-            font-weight: 700;
-            line-height: 1.2;
-        }
-
-        .financial-textarea {
-            min-height: 20px;
-            padding: 2px 2px;
-            text-transform: uppercase;
-        }
-
-        .financial-meta {
-            display: grid;
-            grid-template-columns: 100px minmax(0, 1fr) 140px;
-            gap: 5px 10px;
-            align-items: end;
-            margin-bottom: 9mm;
-        }
-
-        .financial-label {
-            font-size: 8pt !important;
-            font-weight: 700;
-            white-space: nowrap;
-        }
-
-        .financial-date {
-            border: 0;
-            background: transparent;
-            font-size: 8pt !important;
-            outline: none;
-        }
-
-        .financial-section-title {
-            margin: 0 0 6mm;
-            text-align: center;
-            font-size: 9pt !important;
-            font-weight: 700;
-        }
-
-        .financial-envelope-row {
-            display: grid;
-            grid-template-columns: 154px minmax(0, 1fr);
-            gap: 10px;
-            margin-bottom: 10mm;
-        }
-
-        .financial-envelope-copy {
-            width: 74%;
-            min-height: 44px;
-            border-bottom: 1px solid #000;
-            font-size: 8pt !important;
-            font-weight: 700;
-            line-height: 1.25 !important;
-        }
-
-        .financial-checklist-table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-            font-size: 8.2pt !important;
-        }
-
-        .financial-checklist-table th,
-        .financial-checklist-table td {
-            border: 1px solid #000;
-            padding: 3px 5px;
-            vertical-align: middle;
-        }
-
-        .financial-checklist-table th {
-            font-weight: 400;
-            text-align: center;
-        }
-
-        .financial-checklist-table .initial-col {
-            width: 31px;
-        }
-
-        .financial-checklist-table .requirement-col {
-            width: auto;
-        }
-
-        .financial-member-name {
-            height: 102px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .financial-member-name-input {
-            width: 94px;
-            height: 20px;
-            border: 0;
-            background: transparent;
-            font-size: 6.7pt !important;
-            line-height: 1 !important;
-            text-align: center;
-            text-transform: uppercase;
-            outline: none;
-            transform: rotate(-90deg);
-            transform-origin: center;
-        }
-
-        .financial-member-name-input:focus,
-        .financial-date:focus,
-        .financial-initial:focus {
-            background: #eff6ff;
-            box-shadow: inset 0 0 0 1px #2563eb;
-        }
-
-        .financial-initial {
-            width: 100%;
-            height: 23px;
-            border: 0;
-            background: transparent;
-            text-align: center;
-            font-weight: 400;
-            outline: none;
-        }
-
-        .financial-requirement-input {
-            width: 100%;
-            min-height: 24px;
-            border: 0;
-            background: transparent;
-            font-size: 8.2pt !important;
-        }
-
-        .financial-note {
-            margin: 6mm 0 0;
-            font-size: 7.4pt !important;
-        }
-
-        .financial-note-editor {
-            min-height: 24px;
-            font-size: 7.4pt !important;
-            line-height: 1.2 !important;
-        }
-
-        .financial-remarks {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            margin-top: 5mm;
-            font-size: 8pt !important;
-        }
-
-        .financial-check-option {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            min-width: 142px;
-            border-bottom: 1px solid #000;
-            padding-bottom: 1px;
-        }
-
-        .financial-check-option input {
-            width: 10px;
-            height: 10px;
-            margin: 0;
-        }
-
-        .financial-footer-note {
-            margin-top: auto;
-            padding-top: 12mm;
-            font-size: 7.4pt !important;
-            font-style: italic;
-            line-height: 1.25 !important;
-        }
-
-        .financial-footer-editor {
-            min-height: 46px;
-            font-size: 7.4pt !important;
-            font-style: italic;
-            line-height: 1.25 !important;
-        }
-
-        @media (max-width: 980px) {
-            .financial-template-wrap {
-                justify-content: flex-start;
-            }
-        }
-
-        @media print {
-            @page {
-                size: A4 portrait;
-                margin: 12mm 13mm 10mm;
-            }
-
-            .financial-template-toolbar,
-            .financial-rich-toolbar,
-            .no-print {
-                display: none !important;
-            }
-
-            .financial-template-wrap,
-            .financial-template-wrap * {
-                visibility: visible !important;
-            }
-
-            .financial-template-wrap {
-                display: block !important;
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                overflow: visible !important;
-                background: #fff !important;
-            }
-
-            .financial-template-page {
-                width: auto !important;
-                max-width: none !important;
-                min-height: 0 !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                border: 0 !important;
-                box-shadow: none !important;
-            }
-
-            .financial-template-form { min-height: 0 !important; }
-            .financial-template-page thead { display: table-header-group; }
-            .financial-template-page tr { break-inside: avoid; }
-
-            .financial-rich-field,
-            .financial-date,
-            .financial-member-name-input,
-            .financial-initial {
-                background: transparent !important;
-                box-shadow: none !important;
-            }
-        }
+        .financial-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:16px; }
+        .financial-toolbar h1 { margin:0 auto 0 0; color:#0b2341; font-size:18px; }
+        .financial-toolbar a, .financial-toolbar button { display:inline-flex; align-items:center; justify-content:center; min-height:36px; padding:0 14px; border:1px solid #cbd5e1; border-radius:6px; background:#fff; color:#0b2341; font:700 13px Figtree, Arial, sans-serif; text-decoration:none; cursor:pointer; }
+        .financial-toolbar button:last-child { background:#0b2341; border-color:#0b2341; color:#fff; }
+        .financial-reviewers { margin-bottom:18px; padding:14px; border:1px solid #d8dee8; background:#fff; }
+        .financial-reviewers h2 { margin:0 0 12px; color:#0b2341; font-size:15px; }
+        .financial-reviewer-grid { display:grid; gap:8px; }
+        .financial-reviewer-row { display:grid; grid-template-columns:180px 80px minmax(180px,1fr) minmax(160px,1fr); align-items:center; gap:10px; font-size:13px; }
+        .financial-reviewer-row > span:first-child { font-weight:700; }
+        .financial-reviewer-row label { display:flex; align-items:center; gap:5px; }
+        .financial-reviewer-row select, .financial-reviewer-row input[type=text] { width:100%; min-height:36px; padding:0 8px; border:1px solid #cbd5e1; border-radius:6px; background:#fff; color:#0b2341; font:600 13px Figtree, Arial, sans-serif; }
+        .financial-sheet-wrap { display:flex; justify-content:center; overflow:auto; padding:8px 8px 36px; }
+        .financial-paper { width:210mm; min-height:297mm; flex:none; display:flex; flex-direction:column; box-sizing:border-box; padding:19mm 18mm 19mm 22mm; background:#fff; color:#000; box-shadow:0 12px 30px #0b234126; font:10pt/1.18 Calibri, Arial, sans-serif; }
+        .financial-paper * { box-sizing:border-box; }
+        .financial-paper [contenteditable=true] { outline:0; }
+        .financial-paper [contenteditable=true]:focus { background:#f0f6ff; outline:1px solid #7aa7ed; }
+        .financial-title { margin:0 0 24px; text-align:center; font-size:13pt; font-weight:700; }
+        .financial-meta { display:grid; grid-template-columns:80px minmax(0,1fr) 128px; align-items:end; gap:5px; }
+        .financial-meta strong { white-space:nowrap; }
+        .financial-meta .financial-date { grid-column:3; grid-row:1; min-height:17px; }
+        .financial-project-lines { grid-column:2; grid-row:2; width:80%; }
+        .financial-meta .financial-project-label { grid-column:1; grid-row:1; }
+        .financial-line { min-height:18px; border-bottom:1px solid #000; }
+        .financial-line[contenteditable=true]:empty:before { content:'\00a0'; }
+        .financial-bidder { display:grid; grid-template-columns:80px minmax(0,1fr); gap:5px; margin-top:5px; }
+        .financial-bidder-lines { width:67%; }
+        .financial-form-title { margin:26px 0 18px; text-align:center; font-size:11pt; font-weight:700; }
+        .financial-envelope { display:grid; grid-template-columns:151px minmax(0,1fr); gap:12px; margin-bottom:8px; }
+        .financial-envelope strong { white-space:nowrap; }
+        .financial-envelope div { max-width:440px; font-size:9pt; font-weight:700; line-height:1.25; }
+        .financial-heading { display:grid; grid-template-columns:17px repeat(5,26px) minmax(0,1fr); min-height:98px; }
+        .financial-heading > span { border:1px solid #000; border-right:0; display:flex; justify-content:center; align-items:center; overflow:hidden; }
+        .financial-heading > span:nth-child(6) { border-right:1px solid #000; }
+        .financial-heading > span:last-child { border:0; }
+        .financial-heading .financial-rotated { writing-mode:vertical-rl; transform:rotate(180deg); white-space:nowrap; font-size:8pt; }
+        .financial-initial-caption { width:151px; margin:3px 0 20px; font-size:8pt; line-height:1.12; }
+        .financial-requirement { display:grid; grid-template-columns:151px minmax(0,1fr); gap:12px; align-items:start; min-height:29px; margin-bottom:5px; break-inside:avoid; }
+        .financial-initial-grid { display:grid; grid-template-columns:17px repeat(5,26px); height:19px; }
+        .financial-initial-grid > span { border:1px solid #000; border-right:0; overflow:hidden; white-space:nowrap; text-align:center; font-size:8pt; line-height:17px; }
+        .financial-initial-grid > span:last-child { border-right:1px solid #000; }
+        .financial-requirement-text { padding-top:2px; font-size:9pt; }
+        .financial-note { margin:14px 0 12px; font-size:8pt; }
+        .financial-remarks { display:flex; align-items:center; gap:22px; font-size:9pt; }
+        .financial-remarks input { margin:0 3px 0 0; accent-color:#000; vertical-align:middle; }
+        .financial-footer { margin-top:auto; padding-top:24px; font-size:9pt; line-height:1.25; }
+        @media (max-width:800px) { .financial-reviewer-row { grid-template-columns:1fr 80px; } .financial-reviewer-row select, .financial-reviewer-row input[type=text] { grid-column:span 2; } }
+        @media print { @page { size:A4 portrait; margin:19mm 18mm 19mm 22mm; } body { background:#fff !important; } .financial-toolbar, .financial-reviewers, .cb-routing-actions, .cb-routing-dialog, .no-print { display:none !important; } .financial-sheet-wrap { display:block; padding:0; overflow:visible; } .financial-paper { width:auto; min-height:259mm; padding:0; box-shadow:none; } .financial-paper * { color:#000 !important; } }
     </style>
 
-    <section class="financial-template-toolbar no-print">
-        <strong>Financial Checklist Requirements</strong>
+    <div class="financial-toolbar no-print">
+        <h1>Checklist of Financial Envelope Requirements</h1>
         <a href="{{ route('bac-secretariat.competitive-bidding.checklist.financial') }}">Back</a>
-        <button type="button" onclick="window.print()">Print</button>
-    </section>
+        <button type="button" data-financial-print>Print</button>
+        <button type="button" data-financial-save>Save Word</button>
+    </div>
 
-    <section class="financial-rich-toolbar no-print" data-financial-rich-toolbar>
-        <button type="button" data-rich-command="bold" title="Bold" aria-label="Bold"><strong>B</strong></button>
-        <button type="button" data-rich-command="italic" title="Italic" aria-label="Italic"><em>I</em></button>
-        <button type="button" data-rich-command="underline" title="Underline" aria-label="Underline"><u>U</u></button>
-        <button type="button" data-rich-command="removeFormat" title="Clear formatting" aria-label="Clear formatting">Tx</button>
-        <span class="tool-separator" aria-hidden="true"></span>
-        <select data-rich-font-family aria-label="Font family">
-            <option value="Arial">Arial</option>
-            <option value="Times New Roman">Times</option>
-            <option value="Calibri">Calibri</option>
-            <option value="Courier New">Courier</option>
-        </select>
-        <select data-rich-font-size aria-label="Font size">
-            <option value="6">6 pt</option>
-            <option value="7">7 pt</option>
-            <option value="8" selected>8 pt</option>
-            <option value="9">9 pt</option>
-            <option value="10">10 pt</option>
-            <option value="11">11 pt</option>
-            <option value="12">12 pt</option>
-            <option value="14">14 pt</option>
-        </select>
-        <span class="tool-separator" aria-hidden="true"></span>
-        <button type="button" data-rich-command="justifyLeft" title="Align left" aria-label="Align left">L</button>
-        <button type="button" data-rich-command="justifyCenter" title="Align center" aria-label="Align center">C</button>
-        <button type="button" data-rich-command="justifyRight" title="Align right" aria-label="Align right">R</button>
-    </section>
-
-    <div class="financial-template-wrap">
-        <section class="financial-template-page">
-            <form class="financial-template-form" onsubmit="return false">
-                <div class="financial-rich-field financial-title" contenteditable="true" data-sync-target="financial_title_value">{!! e($title) !!}</div>
-                <input id="financial_title_value" type="hidden" name="title" value="{{ $title }}">
-
-                <div class="financial-meta">
-                    <label class="financial-label" for="financial_project_name">PROJECT NAME:</label>
-                    <div></div>
-                    <input id="financial_date" name="financial_date" class="financial-date" type="text" value="{{ $dateLabel }}">
-
-                    <div></div>
-                    <div id="financial_project_name" class="financial-rich-field financial-textarea" contenteditable="true" data-sync-target="financial_project_name_value">{!! e($projectName) !!}</div>
-                    <input id="financial_project_name_value" type="hidden" name="project_name" value="{{ $projectName }}">
-                    <div></div>
-
-                    <div></div>
-                    <div class="financial-rich-field financial-field" contenteditable="true" data-sync-target="financial_project_location_value">{!! e($projectLocation) !!}</div>
-                    <input id="financial_project_location_value" type="hidden" name="project_location" value="{{ $projectLocation }}">
-                    <div></div>
-
-                    <label class="financial-label" for="financial_bidder">BIDDER:</label>
-                    <div id="financial_bidder" class="financial-rich-field financial-field" contenteditable="true" data-sync-target="financial_bidder_value">{!! e($bidderName) !!}</div>
-                    <input id="financial_bidder_value" type="hidden" name="bidder" value="{{ $bidderName }}">
-                    <div></div>
-                </div>
-
-                <div class="financial-rich-field financial-section-title" contenteditable="true" data-sync-target="financial_section_title_value">Checklist of Bid Requirements</div>
-                <input id="financial_section_title_value" type="hidden" name="section_title" value="Checklist of Bid Requirements">
-
-                <div class="financial-envelope-row">
-                    <label class="financial-label" for="financial_envelope_copy">FINANCIAL ENVELOPE:</label>
-                    <div id="financial_envelope_copy" class="financial-rich-field financial-envelope-copy" contenteditable="true" data-sync-target="financial_envelope_copy_value">{!! e($envelopeCopy) !!}</div>
-                    <input id="financial_envelope_copy_value" type="hidden" name="financial_envelope_copy" value="{{ $envelopeCopy }}">
-                </div>
-
-                <table class="financial-checklist-table">
-                    <colgroup>
-                        @foreach ($bacMembers as $member)
-                            <col class="initial-col">
-                        @endforeach
-                        <col class="requirement-col">
-                    </colgroup>
-                    <thead>
-                        <tr>
-                            @foreach ($bacMembers as $member)
-                                <th>
-                                    <div class="financial-member-name">
-                                        <input class="financial-member-name-input" name="bac_members[]" type="text" value="{{ $member }}" aria-label="BAC member name">
-                                    </div>
-                                </th>
+    @if ($isBacSecretariatOne)
+        <div class="financial-reviewers no-print">
+            <h2>BAC personnel at bid opening</h2>
+            <div class="financial-reviewer-grid">
+                @foreach ($slots as $slot)
+                    @php
+                        $accounts = $bacSigners->where('role', $slot['account_role']);
+                        $defaultAccount = $accounts->firstWhere('user_id', $slot['user_id']);
+                    @endphp
+                    <div class="financial-reviewer-row" data-financial-reviewer="{{ $slot['key'] }}" data-cb-signatory-entry>
+                        <span>{{ $slot['label'] }}</span>
+                        <label><input type="checkbox" data-cb-participating @checked($defaultAccount)> Present</label>
+                        <select aria-label="{{ $slot['label'] }} account" data-financial-account>
+                            <option value="">Select account</option>
+                            @foreach ($accounts as $account)
+                                <option value="{{ $account->id }}" data-name="{{ $account->name }}" @selected($defaultAccount?->id === $account->id)>{{ $account->user_id }} - {{ $account->name }}</option>
                             @endforeach
-                            <th>Initial of BAC Member if document is included</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($requirements as $index => $requirement)
-                            <tr>
-                                @foreach ($bacMembers as $member)
-                                    <td>
-                                        <input class="financial-initial" name="initials[{{ $index }}][]" type="text" aria-label="{{ $member }} initial for requirement {{ $index + 1 }}">
-                                    </td>
-                                @endforeach
-                                <td>
-                                    <div class="financial-rich-field financial-requirement-input" contenteditable="true" data-sync-target="financial_requirement_{{ $index }}_value">{!! e(($index + 1) . '. ' . $requirement) !!}</div>
-                                    <input id="financial_requirement_{{ $index }}_value" type="hidden" name="requirements[]" value="{{ ($index + 1) . '. ' . $requirement }}">
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </select>
+                        <input type="text" aria-label="{{ $slot['label'] }} printed name" data-financial-name value="{{ $defaultAccount?->name ?: $slot['name'] }}">
+                        <input type="hidden" data-cb-recipient-user-id value="{{ $defaultAccount?->id }}">
+                        <span hidden data-cb-signatory data-cb-slot="{{ $slot['key'] }}" data-cb-label="{{ $slot['label'] }}">
+                            <span data-cb-signatory-name>{{ $defaultAccount?->name ?: $slot['name'] }}</span>
+                            <select data-cb-signatory-role aria-label="Role"><option value="{{ $slot['role'] }}" selected>{{ $slot['label'] }}</option></select>
+                        </span>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
 
-                <div class="financial-note">
-                    <div class="financial-rich-field financial-note-editor" contenteditable="true" data-sync-target="financial_note_value">{!! e($note) !!}</div>
-                    <input id="financial_note_value" type="hidden" name="note" value="{{ $note }}">
+    <div class="financial-sheet-wrap">
+        <section class="financial-paper" data-competitive-document>
+            <h2 class="financial-title">Checklist of Financial Envelope Requirements</h2>
+            <div class="financial-meta">
+                <strong class="financial-project-label">PROJECT NAME:</strong>
+                <span class="financial-date" contenteditable="true">{{ now()->format('F j, Y') }}</span>
+                <div class="financial-project-lines" data-checklist-project><div class="financial-line" contenteditable="true"></div><div class="financial-line" contenteditable="true"></div></div>
+            </div>
+            <div class="financial-bidder"><strong>BIDDER:</strong><div class="financial-bidder-lines" data-checklist-bidder><div class="financial-line" contenteditable="true"></div><div class="financial-line" contenteditable="true"></div><div class="financial-line" contenteditable="true"></div></div></div>
+            <h3 class="financial-form-title">Checklist of Bid Requirements</h3>
+            <div class="financial-envelope"><strong>FINANCIAL ENVELOPE:</strong><div>Shall contain the following information / documents and shall be opened only if the bidder has complied with the requirements in the Technical Envelope.</div></div>
+            <div class="financial-heading"><span></span>@foreach ($slots as $slot)<span><span class="financial-rotated" data-financial-printed-name="{{ $slot['key'] }}">{{ strtoupper(substr($slot['name'], 0, 1).'. '.collect(explode(' ', $slot['name']))->last()) }}</span></span>@endforeach<span></span></div>
+            <div class="financial-initial-caption">Initial of BAC Member If<br>document is included</div>
+            @foreach ($requirements as $index => $requirement)
+                <div class="financial-requirement" data-requirement-row>
+                    <div class="financial-initial-grid"><span></span>@foreach ($slots as $slot)<span class="initial-cell" data-initial-slot="{{ $slot['key'] }}" contenteditable="true"></span>@endforeach</div>
+                    <div class="financial-requirement-text">{{ $index + 1 }}. {{ $requirement }}</div>
                 </div>
-
-                <div class="financial-remarks">
-                    <span class="financial-label">Remarks:</span>
-                    <label class="financial-check-option">
-                        <input type="radio" name="remarks" value="complying">
-                        <span>Complying</span>
-                    </label>
-                    <label class="financial-check-option">
-                        <input type="radio" name="remarks" value="non-complying">
-                        <span>Non-Complying</span>
-                    </label>
-                </div>
-
-                <div class="financial-footer-note">
-                    <div class="financial-rich-field financial-footer-editor" contenteditable="true" data-sync-target="financial_footer_note_value">{!! e($footerNote) !!}</div>
-                    <input id="financial_footer_note_value" type="hidden" name="footer_note" value="{{ $footerNote }}">
-                </div>
-            </form>
+            @endforeach
+            <p class="financial-note">Note : Any missing or non-complying document in the above - mentioned checklist ia a ground for outright rejection of the bid.</p>
+            <div class="financial-remarks"><strong>Remarks :</strong><label><input type="radio" name="financial-checklist-result" value="complying">Complying</label><label><input type="radio" name="financial-checklist-result" value="non-complying">Non-Complying</label></div>
+            <p class="financial-footer">On the Bid Opening day, the BAC may find it to use this Form to keep track of the results of the preliminary examination of bids. This form, once accomplished, may be used by the BAC Secretariat as a reference in writing up the minutes of the bid opening.</p>
         </section>
     </div>
 
+    @if ($isBacSecretariatOne)
+        @include('bac-secretariat.competitive-bidding.partials.signature-routing-tools', ['templateKey' => 'financial_envelope_checklist', 'documentTitle' => 'Checklist of Financial Envelope Requirements'])
+    @endif
+
     <script>
         (() => {
-            const toolbar = document.querySelector('[data-financial-rich-toolbar]');
-            const editors = Array.from(document.querySelectorAll('.financial-rich-field[contenteditable="true"]'));
-            let activeEditor = editors[0] || null;
-            let savedRange = null;
-
-            const syncEditor = (editor) => {
-                const targetId = editor.dataset.syncTarget;
-                const target = targetId ? document.getElementById(targetId) : null;
-
-                if (target) {
-                    target.value = editor.innerHTML.trim();
-                }
-            };
-
-            const rangeBelongsToEditor = (range, editor) => {
-                return editor && editor.contains(range.commonAncestorContainer);
-            };
-
-            const rememberSelection = () => {
-                const selection = window.getSelection();
-
-                if (!selection || selection.rangeCount === 0) {
-                    return;
-                }
-
-                const range = selection.getRangeAt(0);
-                const editor = editors.find((candidate) => rangeBelongsToEditor(range, candidate));
-
-                if (editor) {
-                    activeEditor = editor;
-                    savedRange = range.cloneRange();
-                }
-            };
-
-            const restoreSelection = () => {
-                if (!activeEditor) {
-                    activeEditor = editors[0] || null;
-                }
-
-                if (!activeEditor) {
-                    return false;
-                }
-
-                activeEditor.focus();
-
-                if (savedRange && rangeBelongsToEditor(savedRange, activeEditor)) {
-                    const selection = window.getSelection();
-                    selection.removeAllRanges();
-                    selection.addRange(savedRange);
-                }
-
-                return true;
-            };
-
-            const convertFontSizeTags = (editor, size) => {
-                editor.querySelectorAll('font[size="7"]').forEach((font) => {
-                    const span = document.createElement('span');
-                    span.style.fontSize = `${size}pt`;
-                    span.innerHTML = font.innerHTML;
-                    font.replaceWith(span);
-                });
-            };
-
-            const runCommand = (command, value = null) => {
-                if (!restoreSelection()) {
-                    return;
-                }
-
-                document.execCommand(command, false, value);
-                syncEditor(activeEditor);
-                rememberSelection();
-            };
-
-            editors.forEach((editor) => {
-                editor.addEventListener('focus', () => {
-                    activeEditor = editor;
-                    rememberSelection();
-                });
-
-                editor.addEventListener('keyup', rememberSelection);
-                editor.addEventListener('mouseup', rememberSelection);
-                editor.addEventListener('input', () => syncEditor(editor));
-                syncEditor(editor);
+            const paper = document.querySelector('.financial-paper');
+            document.querySelector('[data-financial-print]')?.addEventListener('click', () => window.print());
+            document.querySelector('[data-financial-save]')?.addEventListener('click', () => {
+                const clone = paper.cloneNode(true);
+                clone.querySelectorAll('[contenteditable]').forEach((node) => node.removeAttribute('contenteditable'));
+                clone.querySelectorAll('input[type=radio]').forEach((node) => node.toggleAttribute('checked', paper.querySelector(`input[name="${node.name}"][value="${node.value}"]`)?.checked === true));
+                const css = Array.from(document.querySelectorAll('style')).map((node) => node.innerHTML).join('\n');
+                const html = `<!doctype html><html><head><meta charset="utf-8"><style>${css} @page { size:A4 portrait; margin:19mm 18mm 19mm 22mm; } .financial-paper { width:auto !important; min-height:259mm !important; padding:0 !important; box-shadow:none !important; }</style></head><body>${clone.outerHTML}</body></html>`;
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(new Blob(['\ufeff', html], {type:'application/msword'}));
+                link.download = 'financial-envelope-checklist.doc';
+                link.click();
+                setTimeout(() => URL.revokeObjectURL(link.href), 1000);
             });
 
-            document.addEventListener('selectionchange', rememberSelection);
-
-            toolbar?.querySelectorAll('button[data-rich-command]').forEach((button) => {
-                button.addEventListener('mousedown', (event) => event.preventDefault());
-                button.addEventListener('click', () => runCommand(button.dataset.richCommand));
+            document.querySelectorAll('[data-financial-reviewer]').forEach((row) => {
+                const select = row.querySelector('[data-financial-account]');
+                const name = row.querySelector('[data-financial-name]');
+                const present = row.querySelector('[data-cb-participating]');
+                const sync = () => {
+                    row.querySelector('[data-cb-recipient-user-id]').value = select.value;
+                    row.querySelector('[data-cb-signatory-name]').textContent = name.value.trim();
+                    const parts = name.value.trim().split(/\s+/);
+                    document.querySelector(`[data-financial-printed-name="${row.dataset.financialReviewer}"]`).textContent = present.checked && parts.length ? `${parts[0].charAt(0)}. ${parts.at(-1)}`.toUpperCase() : '';
+                    if (!present.checked) document.querySelectorAll(`[data-initial-slot="${row.dataset.financialReviewer}"]`).forEach((cell) => cell.textContent = '');
+                };
+                select.addEventListener('change', () => { name.value = select.selectedOptions[0]?.dataset.name || name.value; sync(); });
+                name.addEventListener('input', sync);
+                present.addEventListener('change', sync);
+                sync();
             });
 
-            toolbar?.querySelector('[data-rich-font-family]')?.addEventListener('change', (event) => {
-                runCommand('fontName', event.target.value);
-            });
-
-            toolbar?.querySelector('[data-rich-font-size]')?.addEventListener('change', (event) => {
-                if (!restoreSelection()) {
-                    return;
+            document.querySelector('[data-cb-routing-form="financial_envelope_checklist"]')?.addEventListener('submit', (event) => {
+                const reviewers = Array.from(document.querySelectorAll('[data-financial-reviewer]')).filter((row) => row.querySelector('[data-cb-participating]').checked);
+                const accountIds = reviewers.map((row) => row.querySelector('[data-financial-account]').value);
+                const rows = Array.from(paper.querySelectorAll('[data-requirement-row]'));
+                const details = ['project', 'bidder'].every((field) => paper.querySelector(`[data-checklist-${field}]`)?.textContent.trim());
+                const complete = rows.length === 3 && rows.every((row) => Array.from(row.querySelectorAll('.initial-cell')).some((cell) => cell.textContent.trim() && reviewers.some((reviewer) => reviewer.dataset.financialReviewer === cell.dataset.initialSlot)));
+                if (!details || !complete || !paper.querySelector('[name="financial-checklist-result"][value="complying"]').checked || !reviewers.some((row) => ['chairperson', 'vice_chairperson'].includes(row.dataset.financialReviewer)) || accountIds.some((id) => !id) || new Set(accountIds).size !== accountIds.length) {
+                    event.preventDefault();
+                    window.alert('Enter the project and bidder; initial all three requirements with present BAC personnel; mark Complying; and select distinct accounts including the chairperson or vice-chairperson.');
                 }
-
-                document.execCommand('fontSize', false, '7');
-                convertFontSizeTags(activeEditor, event.target.value);
-                syncEditor(activeEditor);
-                rememberSelection();
-            });
+            }, true);
         })();
     </script>
 @endsection

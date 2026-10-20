@@ -20,6 +20,14 @@ class CompetitiveBiddingSignatureDocumentController extends Controller
 
     private const PRE_BID_MEMBER_SLOTS = ['member_1', 'member_2', 'member_3'];
 
+    private const CHECKLIST_ROLES = [
+        'chairperson' => 'bac_chairperson',
+        'vice_chairperson' => 'bac_vice_chairperson',
+        'member_1' => 'bac_member',
+        'member_2' => 'bac_member',
+        'member_3' => 'bac_member',
+    ];
+
     private const ROLE_OPTIONS = [
         'bac_secretariat' => ['label' => 'BAC Secretariat', 'role' => User::ROLE_BAC_SECRETARIAT, 'type' => 'internal'],
         'twg' => ['label' => 'Technical Working Group', 'role' => User::ROLE_BAC_MEMBER, 'type' => 'internal'],
@@ -45,6 +53,20 @@ class CompetitiveBiddingSignatureDocumentController extends Controller
             $validated['document_title'] = 'Minutes of the Pre-Bid Conference';
         }
 
+        if ($validated['template_key'] === 'technical_envelope_checklist') {
+            abort_unless($request->user()?->user_id === 'BACSEC-001', 403);
+            $request->validate(['checklist_result' => ['required', 'in:complying']]);
+            $validated['document_title'] = 'Checklist of Technical Envelope Requirements';
+            $this->validateChecklistRows($validated['document_html'], 'technical', 9);
+        }
+
+        if ($validated['template_key'] === 'financial_envelope_checklist') {
+            abort_unless($request->user()?->user_id === 'BACSEC-001', 403);
+            $request->validate(['checklist_result' => ['required', 'in:complying']]);
+            $validated['document_title'] = 'Checklist of Financial Envelope Requirements';
+            $this->validateChecklistRows($validated['document_html'], 'financial', 3);
+        }
+
         $signatories = json_decode($validated['signatories'], true);
 
         if (! is_array($signatories)) {
@@ -64,8 +86,11 @@ class CompetitiveBiddingSignatureDocumentController extends Controller
         $preBidMemberRecipients = $validated['template_key'] === 'pre_bid_conference_minutes'
             ? $this->preBidMemberRecipients($signatories)
             : [];
+        $checklistRecipients = in_array($validated['template_key'], ['technical_envelope_checklist', 'financial_envelope_checklist'], true)
+            ? $this->checklistRecipients($signatories)
+            : [];
 
-        [$document, $internalCount, $supplierCount] = DB::transaction(function () use ($request, $validated, $signatories, $preBidMemberRecipients) {
+        [$document, $internalCount, $supplierCount] = DB::transaction(function () use ($request, $validated, $signatories, $preBidMemberRecipients, $checklistRecipients) {
             $document = CompetitiveBiddingSignatureDocument::create([
                 'template_key' => $validated['template_key'],
                 'document_title' => $validated['document_title'],
@@ -116,6 +141,8 @@ class CompetitiveBiddingSignatureDocumentController extends Controller
                     $recipientId = $signatory['slot'] === 'prepared_by'
                         ? $request->user()->id
                         : ($preBidMemberRecipients[$signatory['slot']] ?? null);
+                } elseif (in_array($document->template_key, ['technical_envelope_checklist', 'financial_envelope_checklist'], true)) {
+                    $recipientId = $checklistRecipients[$signatory['slot']] ?? null;
                 }
 
                 SignatureRequest::create([
@@ -208,6 +235,97 @@ class CompetitiveBiddingSignatureDocumentController extends Controller
         }
 
         return $recipients;
+    }
+
+    private function checklistRecipients(array $signatories): array
+    {
+        $recipients = [];
+
+        foreach ($signatories as $signatory) {
+            $slot = $signatory['slot'];
+            $roleKey = $signatory['role_key'];
+
+            if (! isset(self::CHECKLIST_ROLES[$slot])
+                || self::CHECKLIST_ROLES[$slot] !== $roleKey
+                || ! $signatory['recipient_user_id']
+                || isset($recipients[$slot])) {
+                throw ValidationException::withMessages([
+                    'signatories' => 'Select a valid BAC account for each present checklist signer.',
+                ]);
+            }
+
+            $user = User::query()->find($signatory['recipient_user_id']);
+
+            if (! $user || ! $user->isActive() || ! $user->hasRole(self::ROLE_OPTIONS[$roleKey]['role'])
+                || in_array($user->id, $recipients, true)) {
+                throw ValidationException::withMessages([
+                    'signatories' => 'Each present signer must have a different active BAC account with the correct role.',
+                ]);
+            }
+
+            $recipients[$slot] = $user->id;
+        }
+
+        if (! isset($recipients['chairperson']) && ! isset($recipients['vice_chairperson'])) {
+            throw ValidationException::withMessages([
+                'signatories' => 'The BAC chairperson or vice-chairperson must be present to sign the checklist.',
+            ]);
+        }
+
+        return $recipients;
+    }
+
+    private function validateChecklistRows(string $html, string $envelope, int $expectedRows): void
+    {
+        $document = new \DOMDocument();
+        $previousErrors = libxml_use_internal_errors(true);
+        $document->loadHTML($html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previousErrors);
+
+        $xpath = new \DOMXPath($document);
+        $complying = $xpath->query("//input[@name=\"{$envelope}-checklist-result\" and @value=\"complying\" and @checked]");
+
+        if (! $complying || $complying->length !== 1) {
+            throw ValidationException::withMessages([
+                'document_html' => 'Mark the checklist as complying before submitting it for signatures.',
+            ]);
+        }
+
+        $requiredFields = $envelope === 'technical' ? ['project', 'bidder', 'abc'] : ['project', 'bidder'];
+
+        foreach ($requiredFields as $field) {
+            $value = $xpath->evaluate("string(//*[@data-checklist-{$field}])");
+
+            if (trim($value) === '') {
+                throw ValidationException::withMessages([
+                    'document_html' => 'Enter the required project and bidder details before submitting the checklist.',
+                ]);
+            }
+        }
+
+        $rows = $xpath->query('//*[@data-requirement-row]');
+
+        if (! $rows || $rows->length !== $expectedRows) {
+            throw ValidationException::withMessages([
+                'document_html' => 'Complete every checklist requirement before submitting it.',
+            ]);
+        }
+
+        foreach ($rows as $row) {
+            $initials = $xpath->query('.//*[contains(concat(" ", normalize-space(@class), " "), " initial-cell ")]', $row);
+            $hasInitial = false;
+
+            foreach ($initials as $cell) {
+                $hasInitial = $hasInitial || trim($cell->textContent) !== '';
+            }
+
+            if (! $hasInitial) {
+                throw ValidationException::withMessages([
+                    'document_html' => 'Initial every checklist requirement before submitting it.',
+                ]);
+            }
+        }
     }
 
     private function normalizeSignatories(array $signatories): array

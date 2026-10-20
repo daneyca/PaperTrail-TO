@@ -3,6 +3,8 @@
     $documentTitle = $documentTitle ?? 'Competitive Bidding Document';
     $pageInsets = [
         'pre_bid_conference_minutes' => '25.4mm 19.05mm',
+        'technical_envelope_checklist' => '19mm 18mm 12mm',
+        'financial_envelope_checklist' => '19mm 18mm 19mm 22mm',
         'bac_resolution_on_post_qualification' => '20mm 27mm 18mm',
         'bid_evaluation_report' => '18mm 22mm 16mm',
         'contract_agreement' => '20mm 25mm 18mm',
@@ -223,6 +225,9 @@
         <input type="hidden" name="document_title" value="{{ $documentTitle }}">
         <input type="hidden" name="document_html" data-cb-document-html>
         <input type="hidden" name="signatories" data-cb-signatories>
+        @if (in_array($templateKey, ['technical_envelope_checklist', 'financial_envelope_checklist'], true))
+            <input type="hidden" name="checklist_result" value="complying">
+        @endif
 
         <label>
             Bidding File
@@ -282,10 +287,12 @@
         form.addEventListener('submit', (event) => {
             const documentNode = document.querySelector('[data-competitive-document]');
             const signatories = Array.from(document.querySelectorAll('[data-cb-signatory]'))
+                .filter((node) => node.closest('[data-cb-signatory-entry]')?.querySelector('[data-cb-participating]')?.checked !== false)
                 .map((node, index) => {
                     const nameNode = node.querySelector('[data-cb-signatory-name]');
                     const roleNode = node.querySelector('[data-cb-signatory-role]');
-                    const recipientNode = node.querySelector('[data-cb-recipient-user-id]');
+                    const recipientNode = node.querySelector('[data-cb-recipient-user-id]')
+                        || node.closest('[data-cb-signatory-entry]')?.querySelector('[data-cb-recipient-user-id]');
                     const supplierNode = node.querySelector('[data-cb-supplier-name]') || document.querySelector('[data-cb-supplier-name]');
 
                     return {
@@ -307,6 +314,11 @@
             }
 
             const clone = documentNode.cloneNode(true);
+            clone.querySelectorAll('[data-cb-signatory-entry].is-inactive').forEach((node) => node.remove());
+            clone.querySelectorAll('input[type="radio"]').forEach((node) => {
+                const selected = documentNode.querySelector(`input[name="${node.name}"][value="${node.value}"]`);
+                node.toggleAttribute('checked', selected?.checked === true);
+            });
 
             clone.querySelectorAll('[contenteditable]').forEach((node) => {
                 node.removeAttribute('contenteditable');

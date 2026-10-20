@@ -1,515 +1,218 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Technical Checklist Requirements | PaperTrail')
+@section('title', 'Technical Envelope Checklist | PaperTrail')
 
 @php
-    $dateLabel = now()->format('F j, Y');
+    $slots = [
+        ['key' => 'member_3', 'label' => 'BAC Member', 'role' => 'bac_member', 'user_id' => 'BACMEM-003', 'name' => 'Jessa G. Resus', 'account_role' => \App\Models\User::ROLE_BAC_MEMBER],
+        ['key' => 'member_1', 'label' => 'BAC Member', 'role' => 'bac_member', 'user_id' => 'BACMEM-001', 'name' => 'Perpetua D. Salan', 'account_role' => \App\Models\User::ROLE_BAC_MEMBER],
+        ['key' => 'member_2', 'label' => 'BAC Member', 'role' => 'bac_member', 'user_id' => 'BACMEM-002', 'name' => 'Rogelio A. Layo', 'account_role' => \App\Models\User::ROLE_BAC_MEMBER],
+        ['key' => 'vice_chairperson', 'label' => 'BAC Vice-Chairperson', 'role' => 'bac_vice_chairperson', 'user_id' => 'BACVICE-001', 'name' => 'Roel J. Bano', 'account_role' => \App\Models\User::ROLE_BAC_VICE_CHAIRPERSON],
+        ['key' => 'chairperson', 'label' => 'BAC Chairperson', 'role' => 'bac_chairperson', 'user_id' => 'BACCHAIR-001', 'name' => 'Edmar T. Tambis', 'account_role' => \App\Models\User::ROLE_BAC_CHAIR],
+    ];
     $requirements = [
         'Registration Certificate from the DTI or SEC or CDA',
-        "Mayor's Permit (where the principal place of business of the bidder is located)",
-        'Duly signed statement of all Ongoing and Completed Government & Private Contracts including contracts awarded but not yet started',
+        'Mayors Permit (wher the principal place of business of the bider is located)',
+        'Duly signed statement of all Ongoing and Completed Government & Private Contracts including contracts awarded but not yet started.',
         'Tax Clearance per Executive Order 398, Series of 2005, as finally reviewed and approved by the Bureau of Internal Revenue (BIR)',
-        'PhilGEPS Registration (Platinum)',
+        'PHILGEPS Registration (Platinum)',
         'Duly signed computation of Net Financial Contracting Capacity (NFCC)',
     ];
+    $isBacSecretariatOne = auth()->user()?->user_id === 'BACSEC-001';
 @endphp
 
 @section('content')
     <style>
-        .technical-checklist-toolbar {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-bottom: 16px;
-            padding: 14px 16px;
-            border: 1px solid #d8dee8;
-            border-radius: 8px;
-            background: #fff;
-            box-shadow: 0 10px 28px rgba(11, 35, 65, 0.06);
-        }
-
-        .technical-checklist-toolbar > div {
-            display: grid;
-            gap: 2px;
-            margin-right: auto;
-        }
-
-        .technical-checklist-toolbar strong {
-            color: #0b2341;
-            font-size: 0.98rem;
-        }
-
-        .technical-checklist-toolbar span {
-            color: #64748b;
-            font-size: 0.84rem;
-        }
-
-        .technical-checklist-toolbar a,
-        .technical-checklist-toolbar button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 38px;
-            padding: 0 14px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            background: #fff;
-            color: #0b2341;
-            font: 800 0.84rem/1 Figtree, Arial, sans-serif;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .technical-checklist-toolbar button {
-            border-color: #0b2341;
-            background: #0b2341;
-            color: #fff;
-        }
-
-        .technical-checklist-wrap {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            overflow: auto;
-            padding: 18px 12px 42px;
-            box-sizing: border-box;
-        }
-
-        .technical-checklist-page {
-            flex: 0 0 auto;
-            width: 210mm !important;
-            max-width: 210mm !important;
-            min-height: 297mm !important;
-            padding: 14mm 18mm 12mm !important;
-            border: 1px solid #000 !important;
-            background-color: #fff;
-            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
-            color: #000;
-            font-family: Arial, sans-serif !important;
-            font-size: 7.4pt !important;
-            line-height: 1.14 !important;
-            box-sizing: border-box;
-        }
-
-        .technical-checklist-page * {
-            box-sizing: border-box;
-            font-family: Arial, sans-serif !important;
-            color: #000;
-        }
-
-        .technical-checklist-page [contenteditable="true"] {
-            min-height: 12px;
-            outline: none;
-        }
-
-        .technical-checklist-page [contenteditable="true"]:focus {
-            background: #eff6ff;
-            box-shadow: inset 0 0 0 1px #2563eb;
-        }
-
-        .technical-checklist-page h1 {
-            margin: 0 auto 18px;
-            padding: 2px 8px;
-            border: 2px solid #107c41;
-            width: 93%;
-            text-align: center;
-            font-size: 9pt !important;
-            font-weight: 700;
-        }
-
-        .technical-meta {
-            display: grid;
-            grid-template-columns: 84px minmax(0, 1fr) 48px 150px;
-            column-gap: 8px;
-            row-gap: 4px;
-            align-items: end;
-            margin: 0 0 18px;
-        }
-
-        .technical-label {
-            font-size: 7pt !important;
-            font-weight: 700;
-            white-space: nowrap;
-        }
-
-        .technical-line {
-            min-height: 15px;
-            padding: 1px 4px;
-            border-bottom: 1px solid #000;
-            font-size: 7.1pt !important;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .technical-date {
-            min-height: 15px;
-            padding: 1px 4px;
-            border-bottom: 1px solid transparent;
-            font-size: 7.1pt !important;
-        }
-
-        .technical-form-title {
-            margin: 8px 0 16px;
-            text-align: center;
-            font-size: 7.4pt !important;
-            font-weight: 700;
-        }
-
-        .technical-budget {
-            display: grid;
-            grid-template-columns: 300px 130px minmax(0, 1fr);
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 4px;
-        }
-
-        .technical-budget div {
-            font-size: 7.1pt !important;
-            font-weight: 700;
-        }
-
-        .technical-security {
-            display: grid;
-            grid-template-columns: 176px minmax(0, 1fr);
-            gap: 8px;
-            align-items: start;
-            margin-bottom: 4px;
-        }
-
-        .technical-security-title {
-            padding-top: 2px;
-            font-size: 7.1pt !important;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .technical-security-table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-            font-size: 7pt !important;
-        }
-
-        .technical-security-table td {
-            height: 16px;
-            padding: 1px 4px;
-            border: 0;
-            vertical-align: top;
-        }
-
-        .technical-security-table .security-heading {
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .technical-security-table .security-line {
-            border-bottom: 1px solid #000;
-        }
-
-        .requirements-table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-            margin-top: 0;
-            background: transparent;
-            font-size: 7pt !important;
-        }
-
-        .requirements-table th,
-        .requirements-table td {
-            border: 1px solid #000;
-            padding: 2px 4px;
-            vertical-align: middle;
-        }
-
-        .requirements-table th {
-            font-weight: 400;
-        }
-
-        .requirements-table .initial-col {
-            width: 26px;
-            text-align: center;
-        }
-
-        .requirements-table .requirement-col {
-            width: auto;
-        }
-
-        .requirements-table .vertical-head {
-            height: 84px;
-            padding: 2px 1px;
-            writing-mode: vertical-rl;
-            transform: rotate(180deg);
-            text-align: center;
-            font-size: 6pt !important;
-            white-space: nowrap;
-        }
-
-        .requirements-table .initial-note {
-            text-align: left;
-            font-size: 6.4pt !important;
-            font-weight: 400;
-        }
-
-        .requirements-table tbody td {
-            height: 18px;
-        }
-
-        .technical-documents {
-            margin: 14px 0 0 182px;
-            font-size: 7pt !important;
-        }
-
-        .technical-documents-title {
-            margin-bottom: 5px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .technical-doc-row {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) 92px 102px;
-            gap: 10px;
-            align-items: center;
-            min-height: 18px;
-        }
-
-        .technical-doc-line {
-            min-height: 14px;
-            border-bottom: 1px solid #000;
-        }
-
-        .technical-note {
-            margin-top: 12px;
-            font-size: 6.5pt !important;
-        }
-
-        .technical-remarks {
-            display: grid;
-            grid-template-columns: 62px 125px 140px minmax(0, 1fr);
-            gap: 8px;
-            align-items: center;
-            margin-top: 16px;
-            font-size: 7pt !important;
-        }
-
-        .technical-remarks .technical-line {
-            text-transform: none;
-            font-weight: 400;
-        }
-
-        .technical-footer-note {
-            margin-top: 18px;
-            font-size: 6.5pt !important;
-            font-style: italic;
-            line-height: 1.25 !important;
-        }
-
-        @media (max-width: 980px) {
-            .technical-checklist-wrap {
-                justify-content: flex-start;
-            }
-        }
-
-        @media print {
-            @page {
-                size: A4 portrait;
-                margin: 14mm 18mm 12mm;
-            }
-
-            .technical-checklist-toolbar,
-            .no-print {
-                display: none !important;
-            }
-
-            .technical-checklist-wrap,
-            .technical-checklist-wrap * {
-                visibility: visible !important;
-            }
-
-            .technical-checklist-wrap {
-                display: block !important;
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                overflow: visible !important;
-                background: #fff !important;
-            }
-
-            .technical-checklist-page {
-                width: auto !important;
-                max-width: none !important;
-                min-height: 0 !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                border: 0 !important;
-                box-shadow: none !important;
-                break-after: auto;
-            }
-
-            .technical-checklist-page thead { display: table-header-group; }
-            .technical-checklist-page tr { break-inside: avoid; }
-        }
+        .technical-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:16px; }
+        .technical-toolbar h1 { margin:0 auto 0 0; color:#0b2341; font-size:18px; }
+        .technical-toolbar button, .technical-reviewer-panel select, .technical-reviewer-panel input[type=text] { min-height:36px; border:1px solid #cbd5e1; border-radius:6px; background:#fff; color:#0b2341; font:600 13px Figtree, Arial, sans-serif; }
+        .technical-toolbar button { padding:0 14px; cursor:pointer; }
+        .technical-toolbar button:last-child { color:#fff; background:#0b2341; border-color:#0b2341; }
+        .technical-reviewer-panel { margin-bottom:18px; padding:14px; border:1px solid #d8dee8; background:#fff; }
+        .technical-reviewer-panel h2 { margin:0 0 12px; font-size:15px; color:#0b2341; }
+        .technical-reviewer-grid { display:grid; gap:8px; }
+        .technical-reviewer-row { display:grid; grid-template-columns:180px 80px minmax(180px,1fr) minmax(160px,1fr); gap:10px; align-items:center; font-size:13px; }
+        .technical-reviewer-row > span { font-weight:700; }
+        .technical-reviewer-row label { display:flex; align-items:center; gap:5px; }
+        .technical-reviewer-panel select, .technical-reviewer-panel input[type=text] { width:100%; padding:0 8px; }
+        .technical-sheet-wrap { display:flex; justify-content:center; overflow:auto; padding:8px 8px 36px; }
+        .technical-page { width:210mm; min-height:297mm; flex:none; box-sizing:border-box; padding:19mm 18mm 12mm; background:#fff; color:#000; box-shadow:0 12px 30px #0b234126; font:10pt/1.18 Calibri, Arial, sans-serif; }
+        .technical-page * { box-sizing:border-box; }
+        .technical-page [contenteditable=true] { outline:0; }
+        .technical-page [contenteditable=true]:focus { background:#f0f6ff; outline:1px solid #7aa7ed; }
+        .technical-title { margin:0 0 24px; text-align:center; font-size:13pt; font-weight:700; }
+        .technical-project { display:grid; grid-template-columns:55px 1fr 38px 125px; align-items:end; column-gap:5px; }
+        .technical-line { min-height:17px; border-bottom:1px solid #000; }
+        .technical-line[contenteditable=true]:empty:before { content:'\00a0'; }
+        .technical-project .technical-line:first-of-type { grid-column:2; }
+        .technical-bidder { display:grid; grid-template-columns:55px 1fr; gap:5px; margin-top:4px; }
+        .technical-bidder-lines { width:64%; }
+        .technical-form-title { margin:26px 0 18px; text-align:center; font-size:11pt; font-weight:700; }
+        .technical-abc { display:flex; align-items:baseline; gap:5px; margin-bottom:4px; font-weight:700; }
+        .technical-abc [contenteditable] { display:inline-block; min-width:90px; min-height:16px; border-bottom:1px solid #000; }
+        .technical-main { display:grid; grid-template-columns:151px minmax(0,1fr); column-gap:12px; }
+        .technical-envelope-label { font-weight:700; }
+        .technical-security { font-size:9pt; }
+        .technical-security strong { display:block; margin-bottom:4px; }
+        .technical-security-row { display:grid; grid-template-columns:minmax(0,1fr) 142px; gap:8px; min-height:17px; }
+        .technical-security-row > :last-child { white-space:nowrap; }
+        .technical-security-row [contenteditable] { border-bottom:1px solid #000; }
+        .technical-initial-head { display:grid; grid-template-columns:17px repeat(5, 26px); margin-top:8px; height:98px; }
+        .technical-initial-head > span { border:1px solid #000; border-right:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+        .technical-initial-head > span:last-child { border-right:1px solid #000; }
+        .technical-initial-head .technical-rotated { writing-mode:vertical-rl; transform:rotate(180deg); font-size:8pt; white-space:nowrap; }
+        .technical-initial-caption { margin:3px 0 16px; font-size:8pt; line-height:1.12; }
+        .technical-requirements { margin-top:12px; }
+        .technical-requirement { display:grid; grid-template-columns:151px minmax(0,1fr); column-gap:12px; align-items:start; min-height:24px; break-inside:avoid; }
+        .technical-initial-grid { display:grid; grid-template-columns:17px repeat(5, 26px); height:19px; }
+        .technical-initial-grid > span { border:1px solid #000; border-right:0; text-align:center; font-size:8pt; line-height:17px; overflow:hidden; white-space:nowrap; }
+        .technical-initial-grid > span:last-child { border-right:1px solid #000; }
+        .technical-requirement-text { padding-top:2px; font-size:9pt; }
+        .technical-section-label { margin:7px 0 3px 163px; font-weight:700; font-size:9pt; }
+        .technical-security-check { margin:0 0 8px 163px; font-size:9pt; }
+        .technical-security-check > div { display:flex; align-items:center; gap:12px; min-height:19px; }
+        .technical-security-check > div > span:first-child { width:60px; }
+        .technical-security-check label { white-space:nowrap; }
+        .technical-security-check input, .technical-remarks input { margin:0 3px 0 0; vertical-align:middle; accent-color:#000; }
+        .technical-note { margin:14px 0 12px; font-size:8pt; }
+        .technical-remarks { display:flex; gap:22px; align-items:center; font-size:9pt; }
+        .technical-footer { margin-top:32px; font-size:9pt; line-height:1.25; }
+        @media (max-width:800px) { .technical-reviewer-row { grid-template-columns:1fr 80px; } .technical-reviewer-row select, .technical-reviewer-row input[type=text] { grid-column:span 2; } }
+        @media print { @page { size:A4 portrait; margin:19mm 18mm 12mm; } body { background:#fff !important; } .technical-toolbar, .technical-reviewer-panel, .cb-routing-actions, .cb-routing-dialog, .no-print { display:none !important; } .technical-sheet-wrap { display:block; padding:0; overflow:visible; } .technical-page { margin:0; padding:0; box-shadow:none; width:auto; min-height:0; } }
     </style>
 
-    <section class="technical-checklist-toolbar no-print">
-        <div>
-            <strong>Technical Checklist Requirements</strong>
-            <span>Editable official technical envelope checklist.</span>
+    <div class="technical-toolbar no-print">
+        <h1>Checklist of Technical Envelope Requirements</h1>
+        <button type="button" data-technical-print>Print</button>
+        <button type="button" data-technical-save>Save Word</button>
+    </div>
+
+    @if ($isBacSecretariatOne)
+        <div class="technical-reviewer-panel no-print">
+            <h2>BAC personnel at bid opening</h2>
+            <div class="technical-reviewer-grid">
+                @foreach ($slots as $slot)
+                    @php
+                        $accounts = $bacSigners->where('role', $slot['account_role']);
+                        $defaultAccount = $accounts->firstWhere('user_id', $slot['user_id']);
+                    @endphp
+                    <div class="technical-reviewer-row" data-reviewer-slot="{{ $slot['key'] }}" data-cb-signatory-entry>
+                        <span>{{ $slot['label'] }}</span>
+                        <label><input type="checkbox" data-cb-participating @checked($defaultAccount)> Present</label>
+                        <select aria-label="{{ $slot['label'] }} account" data-reviewer-account>
+                            <option value="">Select account</option>
+                            @foreach ($accounts as $account)
+                                <option value="{{ $account->id }}" data-name="{{ $account->name }}" @selected($defaultAccount?->id === $account->id)>{{ $account->user_id }} - {{ $account->name }}</option>
+                            @endforeach
+                        </select>
+                        <input type="text" aria-label="{{ $slot['label'] }} printed name" data-reviewer-name value="{{ $defaultAccount?->name ?: $slot['name'] }}">
+                        <input type="hidden" data-cb-recipient-user-id value="{{ $defaultAccount?->id }}">
+                        <span hidden data-cb-signatory data-cb-slot="{{ $slot['key'] }}" data-cb-label="{{ $slot['label'] }}">
+                            <span data-cb-signatory-name>{{ $defaultAccount?->name ?: $slot['name'] }}</span>
+                            <select data-cb-signatory-role aria-label="Role"><option value="{{ $slot['role'] }}" selected>{{ $slot['label'] }}</option></select>
+                        </span>
+                    </div>
+                @endforeach
+            </div>
         </div>
-        <a href="{{ route('bac-secretariat.competitive-bidding.checklist.technical') }}">Back</a>
-        <button type="button" onclick="window.print()">Print</button>
-    </section>
+    @endif
 
-    <div class="technical-checklist-wrap">
-        <section class="technical-checklist-page">
-            <h1 contenteditable="true">Checklist of Technical Envelope Requirements</h1>
-
-            <div class="technical-meta">
-                <div class="technical-label" contenteditable="true">PROJECT:</div>
-                <div class="technical-line" contenteditable="true">Procurement of Materials for the Improvement of Felicity Dream Square</div>
-                <div class="technical-label" contenteditable="true">DATE:</div>
-                <div class="technical-date" contenteditable="true">{{ $dateLabel }}</div>
-
-                <div></div>
-                <div class="technical-line" contenteditable="true">Felicity Dream Square</div>
-                <div></div>
-                <div></div>
-
-                <div class="technical-label" contenteditable="true">BIDDER:</div>
-                <div class="technical-line" contenteditable="true">Canlupao Hardware and Construction Supplies</div>
-                <div></div>
-                <div></div>
-
-                <div></div>
-                <div class="technical-line" contenteditable="true">Supplies</div>
-                <div></div>
-                <div></div>
+    <div class="technical-sheet-wrap">
+        <section class="technical-page" data-competitive-document>
+            <h2 class="technical-title">Checklist of Technical Envelope Requirements</h2>
+            <div class="technical-project">
+                <strong>PROJECT:</strong><span class="technical-line" data-checklist-project contenteditable="true"></span>
+                <strong>DATE:</strong><span class="technical-line" contenteditable="true">{{ now()->format('F j, Y') }}</span>
             </div>
-
-            <div class="technical-form-title" contenteditable="true">Checklist of Bid Requirements</div>
-
-            <div class="technical-budget">
-                <div contenteditable="true">APPROVED BUDGET for the CONTRACT (ABC)</div>
-                <div contenteditable="true">P 1,718,445.00</div>
-                <div></div>
-            </div>
-
-            <div class="technical-security">
-                <div class="technical-security-title" contenteditable="true">Technical Envelope</div>
-                <table class="technical-security-table">
-                    <colgroup>
-                        <col style="width: 40%">
-                        <col style="width: 22%">
-                        <col style="width: 38%">
-                    </colgroup>
-                    <tbody>
-                        <tr>
-                            <td class="security-heading" contenteditable="true">Required Bid Security</td>
-                            <td class="security-heading" contenteditable="true">Form</td>
-                            <td class="security-heading" contenteditable="true">Amount</td>
-                        </tr>
-                        <tr>
-                            <td contenteditable="true">a. Cash or Cashier's / Manager's Check</td>
-                            <td contenteditable="true">2% of ABC</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td contenteditable="true">b. Bank Draft / Guarantee or Irrevocable Letter of Credit</td>
-                            <td contenteditable="true">5% of ABC</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td contenteditable="true">c. Surety Bond</td>
-                            <td contenteditable="true">120 Calendar days from opening</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td contenteditable="true">Validity Period</td>
-                            <td colspan="2"></td>
-                        </tr>
-                        <tr>
-                            <td contenteditable="true">Form of Bid Security</td>
-                            <td colspan="2" class="security-line" contenteditable="true"></td>
-                        </tr>
-                        <tr>
-                            <td contenteditable="true">Company</td>
-                            <td colspan="2" class="security-line" contenteditable="true"></td>
-                        </tr>
-                        <tr>
-                            <td contenteditable="true">Bid Security Amount</td>
-                            <td colspan="2" class="security-line" contenteditable="true"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <table class="requirements-table">
-                <colgroup>
-                    @for ($column = 0; $column < 6; $column++)
-                        <col class="initial-col">
-                    @endfor
-                    <col class="requirement-col">
-                </colgroup>
-                <thead>
-                    <tr>
-                        <th class="vertical-head" contenteditable="true">Bidder</th>
-                        <th class="vertical-head" contenteditable="true">Joec Construction</th>
-                        <th class="vertical-head" contenteditable="true">Canlupao</th>
-                        <th class="vertical-head" contenteditable="true">Hardware</th>
-                        <th class="vertical-head" contenteditable="true">Construction</th>
-                        <th class="vertical-head" contenteditable="true">Supplies</th>
-                        <th class="initial-note" contenteditable="true">Initial of BAC Member if document is included</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($requirements as $index => $requirement)
-                        <tr>
-                            @for ($column = 0; $column < 6; $column++)
-                                <td contenteditable="true"></td>
-                            @endfor
-                            <td contenteditable="true">{{ $index + 1 }}. {{ $requirement }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-
-            <div class="technical-documents">
-                <div class="technical-documents-title" contenteditable="true">Technical Documents:</div>
-                <div class="technical-doc-row">
-                    <div contenteditable="true">1. Bid Security Amount</div>
-                    <div contenteditable="true">( &nbsp; ) Sufficient</div>
-                    <div contenteditable="true">( &nbsp; ) Insufficient</div>
+            <div class="technical-bidder"><strong>BIDDER:</strong><div class="technical-bidder-lines" data-checklist-bidder><div class="technical-line" contenteditable="true"></div><div class="technical-line" contenteditable="true"></div><div class="technical-line" contenteditable="true"></div></div></div>
+            <h3 class="technical-form-title">Checklist of Bid Requirements</h3>
+            <div class="technical-abc">APPROVED BUDGET for the CONTRACT (ABC) <span>PHP</span><span data-checklist-abc contenteditable="true"></span></div>
+            <div class="technical-main">
+                <div>
+                    <div class="technical-envelope-label">TECHNICAL ENVELOPE</div>
+                    <div class="technical-initial-head"><span></span>@foreach ($slots as $slot)<span><span class="technical-rotated" data-printed-reviewer="{{ $slot['key'] }}">{{ strtoupper(substr($slot['name'], 0, 1).'. '.collect(explode(' ', $slot['name']))->last()) }}</span></span>@endforeach</div>
+                    <div class="technical-initial-caption">Initial of BAC Member If<br>document is included</div>
                 </div>
-                <div class="technical-doc-row">
-                    <div contenteditable="true">Validity</div>
-                    <div contenteditable="true">( &nbsp; ) Sufficient</div>
-                    <div contenteditable="true">( &nbsp; ) Insufficient</div>
-                </div>
-                <div class="technical-doc-row">
-                    <div contenteditable="true">2. Bid Securing Declaration</div>
-                    <div class="technical-doc-line" contenteditable="true"></div>
-                    <div></div>
-                </div>
-                <div class="technical-doc-row">
-                    <div contenteditable="true">3. Omnibus Sworn Statement</div>
-                    <div class="technical-doc-line" contenteditable="true"></div>
-                    <div></div>
+                <div class="technical-security">
+                    <strong>REQUIRED BID SECURITY</strong>
+                    <div class="technical-security-row"><span>Form</span><span>AMOUNT</span></div>
+                    <div class="technical-security-row"><span>a. Cash or Cashier's /Manager's Check</span><span>2% of ABC</span></div>
+                    <div class="technical-security-row"><span>b. Bank Draft/Guarantee or Irrevocable Letter of Credit</span><span></span></div>
+                    <div class="technical-security-row"><span>c. Surety Bond</span><span>5% of ABC</span></div>
+                    <div class="technical-security-row"><span>Validity Period</span><span>120 Calendar days from opening</span></div>
+                    <div class="technical-security-row"><span>Form of Bid Security</span><span contenteditable="true"></span></div>
+                    <div class="technical-security-row"><span>Company</span><span contenteditable="true"></span></div>
+                    <div class="technical-security-row"><span>Bid Security Amount</span><span contenteditable="true"></span></div>
                 </div>
             </div>
-
-            <p class="technical-note" contenteditable="true">Note: Any missing or non-complying document in the above-mentioned checklist is a ground for outright rejection of the bid.</p>
-
-            <div class="technical-remarks">
-                <div class="technical-label" contenteditable="true">Remarks:</div>
-                <div class="technical-line" contenteditable="true">( &nbsp; ) Complying</div>
-                <div class="technical-line" contenteditable="true">( &nbsp; ) Non-Complying</div>
-                <div></div>
+            <div class="technical-requirements">
+                @foreach ($requirements as $index => $requirement)
+                    <div class="technical-requirement" data-requirement-row>
+                        <div class="technical-initial-grid"><span></span>@foreach ($slots as $slot)<span class="initial-cell" data-initial-slot="{{ $slot['key'] }}" contenteditable="true"></span>@endforeach</div>
+                        <div class="technical-requirement-text">{{ $index + 1 }}. {{ $requirement }}</div>
+                    </div>
+                @endforeach
             </div>
-
-            <p class="technical-footer-note" contenteditable="true">On the Bid Opening day, the BAC may find it useful to use this form to keep track of the results of the preliminary examination of bids. This form, once accomplished, may be used by the BAC Secretariat as a reference in writing up the minutes of the bid opening.</p>
-
+            <div class="technical-section-label">TECHNICAL DOCUMENTS:</div>
+            <div class="technical-requirement" data-requirement-row><div class="technical-initial-grid"><span></span>@foreach ($slots as $slot)<span class="initial-cell" data-initial-slot="{{ $slot['key'] }}" contenteditable="true"></span>@endforeach</div><div class="technical-requirement-text">1. Bid Security</div></div>
+            <div class="technical-security-check"><div><span>Amount</span><label><input type="radio" name="security-amount" value="sufficient">Sufficient</label><label><input type="radio" name="security-amount" value="insufficient">Insufficient</label></div><div><span>Validity</span><label><input type="radio" name="security-validity" value="sufficient">Sufficient</label><label><input type="radio" name="security-validity" value="insufficient">Insufficient</label></div></div>
+            <div class="technical-requirement" data-requirement-row><div class="technical-initial-grid"><span></span>@foreach ($slots as $slot)<span class="initial-cell" data-initial-slot="{{ $slot['key'] }}" contenteditable="true"></span>@endforeach</div><div class="technical-requirement-text">2. Bid Securing Declaration</div></div>
+            <div class="technical-requirement" data-requirement-row><div class="technical-initial-grid"><span></span>@foreach ($slots as $slot)<span class="initial-cell" data-initial-slot="{{ $slot['key'] }}" contenteditable="true"></span>@endforeach</div><div class="technical-requirement-text">3. Omnibus Sworn Statement</div></div>
+            <p class="technical-note">Note : Any missing or non-complying document in the above - mentioned checklist ia a ground for outright rejection<br>of the bid.</p>
+            <div class="technical-remarks"><strong>Remarks :</strong><label><input type="radio" name="technical-checklist-result" value="complying">Complying</label><label><input type="radio" name="technical-checklist-result" value="non-complying">Non-Complying</label></div>
+            <p class="technical-footer">On the Bid Opening day, the BAC may find it to use this Form to keep track of the results of the preliminary examination of bids. This form, once accomplished, may be used by the BAC Secretariat as a reference in writing up the minutes of the bid opening.</p>
         </section>
     </div>
+
+    @if ($isBacSecretariatOne)
+        @include('bac-secretariat.competitive-bidding.partials.signature-routing-tools', ['templateKey' => 'technical_envelope_checklist', 'documentTitle' => 'Checklist of Technical Envelope Requirements'])
+    @endif
+
+    <script>
+        (() => {
+            const paper = document.querySelector('.technical-page');
+            document.querySelector('[data-technical-print]')?.addEventListener('click', () => window.print());
+            document.querySelector('[data-technical-save]')?.addEventListener('click', () => {
+                const clone = paper.cloneNode(true);
+                clone.querySelectorAll('[contenteditable]').forEach((node) => node.removeAttribute('contenteditable'));
+                clone.querySelectorAll('input[type=radio]').forEach((node) => node.toggleAttribute('checked', paper.querySelector(`input[name="${node.name}"][value="${node.value}"]`)?.checked === true));
+                const css = Array.from(document.querySelectorAll('style')).map((node) => node.innerHTML).join('\n');
+                const html = `<!doctype html><html><head><meta charset="utf-8"><style>${css} @page { size:A4 portrait; margin:19mm 18mm 12mm; } .technical-page { width:auto !important; min-height:0 !important; padding:0 !important; box-shadow:none !important; }</style></head><body>${clone.outerHTML}</body></html>`;
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(new Blob(['\ufeff', html], {type:'application/msword'}));
+                link.download = 'technical-envelope-checklist.doc';
+                link.click();
+                setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+            });
+
+            document.querySelectorAll('[data-reviewer-slot]').forEach((row) => {
+                const select = row.querySelector('[data-reviewer-account]');
+                const name = row.querySelector('[data-reviewer-name]');
+                const present = row.querySelector('[data-cb-participating]');
+                const sync = () => {
+                    row.querySelector('[data-cb-recipient-user-id]').value = select.value;
+                    row.querySelector('[data-cb-signatory-name]').textContent = name.value.trim();
+                    const parts = name.value.trim().split(/\s+/);
+                    const heading = document.querySelector(`[data-printed-reviewer="${row.dataset.reviewerSlot}"]`);
+                    heading.textContent = present.checked && parts.length ? `${parts[0].charAt(0)}. ${parts.at(-1)}`.toUpperCase() : '';
+                    if (!present.checked) document.querySelectorAll(`[data-initial-slot="${row.dataset.reviewerSlot}"]`).forEach((cell) => cell.textContent = '');
+                };
+                select.addEventListener('change', () => { name.value = select.selectedOptions[0]?.dataset.name || name.value; sync(); });
+                name.addEventListener('input', sync);
+                present.addEventListener('change', sync);
+                sync();
+            });
+            document.querySelector('[data-cb-routing-form="technical_envelope_checklist"]')?.addEventListener('submit', (event) => {
+                const rows = Array.from(paper.querySelectorAll('[data-requirement-row]'));
+                const reviewers = Array.from(document.querySelectorAll('[data-reviewer-slot]')).filter((row) => row.querySelector('[data-cb-participating]').checked);
+                const accountIds = reviewers.map((row) => row.querySelector('[data-reviewer-account]').value);
+                const fields = ['project', 'bidder', 'abc'].every((field) => paper.querySelector(`[data-checklist-${field}]`)?.textContent.trim());
+                const complete = rows.length === 9 && rows.every((row) => Array.from(row.querySelectorAll('.initial-cell')).some((cell) => cell.textContent.trim() && reviewers.some((reviewer) => reviewer.dataset.reviewerSlot === cell.dataset.initialSlot)));
+                if (!fields || !complete || !paper.querySelector('[name="technical-checklist-result"][value="complying"]').checked || !reviewers.some((row) => ['chairperson', 'vice_chairperson'].includes(row.dataset.reviewerSlot)) || accountIds.some((id) => !id) || new Set(accountIds).size !== accountIds.length) {
+                    event.preventDefault();
+                    window.alert('Enter the project, bidder, and budget; initial all nine requirements with present BAC personnel; mark Complying; and select distinct accounts including the chairperson or vice-chairperson.');
+                }
+            }, true);
+        })();
+    </script>
 @endsection

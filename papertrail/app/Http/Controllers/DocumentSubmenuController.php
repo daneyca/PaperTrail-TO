@@ -152,7 +152,13 @@ class DocumentSubmenuController extends Controller
 
     public function bacSecretariatTechnicalChecklistTemplate(Request $request)
     {
-        return view('bac-secretariat.competitive-bidding.checklist-technical');
+        $bacSigners = User::query()
+            ->whereIn('role', [User::ROLE_BAC_CHAIR, User::ROLE_BAC_VICE_CHAIRPERSON, User::ROLE_BAC_MEMBER])
+            ->where('status', User::STATUS_ACTIVE)
+            ->orderBy('user_id')
+            ->get(['id', 'user_id', 'name', 'role']);
+
+        return view('bac-secretariat.competitive-bidding.checklist-technical', compact('bacSigners'));
     }
 
     public function bacSecretariatFinancialChecklist(Request $request)
@@ -162,7 +168,13 @@ class DocumentSubmenuController extends Controller
 
     public function bacSecretariatFinancialChecklistTemplate(Request $request)
     {
-        return view('bac-secretariat.competitive-bidding.checklist-financial');
+        $bacSigners = User::query()
+            ->whereIn('role', [User::ROLE_BAC_CHAIR, User::ROLE_BAC_VICE_CHAIRPERSON, User::ROLE_BAC_MEMBER])
+            ->where('status', User::STATUS_ACTIVE)
+            ->orderBy('user_id')
+            ->get(['id', 'user_id', 'name', 'role']);
+
+        return view('bac-secretariat.competitive-bidding.checklist-financial', compact('bacSigners'));
     }
 
     public function bacSecretariatAbstractBidsAsRead(Request $request)

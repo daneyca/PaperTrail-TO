@@ -44,12 +44,12 @@ class CompetitiveBiddingTemplateFlowTest extends TestCase
 
         $this->get(route('bac-secretariat.competitive-bidding.checklist.technical.template'))
             ->assertOk()
-            ->assertSee('margin: 14mm 18mm 12mm;', false)
+            ->assertSee('padding:19mm 18mm 12mm;', false)
             ->assertDontSee('technical-page-break');
 
         $this->get(route('bac-secretariat.competitive-bidding.checklist.financial.template'))
             ->assertOk()
-            ->assertSee('margin: 12mm 13mm 10mm;', false);
+            ->assertSee('padding:19mm 18mm 19mm 22mm;', false);
 
         foreach (['as-read', 'as-calculated'] as $abstract) {
             $this->get(route("bac-secretariat.competitive-bidding.abstract-bids.{$abstract}.template"))
