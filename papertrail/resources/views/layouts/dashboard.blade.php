@@ -247,6 +247,12 @@
         const sidebarBackdrop = document.querySelector('[data-sidebar-backdrop]');
         const sidebarCollapse = document.querySelector('[data-sidebar-collapse]');
         const collapseStorageKey = 'papertrail_sidebar_collapsed';
+        const sidebarScrollStorageKey = 'papertrail_sidebar_scroll_' + @json(auth()->id());
+        const sidebar = document.getElementById('dashboard-sidebar');
+        const sidebarNav = sidebar?.querySelector('.sidebar-nav');
+        const sidebarScrollArea = sidebarNav && ['auto', 'scroll'].includes(getComputedStyle(sidebarNav).overflowY)
+            ? sidebarNav
+            : sidebar;
         const mobileSidebarQuery = window.matchMedia('(max-width: 980px)');
 
         function setSidebar(open) {
@@ -271,6 +277,47 @@
 
         setCollapsed(mobileSidebarQuery.matches ? false : getStoredSidebarCollapsed());
 
+        function saveSidebarScroll() {
+            if (!sidebarScrollArea || document.body.classList.contains('sidebar-collapsed')) return;
+
+            try {
+                sessionStorage.setItem(sidebarScrollStorageKey, String(sidebarScrollArea.scrollTop));
+            } catch (error) {
+                // Navigation still works when browser storage is unavailable.
+            }
+        }
+
+        function restoreSidebarScroll() {
+            if (!sidebarScrollArea || document.body.classList.contains('sidebar-collapsed')) return;
+
+            try {
+                const saved = Number(sessionStorage.getItem(sidebarScrollStorageKey));
+                if (Number.isFinite(saved) && saved >= 0) sidebarScrollArea.scrollTop = saved;
+            } catch (error) {
+                // Keep the default sidebar position when storage is unavailable.
+            }
+
+            const activeLink = sidebarNav?.querySelector('a[data-sidebar-link="true"].is-active');
+            if (!activeLink) return;
+
+            const sidebarBounds = sidebarScrollArea.getBoundingClientRect();
+            const activeBounds = activeLink.getBoundingClientRect();
+            const edgePadding = 12;
+
+            if (activeBounds.top < sidebarBounds.top + edgePadding) {
+                sidebarScrollArea.scrollTop += activeBounds.top - sidebarBounds.top - edgePadding;
+            } else if (activeBounds.bottom > sidebarBounds.bottom - edgePadding) {
+                sidebarScrollArea.scrollTop += activeBounds.bottom - sidebarBounds.bottom + edgePadding;
+            }
+        }
+
+        restoreSidebarScroll();
+        sidebarScrollArea?.addEventListener('scroll', saveSidebarScroll, { passive: true });
+        sidebar?.querySelectorAll('a[data-sidebar-link="true"]').forEach((link) => {
+            link.addEventListener('click', saveSidebarScroll);
+        });
+        window.addEventListener('pagehide', saveSidebarScroll);
+
         sidebarToggle?.addEventListener('click', () => {
             setSidebar(!dashboardShell.classList.contains('sidebar-open'));
         });
@@ -282,7 +329,9 @@
             }
 
             const collapsed = !document.body.classList.contains('sidebar-collapsed');
+            if (collapsed) saveSidebarScroll();
             setCollapsed(collapsed);
+            if (!collapsed) restoreSidebarScroll();
 
             try {
                 localStorage.setItem(collapseStorageKey, String(collapsed));
