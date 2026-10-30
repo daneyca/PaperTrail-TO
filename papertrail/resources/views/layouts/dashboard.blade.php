@@ -61,6 +61,28 @@
 
         <x-dashboard.sidebar />
 
+        <script>
+            (() => {
+                const storageKey = 'papertrail_sidebar_dropdowns_' + @json(auth()->id());
+
+                try {
+                    const choices = JSON.parse(sessionStorage.getItem(storageKey) || '{}');
+                    if (!choices || typeof choices !== 'object' || Array.isArray(choices)) return;
+
+                    document.querySelectorAll('#dashboard-sidebar [data-sidebar-dropdown][data-sidebar-key]').forEach((dropdown) => {
+                        const key = dropdown.dataset.sidebarKey;
+                        if (!Object.prototype.hasOwnProperty.call(choices, key)) return;
+
+                        const isOpen = choices[key] === true;
+                        dropdown.classList.toggle('is-open', isOpen);
+                        dropdown.querySelector('[data-sidebar-dropdown-toggle]')?.setAttribute('aria-expanded', String(isOpen));
+                    });
+                } catch (error) {
+                    // Use the page's active-menu defaults when storage is unavailable.
+                }
+            })();
+        </script>
+
         <main class="dashboard-main">
             <x-dashboard.header />
 
@@ -248,6 +270,7 @@
         const sidebarCollapse = document.querySelector('[data-sidebar-collapse]');
         const collapseStorageKey = 'papertrail_sidebar_collapsed';
         const sidebarScrollStorageKey = 'papertrail_sidebar_scroll_' + @json(auth()->id());
+        const sidebarDropdownStorageKey = 'papertrail_sidebar_dropdowns_' + @json(auth()->id());
         const sidebar = document.getElementById('dashboard-sidebar');
         const sidebarNav = sidebar?.querySelector('.sidebar-nav');
         const sidebarScrollArea = sidebarNav && ['auto', 'scroll'].includes(getComputedStyle(sidebarNav).overflowY)
@@ -287,12 +310,35 @@
             }
         }
 
+        function saveSidebarDropdowns(changedDropdown = null) {
+            try {
+                const stored = JSON.parse(sessionStorage.getItem(sidebarDropdownStorageKey) || '{}');
+                const choices = stored && typeof stored === 'object' && !Array.isArray(stored) ? stored : {};
+
+                sidebar?.querySelectorAll('[data-sidebar-dropdown][data-sidebar-key]').forEach((dropdown) => {
+                    if (dropdown.classList.contains('is-open') || dropdown === changedDropdown) {
+                        choices[dropdown.dataset.sidebarKey] = dropdown.classList.contains('is-open');
+                    }
+                });
+
+                sessionStorage.setItem(sidebarDropdownStorageKey, JSON.stringify(choices));
+            } catch (error) {
+                // Keep the current menu state when storage is unavailable.
+            }
+        }
+
         function restoreSidebarScroll() {
             if (!sidebarScrollArea || document.body.classList.contains('sidebar-collapsed')) return;
 
             try {
-                const saved = Number(sessionStorage.getItem(sidebarScrollStorageKey));
-                if (Number.isFinite(saved) && saved >= 0) sidebarScrollArea.scrollTop = saved;
+                const stored = sessionStorage.getItem(sidebarScrollStorageKey);
+                if (stored !== null) {
+                    const saved = Number(stored);
+                    if (Number.isFinite(saved) && saved >= 0) {
+                        sidebarScrollArea.scrollTop = saved;
+                        return;
+                    }
+                }
             } catch (error) {
                 // Keep the default sidebar position when storage is unavailable.
             }
@@ -314,9 +360,15 @@
         restoreSidebarScroll();
         sidebarScrollArea?.addEventListener('scroll', saveSidebarScroll, { passive: true });
         sidebar?.querySelectorAll('a[data-sidebar-link="true"]').forEach((link) => {
-            link.addEventListener('click', saveSidebarScroll);
+            link.addEventListener('click', () => {
+                saveSidebarDropdowns();
+                saveSidebarScroll();
+            });
         });
-        window.addEventListener('pagehide', saveSidebarScroll);
+        window.addEventListener('pagehide', () => {
+            saveSidebarDropdowns();
+            saveSidebarScroll();
+        });
 
         sidebarToggle?.addEventListener('click', () => {
             setSidebar(!dashboardShell.classList.contains('sidebar-open'));
@@ -358,6 +410,8 @@
 
                 const isOpen = dropdown.classList.toggle('is-open');
                 toggle.setAttribute('aria-expanded', String(isOpen));
+                saveSidebarDropdowns(dropdown);
+                saveSidebarScroll();
             });
         });
 

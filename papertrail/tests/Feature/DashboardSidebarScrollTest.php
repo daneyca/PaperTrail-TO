@@ -26,8 +26,11 @@ class DashboardSidebarScrollTest extends TestCase
             ->assertDontSee('9 actions')
             ->assertDontSee('For setup')
             ->assertSee('papertrail_sidebar_scroll_', false)
+            ->assertSee('papertrail_sidebar_dropdowns_', false)
+            ->assertSee('data-sidebar-key="Security &amp; Recovery"', false)
             ->assertSee("getComputedStyle(sidebarNav).overflowY", false)
             ->assertSee('sessionStorage.setItem(sidebarScrollStorageKey, String(sidebarScrollArea.scrollTop))', false)
+            ->assertSee('saveSidebarDropdowns(dropdown)', false)
             ->assertSee('activeLink.getBoundingClientRect()', false);
     }
 }

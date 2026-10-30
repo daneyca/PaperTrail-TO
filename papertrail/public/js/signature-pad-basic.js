@@ -9,7 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const typedPreview = document.querySelector('[data-typed-signature-preview]');
     const imageInput = document.getElementById('signatureImageInput');
     const imagePreview = imageInput?.closest('[data-signature-panel]')?.querySelector('.signature-preview');
+    const deferredUploadedPreview = imagePreview?.querySelector('[data-signature-preview-src]');
     const canvasStatus = document.querySelector('[data-signature-canvas-status]');
+    const canvasWrap = canvas?.closest('.signature-canvas-wrap');
+    const canvasPreview = canvasWrap?.querySelector('[data-signature-canvas-preview]');
     const tabs = Array.from(document.querySelectorAll('[data-signature-tab]'));
     const panels = Array.from(document.querySelectorAll('[data-signature-panel]'));
 
@@ -150,6 +153,11 @@ document.addEventListener('DOMContentLoaded', () => {
         canvasReady = true;
         redrawCanvas();
 
+        if (existingSignatureImage && canvasPreview) {
+            canvasPreview.hidden = true;
+            canvasWrap.classList.remove('is-restoring');
+        }
+
         return true;
     };
 
@@ -239,6 +247,10 @@ document.addEventListener('DOMContentLoaded', () => {
         strokes.length = 0;
         currentStroke = null;
         existingSignatureImage = null;
+        if (canvasPreview) {
+            canvasPreview.hidden = true;
+            canvasWrap.classList.remove('is-restoring');
+        }
         hasDrawn = false;
         drawnInput.value = '';
         redrawCanvas();
@@ -271,26 +283,48 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const loadExistingDrawnSignature = () => {
-        const source = canvas.dataset.existingSignatureSrc;
-
-        if (!source) {
+        if (!canvasPreview) {
             ensureCanvasReady();
             return;
         }
 
-        const image = new Image();
-        image.addEventListener('load', () => {
-            existingSignatureImage = image;
+        const restore = () => {
+            if (canvasPreview.hidden) {
+                return;
+            }
+
+            existingSignatureImage = canvasPreview;
             ensureCanvasReady();
             setCanvasStatus('Current drawn signature loaded.');
-        });
-        image.addEventListener('error', ensureCanvasReady);
-        image.src = source;
+        };
+        const failed = () => {
+            canvasPreview.hidden = true;
+            canvasWrap.classList.remove('is-restoring');
+            ensureCanvasReady();
+            setCanvasStatus('Saved signature could not be loaded. Please reload the page.');
+        };
+
+        if (canvasPreview.complete) {
+            if (canvasPreview.naturalWidth) {
+                restore();
+            } else {
+                failed();
+            }
+        } else {
+            canvasPreview.addEventListener('load', restore, { once: true });
+            canvasPreview.addEventListener('error', failed, { once: true });
+            ensureCanvasReady();
+        }
     };
 
     tabs.forEach((button) => {
         button.addEventListener('click', () => {
             const target = button.dataset.signatureTab;
+
+            if (target === 'uploaded' && deferredUploadedPreview?.dataset.signaturePreviewSrc) {
+                deferredUploadedPreview.src = deferredUploadedPreview.dataset.signaturePreviewSrc;
+                delete deferredUploadedPreview.dataset.signaturePreviewSrc;
+            }
 
             tabs.forEach((tab) => {
                 const active = tab === button;

@@ -49,7 +49,7 @@
 
     @if ($user->email && ! $user->email_verified_at)
         <div class="profile-flash warning">
-            Your email is not verified. Verify your official email to enable password recovery.
+            Your official email is not verified. <a href="{{ route('profile.show', ['email_recovery' => 1]) }}" data-profile-modal-open="email-verification">Verify email</a> to enable password recovery.
         </div>
     @elseif (! $user->email)
         <div class="profile-flash warning">
@@ -176,14 +176,14 @@
         data-profile-email-recovery-modal
         @unless ($emailRecoveryModalOpen) hidden @endunless
     >
-        <button type="button" class="profile-password-modal__backdrop" data-profile-email-recovery-close aria-label="Close email recovery dialog"></button>
+        <button type="button" class="profile-password-modal__backdrop" data-profile-email-recovery-close aria-label="Close email verification dialog"></button>
 
         <section class="profile-password-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="profile-email-recovery-title">
             <header class="profile-password-modal__header">
                 <div>
-                    <p class="eyebrow">Recovery</p>
-                    <h2 id="profile-email-recovery-title">Email Recovery</h2>
-                    <p>Use your official email for password recovery and verification codes.</p>
+                    <p class="eyebrow">Account Security</p>
+                    <h2 id="profile-email-recovery-title">Email Verification</h2>
+                    <p>Confirm your official email address to enable password recovery.</p>
                 </div>
                 <button type="button" class="profile-password-modal__close" data-profile-email-recovery-close aria-label="Close modal">
                     <x-papertrail.icon name="close" />
@@ -191,12 +191,20 @@
             </header>
 
             <div class="email-verification-panel">
-                <strong>Email Recovery</strong>
+                @if ($emailRecoveryModalOpen && session('status'))
+                    <div class="profile-flash success" role="status">{{ session('status') }}</div>
+                @endif
+                @if ($emailRecoveryModalOpen && session('error'))
+                    <div class="profile-flash error" role="alert">{{ session('error') }}</div>
+                @endif
+                <strong>Official Email</strong>
                 <p>
                     @if ($user->email && $user->email_verified_at)
                         Your official email address is verified.
-                    @elseif ($user->email)
+                    @elseif ($hasPendingEmailCode)
                         Enter the 6-digit code sent to your official email. The code expires in 10 minutes.
+                    @elseif ($user->email)
+                        Request a 6-digit code to verify your official email address.
                     @else
                         No official email address is linked to this account. Please update your profile first.
                     @endif
@@ -239,10 +247,11 @@
 @push('scripts')
     <script>
         (() => {
-            const bindModal = (modalSelector, closeSelector, focusSelector) => {
+            const bindModal = (modalSelector, closeSelector, focusSelector, openSelector = null) => {
                 const modal = document.querySelector(modalSelector);
                 const closeButtons = document.querySelectorAll(closeSelector);
-                const firstInput = focusSelector ? modal?.querySelector(focusSelector) : null;
+                const firstInput = modal?.querySelector(focusSelector) || modal?.querySelector('button[type="submit"]');
+                let lastTrigger = null;
 
                 if (!modal) {
                     return;
@@ -252,9 +261,24 @@
                     modal.hidden = !open;
                     modal.classList.toggle('is-open', open);
                     document.body.classList.toggle('profile-password-modal-open', document.querySelector('.profile-password-modal.is-open') !== null);
+                    if (openSelector) {
+                        document.querySelectorAll(`.sidebar-nav ${openSelector}`).forEach((link) => link.classList.toggle('is-active', open));
+
+                        const url = new URL(window.location.href);
+                        if (open) {
+                            url.searchParams.delete('password');
+                            url.searchParams.set('email_recovery', '1');
+                        } else {
+                            url.searchParams.delete('email_recovery');
+                        }
+                        window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+                    }
 
                     if (open) {
                         window.setTimeout(() => firstInput?.focus(), 80);
+                    } else {
+                        lastTrigger?.focus();
+                        lastTrigger = null;
                     }
                 };
 
@@ -262,26 +286,38 @@
                     button.addEventListener('click', () => setOpen(false));
                 });
 
+                if (openSelector) {
+                    document.querySelectorAll(openSelector).forEach((link) => {
+                        link.addEventListener('click', (event) => {
+                            if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                                return;
+                            }
+
+                            event.preventDefault();
+                            lastTrigger = link;
+                            setOpen(true);
+                        });
+                    });
+                }
+
                 if (modal.classList.contains('is-open')) {
                     document.body.classList.add('profile-password-modal-open');
                     window.setTimeout(() => firstInput?.focus(), 80);
                 }
+
+                return setOpen;
             };
 
-            bindModal('[data-profile-password-modal]', '[data-profile-password-close]', '#current_password');
-            bindModal('[data-profile-email-recovery-modal]', '[data-profile-email-recovery-close]', '#verification_code');
+            const closePasswordModal = bindModal('[data-profile-password-modal]', '[data-profile-password-close]', '#current_password');
+            const closeEmailModal = bindModal('[data-profile-email-recovery-modal]', '[data-profile-email-recovery-close]', '#verification_code', '[data-profile-modal-open="email-verification"]');
 
             document.addEventListener('keydown', (event) => {
                 if (event.key !== 'Escape') {
                     return;
                 }
 
-                document.querySelectorAll('.profile-password-modal.is-open').forEach((modal) => {
-                    modal.hidden = true;
-                    modal.classList.remove('is-open');
-                });
-
-                document.body.classList.remove('profile-password-modal-open');
+                closePasswordModal?.(false);
+                closeEmailModal?.(false);
             });
         })();
     </script>

@@ -1,7 +1,7 @@
 (() => {
     const content = document.getElementById('dashboardContent');
 
-    if (!content || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (!content || content.querySelector('.profile-password-modal.is-open') || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         return;
     }
 

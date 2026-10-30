@@ -1485,6 +1485,17 @@ body.dashboard-body .profile-password-modal__dialog {
     box-shadow: 0 24px 70px rgba(15, 23, 42, 0.26);
 }
 
+@media (prefers-reduced-motion: no-preference) {
+    body.dashboard-body .profile-email-recovery-modal.is-open .profile-password-modal__dialog {
+        animation: profileEmailVerificationOpen 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes profileEmailVerificationOpen {
+        from { transform: translateY(6px); }
+        to { transform: translateY(0); }
+    }
+}
+
 body.dashboard-body .profile-password-modal__header {
     display: flex;
     align-items: flex-start;

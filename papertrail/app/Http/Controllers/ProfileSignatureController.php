@@ -17,6 +17,7 @@ class ProfileSignatureController extends Controller
 {
     private const DISK = 'local';
     private const BASE_PATH = 'private/signatures';
+    private const INLINE_DRAWN_SIGNATURE_MAX_BYTES = 256 * 1024;
 
     public function edit(Request $request): View
     {
@@ -28,7 +29,33 @@ class ProfileSignatureController extends Controller
 
         return view('profile.signature', [
             'user' => $user,
+            'inlineDrawnSignatureDataUrl' => $this->inlineDrawnSignature($user),
         ]);
+    }
+
+    private function inlineDrawnSignature(User $user): ?string
+    {
+        if ($user->signature_style !== 'drawn' || ! $user->signature_image_path) {
+            return null;
+        }
+
+        try {
+            $disk = Storage::disk(self::DISK);
+            $path = $user->signature_image_path;
+
+            if (! $disk->exists($path) || $disk->size($path) > self::INLINE_DRAWN_SIGNATURE_MAX_BYTES) {
+                return null;
+            }
+
+            return 'data:'.$this->contentTypeFor($path).';base64,'.base64_encode($disk->get($path));
+        } catch (\Throwable $exception) {
+            Log::warning('PaperTrail saved signature preview could not be prepared.', [
+                'user_id' => $user->id,
+                'exception' => $exception::class,
+            ]);
+
+            return null;
+        }
     }
 
     public function update(Request $request): RedirectResponse

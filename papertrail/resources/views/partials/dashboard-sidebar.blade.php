@@ -387,7 +387,7 @@
             'children' => [
                 ['label' => 'Change Password', 'route' => 'profile.show', 'active' => 'profile.show', 'query' => ['password' => 1]],
                 ['label' => 'Manage E-Signature', 'route' => 'profile.signature.edit', 'active' => 'profile.signature.*'],
-                ['label' => 'Email Recovery', 'route' => 'profile.show', 'active' => 'profile.show', 'query' => ['email_recovery' => 1]],
+                ['label' => 'Email Verification', 'route' => 'profile.show', 'active' => 'profile.show', 'query' => ['email_recovery' => 1], 'modal' => 'email-verification'],
             ],
         ],
     ]);
@@ -492,7 +492,7 @@
                 @endphp
 
                 @if ($hasChildren)
-                    <div class="sidebar-dropdown {{ $itemActive ? 'is-open' : '' }}" data-sidebar-dropdown>
+                    <div class="sidebar-dropdown {{ $itemActive ? 'is-open' : '' }}" data-sidebar-dropdown data-sidebar-key="{{ $item['label'] }}">
                         <button
                             class="sidebar-dropdown-toggle"
                             type="button"
@@ -532,7 +532,7 @@
                                 @endphp
 
                                 @if ($childHasChildren)
-                                    <div class="sidebar-nested-dropdown {{ $childActive ? 'is-open' : '' }}" data-sidebar-dropdown>
+                                    <div class="sidebar-nested-dropdown {{ $childActive ? 'is-open' : '' }}" data-sidebar-dropdown data-sidebar-key="{{ $item['label'] }} / {{ $child['label'] }}">
                                         <button
                                             class="sidebar-nested-toggle {{ $childActive ? 'is-active' : '' }}"
                                             type="button"
@@ -593,6 +593,7 @@
                                     class="{{ $childActive ? 'is-active' : '' }}"
                                     title="{{ $child['label'] }}"
                                     data-sidebar-link="true"
+                                    @if (! empty($child['modal'])) data-profile-modal-open="{{ $child['modal'] }}" @endif
                                 >
                                     <span class="sidebar-link-label">{{ $child['label'] }}</span>
                                     @if ($childCount > 0)

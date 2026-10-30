@@ -20,6 +20,7 @@
         $signatureImageUrl = $user->signature_image_path
             ? route('profile.signature.image.show', ['user' => $user, 'v' => $signatureImageVersion])
             : null;
+        $drawnSignatureSrc = $style === 'drawn' ? ($inlineDrawnSignatureDataUrl ?? $signatureImageUrl) : null;
     @endphp
 
     <section class="dashboard-hero admin-users-hero profile-header">
@@ -85,15 +86,18 @@
 
                 <div class="signature-tab-panel {{ $style === 'drawn' ? 'is-active' : '' }}" data-signature-panel="drawn">
                     <p class="signature-method-note">Use your mouse, touchpad, or touchscreen. Clear and redraw until the signature looks correct.</p>
-                    <div class="signature-canvas-wrap">
+                    <div class="signature-canvas-wrap {{ $drawnSignatureSrc ? 'is-restoring' : '' }}">
                         <canvas
                             id="signatureCanvas"
                             class="signature-canvas"
                             width="820"
                             height="220"
                             aria-label="Draw signature"
-                            data-existing-signature-src="{{ $style === 'drawn' ? $signatureImageUrl : '' }}"
                         ></canvas>
+                        @if ($drawnSignatureSrc)
+                            <span class="signature-canvas-loading" data-signature-canvas-loading>Loading saved signature...</span>
+                            <img class="signature-canvas-preview" src="{{ $drawnSignatureSrc }}" alt="" aria-hidden="true" data-signature-canvas-preview>
+                        @endif
                     </div>
                     <div class="signature-button-row">
                         <button id="clearSignatureCanvasBtn" type="button" class="secondary-action">Clear Drawing</button>
@@ -109,7 +113,11 @@
                     @error('signature_image')<p class="field-error">{{ $message }}</p>@enderror
                     <div class="signature-preview" aria-live="polite">
                         @if ($signatureImageUrl)
-                            <img src="{{ $signatureImageUrl }}" alt="Current signature image">
+                            <img
+                                @if ($style === 'uploaded') src="{{ $signatureImageUrl }}"
+                                @else data-signature-preview-src="{{ $signatureImageUrl }}" @endif
+                                alt="Current signature image"
+                            >
                         @else
                             <span>No signature image saved yet.</span>
                         @endif
