@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AbstractQuotation;
+use App\Models\AnnualInvestmentProgramDraft;
 use App\Models\AnnualProcurementPlan;
 use App\Models\AnnualProcurementPlanItem;
 use App\Models\BacResolution;
@@ -139,7 +140,8 @@ class DocumentSubmenuController extends Controller
         abort_unless($request->user()?->user_id === 'BACSEC-003', 403);
 
         return view('bac-secretariat.competitive-bidding.annual-investment-program', [
-            'signerCandidates' => app(AnnualInvestmentProgramService::class)->signerCandidates(),
+            'signerAccounts' => app(AnnualInvestmentProgramService::class)->signerAccounts(),
+            'draft' => AnnualInvestmentProgramDraft::query()->where('user_id', $request->user()->id)->first(),
         ]);
     }
 

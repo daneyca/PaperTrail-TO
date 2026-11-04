@@ -21,13 +21,7 @@ class AnnualInvestmentProgramSubmissionController extends Controller
         abort_unless($request->user()?->user_id === 'BACSEC-003', 403);
 
         $data = $aip->validateDocument($request);
-        $routing = $request->validate([
-            'signers' => ['required', 'array'],
-            'signers.prepared' => ['required', 'integer'],
-            'signers.reviewed' => ['required', 'integer'],
-            'signers.approved' => ['required', 'integer'],
-        ]);
-        $signers = $aip->resolveSigners($routing['signers']);
+        $signers = $aip->resolveSigners();
 
         foreach ($signers as $slot => $user) {
             $data[$slot.'_name'] = trim($data[$slot.'_name'] ?? '') ?: $user->name;
@@ -88,7 +82,7 @@ class AnnualInvestmentProgramSubmissionController extends Controller
             }
 
             AuditLogger::signature('aip_submitted_for_signatures', $document, [
-                'description' => 'Annual Investment Program routed to three selected accounts for signatures.',
+                'description' => 'Annual Investment Program routed to the three assigned accounts for signatures.',
                 'metadata' => ['recipient_account_ids' => array_map(fn ($user) => $user->user_id, $signers)],
             ]);
 
@@ -101,7 +95,7 @@ class AnnualInvestmentProgramSubmissionController extends Controller
 
         return redirect()
             ->route('bac-secretariat.competitive-bidding.annual-investment-program.show', $document)
-            ->with('status', 'AIP submitted to the selected signatories. Each person can open it under Signatures.');
+            ->with('status', 'AIP submitted to the assigned signatories. Each person can open it under Signatures.');
     }
 
     public function show(Request $request, CompetitiveBiddingSignatureDocument $document, SignatureRequestService $signatureRequests): View

@@ -21,6 +21,7 @@
     .aip-snapshot thead tr:nth-child(2) th { height:38px; }
     .aip-snapshot .aip-snapshot-number th { height:20px; font-weight:400; }
     .aip-snapshot .aip-snapshot-section th { text-align:left; font-size:8pt; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .aip-snapshot .aip-snapshot-subheading th { padding-left:12px; font-size:7.5pt; }
     .aip-snapshot .aip-snapshot-amount { text-align:right; }
     .aip-snapshot .aip-snapshot-total { font-weight:700; }
     .aip-snapshot-signatures { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:25mm; margin:26mm 5mm 0; break-inside:avoid; }
@@ -51,6 +52,7 @@
     }
     $totals['all'] = $totals['ps'] + $totals['mooe'] + $totals['co'];
     $amount = fn ($value) => $value !== null && $value !== '' ? number_format((float) $value, 2) : '';
+    $visibleSections = app(\App\Services\AnnualInvestmentProgramService::class)->visibleSections($data);
 @endphp
 
 <article class="aip-snapshot">
@@ -81,11 +83,9 @@
             <tr class="aip-snapshot-number">@for ($column = 1; $column <= 14; $column++)<th>({{ $column }})</th>@endfor</tr>
         </thead>
         <tbody>
-            @foreach (['general', 'other'] as $section)
-                @php($sectionItems = collect($data['items'])->where('section', $section))
-                @if ($sectionItems->isNotEmpty())
-                    <tr class="aip-snapshot-section"><th colspan="14" style="background-color:{{ $data['section_colors'][$section] }}">{{ $data['section_labels'][$section] }}</th></tr>
-                    @foreach ($sectionItems as $item)
+            @foreach ($visibleSections as $section)
+                    <tr class="aip-snapshot-section @if($section['type'] === 'subheading') aip-snapshot-subheading @endif"><th colspan="14" style="background-color:{{ $section['color'] }}">{{ $section['label'] }}</th></tr>
+                    @foreach ($section['items'] as $item)
                         @php($rowTotal = (float) ($item['ps'] ?? 0) + (float) ($item['mooe'] ?? 0) + (float) ($item['co'] ?? 0))
                         <tr>
                             <td>{{ $item['reference'] ?? '' }}</td><td>{{ $item['description'] ?? '' }}</td><td>{{ $item['office'] ?? '' }}</td>
@@ -100,7 +100,6 @@
                             <td>{{ $item['typology'] ?? '' }}</td>
                         </tr>
                     @endforeach
-                @endif
             @endforeach
             <tr class="aip-snapshot-total">
                 <td></td><td>TOTAL</td><td colspan="5"></td>

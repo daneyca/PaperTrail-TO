@@ -31,19 +31,14 @@ class AnnualInvestmentProgramExportController extends Controller
         $merges = ['A1:N1', 'A2:N2', 'A3:N3', 'A4:N4', 'A5:N5', 'D6:E6', 'H6:K6', 'L6:M6'];
         $totals = array_fill(0, 5, 0.0);
 
-        foreach (['general', 'other'] as $sectionIndex => $section) {
-            $items = array_values(array_filter($data['items'], fn ($item) => $item['section'] === $section));
-
-            if ($items === []) {
-                continue;
-            }
-
-            $rows[] = [$data['section_labels'][$section]];
+        $visibleSections = $aip->visibleSections($data);
+        foreach ($visibleSections as $sectionIndex => $section) {
+            $rows[] = [$section['label']];
             $sectionRow = count($rows);
             $rowStyles[$sectionRow] = 17 + $sectionIndex;
             $merges[] = "A{$sectionRow}:N{$sectionRow}";
 
-            foreach ($items as $item) {
+            foreach ($section['items'] as $item) {
                 $ps = (float) ($item['ps'] ?? 0);
                 $mooe = (float) ($item['mooe'] ?? 0);
                 $co = (float) ($item['co'] ?? 0);
@@ -83,10 +78,7 @@ class AnnualInvestmentProgramExportController extends Controller
             [
                 'merges' => $merges,
                 'rowStyles' => $rowStyles,
-                'customFillColors' => [
-                    substr($data['section_colors']['general'], 1),
-                    substr($data['section_colors']['other'], 1),
-                ],
+                'customFillColors' => array_map(fn (array $section) => substr($section['color'], 1), $visibleSections),
                 'pageSetup' => ['orientation' => 'landscape', 'paperSize' => 8, 'fitToWidth' => 1, 'fitToHeight' => 0],
             ]);
 

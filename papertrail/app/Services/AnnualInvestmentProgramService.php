@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class AnnualInvestmentProgramService
@@ -15,20 +15,20 @@ class AnnualInvestmentProgramService
         'approved' => 'Approved by',
     ];
 
+    public const RECIPIENT_ACCOUNTS = [
+        'prepared' => ['user_id' => 'BACCHAIR-001', 'role' => User::ROLE_BAC_CHAIR, 'office' => 'BAC'],
+        'reviewed' => ['user_id' => 'MBO-001', 'role' => User::ROLE_HEAD_OFFICE, 'office' => 'MBO'],
+        'approved' => ['user_id' => 'MO-001', 'role' => User::ROLE_HEAD_OFFICE, 'office' => 'MO'],
+    ];
+
     public function validateDocument(Request $request): array
     {
-        $data = $request->validate([
+        $rules = [
             'year' => ['required', 'integer', 'between:2000,2100'],
             'municipality' => ['required', 'string', 'max:120'],
             'climate_change' => ['nullable', 'boolean'],
-            'section_labels' => ['required', 'array'],
-            'section_labels.general' => ['required', 'string', 'max:100'],
-            'section_labels.other' => ['required', 'string', 'max:100'],
-            'section_colors' => ['required', 'array'],
-            'section_colors.general' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
-            'section_colors.other' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'items' => ['required', 'array', 'min:1', 'max:500'],
-            'items.*.section' => ['required', 'in:general,other'],
+            'items.*.section' => ['required', 'string', 'regex:/^[a-zA-Z0-9_-]{1,64}$/'],
             'items.*.reference' => ['nullable', 'string', 'max:100'],
             'items.*.description' => ['nullable', 'string', 'max:500'],
             'items.*.office' => ['nullable', 'string', 'max:200'],
@@ -51,9 +51,54 @@ class AnnualInvestmentProgramService
             'approved_name' => ['nullable', 'string', 'max:120'],
             'approved_title' => ['nullable', 'string', 'max:120'],
             'approved_date' => ['nullable', 'string', 'max:80'],
-        ]);
+        ];
+
+        if ($request->exists('sections')) {
+            $rules += [
+                'sections' => ['required', 'array', 'min:1', 'max:40'],
+                'sections.*.key' => ['required', 'string', 'regex:/^[a-zA-Z0-9_-]{1,64}$/', 'distinct'],
+                'sections.*.type' => ['required', 'in:section,subheading'],
+                'sections.*.label' => ['required', 'string', 'max:100'],
+                'sections.*.color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            ];
+        } else {
+            // Accept forms created before sections became editable.
+            $rules += [
+                'section_labels' => ['required', 'array'],
+                'section_labels.general' => ['required', 'string', 'max:100'],
+                'section_labels.other' => ['required', 'string', 'max:100'],
+                'section_colors' => ['required', 'array'],
+                'section_colors.general' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
+                'section_colors.other' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            ];
+        }
+
+        $data = $request->validate($rules);
+        $data['sections'] = isset($data['sections'])
+            ? array_values($data['sections'])
+            : array_map(fn (string $key) => [
+                'key' => $key,
+                'type' => 'section',
+                'label' => $data['section_labels'][$key],
+                'color' => $data['section_colors'][$key],
+            ], ['general', 'other']);
 
         $data['items'] = array_values(array_filter($data['items'], fn (array $item) => $this->hasRowContent($item)));
+
+        $sectionKeys = array_column($data['sections'], 'key');
+        $hasMainSection = false;
+        foreach ($data['sections'] as $section) {
+            if ($section['type'] === 'section') {
+                $hasMainSection = true;
+            } elseif (! $hasMainSection) {
+                throw ValidationException::withMessages(['sections' => 'Place a main section before its subheadings.']);
+            }
+        }
+        foreach ($data['items'] as $item) {
+            if (! in_array($item['section'], $sectionKeys, true)) {
+                throw ValidationException::withMessages(['items' => 'A project row belongs to a missing section.']);
+            }
+        }
 
         if ($data['items'] === []) {
             throw ValidationException::withMessages([
@@ -64,53 +109,114 @@ class AnnualInvestmentProgramService
         return $data;
     }
 
-    public function signerCandidates(): array
+    public function visibleSections(array $data): array
     {
-        $active = fn () => User::query()->where('status', User::STATUS_ACTIVE);
-        $office = fn (Builder $query, string $code) => $query->whereHas('assignedOffice', fn (Builder $officeQuery) => $officeQuery->where('code', $code));
+        $visible = [];
+        $mainIndex = null;
 
-        return [
-            'prepared' => $active()->where('role', User::ROLE_HEAD_OFFICE)
-                ->where(fn (Builder $query) => $office($query, 'MPDO'))
-                ->orderBy('user_id')->get(['id', 'user_id', 'name', 'role', 'office_id']),
-            'reviewed' => $active()->where(fn (Builder $query) => $query
-                ->where('role', User::ROLE_BUDGET)
-                ->orWhere(fn (Builder $headOffice) => $headOffice
-                    ->where('role', User::ROLE_HEAD_OFFICE)
-                    ->whereHas('assignedOffice', fn (Builder $officeQuery) => $officeQuery->where('code', 'MBO'))))
-                ->orderBy('user_id')->get(['id', 'user_id', 'name', 'role', 'office_id']),
-            'approved' => $active()->where(fn (Builder $query) => $query
-                ->where('role', User::ROLE_APPROVING_AUTHORITY)
-                ->orWhere(fn (Builder $headOffice) => $headOffice
-                    ->where('role', User::ROLE_HEAD_OFFICE)
-                    ->whereHas('assignedOffice', fn (Builder $officeQuery) => $officeQuery->where('code', 'MO'))))
-                ->orderBy('user_id')->get(['id', 'user_id', 'name', 'role', 'office_id']),
-        ];
-    }
+        foreach ($data['sections'] as $section) {
+            $section['items'] = array_values(array_filter($data['items'],
+                fn (array $item) => $item['section'] === $section['key']));
+            $section['visible'] = $section['items'] !== [];
 
-    public function resolveSigners(array $ids): array
-    {
-        $candidates = $this->signerCandidates();
-        $resolved = [];
-
-        foreach (self::SLOTS as $slot => $label) {
-            $id = filter_var($ids[$slot] ?? null, FILTER_VALIDATE_INT);
-            $user = $id ? $candidates[$slot]->firstWhere('id', $id) : null;
-
-            if (! $user) {
-                throw ValidationException::withMessages([
-                    "signers.{$slot}" => "Select an active {$label} account from the list.",
-                ]);
+            if ($section['type'] === 'section') {
+                $mainIndex = count($visible);
+            } elseif ($section['visible'] && $mainIndex !== null) {
+                $visible[$mainIndex]['visible'] = true;
             }
 
-            $resolved[$slot] = $user;
+            $visible[] = $section;
         }
 
-        if (count(array_unique(array_map(fn (User $user) => $user->id, $resolved))) !== count($resolved)) {
-            throw ValidationException::withMessages(['signers' => 'Choose a different account for each signatory.']);
+        return array_values(array_filter($visible, fn (array $section) => $section['visible']));
+    }
+
+    public function validateDraft(array $input): array
+    {
+        $rules = [
+            'year' => ['nullable', 'string', 'max:4'],
+            'municipality' => ['nullable', 'string', 'max:120'],
+            'climate_change' => ['nullable', 'boolean'],
+            'sections' => ['required', 'array', 'min:1', 'max:40'],
+            'sections.*.key' => ['required', 'string', 'regex:/^[a-zA-Z0-9_-]{1,64}$/', 'distinct'],
+            'sections.*.type' => ['required', 'in:section,subheading'],
+            'sections.*.label' => ['nullable', 'string', 'max:100'],
+            'sections.*.color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'items' => ['present', 'array', 'max:500'],
+            'items.*.section' => ['required', 'string', 'regex:/^[a-zA-Z0-9_-]{1,64}$/'],
+            'signers' => ['nullable', 'array'],
+        ];
+
+        foreach (['reference' => 100, 'description' => 500, 'office' => 200, 'start' => 80,
+            'completion' => 80, 'output' => 500, 'funding' => 120, 'typology' => 100] as $field => $max) {
+            $rules["items.*.{$field}"] = ['nullable', 'string', "max:{$max}"];
+        }
+        foreach (['ps', 'mooe', 'co', 'adaptation', 'mitigation'] as $field) {
+            $rules["items.*.{$field}"] = ['nullable', 'string', 'max:30'];
+        }
+        foreach (array_keys(self::SLOTS) as $slot) {
+            $rules["signers.{$slot}"] = ['nullable', 'integer'];
+            $rules["{$slot}_name"] = ['nullable', 'string', 'max:120'];
+            $rules["{$slot}_title"] = ['nullable', 'string', 'max:120'];
+            $rules["{$slot}_date"] = ['nullable', 'string', 'max:80'];
         }
 
-        return $resolved;
+        $data = Validator::make($input, $rules)->validate();
+        $data['sections'] = array_values(array_map(function (array $section): array {
+            $section['label'] = $section['label'] ?? '';
+
+            return $section;
+        }, $data['sections']));
+        $data['items'] = array_values($data['items']);
+        $keys = array_column($data['sections'], 'key');
+        $hasMainSection = false;
+        foreach ($data['sections'] as $section) {
+            if ($section['type'] === 'section') $hasMainSection = true;
+            elseif (! $hasMainSection) {
+                throw ValidationException::withMessages(['sections' => 'Place a main section before its subheadings.']);
+            }
+        }
+        foreach ($data['items'] as $item) {
+            if (! in_array($item['section'], $keys, true)) {
+                throw ValidationException::withMessages(['items' => 'A project row belongs to a missing section.']);
+            }
+        }
+
+        return $data;
+    }
+
+    public function signerAccounts(): array
+    {
+        $accounts = User::query()
+            ->with('assignedOffice')
+            ->whereIn('user_id', array_column(self::RECIPIENT_ACCOUNTS, 'user_id'))
+            ->where('status', User::STATUS_ACTIVE)
+            ->get()
+            ->keyBy('user_id');
+
+        $signers = [];
+        foreach (self::RECIPIENT_ACCOUNTS as $slot => $expected) {
+            $account = $accounts->get($expected['user_id']);
+            $signers[$slot] = $account?->role === $expected['role']
+                && $account->assignedOffice?->code === $expected['office'] ? $account : null;
+        }
+
+        return $signers;
+    }
+
+    public function resolveSigners(): array
+    {
+        $signers = $this->signerAccounts();
+
+        foreach (self::SLOTS as $slot => $label) {
+            if (! $signers[$slot]) {
+                throw ValidationException::withMessages([
+                    "signers.{$slot}" => "The {$label} account (".self::RECIPIENT_ACCOUNTS[$slot]['user_id'].') is unavailable. Ask an administrator to check its status, role, and office.',
+                ]);
+            }
+        }
+
+        return $signers;
     }
 
     private function hasRowContent(array $item): bool
