@@ -55,6 +55,18 @@
         </div>
     </section>
 
+    <section class="cb-support-panel" aria-labelledby="coa-transmittal-heading">
+        <header class="cb-support-panel-header">
+            <div>
+                <p class="cb-support-eyebrow">First Page of the Completed Packet</p>
+                <h2 id="coa-transmittal-heading">COA Cover Letter and Attachment List</h2>
+            </div>
+            <a class="cb-support-primary" href="{{ route('bac-secretariat.competitive-bidding.transmittal.create', $record) }}" style="text-decoration:none">
+                <x-papertrail.icon name="document" /> Prepare Cover Letter
+            </a>
+        </header>
+    </section>
+
     <section class="cb-support-panel cb-support-guide-note">
         <x-papertrail.icon name="document" />
         <p><strong>Reference numbering:</strong> Item 20 is crossed out as a duplicate in the supplied guide, so the original numbering continues at item 21.</p>

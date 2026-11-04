@@ -493,7 +493,7 @@ class ElectronicSignatureService
                 $this->applyAppDeclineOutcome($document, $user, $reason);
             } elseif ($type === 'competitive_bidding_document'
                 && $document instanceof CompetitiveBiddingSignatureDocument
-                && $document->template_key === 'annual_investment_program') {
+                && in_array($document->template_key, ['annual_investment_program', 'coa_transmittal'], true)) {
                 $document->forceFill(['status' => CompetitiveBiddingSignatureDocument::STATUS_RETURNED])->save();
                 SignatureRequest::query()
                     ->forDocument($type, $document->id)
@@ -509,9 +509,11 @@ class ElectronicSignatureService
                 'purchase_request' => 'Purchase Request',
                 'ppmp' => 'PPMP',
                 'abstract' => 'Abstract',
-                'competitive_bidding_document' => $document instanceof CompetitiveBiddingSignatureDocument && $document->template_key === 'annual_investment_program'
-                    ? 'Annual Investment Program'
-                    : 'Competitive Bidding Document',
+                'competitive_bidding_document' => match ($document instanceof CompetitiveBiddingSignatureDocument ? $document->template_key : '') {
+                    'annual_investment_program' => 'Annual Investment Program',
+                    'coa_transmittal' => 'COA Cover Letter',
+                    default => 'Competitive Bidding Document',
+                },
                 default => 'BAC Resolution',
             };
 
@@ -528,9 +530,11 @@ class ElectronicSignatureService
                     'purchase_request' => 'Purchase Request signature request declined.',
                     'ppmp' => 'PPMP signature request declined.',
                     'abstract' => 'Abstract signature request declined.',
-                    'competitive_bidding_document' => $document instanceof CompetitiveBiddingSignatureDocument && $document->template_key === 'annual_investment_program'
-                        ? 'AIP returned to BACSEC-003 for correction. Create a revised AIP before resubmitting.'
-                        : 'Competitive bidding document signature request declined.',
+                    'competitive_bidding_document' => match ($document instanceof CompetitiveBiddingSignatureDocument ? $document->template_key : '') {
+                        'annual_investment_program' => 'AIP returned to BACSEC-003 for correction. Create a revised AIP before resubmitting.',
+                        'coa_transmittal' => 'COA cover letter returned to BACSEC-001 for correction. Prepare a revised letter before resubmitting.',
+                        default => 'Competitive bidding document signature request declined.',
+                    },
                     default => 'BAC Resolution returned to BAC Secretariat.',
                 },
                 'signature' => $signature,
@@ -1234,9 +1238,9 @@ class ElectronicSignatureService
 
     private function canSignCompetitiveBiddingDocumentWithReason(User $user, CompetitiveBiddingSignatureDocument $document, string $type, ?SignatureRequest $signatureRequest = null): array
     {
-        if ($document->template_key === 'annual_investment_program'
+        if (in_array($document->template_key, ['annual_investment_program', 'coa_transmittal'], true)
             && $document->status === CompetitiveBiddingSignatureDocument::STATUS_RETURNED) {
-            return ['ok' => false, 'message' => 'This AIP was returned for correction.'];
+            return ['ok' => false, 'message' => 'This document was returned for correction.'];
         }
 
         if ($document->status === CompetitiveBiddingSignatureDocument::STATUS_FULLY_SIGNED) {

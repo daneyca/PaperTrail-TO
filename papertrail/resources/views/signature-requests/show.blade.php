@@ -28,6 +28,7 @@
             $isAbstract => 'Abstract form',
             $isApp => 'APP form',
             $isCompetitiveBiddingDocument && $document?->template_key === 'annual_investment_program' => 'AIP form',
+            $isCompetitiveBiddingDocument && $document?->template_key === 'coa_transmittal' => 'COA cover letter',
             $isCompetitiveBiddingDocument => 'competitive bidding document',
             default => 'document',
         };
@@ -37,6 +38,7 @@
             $isAbstract => 'Sign Abstract Form',
             $isApp => 'Sign APP Form',
             $isCompetitiveBiddingDocument && $document?->template_key === 'annual_investment_program' => 'Sign AIP Form',
+            $isCompetitiveBiddingDocument && $document?->template_key === 'coa_transmittal' => 'Sign COA Cover Letter',
             $isCompetitiveBiddingDocument => 'Sign Competitive Bidding Document',
             default => 'Sign Document',
         };
@@ -165,6 +167,8 @@
                         <div class="signature-competitive-preview-area">
                             @if ($document->template_key === 'annual_investment_program')
                                 @include('bac-secretariat.competitive-bidding.partials.aip-signed-preview', compact('document', 'signatureSlots'))
+                            @elseif ($document->template_key === 'coa_transmittal')
+                                @include('bac-secretariat.competitive-bidding.transmittal.preview', compact('document', 'signatureSlots'))
                             @else
                                 {!! $document->document_html !!}
                             @endif
