@@ -45,26 +45,28 @@
             </svg>
         </button>
 
-        <form class="dashboard-search enterprise-topbar__search" role="search">
-            <label class="sr-only" for="dashboard-search">Search documents</label>
+    </div>
+
+    <div class="enterprise-topbar__right">
+        <form class="dashboard-search enterprise-topbar__search" role="search" method="GET" action="{{ route('search.index') }}" data-global-search data-suggestions-url="{{ route('search.suggestions') }}">
+            <label class="sr-only" for="dashboard-search">Search procurement records</label>
             <span class="dashboard-search-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" focusable="false">
                     <path d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" />
                 </svg>
             </span>
-            <input id="dashboard-search" type="search" placeholder="Search this page...">
+            <input id="dashboard-search" name="q" type="search" value="{{ request()->routeIs('search.index') ? ($term ?? '') : '' }}" placeholder="Search records..." autocomplete="off" aria-autocomplete="list" aria-controls="dashboard-search-suggestions" aria-expanded="false">
+            <div id="dashboard-search-suggestions" class="global-search-suggestions" role="listbox" hidden></div>
         </form>
-    </div>
 
-    <div class="enterprise-topbar__middle">
-        <div class="pht-clock-widget" data-pht-clock aria-live="polite">
-            <span>Philippine Standard Time (PHT)</span>
-            <strong data-pht-date>{{ now('Asia/Manila')->format('l, F d, Y') }}</strong>
-            <time data-pht-time datetime="{{ now('Asia/Manila')->toIso8601String() }}">{{ now('Asia/Manila')->format('h:i:s A') }}</time>
+        <div class="enterprise-topbar__middle">
+            <div class="pht-clock-widget" data-pht-clock aria-live="polite">
+                <span>Philippine Standard Time (PHT)</span>
+                <strong data-pht-date>{{ now('Asia/Manila')->format('l, F d, Y') }}</strong>
+                <time data-pht-time datetime="{{ now('Asia/Manila')->toIso8601String() }}">{{ now('Asia/Manila')->format('h:i:s A') }}</time>
+            </div>
         </div>
-    </div>
 
-    <div class="enterprise-topbar__right">
         <div class="dashboard-utility-group" aria-label="Dashboard utilities">
             <button class="dashboard-utility-button" type="button" data-theme-toggle aria-label="Switch to dark mode" title="Theme">
                 <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">

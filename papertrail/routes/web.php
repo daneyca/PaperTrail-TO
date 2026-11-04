@@ -18,6 +18,7 @@ use App\Http\Controllers\AiDocumentVerificationController;
 use App\Http\Controllers\AiMetadataExtractionController;
 use App\Http\Controllers\AiRouteValidationController;
 use App\Http\Controllers\AiSummaryDashboardController;
+use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\AnnualProcurementPlanController;
 use App\Http\Controllers\Auth\CaptchaController;
 use App\Http\Controllers\Auth\EmailVerificationCodeController;
@@ -142,6 +143,8 @@ Route::middleware('no.cache')->prefix('supplier-signing')->name('supplier-signin
 });
 
 Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->group(function () {
+    Route::get('/search', [GlobalSearchController::class, 'index'])->name('search.index');
+    Route::get('/search/suggestions', [GlobalSearchController::class, 'suggestions'])->middleware('throttle:60,1')->name('search.suggestions');
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
     Route::post('/switch-account', [LoginController::class, 'switchAccount'])->name('switch-account');
     Route::post('/session/timeout', [LoginController::class, 'timeout'])->name('session.timeout');
@@ -242,6 +245,10 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         Route::get('/bac-resolutions/menu', [DocumentSubmenuController::class, 'bacSecretariatBacResolution'])->name('resolutions.menu');
         Route::get('/purchase-orders/menu', [DocumentSubmenuController::class, 'bacSecretariatPurchaseOrder'])->name('purchase-orders.menu');
         Route::get('/competitive-bidding/menu', [DocumentSubmenuController::class, 'bacSecretariatCompetitiveBidding'])->name('competitive-bidding.menu');
+        Route::get('/competitive-bidding/annual-investment-program/template', [DocumentSubmenuController::class, 'bacSecretariatAnnualInvestmentProgramTemplate'])->name('competitive-bidding.annual-investment-program.template');
+        Route::post('/competitive-bidding/annual-investment-program/export', \App\Http\Controllers\BacSecretariat\AnnualInvestmentProgramExportController::class)->name('competitive-bidding.annual-investment-program.export');
+        Route::post('/competitive-bidding/annual-investment-program/submit', [\App\Http\Controllers\BacSecretariat\AnnualInvestmentProgramSubmissionController::class, 'store'])->name('competitive-bidding.annual-investment-program.submit');
+        Route::get('/competitive-bidding/annual-investment-program/{document}', [\App\Http\Controllers\BacSecretariat\AnnualInvestmentProgramSubmissionController::class, 'show'])->name('competitive-bidding.annual-investment-program.show');
         Route::get('/competitive-bidding/pre-bid-conference-minutes/template', [DocumentSubmenuController::class, 'bacSecretariatPreBidConferenceMinutesTemplate'])->name('competitive-bidding.pre-bid-minutes.template');
         Route::get('/competitive-bidding/supporting-submissions', [CompetitiveBiddingSupportingDocumentController::class, 'sourceIndex'])->name('competitive-bidding.supporting-submissions.index');
         Route::get('/competitive-bidding/supporting-submissions/{record}', [CompetitiveBiddingSupportingDocumentController::class, 'sourceShow'])->name('competitive-bidding.supporting-submissions.show');

@@ -32,7 +32,7 @@ class SimpleXlsxBuilder
         $zip->addFromString('docProps/core.xml', $this->coreXml());
         $zip->addFromString('xl/workbook.xml', $this->workbookXml($sheetName));
         $zip->addFromString('xl/_rels/workbook.xml.rels', $this->workbookRelsXml());
-        $zip->addFromString('xl/styles.xml', $this->stylesXml());
+        $zip->addFromString('xl/styles.xml', $this->stylesXml($options));
 
         if ($images) {
             $zip->addFromString('xl/worksheets/_rels/sheet1.xml.rels', $this->worksheetRelsXml());
@@ -266,8 +266,21 @@ class SimpleXlsxBuilder
             . '</Relationships>';
     }
 
-    private function stylesXml(): string
+    private function stylesXml(array $options = []): string
     {
+        $customFills = '';
+        $customStyles = '';
+        $customFillColors = $options['customFillColors'] ?? [];
+
+        foreach (array_values($customFillColors) as $index => $color) {
+            if (! preg_match('/^[0-9A-Fa-f]{6}$/', (string) $color)) {
+                throw new RuntimeException('Invalid XLSX fill color.');
+            }
+
+            $customFills .= '<fill><patternFill patternType="solid"><fgColor rgb="FF'.strtoupper($color).'"/><bgColor indexed="64"/></patternFill></fill>';
+            $customStyles .= '<xf numFmtId="0" fontId="6" fillId="'.(5 + $index).'" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"><alignment horizontal="left" vertical="center"/></xf>';
+        }
+
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             . '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
             . '<fonts count="7">'
@@ -279,12 +292,13 @@ class SimpleXlsxBuilder
             . '<font><sz val="8"/><name val="Arial"/></font>'
             . '<font><b/><sz val="8"/><name val="Arial"/></font>'
             . '</fonts>'
-            . '<fills count="5">'
+            . '<fills count="'.(5 + count($customFillColors)).'">'
             . '<fill><patternFill patternType="none"/></fill>'
             . '<fill><patternFill patternType="gray125"/></fill>'
             . '<fill><patternFill patternType="solid"><fgColor rgb="FFDDEBF7"/><bgColor indexed="64"/></patternFill></fill>'
             . '<fill><patternFill patternType="solid"><fgColor rgb="FFFFFFCC"/><bgColor indexed="64"/></patternFill></fill>'
             . '<fill><patternFill patternType="solid"><fgColor rgb="FFF7F7F7"/><bgColor indexed="64"/></patternFill></fill>'
+            . $customFills
             . '</fills>'
             . '<borders count="4">'
             . '<border><left/><right/><top/><bottom/><diagonal/></border>'
@@ -293,7 +307,7 @@ class SimpleXlsxBuilder
             . '<border><left/><right/><top/><bottom style="medium"><color auto="1"/></bottom><diagonal/></border>'
             . '</borders>'
             . '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
-            . '<cellXfs count="17">'
+            . '<cellXfs count="'.(17 + count($customFillColors)).'">'
             . '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
             . '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>'
             . '<xf numFmtId="0" fontId="6" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"><alignment horizontal="center" vertical="center"/></xf>'
@@ -311,6 +325,7 @@ class SimpleXlsxBuilder
             . '<xf numFmtId="0" fontId="5" fillId="0" borderId="0" xfId="0"><alignment horizontal="left" vertical="center"/></xf>'
             . '<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"><alignment horizontal="center" vertical="center"/></xf>'
             . '<xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>'
+            . $customStyles
             . '</cellXfs>'
             . '</styleSheet>';
     }

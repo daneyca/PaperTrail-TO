@@ -491,6 +491,15 @@ class ElectronicSignatureService
                 app(HeadOfficePpmpSignatureWorkflowService::class)->handleDeclined($document, $user, $reason);
             } elseif ($type === 'app' && $document instanceof AnnualProcurementPlan) {
                 $this->applyAppDeclineOutcome($document, $user, $reason);
+            } elseif ($type === 'competitive_bidding_document'
+                && $document instanceof CompetitiveBiddingSignatureDocument
+                && $document->template_key === 'annual_investment_program') {
+                $document->forceFill(['status' => CompetitiveBiddingSignatureDocument::STATUS_RETURNED])->save();
+                SignatureRequest::query()
+                    ->forDocument($type, $document->id)
+                    ->whereKeyNot($signatureRequest?->id)
+                    ->open()
+                    ->update(['status' => SignatureRequest::STATUS_CANCELLED]);
             } else {
                 $this->applyBacResolutionDeclineOutcome($document, $user, $reason);
             }
@@ -500,6 +509,9 @@ class ElectronicSignatureService
                 'purchase_request' => 'Purchase Request',
                 'ppmp' => 'PPMP',
                 'abstract' => 'Abstract',
+                'competitive_bidding_document' => $document instanceof CompetitiveBiddingSignatureDocument && $document->template_key === 'annual_investment_program'
+                    ? 'Annual Investment Program'
+                    : 'Competitive Bidding Document',
                 default => 'BAC Resolution',
             };
 
@@ -516,6 +528,9 @@ class ElectronicSignatureService
                     'purchase_request' => 'Purchase Request signature request declined.',
                     'ppmp' => 'PPMP signature request declined.',
                     'abstract' => 'Abstract signature request declined.',
+                    'competitive_bidding_document' => $document instanceof CompetitiveBiddingSignatureDocument && $document->template_key === 'annual_investment_program'
+                        ? 'AIP returned to BACSEC-003 for correction. Create a revised AIP before resubmitting.'
+                        : 'Competitive bidding document signature request declined.',
                     default => 'BAC Resolution returned to BAC Secretariat.',
                 },
                 'signature' => $signature,
@@ -656,6 +671,19 @@ class ElectronicSignatureService
                     || $resolution->sourcePrDocument?->submitted_by_user_id === $user->id
                     || $resolution->sourcePrDocument?->prepared_by_user_id === $user->id
                     || ($user->office_id && $resolution->sourcePrDocument?->submitting_office_id === $user->office_id)
+                );
+        }
+
+        if ($signature->document_type === 'competitive_bidding_document' && $signature->document_id) {
+            $document = CompetitiveBiddingSignatureDocument::find($signature->document_id);
+
+            return $document
+                && (
+                    (int) $document->prepared_by_user_id === (int) $user->id
+                    || SignatureRequest::query()
+                        ->forDocument('competitive_bidding_document', $document->id)
+                        ->where('requested_to_user_id', $user->id)
+                        ->exists()
                 );
         }
 
@@ -1206,6 +1234,11 @@ class ElectronicSignatureService
 
     private function canSignCompetitiveBiddingDocumentWithReason(User $user, CompetitiveBiddingSignatureDocument $document, string $type, ?SignatureRequest $signatureRequest = null): array
     {
+        if ($document->template_key === 'annual_investment_program'
+            && $document->status === CompetitiveBiddingSignatureDocument::STATUS_RETURNED) {
+            return ['ok' => false, 'message' => 'This AIP was returned for correction.'];
+        }
+
         if ($document->status === CompetitiveBiddingSignatureDocument::STATUS_FULLY_SIGNED) {
             return ['ok' => false, 'message' => 'This competitive bidding document is already fully signed.'];
         }

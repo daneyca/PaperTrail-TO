@@ -27,6 +27,7 @@
             $isPpmp => 'PPMP form',
             $isAbstract => 'Abstract form',
             $isApp => 'APP form',
+            $isCompetitiveBiddingDocument && $document?->template_key === 'annual_investment_program' => 'AIP form',
             $isCompetitiveBiddingDocument => 'competitive bidding document',
             default => 'document',
         };
@@ -35,6 +36,7 @@
             $isPpmp => 'Sign PPMP Form',
             $isAbstract => 'Sign Abstract Form',
             $isApp => 'Sign APP Form',
+            $isCompetitiveBiddingDocument && $document?->template_key === 'annual_investment_program' => 'Sign AIP Form',
             $isCompetitiveBiddingDocument => 'Sign Competitive Bidding Document',
             default => 'Sign Document',
         };
@@ -161,7 +163,11 @@
                         </div>
                     @elseif ($isCompetitiveBiddingDocument)
                         <div class="signature-competitive-preview-area">
-                            {!! $document->document_html !!}
+                            @if ($document->template_key === 'annual_investment_program')
+                                @include('bac-secretariat.competitive-bidding.partials.aip-signed-preview', compact('document', 'signatureSlots'))
+                            @else
+                                {!! $document->document_html !!}
+                            @endif
                         </div>
                     @else
                         <div class="signature-document-placeholder">

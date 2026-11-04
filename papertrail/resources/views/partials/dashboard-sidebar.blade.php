@@ -322,7 +322,6 @@
             'label' => 'Competitive Bidding',
             'icon' => 'workflow',
             'children' => [
-                ['label' => 'Submit Bidding Documents', 'route' => 'bac-secretariat.competitive-bidding.supporting-submissions.index', 'active' => 'bac-secretariat.competitive-bidding.supporting-submissions.*'],
                 $competitiveBiddingTask('Annual Investment Program', 'annual-investment-program'),
                 $competitiveBiddingTask('Annual Procurement Plan', 'annual-procurement-plan'),
                 $competitiveBiddingTask('Approved Budget for the Contract (ABC)', 'approved-budget-for-the-contract'),
@@ -339,6 +338,8 @@
                         $competitiveBiddingTask('Special Conditions of Contract', 'special-conditions-of-contract'),
                     ],
                 ],
+                ['label' => 'Submit Project Documents to BACSEC-001', 'route' => 'bac-secretariat.competitive-bidding.supporting-submissions.index', 'active' => 'bac-secretariat.competitive-bidding.supporting-submissions.*'],
+                ['label' => 'Post-Award', 'section' => true],
                 ['label' => 'Purchase Order', 'route' => 'bac-secretariat.purchase-orders.create', 'active' => ['bac-secretariat.purchase-orders.menu', 'bac-secretariat.purchase-orders.*']],
             ],
         ];

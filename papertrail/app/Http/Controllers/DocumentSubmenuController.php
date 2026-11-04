@@ -7,6 +7,7 @@ use App\Models\AnnualProcurementPlan;
 use App\Models\AnnualProcurementPlanItem;
 use App\Models\BacResolution;
 use App\Models\BacDeliberation;
+use App\Models\CompetitiveBiddingSignatureDocument;
 use App\Models\DocumentTemplate;
 use App\Models\InspectionAcceptanceRecord;
 use App\Models\ProcurementDocument;
@@ -18,6 +19,7 @@ use App\Models\SupplementalApp;
 use App\Models\SupplierSignatureRequest;
 use App\Models\User;
 use App\Services\Templates\OfficialEditableTemplateService;
+use App\Services\AnnualInvestmentProgramService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -130,6 +132,15 @@ class DocumentSubmenuController extends Controller
     public function bacSecretariatCompetitiveBidding(Request $request)
     {
         return $this->render($request, 'bac-secretariat.competitive-bidding');
+    }
+
+    public function bacSecretariatAnnualInvestmentProgramTemplate(Request $request)
+    {
+        abort_unless($request->user()?->user_id === 'BACSEC-003', 403);
+
+        return view('bac-secretariat.competitive-bidding.annual-investment-program', [
+            'signerCandidates' => app(AnnualInvestmentProgramService::class)->signerCandidates(),
+        ]);
     }
 
     public function bacSecretariatPreBidConferenceMinutesTemplate(Request $request)
@@ -461,7 +472,7 @@ class DocumentSubmenuController extends Controller
             'bac-secretariat.abstract' => $this->bacSecretariatAbstractMenu(),
             'bac-secretariat.resolution' => $this->bacSecretariatResolutionMenu($user),
             'bac-secretariat.po' => $this->bacSecretariatPurchaseOrderMenu($user),
-            'bac-secretariat.competitive-bidding' => $this->bacSecretariatCompetitiveBiddingMenu($user),
+            'bac-secretariat.competitive-bidding' => $this->bacSecretariatCompetitiveBiddingMenu($user, $request),
             'bac-member.reviews' => $this->bacMemberReviewMenu(),
             'bac-chair.reviews' => $this->bacChairReviewMenu(),
             'budget.review' => $this->budgetReviewMenu(),
@@ -1006,11 +1017,34 @@ class DocumentSubmenuController extends Controller
         );
     }
 
-    private function bacSecretariatCompetitiveBiddingMenu($user): array
+    private function bacSecretariatCompetitiveBiddingMenu($user, Request $request): array
     {
         $setupBadge = 'For setup';
 
         if ($user?->user_id === 'BACSEC-003') {
+            if ($request->query('task') === 'annual-investment-program') {
+                return [
+                    'eyebrow' => 'BACSEC-003',
+                    'title' => 'Annual Investment Program',
+                    'backRoute' => 'bac-secretariat.dashboard',
+                    'panelTitle' => 'Annual Investment Program',
+                    'cards' => [
+                        $this->card('Create / Open Template', 'Prepare the LGU Tomas Oppus AIP worksheet.', 'document', 'blue', 'bac-secretariat.competitive-bidding.annual-investment-program.template'),
+                    ],
+                    'recentRecords' => $this->recent(
+                        CompetitiveBiddingSignatureDocument::class,
+                        'bac-secretariat.competitive-bidding.annual-investment-program.show',
+                        fn (Builder $query) => $query
+                            ->where('template_key', 'annual_investment_program')
+                            ->where('prepared_by_user_id', $user->id),
+                        'tracking_number',
+                        'document_title',
+                    ),
+                    'recentRecordsTitle' => 'Submitted AIP Records',
+                    'recentRecordsEmptyMessage' => 'No AIP has been submitted for signatures yet.',
+                ];
+            }
+
             return [
                 'eyebrow' => 'BACSEC-003',
                 'title' => 'Competitive Bidding',
@@ -1021,7 +1055,7 @@ class DocumentSubmenuController extends Controller
                 'recentRecords' => [],
                 'helpSteps' => [
                     'Use this menu as the BACSEC-003 competitive bidding workspace.',
-                    'Use Submit Bidding Documents when a final file is ready for BACSEC-001 checking.',
+                    'Use Submit Project Documents to BACSEC-001 when a final project file is ready for checking.',
                     'Purchase Order opens the existing PaperTrail Purchase Order module.',
                 ],
             ];

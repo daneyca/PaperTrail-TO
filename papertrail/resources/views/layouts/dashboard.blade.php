@@ -38,6 +38,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="{{ asset('css/papertrail-dark-mode.css') }}?v={{ file_exists(public_path('css/papertrail-dark-mode.css')) ? filemtime(public_path('css/papertrail-dark-mode.css')) : time() }}">
     <link rel="stylesheet" href="{{ asset('css/papertrail-auth-shell.css') }}?v={{ file_exists(public_path('css/papertrail-auth-shell.css')) ? filemtime(public_path('css/papertrail-auth-shell.css')) : time() }}">
+    <link rel="stylesheet" href="{{ asset('css/global-search.css') }}?v={{ filemtime(public_path('css/global-search.css')) }}">
     <script>
         try {
             if (localStorage.getItem('papertrail_theme') === 'dark') {
@@ -1556,6 +1557,7 @@
     </script>
     @stack('vendor-scripts')
     @stack('scripts')
+    <script src="{{ asset('js/global-search.js') }}?v={{ filemtime(public_path('js/global-search.js')) }}" defer></script>
     <script src="{{ asset('js/dashboard-stagger.js') }}?v={{ filemtime(public_path('js/dashboard-stagger.js')) }}" defer></script>
     <script src="{{ asset('js/papertrail-action-icons.js') }}?v={{ filemtime(public_path('js/papertrail-action-icons.js')) }}" defer></script>
     <script src="{{ asset('js/signature-pad-basic.js') }}?v={{ file_exists(public_path('js/signature-pad-basic.js')) ? filemtime(public_path('js/signature-pad-basic.js')) : time() }}" defer></script>

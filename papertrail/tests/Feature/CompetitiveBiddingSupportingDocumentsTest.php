@@ -134,11 +134,28 @@ class CompetitiveBiddingSupportingDocumentsTest extends TestCase
         $record = $this->createRecord($bacsec001);
         $item = $record->projectItems()->where('requirement_key', 'annual_investment_program')->firstOrFail();
 
-        $this->actingAs($bacsec003)
+        $indexResponse = $this->actingAs($bacsec003)
             ->get(route('bac-secretariat.competitive-bidding.supporting-submissions.index'))
             ->assertOk()
-            ->assertSee('Submit Bidding Documents')
+            ->assertSee('Submit Project Documents to BACSEC-001')
             ->assertSee($record->reference_number);
+
+        $page = new \DOMDocument();
+        @$page->loadHTML($indexResponse->getContent());
+        $sidebarMenu = (new \DOMXPath($page))->query('//div[@data-sidebar-key="Competitive Bidding"]')->item(0);
+        $this->assertNotNull($sidebarMenu);
+        $menuText = $sidebarMenu->textContent;
+        $biddingDocsPosition = strpos($menuText, 'Bidding Docs');
+        $submissionPosition = strpos($menuText, 'Submit Project Documents to BACSEC-001');
+        $postAwardPosition = strpos($menuText, 'Post-Award');
+        $purchaseOrderPosition = strpos($menuText, 'Purchase Order');
+        $this->assertNotFalse($biddingDocsPosition);
+        $this->assertNotFalse($submissionPosition);
+        $this->assertNotFalse($postAwardPosition);
+        $this->assertNotFalse($purchaseOrderPosition);
+        $this->assertLessThan($submissionPosition, $biddingDocsPosition);
+        $this->assertLessThan($postAwardPosition, $submissionPosition);
+        $this->assertLessThan($purchaseOrderPosition, $postAwardPosition);
 
         $this->actingAs($bacsec003)->post(
             route('bac-secretariat.competitive-bidding.supporting-submissions.store', [$record, $item]),

@@ -20,14 +20,16 @@
             <x-document-submenu.panel :title="$panelTitle" :cards="$cards" />
         @endif
 
-        <div class="grid gap-5">
-            <x-documents.records-list
-                :title="$recentRecordsTitle ?? 'Recent Document Records'"
-                :subtitle="$recentRecordsSubtitle ?? 'Documents created, submitted, or routed through this module will appear here.'"
-                :records="$recentRecords ?? []"
-                :document-type="$recentRecordsDocumentType ?? null"
-                :empty-message="$recentRecordsEmptyMessage ?? 'No document records found.'"
-            />
-        </div>
+        @if ($showRecentRecords ?? true)
+            <div class="grid gap-5">
+                <x-documents.records-list
+                    :title="$recentRecordsTitle ?? 'Recent Document Records'"
+                    :subtitle="$recentRecordsSubtitle ?? 'Documents created, submitted, or routed through this module will appear here.'"
+                    :records="$recentRecords ?? []"
+                    :document-type="$recentRecordsDocumentType ?? null"
+                    :empty-message="$recentRecordsEmptyMessage ?? 'No document records found.'"
+                />
+            </div>
+        @endif
     </div>
 @endsection
