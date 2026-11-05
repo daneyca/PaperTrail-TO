@@ -33,6 +33,9 @@ class AnnualInvestmentProgramTemplateTest extends TestCase
             ->assertSee('Climate Change<br>Adaptation', false)
             ->assertSee('size:A4 landscape', false)
             ->assertSee('.aip-sheet, .aip-sheet * { visibility:visible !important; }', false)
+            ->assertSee('class="aip-page-heading"', false)
+            ->assertSee('class="aip-signatures-row"', false)
+            ->assertSee('grid-template-columns:62mm 18mm minmax(0,1fr)', false)
             ->assertSee('data-aip-action="add-section" class="aip-main-only"', false)
             ->assertSee('id="aip-section-template"', false)
             ->assertSee('Add Subheading')
@@ -254,6 +257,8 @@ class AnnualInvestmentProgramTemplateTest extends TestCase
         ])->assertSessionHasNoErrors()->assertRedirect();
 
         $html = CompetitiveBiddingSignatureDocument::where('template_key', 'annual_investment_program')->firstOrFail()->document_html;
+        $this->assertStringContainsString('class="aip-snapshot-heading-row"', $html);
+        $this->assertStringContainsString('class="aip-snapshot-signatures-row"', $html);
         $this->assertStringContainsString('ECONOMIC SERVICES', $html);
         $this->assertStringContainsString('AGRICULTURAL SERVICES', $html);
         $this->assertStringContainsString('Seeds project', $html);

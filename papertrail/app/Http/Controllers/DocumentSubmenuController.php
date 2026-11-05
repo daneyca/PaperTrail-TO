@@ -1047,6 +1047,66 @@ class DocumentSubmenuController extends Controller
                 ];
             }
 
+            if ($request->query('task') === 'annual-procurement-plan') {
+                return [
+                    'eyebrow' => 'BACSEC-003',
+                    'title' => 'Annual Procurement Plan',
+                    'backRoute' => 'bac-secretariat.dashboard',
+                    'panelTitle' => 'Annual Procurement Plan',
+                    'cards' => [
+                        $this->card('Create / Open Template', 'Prepare the competitive bidding APP.', 'document', 'blue', 'bac-secretariat.competitive-bidding.annual-procurement-plan.template'),
+                    ],
+                    'recentRecords' => $this->recent(
+                        CompetitiveBiddingSignatureDocument::class,
+                        'bac-secretariat.competitive-bidding.annual-procurement-plan.show',
+                        fn (Builder $query) => $query->where('template_key', 'annual_procurement_plan')->where('prepared_by_user_id', $user->id),
+                        'tracking_number', 'document_title',
+                    ),
+                    'recentRecordsTitle' => 'Submitted APP Records',
+                    'recentRecordsEmptyMessage' => 'No APP has been submitted for signatures yet.',
+                ];
+            }
+
+            if ($request->query('task') === 'approved-budget-for-the-contract') {
+                return [
+                    'eyebrow' => 'BACSEC-003',
+                    'title' => 'Approved Budget for the Contract',
+                    'backRoute' => 'bac-secretariat.dashboard',
+                    'panelTitle' => 'Approved Budget for the Contract',
+                    'cards' => [
+                        $this->card('Create / Open Template', 'Prepare the competitive bidding ABC.', 'document', 'blue', 'bac-secretariat.competitive-bidding.abc.template'),
+                    ],
+                    'recentRecords' => $this->recent(
+                        CompetitiveBiddingSignatureDocument::class,
+                        'bac-secretariat.competitive-bidding.abc.show',
+                        fn (Builder $query) => $query->where('template_key', 'approved_budget_contract')->where('prepared_by_user_id', $user->id),
+                        'tracking_number', 'document_title',
+                    ),
+                    'recentRecordsTitle' => 'Submitted ABC Records',
+                    'recentRecordsEmptyMessage' => 'No ABC has been submitted for signatures yet.',
+                ];
+            }
+
+            if ($request->query('task') === 'bac-secretariat-head-certification') {
+                return [
+                    'eyebrow' => 'BACSEC-003',
+                    'title' => 'Certification of the Head of the BAC Secretariat',
+                    'backRoute' => 'bac-secretariat.dashboard',
+                    'panelTitle' => 'Certification',
+                    'cards' => [
+                        $this->card('Create / Open Template', 'Prepare the official posting certification.', 'document', 'blue', 'bac-secretariat.competitive-bidding.certification.template'),
+                    ],
+                    'recentRecords' => $this->recent(
+                        CompetitiveBiddingSignatureDocument::class,
+                        'bac-secretariat.competitive-bidding.certification.show',
+                        fn (Builder $query) => $query->where('template_key', 'bac_secretariat_head_certification')->where('prepared_by_user_id', $user->id),
+                        'tracking_number', 'document_title',
+                    ),
+                    'recentRecordsTitle' => 'Submitted Certifications',
+                    'recentRecordsEmptyMessage' => 'No certification has been submitted for signatures yet.',
+                ];
+            }
+
             return [
                 'eyebrow' => 'BACSEC-003',
                 'title' => 'Competitive Bidding',

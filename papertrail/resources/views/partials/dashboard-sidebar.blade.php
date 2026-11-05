@@ -165,7 +165,7 @@
             ['section' => 'Workspace'],
             ['label' => 'Dashboard', 'route' => 'bac-secretariat.dashboard', 'icon' => 'dashboard'],
             [
-                'label' => 'Planning',
+                'label' => 'SVP Plans',
                 'icon' => 'planning',
                 'children' => [
                     ['label' => 'PPMP Review', 'route' => 'bac-secretariat.ppmp.index', 'active' => 'bac-secretariat.ppmp.*', 'count' => $pendingPpmpReviewCount],
@@ -245,7 +245,7 @@
     ];
 
     if ($roleSlug === 'bac-secretariat' && $isBacsecPrSignatureOnly) {
-        $items = array_values(array_filter($items, fn ($item) => ($item['label'] ?? null) !== 'Planning'));
+        $items = array_values(array_filter($items, fn ($item) => ($item['label'] ?? null) !== 'SVP Plans'));
     }
 
     if ($roleSlug === 'bac-secretariat' && $isBacsecPrSignatureOnly) {
@@ -325,7 +325,12 @@
                 $competitiveBiddingTask('Annual Investment Program', 'annual-investment-program'),
                 $competitiveBiddingTask('Annual Procurement Plan', 'annual-procurement-plan'),
                 $competitiveBiddingTask('Approved Budget for the Contract (ABC)', 'approved-budget-for-the-contract'),
-                $competitiveBiddingTask('Printout of the PhilGEPS (Bid Notice Abstract)', 'philgeps-bid-notice-abstract'),
+                [
+                    'label' => 'Printout of the PhilGEPS (Bid Notice Abstract)',
+                    'route' => 'bac-secretariat.competitive-bidding.supporting-submissions.index',
+                    'active' => 'bac-secretariat.competitive-bidding.supporting-submissions.*',
+                    'query' => ['document' => 'philgeps_bid_notice_abstract'],
+                ],
                 $competitiveBiddingTask('Certification of the Head of the BAC Secretariat', 'bac-secretariat-head-certification'),
                 $competitiveBiddingTask('Letter of Invitation to Observer', 'letter-of-invitation-to-observer'),
                 [
@@ -338,7 +343,7 @@
                         $competitiveBiddingTask('Special Conditions of Contract', 'special-conditions-of-contract'),
                     ],
                 ],
-                ['label' => 'Submit Project Documents to BACSEC-001', 'route' => 'bac-secretariat.competitive-bidding.supporting-submissions.index', 'active' => 'bac-secretariat.competitive-bidding.supporting-submissions.*'],
+                ['label' => 'Submit Project Documents to BACSEC-001', 'route' => 'bac-secretariat.competitive-bidding.supporting-submissions.index', 'active' => 'bac-secretariat.competitive-bidding.supporting-submissions.*', 'active_query' => ['document' => null]],
                 ['label' => 'Post-Award', 'section' => true],
                 ['label' => 'Purchase Order', 'route' => 'bac-secretariat.purchase-orders.create', 'active' => ['bac-secretariat.purchase-orders.menu', 'bac-secretariat.purchase-orders.*']],
             ],
@@ -418,6 +423,10 @@
         $active = $patterns ? $routeMatches($patterns) : false;
 
         if ($active && ! empty($item['query']) && ! $queryMatches($item['query'])) {
+            $active = false;
+        }
+
+        if ($active && array_key_exists('active_query', $item) && ! $queryMatches($item['active_query'])) {
             $active = false;
         }
 

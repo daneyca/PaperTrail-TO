@@ -1,17 +1,17 @@
 @extends('layouts.dashboard')
 
-@section('title', $record->reference_number . ' Submissions | PaperTrail')
+@section('title', $record->reference_number . ($isPhilgepsNotice ? ' PhilGEPS Printout' : ' Submissions') . ' | PaperTrail')
 
 @section('content')
     <section class="cb-support-detail-header pt-smooth-enter">
         <div>
-            <p class="cb-support-eyebrow">BACSEC-003 &middot; Submit to BACSEC-001</p>
+            <p class="cb-support-eyebrow">BACSEC-003 &middot; {{ $isPhilgepsNotice ? 'PhilGEPS Bid Notice Abstract' : 'Submit to BACSEC-001' }}</p>
             <h1>{{ $record->reference_number }}</h1>
             <p>{{ $record->project_title }}</p>
         </div>
         <dl class="cb-support-record-meta">
             <div>
-                <dt>Documents Submitted</dt>
+                <dt>{{ $isPhilgepsNotice ? 'Printout Submitted' : 'Documents Submitted' }}</dt>
                 <dd>{{ $submittedCount }} / {{ $itemCount }}</dd>
             </div>
             <div>
@@ -36,11 +36,11 @@
         </div>
     @endif
 
-    <section class="cb-support-panel" aria-labelledby="bacsec004-submissions-heading">
+    <section class="cb-support-panel" aria-labelledby="bacsec003-submissions-heading">
         <header class="cb-support-panel-header">
             <div>
-                <p class="cb-support-eyebrow">Project Documents</p>
-                <h2 id="bacsec003-submissions-heading">BACSEC-003 Submission Queue</h2>
+                <p class="cb-support-eyebrow">{{ $isPhilgepsNotice ? 'Official Posting' : 'Project Documents' }}</p>
+                <h2 id="bacsec003-submissions-heading">{{ $isPhilgepsNotice ? 'Official PhilGEPS Printout' : 'BACSEC-003 Submission Queue' }}</h2>
             </div>
             <span class="cb-support-progress">{{ $submittedCount }} / {{ $itemCount }} submitted</span>
         </header>
@@ -73,9 +73,9 @@
                                 </div>
 
                                 <div class="cb-support-files">
-                                    @forelse ($item->attachments as $attachment)
+                                    @forelse ($item->attachments->sortByDesc('id') as $attachment)
                                         <div class="cb-support-file">
-                                            <span title="{{ $attachment->displayName() }}">{{ $attachment->displayName() }}</span>
+                                            <span title="{{ $attachment->displayName() }}">{{ $isPhilgepsNotice ? ($loop->first ? 'Current: ' : 'Earlier: ') : '' }}{{ $attachment->displayName() }}</span>
                                             <small>{{ $attachment->fileSizeHuman() }}</small>
                                             <div class="cb-support-file-actions">
                                                 <a href="{{ route('bac-secretariat.competitive-bidding.supporting-documents.attachments.view', [$record, $item, $attachment]) }}" target="_blank" class="cb-support-icon-button" title="View file" aria-label="View file">
@@ -93,10 +93,10 @@
 
                                 <form method="POST" enctype="multipart/form-data" action="{{ route('bac-secretariat.competitive-bidding.supporting-submissions.store', [$record, $item]) }}" class="cb-support-source-form">
                                     @csrf
-                                    <input type="file" name="attachment" required accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" aria-label="Choose final file for {{ $item->requirement_name }}">
+                                    <input type="file" name="attachment" required accept="{{ $isPhilgepsNotice ? '.pdf,.jpg,.jpeg,.png' : '.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx' }}" aria-label="{{ $isPhilgepsNotice ? 'Choose official PhilGEPS printout' : 'Choose final file for ' . $item->requirement_name }}">
                                     <button type="submit" class="cb-support-primary">
                                         <x-papertrail.icon name="upload" />
-                                        {{ $item->source_version > 0 ? 'Submit Revision' : 'Submit to BACSEC-001' }}
+                                        {{ $isPhilgepsNotice ? ($item->source_version > 0 ? 'Replace printout' : 'Upload printout') : ($item->source_version > 0 ? 'Submit Revision' : 'Submit to BACSEC-001') }}
                                     </button>
                                 </form>
                             </article>

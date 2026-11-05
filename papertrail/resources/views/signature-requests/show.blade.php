@@ -29,6 +29,7 @@
             $isApp => 'APP form',
             $isCompetitiveBiddingDocument && $document?->template_key === 'annual_investment_program' => 'AIP form',
             $isCompetitiveBiddingDocument && $document?->template_key === 'coa_transmittal' => 'COA cover letter',
+            $isCompetitiveBiddingDocument && $document?->template_key === 'bac_secretariat_head_certification' => 'BAC Secretariat certification',
             $isCompetitiveBiddingDocument => 'competitive bidding document',
             default => 'document',
         };
@@ -39,6 +40,7 @@
             $isApp => 'Sign APP Form',
             $isCompetitiveBiddingDocument && $document?->template_key === 'annual_investment_program' => 'Sign AIP Form',
             $isCompetitiveBiddingDocument && $document?->template_key === 'coa_transmittal' => 'Sign COA Cover Letter',
+            $isCompetitiveBiddingDocument && $document?->template_key === 'bac_secretariat_head_certification' => 'Sign BAC Secretariat Certification',
             $isCompetitiveBiddingDocument => 'Sign Competitive Bidding Document',
             default => 'Sign Document',
         };
@@ -169,6 +171,8 @@
                                 @include('bac-secretariat.competitive-bidding.partials.aip-signed-preview', compact('document', 'signatureSlots'))
                             @elseif ($document->template_key === 'coa_transmittal')
                                 @include('bac-secretariat.competitive-bidding.transmittal.preview', compact('document', 'signatureSlots'))
+                            @elseif ($document->template_key === 'bac_secretariat_head_certification')
+                                @include('bac-secretariat.competitive-bidding.partials.head-certification-signed-preview', compact('document', 'signatureSlots'))
                             @else
                                 {!! $document->document_html !!}
                             @endif

@@ -17,7 +17,7 @@
     [id^="aip-signed-preview-"], [id^="aip-signed-preview-"] .aip-snapshot,
     [id^="aip-signed-preview-"] .aip-snapshot * { visibility:visible !important; }
     [id^="aip-signed-preview-"] { display:block !important; width:100% !important; max-width:none !important; overflow:visible !important; margin:0 !important; padding:0 !important; }
-    [id^="aip-signed-preview-"] .aip-snapshot { width:285mm !important; min-height:0 !important; margin:0 !important; padding:0 !important; }
+    [id^="aip-signed-preview-"] .aip-snapshot { width:100% !important; min-height:0 !important; margin:0 !important; padding:0 !important; }
 }
 </style>
 <div id="aip-signed-preview-{{ $document->id }}" style="max-width:100%;overflow:auto">

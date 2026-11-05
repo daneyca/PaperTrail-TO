@@ -201,6 +201,79 @@ class CompetitiveBiddingSupportingDocumentsTest extends TestCase
             ->assertSee('Replace the unsigned final page.');
     }
 
+    public function test_bacsec_003_can_open_upload_and_replace_the_official_philgeps_printout(): void
+    {
+        Storage::fake('local');
+        $bacsec001 = $this->bacSecretariatUser('BACSEC-001');
+        $bacsec003 = $this->bacSecretariatUser('BACSEC-003');
+        $record = $this->createRecord($bacsec001);
+        $item = $record->projectItems()->where('requirement_key', 'philgeps_bid_notice_abstract')->firstOrFail();
+        $query = ['document' => 'philgeps_bid_notice_abstract'];
+
+        $this->actingAs($bacsec003)
+            ->get(route('bac-secretariat.competitive-bidding.supporting-submissions.index', $query))
+            ->assertOk()
+            ->assertSee('Select a bidding file to upload its official PhilGEPS printout.')
+            ->assertSee(route('bac-secretariat.competitive-bidding.supporting-submissions.index', $query), false)
+            ->assertSee(route('bac-secretariat.competitive-bidding.supporting-submissions.show', [$record, ...$query]), false);
+
+        $this->actingAs($bacsec003)
+            ->get(route('bac-secretariat.competitive-bidding.supporting-submissions.show', [$record, ...$query]))
+            ->assertOk()
+            ->assertSee('Upload printout')
+            ->assertSee('PhilGEPS Bid Notice Abstract')
+            ->assertDontSee('Choose final file for Annual Investment Program');
+
+        $this->actingAs($bacsec003)->post(
+            route('bac-secretariat.competitive-bidding.supporting-submissions.store', [$record, $item]),
+            ['attachment' => UploadedFile::fake()->create('not-from-philgeps.docx', 10)]
+        )->assertSessionHasErrors('attachment');
+
+        $this->actingAs($bacsec003)->post(
+            route('bac-secretariat.competitive-bidding.supporting-submissions.store', [$record, $item]),
+            ['attachment' => UploadedFile::fake()->create('notice-original.pdf', 120, 'application/pdf')]
+        )->assertRedirect();
+
+        $this->assertSame(1, $item->refresh()->source_version);
+        $this->assertSame(CompetitiveBiddingSupportingItem::STATUS_ATTACHED, $item->status);
+        $this->assertTrue(SystemNotification::where('user_id', $bacsec001->id)->where('related_id', $item->id)->exists());
+
+        $this->actingAs($bacsec001)
+            ->get(route('bac-secretariat.competitive-bidding.supporting-documents.show', $record))
+            ->assertOk()
+            ->assertSee('notice-original.pdf');
+
+        $this->actingAs($bacsec003)
+            ->get(route('bac-secretariat.competitive-bidding.supporting-submissions.show', [$record, ...$query]))
+            ->assertOk()
+            ->assertSee('Replace printout')
+            ->assertSee('Current: notice-original.pdf');
+
+        $this->actingAs($bacsec001)->patch(
+            route('bac-secretariat.competitive-bidding.supporting-documents.items.update', [$record, $item]),
+            ['status' => CompetitiveBiddingSupportingItem::STATUS_VERIFIED]
+        )->assertRedirect();
+
+        $this->actingAs($bacsec003)->post(
+            route('bac-secretariat.competitive-bidding.supporting-submissions.store', [$record, $item]),
+            ['attachment' => UploadedFile::fake()->create('notice-corrected.pdf', 120, 'application/pdf')]
+        )->assertRedirect();
+
+        $this->assertSame(2, $item->refresh()->source_version);
+        $this->assertSame(CompetitiveBiddingSupportingItem::STATUS_ATTACHED, $item->status);
+
+        $attachment = $item->attachments()->firstOrFail();
+        $this->actingAs($bacsec003)
+            ->get(route('bac-secretariat.competitive-bidding.supporting-documents.attachments.view', [$record, $item, $attachment]))
+            ->assertOk();
+
+        $this->actingAs($bacsec003)
+            ->get(route('bac-secretariat.competitive-bidding.supporting-submissions.show', [$record, ...$query]))
+            ->assertOk()
+            ->assertSee('Current: notice-corrected.pdf')
+            ->assertSee('Earlier: notice-original.pdf');
+    }
+
     public function test_bacsec_003_cannot_submit_a_bacsec_001_owned_requirement(): void
     {
         Storage::fake('local');

@@ -259,6 +259,9 @@ class CompetitiveBiddingSupportingDocumentController extends Controller
         $this->ensureItemBelongsToRecord($record, $item);
 
         $allowedMimes = config('papertrail.attachments.allowed_mimes', ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx']);
+        if ($item->requirement_key === 'philgeps_bid_notice_abstract') {
+            $allowedMimes = array_values(array_intersect($allowedMimes, ['pdf', 'jpg', 'jpeg', 'png']));
+        }
         $maxSize = (int) config('papertrail.attachments.max_size_kb', 10240);
         $validated = $request->validate([
             'attachment' => ['required', 'file', 'max:' . $maxSize, 'mimes:' . implode(',', $allowedMimes)],
@@ -367,8 +370,12 @@ class CompetitiveBiddingSupportingDocumentController extends Controller
     public function sourceIndex(Request $request): View
     {
         $this->authorizeSourceUser($request);
+        $isPhilgepsNotice = $request->query('document') === 'philgeps_bid_notice_abstract';
 
         $records = CompetitiveBiddingRecord::query()
+            ->when($isPhilgepsNotice, fn ($query) => $query->with([
+                'projectItems' => fn ($items) => $items->where('requirement_key', 'philgeps_bid_notice_abstract'),
+            ]))
             ->withCount([
                 'projectItems as submission_items_count' => fn ($query) => $query->where('document_source', self::BACSEC_004_USER_ID),
                 'projectItems as submitted_items_count' => fn ($query) => $query
@@ -379,17 +386,20 @@ class CompetitiveBiddingSupportingDocumentController extends Controller
                     ]),
             ])
             ->latest()
-            ->paginate(12);
+            ->paginate(12)
+            ->withQueryString();
 
-        return view('bac-secretariat.competitive-bidding.supporting-documents.source-index', compact('records'));
+        return view('bac-secretariat.competitive-bidding.supporting-documents.source-index', compact('records', 'isPhilgepsNotice'));
     }
 
     public function sourceShow(Request $request, CompetitiveBiddingRecord $record): View
     {
         $this->authorizeSourceUser($request);
+        $isPhilgepsNotice = $request->query('document') === 'philgeps_bid_notice_abstract';
 
         $items = $record->projectItems()
             ->where('document_source', self::BACSEC_004_USER_ID)
+            ->when($isPhilgepsNotice, fn ($query) => $query->where('requirement_key', 'philgeps_bid_notice_abstract'))
             ->with(['attachments.uploadedBy', 'checkedBy', 'submittedBy'])
             ->get();
 
@@ -401,6 +411,7 @@ class CompetitiveBiddingSupportingDocumentController extends Controller
                 CompetitiveBiddingSupportingItem::STATUS_VERIFIED,
             ])->count(),
             'itemCount' => $items->count(),
+            'isPhilgepsNotice' => $isPhilgepsNotice,
         ]);
     }
 
@@ -414,6 +425,9 @@ class CompetitiveBiddingSupportingDocumentController extends Controller
         abort_unless($this->isBacsec004ProjectItem($item), 403);
 
         $allowedMimes = config('papertrail.attachments.allowed_mimes', ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx']);
+        if ($item->requirement_key === 'philgeps_bid_notice_abstract') {
+            $allowedMimes = array_values(array_intersect($allowedMimes, ['pdf', 'jpg', 'jpeg', 'png']));
+        }
         $maxSize = (int) config('papertrail.attachments.max_size_kb', 10240);
         $validated = $request->validate([
             'attachment' => ['required', 'file', 'max:' . $maxSize, 'mimes:' . implode(',', $allowedMimes)],

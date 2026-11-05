@@ -30,6 +30,7 @@
     .aip-meta input[name="year"] { width:56px; }
     .aip-meta input[name="municipality"] { width:180px; }
     .aip-meta input[type="checkbox"] { width:16px; height:16px; accent-color:#111; }
+    .aip-meta-print { display:none; }
     .aip-table { width:100%; border-collapse:collapse; table-layout:fixed; color:#111; }
     .aip-table col:nth-child(1) { width:8%; }
     .aip-table col:nth-child(2) { width:15%; }
@@ -42,8 +43,10 @@
     .aip-table col:nth-child(14) { width:5%; }
     .aip-table th, .aip-table td { border:1px solid #333; padding:3px 4px; vertical-align:middle; overflow-wrap:anywhere; }
     .aip-table thead th { font-weight:700; text-align:center; }
-    .aip-table thead tr:first-child th { height:30px; }
-    .aip-table thead tr:nth-child(2) th { height:38px; }
+    .aip-table .aip-page-heading th, .aip-table .aip-page-meta th { border:0; padding:0; font-weight:400; }
+    .aip-table .aip-page-meta th { text-align:left; }
+    .aip-table .aip-column-heading th { height:30px; }
+    .aip-table .aip-column-subheading th { height:38px; }
     .aip-table .aip-number th { height:20px; font-weight:400; }
     .aip-table .aip-section th { padding:5px 6px; background:var(--aip-section-color, #f4df9c) !important; text-align:left; font-size:8pt; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     .aip-table .aip-section.aip-subheading th { padding-left:14px; font-size:7.5pt; }
@@ -60,8 +63,10 @@
     body.dashboard-body #aip-form .aip-table .aip-entry input, body.dashboard-body #aip-form .aip-table .aip-entry textarea { display:block; width:100%; min-width:0; min-height:0 !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; padding:1px !important; background:transparent !important; color:#111; font:inherit !important; line-height:1.2; outline:none; resize:none; }
     .aip-table .aip-entry input:focus, .aip-table .aip-entry textarea:focus { background:#e9f2ff !important; box-shadow:inset 0 -1px #2563eb !important; }
     .aip-table .aip-entry input[type="number"], .aip-table .aip-row-total, .aip-grand-total td:nth-child(n+8) { text-align:right; }
+    .aip-print-value { display:none; }
     .aip-table .aip-row-total { display:block; }
     .aip-grand-total td { font-weight:700; }
+    .aip-table .aip-signatures-row td { border:0; padding:0; }
     .aip-signatures { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:25mm; margin:26mm 5mm 0; break-inside:avoid; }
     .aip-signatures section { min-width:0; }
     .aip-signatures strong { display:block; margin-bottom:14mm; font-size:9pt; }
@@ -69,6 +74,7 @@
     .aip-signatures .aip-name { font-weight:700; text-transform:uppercase; }
     .aip-signatures input::placeholder { color:#64748b; opacity:1; font-weight:400; text-transform:none; }
     .aip-signatures .aip-date { margin-top:8px; text-align:left; }
+    .aip-signature-print { display:none; }
     .aip-signatures .aip-signer-account { margin:0 0 10px; border:1px solid #cbd5e1; padding:6px; }
     .aip-signatures .aip-signer-account span { display:block; margin-bottom:4px; font:700 7pt Arial,sans-serif; }
     .aip-signatures .aip-signer-account b { display:block; font:700 7.5pt Arial,sans-serif; }
@@ -76,20 +82,37 @@
     .aip-errors { margin:0 0 14px; padding:10px 14px; border:1px solid #fecaca; background:#fff1f2; color:#991b1b; }
     @media (max-width:900px) { .aip-sheet { margin-left:0; } }
     @media print {
-        @page { size:A4 landscape; margin:6mm; }
+        @page { size:A4 landscape; margin:8mm; }
         html, body { width:auto !important; min-width:0 !important; }
         .aip-toolbar, .aip-errors, .no-print { display:none !important; }
         body.dashboard-body .dashboard-shell, body.dashboard-body .dashboard-main, body.dashboard-body .dashboard-content,
         body.dashboard-body #dashboardContent, #aip-form, .aip-scroll { display:block !important; visibility:visible !important; width:100% !important; max-width:none !important; height:auto !important; overflow:visible !important; margin:0 !important; padding:0 !important; box-shadow:none !important; }
-        .aip-sheet { width:285mm !important; min-height:0 !important; margin:0 !important; padding:0 !important; border:0 !important; box-shadow:none !important; font-size:5.5pt !important; }
+        .aip-sheet { width:100% !important; min-height:0 !important; margin:0 !important; padding:0 !important; border:0 !important; box-shadow:none !important; font-size:7pt !important; }
         .aip-sheet, .aip-sheet * { visibility:visible !important; }
-        .aip-heading h1 { font-size:10pt !important; }
-        .aip-meta { font-size:7pt !important; }
+        .aip-heading h1 { font-size:11pt !important; }
+        .aip-meta { display:grid !important; grid-template-columns:62mm 18mm minmax(0,1fr); align-items:center; gap:6mm; font-size:7pt !important; }
+        .aip-meta label { min-width:0; white-space:nowrap; }
+        .aip-meta label:last-child { justify-self:end; white-space:normal; }
+        .aip-meta input { display:none !important; }
+        .aip-meta-print { display:inline !important; }
         .aip-table th, .aip-table td { padding:2px !important; }
-        .aip-table .aip-section th, .aip-section-title { font-size:6pt !important; }
-        .aip-signatures { margin-top:15mm !important; gap:12mm !important; }
-        .aip-table thead { display:table-header-group; }
-        .aip-table tr { break-inside:avoid; }
+        .aip-table .aip-page-heading th, .aip-table .aip-page-meta th, .aip-table .aip-signatures-row td { padding:0 !important; }
+        .aip-table .aip-section th, .aip-section-title { font-size:7pt !important; }
+        .aip-signatures { margin:4mm 2mm 0 !important; gap:7mm !important; }
+        .aip-signatures strong { margin-bottom:6mm !important; font-size:8pt !important; }
+        .aip-signatures input { display:none !important; }
+        .aip-signature-print { display:block !important; min-height:4mm; text-align:center; }
+        .aip-name-print { min-height:6mm; border-bottom:1px solid #111; font-weight:700; text-transform:uppercase; }
+        .aip-date-print { margin-top:2mm; text-align:left; }
+        .aip-table { break-inside:auto; page-break-inside:auto; }
+        .aip-table thead { display:table-header-group !important; }
+        .aip-table tbody { break-inside:auto; }
+        .aip-table tr { break-inside:avoid; page-break-inside:avoid; }
+        .aip-section-group tr:first-child { break-after:avoid; page-break-after:avoid; }
+        body.dashboard-body #aip-form .aip-table .aip-entry textarea,
+        body.dashboard-body #aip-form .aip-table .aip-entry input[type="number"] { display:none !important; }
+        body.dashboard-body #aip-form .aip-table .aip-print-value { display:block !important; white-space:pre-wrap; overflow-wrap:anywhere; }
+        .aip-entry input[type="number"] + .aip-print-value { text-align:right; }
         .aip-table .aip-entry.is-selected { background:transparent; }
         .aip-table .aip-entry input:focus, .aip-table .aip-entry textarea:focus { background:transparent !important; box-shadow:none !important; }
         .aip-meta input, .aip-signatures input { outline:0; }
@@ -118,22 +141,20 @@
 
     <div class="aip-scroll">
         <article class="aip-sheet">
-            <header class="aip-heading">
-                <h1>CY <span data-aip-year>{{ $aipInitialYear }}</span> Annual Investment Program (AIP)</h1>
-                <p>By Program / Project / Activity by Sector</p>
-                <p>As of January 1 to December 31, <span data-aip-year>{{ $aipInitialYear }}</span></p>
-            </header>
-
-            <div class="aip-meta">
-                <label>Municipality: <input type="text" name="municipality" value="{{ old('municipality', data_get($aipDraftData, 'municipality', 'Tomas Oppus')) }}" required maxlength="120"></label>
-                <label>CY <input type="number" name="year" value="{{ $aipInitialYear }}" min="2000" max="2100" required></label>
-                <label><input type="checkbox" name="climate_change" value="1" @checked(old('climate_change', data_get($aipDraftData, 'climate_change')))> Climate Change Expenditure (Please check box if your LGU does not have any climate change expenditure)</label>
-            </div>
-
             <table class="aip-table">
                 <colgroup>@for ($column = 1; $column <= 14; $column++)<col>@endfor</colgroup>
                 <thead>
-                    <tr>
+                    <tr class="aip-page-heading"><th colspan="14"><header class="aip-heading">
+                        <h1>CY <span data-aip-year>{{ $aipInitialYear }}</span> Annual Investment Program (AIP)</h1>
+                        <p>By Program / Project / Activity by Sector</p>
+                        <p>As of January 1 to December 31, <span data-aip-year>{{ $aipInitialYear }}</span></p>
+                    </header></th></tr>
+                    <tr class="aip-page-meta"><th colspan="14"><div class="aip-meta">
+                        <label>Municipality: <input type="text" name="municipality" value="{{ old('municipality', data_get($aipDraftData, 'municipality', 'Tomas Oppus')) }}" required maxlength="120"><span class="aip-meta-print" data-aip-print-field="municipality"></span></label>
+                        <label>CY <input type="number" name="year" value="{{ $aipInitialYear }}" min="2000" max="2100" required><span class="aip-meta-print" data-aip-print-field="year"></span></label>
+                        <label><input type="checkbox" name="climate_change" value="1" @checked(old('climate_change', data_get($aipDraftData, 'climate_change')))><span class="aip-meta-print" data-aip-print-field="climate_change"></span> Climate Change Expenditure (Please check box if your LGU does not have any climate change expenditure)</label>
+                    </div></th></tr>
+                    <tr class="aip-column-heading">
                         <th rowspan="2">AIP<br>REFERENCE<br>CODE</th>
                         <th rowspan="2">PROGRAM / PROJECT / ACTIVITY<br>DESCRIPTION</th>
                         <th rowspan="2">Implementing<br>Office / Department</th>
@@ -144,7 +165,7 @@
                         <th colspan="2">AMOUNT OF Climate Change Expenditures (in thousand pesos)</th>
                         <th rowspan="2">CC Typology<br>Code</th>
                     </tr>
-                    <tr>
+                    <tr class="aip-column-subheading">
                         <th>Starting<br>Date</th><th>Completion<br>Date</th>
                         <th>Personal Services<br>(PS)</th><th>Maintenance and Other Operating Expenses<br>(MOOE)</th><th>Capital Outlay<br>(CO)</th><th>TOTAL</th>
                         <th>Climate Change<br>Adaptation</th><th>Climate Change<br>Mitigation</th>
@@ -157,20 +178,22 @@
                         <td data-total="ps"></td><td data-total="mooe"></td><td data-total="co"></td><td data-total="all"></td>
                         <td colspan="3"></td>
                     </tr>
+                    <tr class="aip-signatures-row"><td colspan="14"><div class="aip-signatures">
+                        @foreach (['prepared' => 'Prepared by:', 'reviewed' => 'Reviewed by:', 'approved' => 'Approved by:'] as $key => $label)
+                            <section>
+                                <strong>{{ $label }}</strong>
+                                <div class="aip-signer-account no-print"><span>Recipient account</span><b>{{ $signerAccounts[$key]?->name ?? 'Unavailable' }} ({{ \App\Services\AnnualInvestmentProgramService::RECIPIENT_ACCOUNTS[$key]['user_id'] }})</b></div>
+                                <input class="aip-name" type="text" name="{{ $key }}_name" value="{{ old($key.'_name', data_get($aipDraftData, $key.'_name')) }}" placeholder="Enter Name" aria-label="{{ $label }} name" maxlength="120">
+                                <span class="aip-signature-print aip-name-print" data-aip-print-field="{{ $key }}_name"></span>
+                                <input type="text" name="{{ $key }}_title" value="{{ old($key.'_title', data_get($aipDraftData, $key.'_title')) }}" placeholder="Enter Position" aria-label="{{ $label }} position" maxlength="120">
+                                <span class="aip-signature-print" data-aip-print-field="{{ $key }}_title"></span>
+                                <input class="aip-date" type="text" name="{{ $key }}_date" value="{{ old($key.'_date', data_get($aipDraftData, $key.'_date')) }}" placeholder="Date: ____________________" aria-label="{{ $label }} date" maxlength="80">
+                                <span class="aip-signature-print aip-date-print">Date: <span data-aip-print-field="{{ $key }}_date"></span></span>
+                            </section>
+                        @endforeach
+                    </div></td></tr>
                 </tbody>
             </table>
-
-            <div class="aip-signatures">
-                @foreach (['prepared' => 'Prepared by:', 'reviewed' => 'Reviewed by:', 'approved' => 'Approved by:'] as $key => $label)
-                    <section>
-                        <strong>{{ $label }}</strong>
-                        <div class="aip-signer-account no-print"><span>Recipient account</span><b>{{ $signerAccounts[$key]?->name ?? 'Unavailable' }} ({{ \App\Services\AnnualInvestmentProgramService::RECIPIENT_ACCOUNTS[$key]['user_id'] }})</b></div>
-                        <input class="aip-name" type="text" name="{{ $key }}_name" value="{{ old($key.'_name', data_get($aipDraftData, $key.'_name')) }}" placeholder="Enter Name" aria-label="{{ $label }} name" maxlength="120">
-                        <input type="text" name="{{ $key }}_title" value="{{ old($key.'_title', data_get($aipDraftData, $key.'_title')) }}" placeholder="Enter Position" aria-label="{{ $label }} position" maxlength="120">
-                        <input class="aip-date" type="text" name="{{ $key }}_date" value="{{ old($key.'_date', data_get($aipDraftData, $key.'_date')) }}" placeholder="Date: ____________________" aria-label="{{ $label }} date" maxlength="80">
-                    </section>
-                @endforeach
-            </div>
         </article>
     </div>
 </form>
@@ -245,6 +268,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const groups = () => [...form.querySelectorAll('.aip-section-group')];
     const filled = row => [...row.querySelectorAll('input:not([type="hidden"]), textarea')]
         .some(field => String(field.value).trim() !== '');
+
+    function resizeTextarea(field) {
+        field.style.height = 'auto';
+        field.style.height = `${field.scrollHeight}px`;
+    }
+
+    function syncPrintValues() {
+        form.querySelectorAll('.aip-entry textarea, .aip-entry input[type="number"]').forEach(field => {
+            let printValue = field.nextElementSibling;
+            if (!printValue?.classList.contains('aip-print-value')) {
+                printValue = document.createElement('span');
+                printValue.className = 'aip-print-value';
+                field.after(printValue);
+            }
+            printValue.textContent = field.type === 'number' && field.value !== ''
+                ? Number(field.value).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                : field.value;
+        });
+        form.querySelectorAll('[data-aip-print-field]').forEach(element => {
+            const fieldName = element.dataset.aipPrintField;
+            const field = form.elements.namedItem(fieldName);
+            element.textContent = fieldName === 'climate_change'
+                ? (field.checked ? '[X]' : '[ ]')
+                : (fieldName.endsWith('_date') ? field.value || '__________________' : field.value);
+        });
+    }
 
     function setDraftStatus(message, state = '') {
         draftStatus.textContent = message;
@@ -524,8 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
             event.target.closest('.aip-section').style.setProperty('--aip-section-color', event.target.value);
         }
         if (event.target.matches('textarea')) {
-            event.target.style.height = 'auto';
-            event.target.style.height = `${event.target.scrollHeight}px`;
+            resizeTextarea(event.target);
         }
         if (event.target.type === 'number') recalculate();
         else if (event.target.closest('.aip-entry')) refreshSections();
@@ -544,6 +592,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     });
+    form.querySelectorAll('.aip-entry textarea').forEach(resizeTextarea);
+    syncPrintValues();
     recalculate();
     selectRow(null);
     initialized = true;
@@ -579,7 +629,10 @@ document.addEventListener('DOMContentLoaded', () => {
             event.returnValue = '';
         }
     });
-    window.addEventListener('beforeprint', refreshSections);
+    window.addEventListener('beforeprint', () => {
+        syncPrintValues();
+        refreshSections();
+    });
 });
 </script>
 @endsection
