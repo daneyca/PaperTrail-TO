@@ -28,6 +28,12 @@ class AbstractController extends Controller
         AuditLogger::log('Abstract', 'Abstract Page Viewed', 'BAC Secretariat viewed Abstracts.');
 
         $query = AbstractQuotation::query()->with(['sourcePrDocument.submittingOffice', 'sourceRfq', 'preparedBy']);
+        if ($request->user()->user_id === 'BACSEC-001') {
+            $query->where(function (Builder $bids): void {
+                $bids->where('purpose', 'like', '%Abstract of Bids as Read%')
+                    ->orWhere('purpose', 'like', '%Abstract of Bids as Calculated%');
+            });
+        }
         $this->applyFilters($query, $request);
 
         return view('bac-secretariat.abstracts.index', [
@@ -98,6 +104,7 @@ class AbstractController extends Controller
     {
         $isSubmitting = $request->input('save_action') === 'submit';
         $validated = $this->validatedAbstract($request, $isSubmitting);
+        $this->authorizeBacsec001CompetitiveAbstract($request, $validated['purpose'] ?? null);
         $sourceRfq = $this->selectedRfq($validated['source_rfq_id'] ?? null);
         $sourceResolution = $this->readyBacResolutionForRfq($sourceRfq) ?: $this->selectedResolution($validated['source_bac_resolution_id'] ?? null);
         $sourceDocument = $sourceRfq?->sourcePrDocument ?: $sourceResolution?->sourcePrDocument ?: $this->selectedPr($validated['source_pr_document_id'] ?? null);
@@ -153,6 +160,7 @@ class AbstractController extends Controller
 
     public function show(AbstractQuotation $abstract): View
     {
+        $this->authorizeBacsec001CompetitiveAbstract(request(), $abstract->purpose);
         $abstract->load(['sourcePrDocument.submittingOffice', 'sourceRfq', 'sourceBacResolution', 'preparedBy', 'submittedBy', 'items']);
         AuditLogger::log('Abstract', 'Abstract Viewed', 'BAC Secretariat viewed an Abstract.', $abstract);
 
@@ -161,6 +169,7 @@ class AbstractController extends Controller
 
     public function edit(AbstractQuotation $abstract): View|RedirectResponse
     {
+        $this->authorizeBacsec001CompetitiveAbstract(request(), $abstract->purpose);
         if (! $abstract->isEditable()) {
             return redirect()->route('bac-secretariat.abstracts.show', $abstract)->with('error', 'Only draft or returned Abstracts can be edited.');
         }
@@ -177,12 +186,14 @@ class AbstractController extends Controller
 
     public function update(Request $request, AbstractQuotation $abstract): RedirectResponse
     {
+        $this->authorizeBacsec001CompetitiveAbstract($request, $abstract->purpose);
         if (! $abstract->isEditable()) {
             return back()->with('error', 'Only draft or returned Abstracts can be updated.');
         }
 
         $isSubmitting = $request->input('save_action') === 'submit';
         $validated = $this->validatedAbstract($request, $isSubmitting, $abstract);
+        $this->authorizeBacsec001CompetitiveAbstract($request, $validated['purpose'] ?? $abstract->purpose);
         $sourceRfq = $this->selectedRfq($validated['source_rfq_id'] ?? null) ?: $abstract->sourceRfq;
         $sourceResolution = $this->readyBacResolutionForRfq($sourceRfq) ?: ($this->selectedResolution($validated['source_bac_resolution_id'] ?? null) ?: $abstract->sourceBacResolution);
         $sourceDocument = $sourceRfq?->sourcePrDocument ?: $sourceResolution?->sourcePrDocument ?: ($this->selectedPr($validated['source_pr_document_id'] ?? null) ?: $abstract->sourcePrDocument);
@@ -232,6 +243,7 @@ class AbstractController extends Controller
 
     public function submit(Request $request, AbstractQuotation $abstract): RedirectResponse
     {
+        $this->authorizeBacsec001CompetitiveAbstract($request, $abstract->purpose);
         if (! $abstract->canSubmit()) {
             return back()->with('error', 'Only draft or returned Abstracts can be submitted.');
         }
@@ -281,6 +293,7 @@ class AbstractController extends Controller
 
     public function print(AbstractQuotation $abstract): View
     {
+        $this->authorizeBacsec001CompetitiveAbstract(request(), $abstract->purpose);
         $abstract->load(['sourcePrDocument.submittingOffice', 'sourceRfq', 'sourceBacResolution', 'preparedBy', 'submittedBy', 'items']);
         AuditLogger::log('Abstract', 'Abstract Print Viewed', 'BAC Secretariat opened Abstract print view.', $abstract);
 
@@ -580,6 +593,14 @@ class AbstractController extends Controller
 
         return str_contains($purpose, 'abstract of bids as read')
             || str_contains($purpose, 'abstract of bids as calculated');
+    }
+
+    private function authorizeBacsec001CompetitiveAbstract(Request $request, ?string $purpose): void
+    {
+        abort_if(
+            $request->user()?->user_id === 'BACSEC-001' && ! $this->isCompetitiveBiddingAbstractOfBids($purpose),
+            403
+        );
     }
 
     private function defaultData(?ProcurementDocument $sourceDocument, ?Rfq $sourceRfq, ?BacResolution $sourceResolution, int $userId): array

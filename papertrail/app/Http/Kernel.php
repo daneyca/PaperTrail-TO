@@ -63,6 +63,8 @@ class Kernel extends HttpKernel
         'remember.page' => \App\Http\Middleware\RememberLastAuthenticatedPage::class,
         'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
         'permission' => \App\Http\Middleware\EnsureUserHasPermission::class,
+        'svp.planner' => \App\Http\Middleware\EnsureBacSecretariatSvpPlanner::class,
+        'bacsec001.svp.other' => \App\Http\Middleware\BlockBacsec001SvpTask::class,
         'requesting.office' => \App\Http\Middleware\EnsureRequestingOfficeForHeadOfficeTransactions::class,
         'password.changed' => \App\Http\Middleware\EnsurePasswordIsChanged::class,
         'precognitive' => \Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests::class,

@@ -244,7 +244,7 @@
         ['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'dashboard'],
     ];
 
-    if ($roleSlug === 'bac-secretariat' && $isBacsecPrSignatureOnly) {
+    if ($roleSlug === 'bac-secretariat' && ($hasBacsec002PurchaseRequestCapability || $isBacsecPrSignatureOnly)) {
         $items = array_values(array_filter($items, fn ($item) => ($item['label'] ?? null) !== 'SVP Plans'));
     }
 
@@ -271,7 +271,14 @@
     } elseif ($roleSlug === 'bac-secretariat') {
         foreach ($items as &$item) {
             if (($item['label'] ?? null) === 'Small Value Procurement') {
-                $item['children'] = array_values(array_filter($item['children'] ?? [], fn ($child) => empty($child['posting_only'])));
+                if ($user?->user_id === 'BACSEC-001') {
+                    $item['children'] = [
+                        ['label' => 'PR Copies', 'route' => 'bac-secretariat.pr.index', 'active' => 'bac-secretariat.pr.*', 'count' => $submittedPrCount],
+                        ['label' => 'BAC Resolutions', 'route' => 'bac-secretariat.resolutions.index', 'active' => 'bac-secretariat.resolutions.*'],
+                    ];
+                } else {
+                    $item['children'] = array_values(array_filter($item['children'] ?? [], fn ($child) => empty($child['posting_only'])));
+                }
             }
         }
         unset($item);

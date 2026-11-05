@@ -6,6 +6,7 @@
     @php
         $isIncomingReference = $document->status === \App\Models\ProcurementDocument::STATUS_READY_FOR_BAC_RESOLUTION
             && (int) $document->assigned_to_user_id === (int) auth()->id();
+        $isResolutionPreparer = auth()->user()?->user_id === 'BACSEC-001';
         $statusLabel = $isIncomingReference
             ? 'Incoming PR Reference'
             : str($document->status)->replace('_', ' ')->title();
@@ -15,7 +16,7 @@
         <div>
             <p class="eyebrow">{{ $isIncomingReference ? 'BAC Resolution Preparation' : 'BAC Secretariat Purchase Request' }}</p>
             <h1>{{ $document->pr_no ?? $document->tracking_number }}</h1>
-            <p>{{ $isIncomingReference ? 'Review the finalized PR reference forwarded by the requesting office.' : 'Validate the official LGU Purchase Request form submitted by '.($document->submittingOffice?->name ?? 'the requesting office').'.' }}</p>
+            <p>{{ $isResolutionPreparer ? 'Review this PR copy before preparing its BAC Resolution.' : ($isIncomingReference ? 'Review the finalized PR reference forwarded by the requesting office.' : 'Validate the official LGU Purchase Request form submitted by '.($document->submittingOffice?->name ?? 'the requesting office').'.') }}</p>
         </div>
 
         <a href="{{ route('bac-secretariat.pr.index') }}" class="dashboard-action secondary-action">Back to Purchase Requests</a>
@@ -54,12 +55,12 @@
             <article class="table-panel budget-action-panel bac-pr-side-panel">
                 <div class="panel-heading">
                     <div>
-                        <p class="eyebrow">PR Validation Actions</p>
-                        <h2>Validation Controls</h2>
+                        <p class="eyebrow">{{ $isResolutionPreparer ? 'BAC Resolution' : 'PR Validation Actions' }}</p>
+                        <h2>{{ $isResolutionPreparer ? 'Next Step' : 'Validation Controls' }}</h2>
                     </div>
                 </div>
 
-                @if (in_array($document->status, ['pr_submitted', 'submitted_to_bac_secretariat'], true))
+                @if (! $isResolutionPreparer && in_array($document->status, ['pr_submitted', 'submitted_to_bac_secretariat'], true))
                     <form method="POST" action="{{ route('bac-secretariat.pr.acknowledge', $document) }}" onsubmit="return confirm('Acknowledge receipt of this Purchase Request?');" class="budget-action-form">
                         @csrf
                         @method('PATCH')
@@ -67,7 +68,7 @@
                     </form>
                 @endif
 
-                @if ($document->status === 'pr_received_by_bac_secretariat')
+                @if (! $isResolutionPreparer && $document->status === 'pr_received_by_bac_secretariat')
                     <form method="POST" action="{{ route('bac-secretariat.pr.start-validation', $document) }}" onsubmit="return confirm('Start validation for this Purchase Request?');" class="budget-action-form">
                         @csrf
                         @method('PATCH')
@@ -88,7 +89,7 @@
                     @endif
                 @endif
 
-                @if (in_array($document->status, ['pr_submitted', 'submitted_to_bac_secretariat', 'pr_received_by_bac_secretariat', 'under_pr_validation'], true))
+                @if (! $isResolutionPreparer && in_array($document->status, ['pr_submitted', 'submitted_to_bac_secretariat', 'pr_received_by_bac_secretariat', 'under_pr_validation'], true))
                     <form method="POST" action="{{ route('bac-secretariat.pr.return', $document) }}" onsubmit="return confirm('Return this Purchase Request?');" class="budget-action-form">
                         @csrf
                         @method('PATCH')
@@ -99,7 +100,7 @@
                     </form>
                 @endif
 
-                @if ($document->status === 'under_pr_validation')
+                @if (! $isResolutionPreparer && $document->status === 'under_pr_validation')
                     <form method="POST" action="{{ route('bac-secretariat.pr.route-budget', $document) }}" onsubmit="return confirm('Route this Purchase Request to Budget Office?');" class="budget-action-form">
                         @csrf
                         @method('PATCH')
@@ -115,7 +116,7 @@
                 @if (!in_array($document->status, ['pr_submitted', 'submitted_to_bac_secretariat', 'pr_received_by_bac_secretariat', 'under_pr_validation', 'ready_for_bac_resolution'], true))
                     <div class="empty-state">
                         <strong>No PR action available</strong>
-                        <p>This Purchase Request has already moved beyond BAC Secretariat PR validation.</p>
+                        <p>{{ $isResolutionPreparer ? 'This PR copy already has a BAC Resolution or has moved to the next step.' : 'This Purchase Request has already moved beyond BAC Secretariat PR validation.' }}</p>
                     </div>
                 @endif
             </article>
@@ -141,16 +142,20 @@
                             <p>Status: {{ str($supplementalApp->status)->replace('_', ' ')->title() }}</p>
                             <p>Total Amount: PHP {{ number_format((float) $supplementalApp->total_amount, 2) }}</p>
                             <div class="table-actions">
-                                <a href="{{ route('bac-secretariat.supplemental-apps.show', $supplementalApp) }}">View Supplemental APP</a>
+                                @unless ($isResolutionPreparer)
+                                    <a href="{{ route('bac-secretariat.supplemental-apps.show', $supplementalApp) }}">View Supplemental APP</a>
+                                @endunless
                             </div>
                         </div>
                     @else
                         <div class="empty-state warning-state">
                             <strong>No PPMP/APP Record Found</strong>
-                            <p>This Purchase Request has no matching PPMP/APP record. Create a Supplemental APP before proceeding.</p>
-                            <div class="table-actions">
-                                <a href="{{ route('bac-secretariat.supplemental-apps.create-from-pr', $document) }}">Create Supplemental APP</a>
-                            </div>
+                            <p>{{ $isResolutionPreparer ? 'This PR copy has no linked APP record.' : 'This Purchase Request has no matching PPMP/APP record. Create a Supplemental APP before proceeding.' }}</p>
+                            @unless ($isResolutionPreparer)
+                                <div class="table-actions">
+                                    <a href="{{ route('bac-secretariat.supplemental-apps.create-from-pr', $document) }}">Create Supplemental APP</a>
+                                </div>
+                            @endunless
                         </div>
                     @endif
                 </div>

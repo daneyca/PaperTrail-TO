@@ -10,6 +10,26 @@ class DashboardSidebarScrollTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_svp_plans_menu_is_hidden_from_bacsec_001_only(): void
+    {
+        foreach (['BACSEC-001', 'BACSEC-003'] as $userId) {
+            $user = User::where('user_id', $userId)->firstOrFail();
+            $user->update([
+                'role' => User::ROLE_BAC_SECRETARIAT,
+                'status' => User::STATUS_ACTIVE,
+                'must_change_password' => false,
+            ]);
+
+            $response = $this->actingAs($user)->get(route('bac-secretariat.dashboard'))->assertOk();
+
+            if ($userId === 'BACSEC-001') {
+                $response->assertDontSee('SVP Plans');
+            } else {
+                $response->assertSee('SVP Plans');
+            }
+        }
+    }
+
     public function test_bacsec_003_task_page_renders_sidebar_scroll_restoration(): void
     {
         $user = User::where('user_id', 'BACSEC-003')->firstOrFail();

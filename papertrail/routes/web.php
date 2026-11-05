@@ -234,16 +234,16 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
     });
 
     Route::middleware('role:bac-secretariat')->prefix('bac-secretariat')->name('bac-secretariat.')->group(function () {
-        Route::get('/incoming-documents/menu', [DocumentSubmenuController::class, 'bacSecretariatIncomingDocuments'])->name('incoming.menu');
+        Route::get('/incoming-documents/menu', [DocumentSubmenuController::class, 'bacSecretariatIncomingDocuments'])->middleware('bacsec001.svp.other')->name('incoming.menu');
         Route::get('/document-routing/menu', [DocumentSubmenuController::class, 'bacSecretariatDocumentRouting'])->name('routing.menu');
-        Route::get('/ppmp-review/menu', [DocumentSubmenuController::class, 'bacSecretariatPpmpReview'])->name('ppmp.menu');
-        Route::get('/apps/menu', [DocumentSubmenuController::class, 'bacSecretariatApp'])->name('apps.menu');
-        Route::get('/supplemental-apps/menu', [DocumentSubmenuController::class, 'bacSecretariatSupplementalApp'])->name('supplemental-apps.menu');
+        Route::get('/ppmp-review/menu', [DocumentSubmenuController::class, 'bacSecretariatPpmpReview'])->middleware('svp.planner')->name('ppmp.menu');
+        Route::get('/apps/menu', [DocumentSubmenuController::class, 'bacSecretariatApp'])->middleware('svp.planner')->name('apps.menu');
+        Route::get('/supplemental-apps/menu', [DocumentSubmenuController::class, 'bacSecretariatSupplementalApp'])->middleware('svp.planner')->name('supplemental-apps.menu');
         Route::get('/purchase-requests/menu', [DocumentSubmenuController::class, 'bacSecretariatPurchaseRequest'])->name('pr.menu');
-        Route::get('/rfqs/menu', [DocumentSubmenuController::class, 'bacSecretariatRfq'])->name('rfqs.menu');
-        Route::get('/abstracts/menu', [DocumentSubmenuController::class, 'bacSecretariatAbstract'])->name('abstracts.menu');
+        Route::get('/rfqs/menu', [DocumentSubmenuController::class, 'bacSecretariatRfq'])->middleware('bacsec001.svp.other')->name('rfqs.menu');
+        Route::get('/abstracts/menu', [DocumentSubmenuController::class, 'bacSecretariatAbstract'])->middleware('bacsec001.svp.other')->name('abstracts.menu');
         Route::get('/bac-resolutions/menu', [DocumentSubmenuController::class, 'bacSecretariatBacResolution'])->name('resolutions.menu');
-        Route::get('/purchase-orders/menu', [DocumentSubmenuController::class, 'bacSecretariatPurchaseOrder'])->name('purchase-orders.menu');
+        Route::get('/purchase-orders/menu', [DocumentSubmenuController::class, 'bacSecretariatPurchaseOrder'])->middleware('bacsec001.svp.other')->name('purchase-orders.menu');
         Route::get('/competitive-bidding/menu', [DocumentSubmenuController::class, 'bacSecretariatCompetitiveBidding'])->name('competitive-bidding.menu');
         Route::get('/competitive-bidding/annual-investment-program/template', [DocumentSubmenuController::class, 'bacSecretariatAnnualInvestmentProgramTemplate'])->name('competitive-bidding.annual-investment-program.template');
         Route::post('/competitive-bidding/annual-investment-program/draft', [\App\Http\Controllers\BacSecretariat\AnnualInvestmentProgramDraftController::class, 'store'])->name('competitive-bidding.annual-investment-program.draft.store');
@@ -666,7 +666,7 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
     Route::get('/bac-secretariat/dashboard', [DashboardController::class, 'bacSecretariat'])
         ->middleware('role:bac-secretariat')
         ->name('bac-secretariat.dashboard');
-    Route::middleware(['role:bac-secretariat', 'permission:documents.view.all', 'permission:documents.track', 'permission:documents.return', 'permission:documents.comment', 'permission:workflow.route', 'permission:workflow.update_status', 'permission:workflow.view_history'])->prefix('bac-secretariat/incoming-documents')->name('bac-secretariat.incoming.')->group(function () {
+    Route::middleware(['role:bac-secretariat', 'bacsec001.svp.other', 'permission:documents.view.all', 'permission:documents.track', 'permission:documents.return', 'permission:documents.comment', 'permission:workflow.route', 'permission:workflow.update_status', 'permission:workflow.view_history'])->prefix('bac-secretariat/incoming-documents')->name('bac-secretariat.incoming.')->group(function () {
         Route::get('/', [BacIncomingDocumentsController::class, 'index'])->name('index');
         Route::get('/{document}', [BacIncomingDocumentsController::class, 'show'])->name('show');
         Route::patch('/{document}/acknowledge', [BacIncomingDocumentsController::class, 'acknowledge'])->name('acknowledge');
@@ -694,7 +694,7 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         Route::get('/history', [BacSvpPostingController::class, 'history'])->name('history');
         Route::get('/records/{postingRecord}', [BacSvpPostingController::class, 'show'])->name('show');
     });
-    Route::middleware(['role:bac-secretariat', 'permission:ppmp.review', 'permission:documents.view.all', 'permission:documents.track', 'permission:documents.return', 'permission:documents.comment', 'permission:workflow.update_status'])->prefix('bac-secretariat/ppmp-review')->name('bac-secretariat.ppmp.')->group(function () {
+    Route::middleware(['role:bac-secretariat', 'svp.planner', 'permission:ppmp.review', 'permission:documents.view.all', 'permission:documents.track', 'permission:documents.return', 'permission:documents.comment', 'permission:workflow.update_status'])->prefix('bac-secretariat/ppmp-review')->name('bac-secretariat.ppmp.')->group(function () {
         Route::get('/', [BacPpmpReviewController::class, 'index'])->name('index');
         Route::get('/{document}', [BacPpmpReviewController::class, 'show'])->name('show');
         Route::get('/{document}/print', [BacPpmpReviewController::class, 'print'])->name('print');
@@ -702,7 +702,7 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         Route::patch('/{document}/return', [BacPpmpReviewController::class, 'return'])->name('return');
         Route::patch('/{document}/accept', [BacPpmpReviewController::class, 'accept'])->name('accept');
     });
-    Route::middleware(['role:bac-secretariat,approving-authority,bac-chair,admin'])->prefix('bac-secretariat/app')->name('bac-secretariat.app.')->group(function () {
+    Route::middleware(['role:bac-secretariat,approving-authority,bac-chair,admin', 'svp.planner'])->prefix('bac-secretariat/app')->name('bac-secretariat.app.')->group(function () {
         Route::get('/', [BacAnnualProcurementPlanController::class, 'index'])->name('index');
         Route::get('/create', [BacAnnualProcurementPlanController::class, 'create'])->name('create');
         Route::post('/', [BacAnnualProcurementPlanController::class, 'store'])->name('store');
@@ -718,8 +718,8 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         Route::delete('/{app}', [BacAnnualProcurementPlanController::class, 'destroy'])->name('destroy');
         Route::get('/{app}', [BacAnnualProcurementPlanController::class, 'show'])->name('show');
     });
-    Route::redirect('/bac-secretariat/app-consolidation', '/bac-secretariat/app')->middleware('role:bac-secretariat');
-    Route::middleware(['role:bac-secretariat', 'permission:app.view', 'permission:app.consolidate', 'permission:documents.view.all', 'permission:documents.track', 'permission:workflow.update_status', 'permission:workflow.view_history'])->prefix('bac-secretariat/supplemental-apps')->name('bac-secretariat.supplemental-apps.')->group(function () {
+    Route::redirect('/bac-secretariat/app-consolidation', '/bac-secretariat/app')->middleware(['role:bac-secretariat', 'svp.planner']);
+    Route::middleware(['role:bac-secretariat', 'svp.planner', 'permission:app.view', 'permission:app.consolidate', 'permission:documents.view.all', 'permission:documents.track', 'permission:workflow.update_status', 'permission:workflow.view_history'])->prefix('bac-secretariat/supplemental-apps')->name('bac-secretariat.supplemental-apps.')->group(function () {
         Route::get('/', [BacSupplementalAppController::class, 'index'])->name('index');
         Route::get('/create', [BacSupplementalAppController::class, 'create'])->name('create');
         Route::get('/create-from-pr/{document}', [BacSupplementalAppController::class, 'createFromPr'])->name('create-from-pr');
@@ -735,10 +735,10 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         Route::get('/', [BacPurchaseRequestController::class, 'index'])->name('index');
         Route::get('/{document}/print', [BacPurchaseRequestController::class, 'print'])->name('print');
         Route::get('/{document}', [BacPurchaseRequestController::class, 'show'])->name('show');
-        Route::patch('/{document}/acknowledge', [BacPurchaseRequestController::class, 'acknowledge'])->name('acknowledge');
-        Route::patch('/{document}/start-validation', [BacPurchaseRequestController::class, 'startValidation'])->name('start-validation');
-        Route::patch('/{document}/return', [BacPurchaseRequestController::class, 'return'])->name('return');
-        Route::patch('/{document}/route-budget', [BacPurchaseRequestController::class, 'routeBudget'])->name('route-budget');
+        Route::patch('/{document}/acknowledge', [BacPurchaseRequestController::class, 'acknowledge'])->middleware('bacsec001.svp.other')->name('acknowledge');
+        Route::patch('/{document}/start-validation', [BacPurchaseRequestController::class, 'startValidation'])->middleware('bacsec001.svp.other')->name('start-validation');
+        Route::patch('/{document}/return', [BacPurchaseRequestController::class, 'return'])->middleware('bacsec001.svp.other')->name('return');
+        Route::patch('/{document}/route-budget', [BacPurchaseRequestController::class, 'routeBudget'])->middleware('bacsec001.svp.other')->name('route-budget');
     });
     Route::middleware(['role:bac-secretariat', 'permission:bac.resolution.view', 'permission:documents.track', 'permission:workflow.update_status'])->prefix('bac-secretariat/bac-resolutions')->name('bac-secretariat.resolutions.')->group(function () {
         Route::get('/', [BacResolutionController::class, 'index'])->name('index');
@@ -751,7 +751,7 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         Route::patch('/{resolution}/return-to-office', [BacResolutionController::class, 'returnToOffice'])->name('return-office');
         Route::get('/{resolution}/print', [BacResolutionController::class, 'print'])->name('print');
     });
-    Route::middleware(['role:bac-secretariat'])->prefix('bac-secretariat/rfqs')->name('bac-secretariat.rfqs.')->group(function () {
+    Route::middleware(['role:bac-secretariat', 'bacsec001.svp.other'])->prefix('bac-secretariat/rfqs')->name('bac-secretariat.rfqs.')->group(function () {
         Route::get('/', [BacRfqController::class, 'index'])->name('index');
         Route::get('/create', [BacRfqController::class, 'create'])->name('create');
         Route::post('/', [BacRfqController::class, 'store'])->name('store');
@@ -763,7 +763,7 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
     });
     Route::middleware(['role:bac-secretariat'])->prefix('bac-secretariat/abstracts')->name('bac-secretariat.abstracts.')->group(function () {
         Route::get('/', [BacAbstractController::class, 'index'])->name('index');
-        Route::get('/create', [BacAbstractController::class, 'create'])->name('create');
+        Route::get('/create', [BacAbstractController::class, 'create'])->middleware('bacsec001.svp.other')->name('create');
         Route::post('/', [BacAbstractController::class, 'store'])->name('store');
         Route::get('/{abstract}', [BacAbstractController::class, 'show'])->name('show');
         Route::get('/{abstract}/edit', [BacAbstractController::class, 'edit'])->name('edit');
@@ -771,7 +771,7 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         Route::get('/{abstract}/print', [BacAbstractController::class, 'print'])->name('print');
         Route::patch('/{abstract}/submit', [BacAbstractController::class, 'submit'])->name('submit');
     });
-    Route::middleware(['role:bac-secretariat', 'permission:po.view', 'permission:po.prepare', 'permission:workflow.update_status', 'permission:documents.track', 'permission:documents.comment'])->prefix('bac-secretariat/purchase-orders')->name('bac-secretariat.purchase-orders.')->group(function () {
+    Route::middleware(['role:bac-secretariat', 'bacsec001.svp.other', 'permission:po.view', 'permission:po.prepare', 'permission:workflow.update_status', 'permission:documents.track', 'permission:documents.comment'])->prefix('bac-secretariat/purchase-orders')->name('bac-secretariat.purchase-orders.')->group(function () {
         Route::get('/', [BacPurchaseOrderController::class, 'index'])->name('index');
         Route::get('/create', [BacPurchaseOrderController::class, 'create'])->name('create');
         Route::post('/', [BacPurchaseOrderController::class, 'store'])->name('store');

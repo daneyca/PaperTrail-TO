@@ -49,11 +49,14 @@ class BacResolutionController extends Controller
         AuditLogger::log('BAC Resolutions', 'BAC Resolutions Page Viewed', 'BAC Secretariat viewed BAC Resolutions.');
 
         $query = BacResolution::query()->with(['sourcePrDocument.submittingOffice', 'preparedBy']);
+        if ($request->user()->user_id === 'BACSEC-001') {
+            $query->where('prepared_by_user_id', $request->user()->id);
+        }
         $this->applyFilters($query, $request);
 
         return view('bac-secretariat.resolutions.index', [
             'resolutions' => $query->latest('updated_at')->paginate(10)->withQueryString(),
-            'summary' => $this->summary(),
+            'summary' => $this->summary($request->user()),
             'recentDrafts' => app(DocumentDraftService::class)->getBacResolutionDraftsForBacSecretariat($request->user(), 5),
             'filters' => $request->only(['search', 'fiscal_year', 'status', 'date_from', 'date_to']),
             'fiscalYears' => BacResolution::query()->select('fiscal_year')->whereNotNull('fiscal_year')->distinct()->orderByDesc('fiscal_year')->pluck('fiscal_year'),
@@ -95,6 +98,10 @@ class BacResolutionController extends Controller
     {
         $validated = $this->validatedResolution($request);
         $sourceDocument = $this->selectedEligiblePr($validated['source_pr_document_id'] ?? null);
+
+        if ($request->user()->user_id === 'BACSEC-001' && ! $sourceDocument) {
+            return back()->with('error', 'Select a PR copy assigned to you before creating a BAC Resolution.')->withInput();
+        }
 
         if (($validated['source_pr_document_id'] ?? null) && ! $sourceDocument) {
             if ($existingResolution = $this->existingResolutionForSourceId($validated['source_pr_document_id'])) {
@@ -147,6 +154,7 @@ class BacResolutionController extends Controller
 
     public function show(BacResolution $resolution): View
     {
+        $this->authorizeBacsec001Resolution($resolution);
         AuditLogger::log('BAC Resolutions', 'BAC Resolution Detail Viewed', 'BAC Secretariat viewed a BAC Resolution.', $resolution);
 
         $resolution->load([
@@ -171,6 +179,7 @@ class BacResolutionController extends Controller
 
     public function edit(Request $request, BacResolution $resolution): View|RedirectResponse
     {
+        $this->authorizeBacsec001Resolution($resolution);
         if (! $resolution->isEditable()) {
             return redirect()
                 ->route('bac-secretariat.resolutions.show', $resolution)
@@ -189,6 +198,7 @@ class BacResolutionController extends Controller
 
     public function update(Request $request, BacResolution $resolution): RedirectResponse
     {
+        $this->authorizeBacsec001Resolution($resolution);
         if (! $resolution->isEditable()) {
             return back()->with('error', 'Only draft or returned BAC Resolutions can be updated.');
         }
@@ -240,6 +250,7 @@ class BacResolutionController extends Controller
 
     public function submit(Request $request, BacResolution $resolution): RedirectResponse
     {
+        $this->authorizeBacsec001Resolution($resolution);
         if (! $resolution->canSubmit()) {
             return back()->with('error', 'Only draft or returned BAC Resolutions can be submitted for signatures.');
         }
@@ -253,6 +264,7 @@ class BacResolutionController extends Controller
 
     public function print(BacResolution $resolution): View
     {
+        $this->authorizeBacsec001Resolution($resolution);
         AuditLogger::log('BAC Resolutions', 'BAC Resolution Print Viewed', 'BAC Secretariat opened the BAC Resolution print view.', $resolution);
 
         $resolution->load(['sourcePrDocument.submittingOffice', 'preparedBy', 'submittedBy', 'approvedBy', 'items']);
@@ -266,6 +278,7 @@ class BacResolutionController extends Controller
 
     public function returnToOffice(Request $request, BacResolution $resolution): RedirectResponse
     {
+        $this->authorizeBacsec001Resolution($resolution);
         if (app(SignatureRequestService::class)->signedSignaturesForDocument($resolution, 'bac-resolution')->isNotEmpty()) {
             return back()->with('error', 'This BAC Resolution has already been electronically signed and returned through the signing workflow.');
         }
@@ -866,7 +879,7 @@ class BacResolutionController extends Controller
     {
         $user = request()->user();
 
-        return ProcurementDocument::query()
+        $query = ProcurementDocument::query()
             ->where(function (Builder $type) {
                 $type->where('document_type', 'PR')
                     ->orWhere('document_type', 'Purchase Request');
@@ -888,6 +901,13 @@ class BacResolutionController extends Controller
                     });
             })
             ->whereDoesntHave('sourcePurchaseOrders');
+
+        if ($user?->user_id === 'BACSEC-001') {
+            $query->where('status', ProcurementDocument::STATUS_READY_FOR_BAC_RESOLUTION)
+                ->where('assigned_to_user_id', $user->id);
+        }
+
+        return $query;
     }
 
     private function defaultResolutionData(?ProcurementDocument $sourceDocument, User $user): array
@@ -1314,15 +1334,26 @@ class BacResolutionController extends Controller
         ];
     }
 
-    private function summary(): array
+    private function summary(User $user): array
     {
+        $base = BacResolution::query();
+        if ($user->user_id === 'BACSEC-001') {
+            $base->where('prepared_by_user_id', $user->id);
+        }
+
         return [
-            'draft' => BacResolution::where('status', BacResolution::STATUS_DRAFT)->count(),
-            'submitted' => BacResolution::where('status', BacResolution::STATUS_SUBMITTED_TO_BAC_CHAIR)->count(),
-            'confirmed' => BacResolution::where('status', BacResolution::STATUS_CONFIRMED_BY_BAC_CHAIR)->count(),
-            'approved' => BacResolution::where('status', BacResolution::STATUS_APPROVED_BY_HOPE)->count(),
-            'returnedToOffice' => BacResolution::where('status', BacResolution::STATUS_RETURNED_TO_END_USER)->count(),
+            'draft' => (clone $base)->where('status', BacResolution::STATUS_DRAFT)->count(),
+            'submitted' => (clone $base)->where('status', BacResolution::STATUS_SUBMITTED_TO_BAC_CHAIR)->count(),
+            'confirmed' => (clone $base)->where('status', BacResolution::STATUS_CONFIRMED_BY_BAC_CHAIR)->count(),
+            'approved' => (clone $base)->where('status', BacResolution::STATUS_APPROVED_BY_HOPE)->count(),
+            'returnedToOffice' => (clone $base)->where('status', BacResolution::STATUS_RETURNED_TO_END_USER)->count(),
         ];
+    }
+
+    private function authorizeBacsec001Resolution(BacResolution $resolution): void
+    {
+        $user = request()->user();
+        abort_if($user?->user_id === 'BACSEC-001' && (int) $resolution->prepared_by_user_id !== (int) $user->id, 403);
     }
 
     private function activeUserByRoleOrCode(string $roleName, string $roleCode, string $fallbackUserId): ?User

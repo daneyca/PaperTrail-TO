@@ -30,6 +30,8 @@ class PurchaseRequestController extends Controller
             ->purchaseRequestsForBacSecretariat($request->user())
             ->with(['submittingOffice', 'currentOffice', 'assignedTo', 'appConsolidation', 'latestBacResolution']);
 
+        $this->scopeBacsec001PrCopies($query, $request->user());
+
         $this->applyFilters($query, $request);
 
         return view('bac-secretariat.pr.index', [
@@ -344,10 +346,24 @@ class PurchaseRequestController extends Controller
 
     private function canAccess(User $user, ProcurementDocument $document): bool
     {
-        return ProcurementDocument::query()
-            ->purchaseRequestsForBacSecretariat($user)
-            ->whereKey($document->id)
-            ->exists();
+        $query = ProcurementDocument::query()->purchaseRequestsForBacSecretariat($user);
+        $this->scopeBacsec001PrCopies($query, $user);
+
+        return $query->whereKey($document->id)->exists();
+    }
+
+    private function scopeBacsec001PrCopies(Builder $query, User $user): void
+    {
+        if ($user->user_id !== 'BACSEC-001') {
+            return;
+        }
+
+        $query->where(function (Builder $copies) use ($user): void {
+            $copies->where(function (Builder $assigned) use ($user): void {
+                $assigned->where('status', ProcurementDocument::STATUS_READY_FOR_BAC_RESOLUTION)
+                    ->where('assigned_to_user_id', $user->id);
+            })->orWhereHas('bacResolutions', fn (Builder $resolution) => $resolution->where('prepared_by_user_id', $user->id));
+        });
     }
 
     private function summary(User $user): array

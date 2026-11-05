@@ -7,22 +7,28 @@
         $activeStatus = $filters['status'] ?? request('status');
         $activePrStatus = $filters['pr_status'] ?? request('pr_status');
         $statusLabel = fn ($value) => str($value)->replace('_', ' ')->title()->replace('Bac', 'BAC')->replace('Pr', 'PR')->replace('Ppmp', 'PPMP');
+        $isResolutionPreparer = auth()->user()?->user_id === 'BACSEC-001';
     @endphp
 
     <section class="dashboard-hero admin-users-hero">
         <div>
             <p class="eyebrow">BAC Secretariat</p>
-            <h1>Purchase Requests</h1>
-            <p>Validate and route Purchase Requests submitted by end-user offices.</p>
+            <h1>{{ $isResolutionPreparer ? 'PR Copies' : 'Purchase Requests' }}</h1>
+            <p>{{ $isResolutionPreparer ? 'Review assigned PR copies and prepare BAC Resolutions.' : 'Validate and route Purchase Requests submitted by end-user offices.' }}</p>
         </div>
+        @if ($isResolutionPreparer)
+            <a href="{{ route('bac-secretariat.resolutions.create') }}" class="dashboard-action">Create BAC Resolution</a>
+        @endif
     </section>
 
+    @unless ($isResolutionPreparer)
     <section class="stat-grid stat-grid-modern" aria-label="Purchase Request summary">
         <x-dashboard.stat-card href="{{ route('bac-secretariat.pr.index', ['status' => 'submitted']) }}" value="{{ $summary['submitted'] }}" label="Submitted PRs" accent="blue" class="{{ in_array($activeStatus, ['submitted', \App\Models\ProcurementDocument::STATUS_READY_FOR_BAC_RESOLUTION], true) ? 'is-filter-active' : '' }}" />
         <x-dashboard.stat-card href="{{ route('bac-secretariat.pr.index', ['status' => \App\Models\ProcurementDocument::STATUS_UNDER_PR_VALIDATION]) }}" value="{{ $summary['underValidation'] }}" label="Under Validation" accent="navy" class="{{ $activeStatus === \App\Models\ProcurementDocument::STATUS_UNDER_PR_VALIDATION ? 'is-filter-active' : '' }}" />
         <x-dashboard.stat-card href="{{ route('bac-secretariat.pr.index', ['pr_status' => \App\Models\ProcurementDocument::PR_STATUS_ROUTED_TO_BUDGET]) }}" value="{{ $summary['routedToBudget'] }}" label="Routed to Budget" accent="green" class="{{ $activePrStatus === \App\Models\ProcurementDocument::PR_STATUS_ROUTED_TO_BUDGET ? 'is-filter-active' : '' }}" />
         <x-dashboard.stat-card href="{{ route('bac-secretariat.pr.index', ['pr_status' => \App\Models\ProcurementDocument::PR_STATUS_RETURNED]) }}" value="{{ $summary['returned'] }}" label="Returned PRs" accent="red" class="{{ $activePrStatus === \App\Models\ProcurementDocument::PR_STATUS_RETURNED ? 'is-filter-active' : '' }}" />
     </section>
+    @endunless
 
     <section class="table-panel" aria-label="BAC Secretariat Purchase Requests">
         <x-document-filter-card :action="route('bac-secretariat.pr.index')" class="pr-filter-toolbar">
@@ -132,7 +138,7 @@
                                     <a href="{{ route('bac-secretariat.pr.show', $document) }}">View PR</a>
                                     @if ($linkedResolution)
                                         <a href="{{ route('bac-secretariat.resolutions.show', $linkedResolution) }}">View BAC Resolution</a>
-                                    @else
+                                    @elseif ($isIncomingReference || ! $isResolutionPreparer)
                                         <a href="{{ route('bac-secretariat.resolutions.create', ['source_pr_document_id' => $document->id]) }}">Create BAC Resolution</a>
                                     @endif
                                 </div>
@@ -143,7 +149,7 @@
                             <td colspan="11">
                                 <div class="empty-state">
                                     <strong>No purchase requests yet</strong>
-                                    <p>Purchase Requests submitted by end-user offices will appear here for validation and routing.</p>
+                                    <p>{{ $isResolutionPreparer ? 'PR copies assigned to you will appear here.' : 'Purchase Requests submitted by end-user offices will appear here for validation and routing.' }}</p>
                                 </div>
                             </td>
                         </tr>

@@ -5,15 +5,18 @@
 @section('content')
     @php
         $activeStatus = $filters['status'] ?? request('status');
+        $isResolutionPreparer = auth()->user()?->user_id === 'BACSEC-001';
     @endphp
 
     <section class="dashboard-hero admin-users-hero">
         <div>
             <p class="eyebrow">BAC Secretariat</p>
             <h1>BAC Resolutions</h1>
-            <p>Prepare official BAC Resolution drafts from eligible Purchase Requests and route them for electronic signatures.</p>
+            <p>{{ $isResolutionPreparer ? 'Find your BAC Resolution drafts, signed documents, and returned records here.' : 'Prepare official BAC Resolution drafts from eligible Purchase Requests and route them for electronic signatures.' }}</p>
         </div>
-        <a href="{{ route('bac-secretariat.resolutions.create') }}" class="dashboard-action">Create BAC Resolution</a>
+        @unless ($isResolutionPreparer)
+            <a href="{{ route('bac-secretariat.resolutions.create') }}" class="dashboard-action">Create BAC Resolution</a>
+        @endunless
     </section>
 
     <section class="stat-grid stat-grid-modern" aria-label="BAC Resolution summary">
