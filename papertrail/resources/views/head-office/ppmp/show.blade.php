@@ -54,15 +54,17 @@
             />
         </div>
 
-        @if ($canModify || $canSubmitToAppConsolidation)
+        @if ($canModify || $canDelete || $canSubmitToAppConsolidation)
             <div class="head-office-ppmp-toolbar__group head-office-ppmp-toolbar__group--actions">
                 @if ($canModify)
                     <a href="{{ route('head-office.ppmp.edit', $document) }}" class="dashboard-action">Edit / Revise</a>
+                @endif
+                @if ($canDelete)
                     <form
                         method="POST"
                         action="{{ route('head-office.ppmp.destroy', $document) }}"
                         data-confirm-title="Delete PPMP?"
-                        data-confirm="This will permanently remove this draft or returned PPMP record and its saved item rows."
+                        data-confirm="{{ $canModify ? 'This will permanently remove this PPMP and its saved item rows.' : 'This signed PPMP and its signatures will be permanently deleted. This cannot be undone.' }}"
                         data-confirm-label="Delete PPMP"
                         data-confirm-type="danger"
                     >
@@ -71,17 +73,19 @@
                         <button type="submit" class="dashboard-action secondary-action">Delete</button>
                     </form>
                 @endif
-                <form
-                    method="POST"
-                    action="{{ route('head-office.ppmp.submit', $document) }}"
-                    data-confirm="{{ $submitConfirm }}"
-                    data-confirm-title="{{ $canSubmitToAppConsolidation ? 'Submit PPMP?' : 'Continue to E-Signature?' }}"
-                    data-confirm-label="{{ $submitLabel }}"
-                    data-confirm-type="submit"
-                >
-                    @csrf
-                    <button type="submit" class="dashboard-action" data-action-icon="false">{{ $submitLabel }}</button>
-                </form>
+                @if ($canModify || $canSubmitToAppConsolidation)
+                    <form
+                        method="POST"
+                        action="{{ route('head-office.ppmp.submit', $document) }}"
+                        data-confirm="{{ $submitConfirm }}"
+                        data-confirm-title="{{ $canSubmitToAppConsolidation ? 'Submit PPMP?' : 'Continue to E-Signature?' }}"
+                        data-confirm-label="{{ $submitLabel }}"
+                        data-confirm-type="submit"
+                    >
+                        @csrf
+                        <button type="submit" class="dashboard-action" data-action-icon="false">{{ $submitLabel }}</button>
+                    </form>
+                @endif
             </div>
         @endif
     </div>
