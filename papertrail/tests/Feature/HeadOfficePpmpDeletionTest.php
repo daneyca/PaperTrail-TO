@@ -15,7 +15,7 @@ class HeadOfficePpmpDeletionTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_signed_ppmp_not_sent_to_bac_can_be_deleted_with_its_signatures(): void
+    public function test_signed_ppmp_cannot_be_deleted_even_before_bac_submission(): void
     {
         $this->withoutMiddleware(EnsureUserHasPermission::class);
         $office = Office::create(['code' => 'DELETE-TEST', 'name' => 'Delete Test Office', 'type' => Office::TYPE_END_USER, 'status' => Office::STATUS_ACTIVE, 'is_requesting_office' => true]);
@@ -48,15 +48,15 @@ class HeadOfficePpmpDeletionTest extends TestCase
 
         $this->actingAs($user)->get(route('head-office.ppmp.index'))
             ->assertOk()
-            ->assertSee(route('head-office.ppmp.destroy', $documentId));
+            ->assertDontSee('data-confirm-title="Delete PPMP?"', false);
 
         $this->actingAs($user)->delete(route('head-office.ppmp.destroy', $documentId))
             ->assertRedirect(route('head-office.ppmp.index'));
 
-        $this->assertDatabaseMissing('procurement_documents', ['id' => $documentId]);
-        $this->assertDatabaseMissing('signature_requests', ['id' => $requestId]);
-        $this->assertDatabaseMissing('electronic_signatures', ['id' => $signatureId]);
-        $this->assertDatabaseMissing('signed_document_snapshots', ['electronic_signature_id' => $signatureId]);
+        $this->assertDatabaseHas('procurement_documents', ['id' => $documentId]);
+        $this->assertDatabaseHas('signature_requests', ['id' => $requestId]);
+        $this->assertDatabaseHas('electronic_signatures', ['id' => $signatureId]);
+        $this->assertDatabaseHas('signed_document_snapshots', ['electronic_signature_id' => $signatureId]);
     }
 
     public function test_ppmp_already_submitted_to_bac_cannot_be_deleted(): void

@@ -111,7 +111,6 @@
                     @forelse ($documents as $document)
                         @php
                             $canEdit = in_array($document->status, ['ppmp_draft', 'returned_by_bac_secretariat', 'ppmp_signature_returned'], true);
-                            $canDelete = $canEdit || ($document->status === \App\Models\ProcurementDocument::STATUS_PPMP_SIGNATORIES_COMPLETED && $document->submitted_at === null);
                         @endphp
                         <tr>
                             <td>{{ $document->displayNumber() }}</td>
@@ -132,13 +131,11 @@
                                     @endif
                                     @if ($canEdit)
                                         <a href="{{ route('head-office.ppmp.edit', $document) }}">Continue Editing</a>
-                                    @endif
-                                    @if ($canDelete)
                                         <form
                                             method="POST"
                                             action="{{ route('head-office.ppmp.destroy', $document) }}"
                                             data-confirm-title="Delete PPMP?"
-                                            data-confirm="{{ $canEdit ? 'This will permanently remove this PPMP and its saved item rows.' : 'This signed PPMP and its signatures will be permanently deleted. This cannot be undone.' }}"
+                                            data-confirm="This will permanently remove this draft or returned PPMP record and its saved item rows."
                                             data-confirm-label="Delete PPMP"
                                             data-confirm-type="danger"
                                         >
