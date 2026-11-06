@@ -371,6 +371,10 @@ class DocumentRoutingController extends Controller
 
     private function activeUserByRole(string $role): ?User
     {
+        if ($recipient = User::officeWorkflowRecipient($role)) {
+            return $recipient;
+        }
+
         return User::where('status', User::STATUS_ACTIVE)
             ->where(function (Builder $query) use ($role) {
                 $query->where('role', $role);

@@ -8,6 +8,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -26,6 +27,63 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public const STATUS_ACTIVE = 'active';
     public const STATUS_INACTIVE = 'inactive';
+
+    public const OFFICE_WORKFLOW_ROLES = [
+        'MBO-001' => ['name' => self::ROLE_BUDGET, 'code' => 'budget_officer', 'slug' => 'budget'],
+        'ACC-001' => ['name' => self::ROLE_ACCOUNTING, 'code' => 'accounting_officer', 'slug' => 'accounting'],
+        'MO-001' => ['name' => self::ROLE_APPROVING_AUTHORITY, 'code' => 'approving_authority', 'slug' => 'approving-authority'],
+    ];
+
+    public const RETIRED_ACCOUNT_REPLACEMENTS = [
+        'BUDGET-001' => 'MBO-001',
+        'ACCOUNTING-001' => 'ACC-001',
+        'HOPE-001' => 'MO-001',
+    ];
+
+    public static function officeWorkflowRoleNames(): array
+    {
+        return array_column(self::OFFICE_WORKFLOW_ROLES, 'name');
+    }
+
+    public function officeWorkflowRole(): ?array
+    {
+        return $this->role === self::ROLE_HEAD_OFFICE && $this->isActive()
+            ? (self::OFFICE_WORKFLOW_ROLES[$this->user_id] ?? null)
+            : null;
+    }
+
+    public static function officeAccountForRole(string $role): ?string
+    {
+        foreach (self::OFFICE_WORKFLOW_ROLES as $account => $duty) {
+            if (in_array($role, $duty, true)) {
+                return $account;
+            }
+        }
+
+        return null;
+    }
+
+    public function scopeForWorkflowRole(Builder $query, string $role): Builder
+    {
+        $account = self::officeAccountForRole($role);
+
+        return $query->where(function (Builder $roles) use ($role, $account) {
+            $roles->where('role', $role)->orWhereHas('assignedRole', function (Builder $assigned) use ($role) {
+                $assigned->where('name', $role)->orWhere('code', $role);
+            });
+            if ($account) {
+                $roles->orWhere(fn (Builder $office) => $office->where('user_id', $account)->where('role', self::ROLE_HEAD_OFFICE));
+            }
+        });
+    }
+
+    public static function officeWorkflowRecipient(string $role): ?self
+    {
+        $account = self::officeAccountForRole($role);
+
+        return $account ? self::where('user_id', $account)
+            ->where('role', self::ROLE_HEAD_OFFICE)->where('status', self::STATUS_ACTIVE)->first() : null;
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -146,16 +204,24 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function hasRole(string $codeOrName): bool
     {
-        return $this->assignedRole?->code === $codeOrName
+        return in_array($codeOrName, $this->officeWorkflowRole() ?? [], true)
+            || $this->assignedRole?->code === $codeOrName
             || $this->assignedRole?->name === $codeOrName
             || $this->role === $codeOrName;
     }
 
     public function hasPermission(string $permissionKey): bool
     {
-        return $this->assignedRole?->permissions()
+        if ($this->assignedRole?->permissions()
             ->where('key', $permissionKey)
-            ->exists() ?? false;
+            ->exists()) {
+            return true;
+        }
+
+        $duty = $this->officeWorkflowRole();
+
+        return $duty && Role::where('code', $duty['code'])
+            ->whereHas('permissions', fn (Builder $permissions) => $permissions->where('key', $permissionKey))->exists();
     }
 
     public function hasBacsec002PurchaseRequestCapability(): bool

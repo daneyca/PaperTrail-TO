@@ -7,6 +7,7 @@ use App\Models\BacResolution;
 use App\Models\ProcurementDocument;
 use App\Models\PurchaseOrder;
 use App\Models\Rfq;
+use App\Models\SignatureRequest;
 use App\Models\SvpProcurementChain;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -62,7 +63,8 @@ class GlobalSearchService
             $sources[] = [$query, $documentFields, 'Document', $route, 'display_number', 'title', 'status'];
         };
 
-        switch ($user->roleSlug()) {
+        foreach (array_filter([$user->roleSlug(), $user->officeWorkflowRole()['slug'] ?? null]) as $roleSlug) {
+        switch ($roleSlug) {
             case 'head-office':
                 $addDocument(ProcurementDocument::query()->where(function (Builder $query) use ($user) {
                     if ($user->office_id) {
@@ -124,6 +126,13 @@ class GlobalSearchService
                     'SVP file', 'admin.svp-chains.show', 'chain_number', 'office_name', 'current_status'];
                 break;
         }
+
+        }
+
+        $sources[] = [app(SignatureRequestService::class)->requestsForUser($user)
+            ->whereNotIn('status', [SignatureRequest::STATUS_CANCELLED, SignatureRequest::STATUS_SKIPPED]),
+            ['document_type', 'document_label', 'tracking_number', 'signatory_label'],
+            'Signature request', 'signature-requests.show', 'tracking_number', 'document_label', 'status'];
 
         return $sources;
     }

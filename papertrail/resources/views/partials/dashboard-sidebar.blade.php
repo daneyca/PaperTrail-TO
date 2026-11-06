@@ -66,7 +66,7 @@
         ],
     ];
 
-    $items = [
+    $roleMenus = [
         'admin' => [
             ['section' => 'Workspace'],
             ['label' => 'Dashboard', 'route' => 'admin.dashboard', 'icon' => 'dashboard'],
@@ -239,10 +239,16 @@
                 ],
             ],
         ],
-    ][$roleSlug] ?? [
+    ];
+
+    $items = $roleMenus[$roleSlug] ?? [
         ['section' => 'Workspace'],
         ['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'dashboard'],
     ];
+
+    if ($duty = $user?->officeWorkflowRole()) {
+        array_splice($items, 4, 0, [$roleMenus[$duty['slug']][2]]);
+    }
 
     if ($roleSlug === 'bac-secretariat' && ($hasBacsec002PurchaseRequestCapability || $isBacsecPrSignatureOnly)) {
         $items = array_values(array_filter($items, fn ($item) => ($item['label'] ?? null) !== 'SVP Plans'));

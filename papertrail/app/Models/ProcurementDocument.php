@@ -299,7 +299,7 @@ class ProcurementDocument extends Model
                 return;
             }
 
-            User::where('role', User::ROLE_BUDGET)
+            User::forWorkflowRole(User::ROLE_BUDGET)
                 ->where('status', User::STATUS_ACTIVE)
                 ->get()
                 ->each(function (User $budgetOfficer) use ($document) {
@@ -332,7 +332,7 @@ class ProcurementDocument extends Model
                 return;
             }
 
-            User::where('role', User::ROLE_ACCOUNTING)
+            User::forWorkflowRole(User::ROLE_ACCOUNTING)
                 ->where('status', User::STATUS_ACTIVE)
                 ->get()
                 ->each(function (User $accountingOfficer) use ($document) {
@@ -702,8 +702,8 @@ class ProcurementDocument extends Model
     {
         return $query->where(function (Builder $builder) use ($user) {
             $builder->whereHas('currentOffice', function (Builder $officeQuery) {
-                $officeQuery->where('code', 'MACCO')
-                    ->orWhere('name', 'Accounting Office');
+                $officeQuery->whereIn('code', ['MACCO', 'Accounting'])
+                    ->orWhereIn('name', ['Accounting Office', 'Municipal Accounting Office']);
             })->orWhere('assigned_to_user_id', $user->id);
         });
     }

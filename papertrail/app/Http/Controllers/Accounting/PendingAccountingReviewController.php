@@ -325,7 +325,7 @@ class PendingAccountingReviewController extends Controller
 
     private function budgetOfficer(): ?User
     {
-        return User::where('role', User::ROLE_BUDGET)
+        return User::officeWorkflowRecipient(User::ROLE_BUDGET) ?? User::where('role', User::ROLE_BUDGET)
             ->where('status', User::STATUS_ACTIVE)
             ->first();
     }

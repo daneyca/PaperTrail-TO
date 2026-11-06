@@ -2613,14 +2613,14 @@ class AnnualProcurementPlanController extends Controller
                 'office' => 'Municipal Budget Office',
                 'role_code' => 'budget_officer',
                 'role_name' => User::ROLE_BUDGET,
-                'account_code' => 'BUDGET-001',
+                'account_code' => 'MBO-001',
             ],
             'accounting officer', 'municipal accountant' => [
                 'title' => 'Accounting Officer',
                 'office' => 'Municipal Accounting Office',
                 'role_code' => 'accounting_officer',
                 'role_name' => User::ROLE_ACCOUNTING,
-                'account_code' => 'ACCOUNTING-001',
+                'account_code' => 'ACC-001',
             ],
             'municipal mayor' => [
                 'title' => 'Municipal Mayor',
@@ -2640,7 +2640,7 @@ class AnnualProcurementPlanController extends Controller
                 'office' => 'Office of the Municipal Mayor',
                 'role_code' => 'approving_authority',
                 'role_name' => User::ROLE_APPROVING_AUTHORITY,
-                'account_code' => 'HOPE-001',
+                'account_code' => 'MO-001',
                 'office_code' => 'MO',
             ],
             'pr numbering staff' => [

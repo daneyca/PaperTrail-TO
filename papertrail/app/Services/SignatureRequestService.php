@@ -424,8 +424,12 @@ class SignatureRequestService
     private function resolveSigner(array $signerData): ?User
     {
         $accountCode = $signerData['account_code'] ?? $signerData['user_id'] ?? null;
+        $accountCode = User::RETIRED_ACCOUNT_REPLACEMENTS[$accountCode] ?? $accountCode;
         $roleCode = $signerData['role_code'] ?? null;
         $roleName = $signerData['role_name'] ?? $signerData['label'] ?? null;
+        if (! $accountCode && ($recipient = User::officeWorkflowRecipient($roleCode ?? $roleName ?? ''))) {
+            return $recipient;
+        }
         $officeCode = $signerData['office_code'] ?? null;
         $officeNames = collect($signerData['office_names'] ?? [])->filter()->values()->all();
         $officeId = null;
@@ -479,6 +483,7 @@ class SignatureRequestService
             $user->assignedRole?->code,
             $user->roleSlug(),
             str_replace('-', '_', $user->roleSlug()),
+            ...array_values($user->officeWorkflowRole() ?? []),
         ])
             ->filter()
             ->unique()

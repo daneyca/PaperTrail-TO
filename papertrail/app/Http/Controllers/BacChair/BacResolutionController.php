@@ -473,7 +473,8 @@ class BacResolutionController extends Controller
 
     private function hopeUser(): ?User
     {
-        return $this->activeUserByRoleName(User::ROLE_APPROVING_AUTHORITY)
+        return User::officeWorkflowRecipient(User::ROLE_APPROVING_AUTHORITY)
+            ?? $this->activeUserByRoleName(User::ROLE_APPROVING_AUTHORITY)
             ?? $this->activeUserByRoleCode('hope')
             ?? $this->activeUserByRoleCode('approving_authority')
             ?? User::where('status', User::STATUS_ACTIVE)->where('user_id', 'HOPE-001')->first();

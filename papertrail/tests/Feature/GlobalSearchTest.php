@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\ProcurementDocument;
 use App\Models\Rfq;
+use App\Models\SignatureRequest;
 use App\Models\User;
 use App\Services\GlobalSearchService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -140,5 +141,44 @@ class GlobalSearchTest extends TestCase
             ->assertOk()
             ->assertJsonCount(1, 'results')
             ->assertJsonPath('results.0.type', 'RFQ');
+    }
+
+    public function test_assigned_app_signature_request_appears_in_search_only_for_recipient(): void
+    {
+        $recipient = User::factory()->create([
+            'user_id' => 'BACSEC-SEARCH-001',
+            'role' => User::ROLE_BAC_SECRETARIAT,
+            'status' => User::STATUS_ACTIVE,
+            'must_change_password' => false,
+        ]);
+        $other = User::factory()->create([
+            'user_id' => 'BACSEC-SEARCH-002',
+            'role' => User::ROLE_BAC_SECRETARIAT,
+            'status' => User::STATUS_ACTIVE,
+            'must_change_password' => false,
+        ]);
+        $request = SignatureRequest::query()->create([
+            'document_type' => 'app',
+            'document_label' => 'Annual Procurement Plan',
+            'tracking_number' => '2026-10-APP-0001',
+            'requested_to_user_id' => $recipient->id,
+            'status' => SignatureRequest::STATUS_PENDING,
+        ]);
+
+        $this->actingAs($recipient)
+            ->get(route('search.index', ['q' => 'APP']))
+            ->assertOk()
+            ->assertSee('2026-10-APP-0001')
+            ->assertSee(route('signature-requests.show', $request), false);
+
+        $this->getJson(route('search.suggestions', ['q' => 'APP']))
+            ->assertOk()
+            ->assertJsonCount(1, 'results')
+            ->assertJsonPath('results.0.title', 'Annual Procurement Plan');
+
+        $this->actingAs($other)
+            ->getJson(route('search.suggestions', ['q' => 'APP']))
+            ->assertOk()
+            ->assertJsonCount(0, 'results');
     }
 }

@@ -480,6 +480,10 @@ class PurchaseRequestController extends Controller
 
     private function budgetOfficer(): ?User
     {
+        if ($recipient = User::officeWorkflowRecipient(User::ROLE_BUDGET)) {
+            return $recipient;
+        }
+
         return User::where(function (Builder $query) {
                 $query->where('role', User::ROLE_BUDGET)
                     ->orWhere('user_id', 'BUDGET-001');

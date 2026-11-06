@@ -67,7 +67,7 @@ class AdminUserController extends Controller
     {
         return view('admin.users.create', [
             'user' => new User(['status' => User::STATUS_ACTIVE]),
-            'roles' => Role::where('status', Role::STATUS_ACTIVE)->orderBy('name')->get(),
+            'roles' => Role::where('status', Role::STATUS_ACTIVE)->whereNotIn('name', User::officeWorkflowRoleNames())->orderBy('name')->get(),
             'offices' => Office::where('status', Office::STATUS_ACTIVE)->orderBy('name')->get(),
         ]);
     }
@@ -102,7 +102,7 @@ class AdminUserController extends Controller
         return view('admin.users.edit', [
             'user' => $user,
             'roles' => Role::where('status', Role::STATUS_ACTIVE)
-                ->orWhere('id', $user->role_id)
+                ->whereNotIn('name', User::officeWorkflowRoleNames())
                 ->orderBy('name')
                 ->get(),
             'offices' => Office::where('status', Office::STATUS_ACTIVE)
@@ -187,6 +187,10 @@ class AdminUserController extends Controller
 
     public function updateStatus(Request $request, User $user): RedirectResponse
     {
+        if (array_key_exists($user->user_id, User::RETIRED_ACCOUNT_REPLACEMENTS)) {
+            return back()->with('error', 'Use the existing office account. This duplicate account has been retired.');
+        }
+
         if ($request->user()->is($user)) {
             return back()->with('error', 'You cannot deactivate your own admin account.');
         }
@@ -239,7 +243,7 @@ class AdminUserController extends Controller
             'contact_number' => ['nullable', 'string', 'max:50'],
             'position' => ['nullable', 'string', 'max:255'],
             'office_id' => ['required', Rule::exists('offices', 'id')],
-            'role_id' => ['required', Rule::exists('roles', 'id')],
+            'role_id' => ['required', Rule::exists('roles', 'id')->whereNotIn('name', User::officeWorkflowRoleNames())],
             'password' => [$user ? 'nullable' : 'required', 'string', 'min:8'],
             'status' => ['required', Rule::in([User::STATUS_ACTIVE, User::STATUS_INACTIVE])],
         ];

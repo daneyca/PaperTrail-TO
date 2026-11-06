@@ -124,8 +124,8 @@ class DatabaseSeeder extends Seeder
         $assignments = [
             'admin' => Permission::pluck('key')->all(),
             'head_office' => ['dashboard.view', 'profile.view', 'profile.update', 'notifications.view', 'documents.view.own', 'documents.track', 'documents.submit', 'documents.edit.own', 'documents.upload', 'documents.comment', 'ppmp.submit', 'ppmp.view', 'pr.submit', 'pr.view'],
-            'budget_officer' => ['dashboard.view', 'profile.view', 'profile.update', 'notifications.view', 'documents.view.assigned', 'documents.track', 'documents.return', 'documents.comment', 'review.budget', 'reports.budget'],
-            'accounting_officer' => ['dashboard.view', 'profile.view', 'profile.update', 'notifications.view', 'documents.view.assigned', 'documents.track', 'documents.return', 'documents.comment', 'review.accounting', 'reports.accounting'],
+            'budget_officer' => ['dashboard.view', 'profile.view', 'profile.update', 'notifications.view', 'documents.view.assigned', 'documents.track', 'documents.return', 'documents.comment', 'review.budget', 'reports.budget', 'esignature.use'],
+            'accounting_officer' => ['dashboard.view', 'profile.view', 'profile.update', 'notifications.view', 'documents.view.assigned', 'documents.track', 'documents.return', 'documents.comment', 'review.accounting', 'reports.accounting', 'esignature.use'],
             'bac_secretariat' => ['dashboard.view', 'profile.view', 'profile.update', 'notifications.view', 'documents.view.all', 'documents.track', 'documents.return', 'documents.comment', 'workflow.route', 'workflow.update_status', 'workflow.view_history', 'ppmp.review', 'app.view', 'app.consolidate', 'pr.view', 'pr.review', 'bac.resolution.view', 'bac.resolution.create', 'bac.resolution.update', 'bac.resolution.submit', 'po.view', 'po.prepare', 'reports.procurement', 'audit.view'],
             'bac_member' => ['dashboard.view', 'profile.view', 'profile.update', 'notifications.view', 'documents.view.assigned', 'documents.track', 'documents.comment', 'documents.return', 'review.bac', 'ppmp.review', 'pr.review'],
             'bac_chair' => ['dashboard.view', 'profile.view', 'profile.update', 'notifications.view', 'documents.view.assigned', 'documents.track', 'documents.comment', 'documents.return', 'review.bac', 'workflow.update_status', 'workflow.view_history', 'ppmp.review', 'app.approve', 'pr.review', 'bac.resolution.view', 'bac.resolution.review', 'bac.resolution.confirm', 'bac.resolution.return', 'bac.resolution.forward_to_hope', 'esignature.use', 'reports.procurement'],
@@ -190,9 +190,6 @@ class DatabaseSeeder extends Seeder
 
         $workflowUsers = [
             ['ADMIN-001', 'System Administrator', 'SYSADMIN', User::ROLE_ADMIN],
-            ['HOPE-001', 'Head of the Procuring Entity', 'MO', User::ROLE_APPROVING_AUTHORITY],
-            ['BUDGET-001', 'Budget Office', 'MBO', User::ROLE_BUDGET],
-            ['ACCOUNTING-001', 'Accounting Office', 'MACCO', User::ROLE_ACCOUNTING],
             ['BACSEC-001', 'BAC Secretariat Resolution Preparer', 'BACSEC', User::ROLE_BAC_SECRETARIAT],
             ['BACSEC-002', 'Meagan C. Matutes', 'BACSEC', User::ROLE_BAC_SECRETARIAT],
             ['BACSEC-003', 'BAC Secretariat APP Consolidation', 'BACSEC', User::ROLE_BAC_SECRETARIAT],
@@ -323,7 +320,7 @@ class DatabaseSeeder extends Seeder
 
         if (class_exists(ProcurementDocument::class) && $seedDemoDocuments) {
             $budgetOffice = Office::where('code', 'MBO')->first();
-            $budgetOfficer = User::where('user_id', 'BUDGET-001')->first();
+            $budgetOfficer = User::where('user_id', 'MBO-001')->first();
 
             $samples = [
                 ['PR-2026-MEO-0001', 'Purchase Request', 'Road maintenance materials and supplies', 'MEO', 'MEO-001', ProcurementDocument::STATUS_PENDING_BUDGET_REVIEW, 'normal', 285000.00],

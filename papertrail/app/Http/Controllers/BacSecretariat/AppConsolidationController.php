@@ -254,7 +254,7 @@ class AppConsolidationController extends Controller
         }
 
         $approvingOffice = $this->officeByCodeOrName('OMM', 'Office of the Municipal Mayor');
-        $approvingUser = User::where('status', User::STATUS_ACTIVE)
+        $approvingUser = User::officeWorkflowRecipient(User::ROLE_APPROVING_AUTHORITY) ?? User::where('status', User::STATUS_ACTIVE)
             ->where(function (Builder $query) {
                 $query->whereHas('assignedRole', fn (Builder $roleQuery) => $roleQuery->where('code', 'approving_authority'))
                     ->orWhere('role', User::ROLE_APPROVING_AUTHORITY)

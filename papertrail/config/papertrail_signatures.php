@@ -63,7 +63,7 @@ return [
                 'label' => 'Approved By',
                 'role_code' => 'approving_authority',
                 'role_name' => 'HOPE / Municipal Mayor',
-                'account_code' => 'HOPE-001',
+                'account_code' => 'MO-001',
                 'office_code' => 'MO',
                 'office_names' => ['Office of the Municipal Mayor'],
                 'order' => 7,

@@ -1358,6 +1358,10 @@ class BacResolutionController extends Controller
 
     private function activeUserByRoleOrCode(string $roleName, string $roleCode, string $fallbackUserId): ?User
     {
+        if ($recipient = User::officeWorkflowRecipient($roleName)) {
+            return $recipient;
+        }
+
         $primary = $fallbackUserId === 'BACSEC-001'
             ? User::where('user_id', $fallbackUserId)->where('status', User::STATUS_ACTIVE)->first()
             : null;

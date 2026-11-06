@@ -28,11 +28,12 @@ class LoginPageTest extends TestCase
         $this->assertStringStartsWith('image/', (string) $response->headers->get('Content-Type'));
     }
 
-    public function test_budget_and_accounting_officers_are_available_as_login_roles(): void
+    public function test_duplicate_office_duties_are_not_separate_login_roles(): void
     {
         foreach ([
             ['code' => 'budget_officer', 'name' => User::ROLE_BUDGET, 'route' => 'budget.dashboard'],
             ['code' => 'accounting_officer', 'name' => User::ROLE_ACCOUNTING, 'route' => 'accounting.dashboard'],
+            ['code' => 'approving_authority', 'name' => User::ROLE_APPROVING_AUTHORITY, 'route' => 'approving-authority.dashboard'],
         ] as $role) {
             Role::create([
                 'code' => $role['code'],
@@ -45,7 +46,8 @@ class LoginPageTest extends TestCase
 
         $this->get(route('login'))
             ->assertOk()
-            ->assertSee(User::ROLE_BUDGET)
-            ->assertSee(User::ROLE_ACCOUNTING);
+            ->assertDontSee('value="'.User::ROLE_BUDGET.'"', false)
+            ->assertDontSee('value="'.User::ROLE_ACCOUNTING.'"', false)
+            ->assertDontSee('value="'.User::ROLE_APPROVING_AUTHORITY.'"', false);
     }
 }

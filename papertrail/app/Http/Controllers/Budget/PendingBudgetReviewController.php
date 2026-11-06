@@ -301,7 +301,7 @@ class PendingBudgetReviewController extends Controller
 
     private function accountingOfficer(): ?User
     {
-        return User::where('role', User::ROLE_ACCOUNTING)
+        return User::officeWorkflowRecipient(User::ROLE_ACCOUNTING) ?? User::where('role', User::ROLE_ACCOUNTING)
             ->where('status', User::STATUS_ACTIVE)
             ->first();
     }

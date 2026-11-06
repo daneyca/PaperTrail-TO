@@ -266,7 +266,7 @@ class EndUserPrSignatoryRoutingService
                 ?: $this->activeUserByOffice(['MBO'], ['Municipal Budget Office']),
             'municipal treasurer' => $this->activeUserByIds(['MTO-001'])
                 ?: $this->activeHeadOfficeUserByOffice(['MTO'], ['Municipal Treasurers Office', 'Municipal Treasurer Office']),
-            'accounting officer' => $this->activeUserByIds(['ACCOUNTING-001', 'ACC-001'])
+            'accounting officer' => $this->activeUserByIds(['ACC-001'])
                 ?: $this->activeHeadOfficeUserByOffice(['Accounting', 'MACCO'], ['Municipal Accounting Office', 'Accounting Office']),
             'bac secretariat' => $this->activeUserByIds(['BACSEC-002', 'BACSEC-001', 'BACSEC-003'])
                 ?: $this->activeUserByOffice(['BACSEC'], ['BAC Secretariat']),

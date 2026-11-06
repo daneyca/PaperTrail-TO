@@ -20,7 +20,8 @@ class EnsureUserHasRole
         $roleCodes = collect($roles)->flatMap(fn ($role) => [$role, str_replace('-', '_', $role)])->all();
 
         if (!in_array($user->roleSlug(), $roles, true)
-            && !in_array($user->assignedRole?->code, $roleCodes, true)) {
+            && !in_array($user->assignedRole?->code, $roleCodes, true)
+            && !collect($roleCodes)->contains(fn ($role) => $user->hasRole($role))) {
             if ($this->allowsBacsec002PurchaseRequestRoutes($request, $user, $roles, $roleCodes)) {
                 return $next($request);
             }
