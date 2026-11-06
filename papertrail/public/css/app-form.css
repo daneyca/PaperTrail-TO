@@ -1010,8 +1010,19 @@
 
 .app-signatory-name {
     margin-top: 4mm;
+    min-height: 3.6mm;
     border-bottom: 1px solid #000;
     font-weight: 700;
+}
+
+@media screen {
+    .app-signatory-name[contenteditable="true"][data-placeholder]:empty::before,
+    .app-signatory-name[contenteditable="true"][data-placeholder]:has(> br:only-child)::before {
+        content: attr(data-placeholder);
+        color: #64748b;
+        font-weight: 400;
+        pointer-events: none;
+    }
 }
 
 .app-signatory-title,

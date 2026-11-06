@@ -72,9 +72,9 @@
     $bagongPath = public_path('images/logos/bagongpilipinas.jpg');
 
     $defaultSignatories = [
-        'prepared_by' => ['label' => 'Prepared By:', 'name' => 'JOBELLE A. SOLER', 'title' => '', 'office' => ''],
-        'recommended_by' => ['label' => 'Recommended By:', 'authority' => 'By the Authority of the Bids and Awards Com.', 'name' => 'EDMAR PETER T. TAMBIS', 'title' => '', 'office' => ''],
-        'approved_by' => ['label' => 'Approved By:', 'name' => 'AURELIO H. SUNGA, JR.', 'title' => '', 'office' => ''],
+        'prepared_by' => ['label' => 'Prepared By:', 'name' => '', 'title' => '', 'office' => ''],
+        'recommended_by' => ['label' => 'Recommended By:', 'authority' => 'By the Authority of the Bids and Awards Com.', 'name' => '', 'title' => '', 'office' => ''],
+        'approved_by' => ['label' => 'Approved By:', 'name' => '', 'title' => '', 'office' => ''],
     ];
     $signatoryDesignationOptions = [
         'BAC Secretariat' => 'Bids and Awards Committee Secretariat',
@@ -283,7 +283,7 @@
                                 @endif
                             @endif
                         </div>
-                        <div class="app-signatory-name app-signatory-field" data-signatory-key="{{ $key }}" data-signatory-column="name">{{ $text($signatoryValue($key, 'name')) }}</div>
+                        <div class="app-signatory-name app-signatory-field" data-signatory-key="{{ $key }}" data-signatory-column="name" @if ($isEditable && ! $signatoriesLocked) data-placeholder="Enter Name" role="textbox" aria-label="{{ $signatory['label'] }} name" @endif>{{ $text($signatoryValue($key, 'name')) }}</div>
                         <div>Signature over Printed Name</div>
                         @php $selectedTitle = $signatoryTitle($key); @endphp
                         @if ($isEditable)

@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
+    use \App\Models\Concerns\HasWorkspaces;
     use HasFactory, Notifiable;
 
     public const ROLE_ADMIN = 'Admin';
@@ -148,11 +149,17 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function hasVerifiedEmail(): bool
     {
+        if ($this->principal_user_id) {
+            return $this->loginAccount()->hasVerifiedEmail();
+        }
         return $this->email_verified_at !== null;
     }
 
     public function markEmailAsVerified(): bool
     {
+        if ($this->principal_user_id) {
+            return $this->loginAccount()->markEmailAsVerified();
+        }
         return $this->forceFill([
             'email_verified_at' => now(),
             'email_verification_code_hash' => null,

@@ -129,7 +129,7 @@
     font-size: 0.72rem;
     font-weight: 900;
     letter-spacing: 0.04em;
-    text-align: left;
+    text-align: center;
     text-transform: uppercase;
     white-space: nowrap;
 }
@@ -138,6 +138,7 @@
     padding: 13px 14px;
     border-top: 1px solid #e5edf6;
     color: #1f2f46;
+    text-align: center;
     vertical-align: middle;
 }
 
@@ -240,7 +241,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    justify-content: flex-start;
+    justify-content: center !important;
 }
 
 .signature-actions .btn {

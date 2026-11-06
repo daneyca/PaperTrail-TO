@@ -143,6 +143,7 @@ Route::middleware('no.cache')->prefix('supplier-signing')->name('supplier-signin
 });
 
 Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->group(function () {
+    Route::post('/workspaces/switch', [\App\Http\Controllers\WorkspaceController::class, 'switch'])->name('workspaces.switch');
     Route::get('/search', [GlobalSearchController::class, 'index'])->name('search.index');
     Route::get('/search/suggestions', [GlobalSearchController::class, 'suggestions'])->middleware('throttle:60,1')->name('search.suggestions');
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
@@ -406,6 +407,8 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         Route::get('/export', [AiSummaryDashboardController::class, 'export'])->name('export');
     });
     Route::middleware('role:admin')->prefix('admin/users')->name('admin.users.')->group(function () {
+        Route::post('/{user}/workspaces', [\App\Http\Controllers\Admin\WorkspaceAssignmentController::class, 'store'])->name('workspaces.store');
+        Route::patch('/{user}/workspaces/{workspace}/status', [\App\Http\Controllers\Admin\WorkspaceAssignmentController::class, 'status'])->name('workspaces.status');
         Route::get('/', [AdminUserController::class, 'index'])->name('index');
         Route::get('/create', [AdminUserController::class, 'create'])->name('create');
         Route::post('/', [AdminUserController::class, 'store'])->name('store');

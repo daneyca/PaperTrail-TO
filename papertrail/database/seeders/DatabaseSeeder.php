@@ -215,7 +215,7 @@ class DatabaseSeeder extends Seeder
                     'role_id' => $assignedRole?->id,
                     'role' => $role,
                     'password' => $existingUser?->password ?? $password,
-                    'status' => User::STATUS_ACTIVE,
+                    'status' => $existingUser?->status ?? User::STATUS_ACTIVE,
                 ],
             );
         }

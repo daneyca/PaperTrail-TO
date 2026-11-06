@@ -69,6 +69,11 @@ class LoginController extends Controller
                 ->withInput($request->except('password', 'security_code'));
         }
 
+        if ($user->principal_user_id) {
+            return back()->withErrors(['user_id' => 'This role now uses your main office login. Sign in with your office User ID, then use Switch Workspace.'])
+                ->withInput($request->except('password', 'security_code'));
+        }
+
         if (!$user->isActive()) {
             AuditLogger::failed('user_login_failed', [
                 'module' => 'Authentication',
@@ -131,6 +136,7 @@ class LoginController extends Controller
         }
 
         $request->session()->regenerate();
+        $request->session()->forget('active_workspace_id');
         CaptchaController::forget($request);
         AuditLogger::log('Authentication', 'user_login_success', 'User logged in successfully.', $user);
 

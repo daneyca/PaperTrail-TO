@@ -215,7 +215,7 @@
             ['section' => 'Workspace'],
             ['label' => 'Dashboard', 'route' => 'bac-chair.dashboard', 'icon' => 'dashboard'],
             [
-                'label' => 'BAC Chair Review',
+                'label' => 'BAC Chairperson Review',
                 'icon' => 'approval',
                 'children' => [
                     ['label' => 'Approvals', 'route' => 'bac-chair.approvals.index', 'active' => 'bac-chair.approvals.*'],

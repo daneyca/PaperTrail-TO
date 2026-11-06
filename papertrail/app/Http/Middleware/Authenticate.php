@@ -11,7 +11,9 @@ class Authenticate extends Middleware
     public function handle($request, \Closure $next, ...$guards): Response
     {
         return parent::handle($request, function ($request) use ($next) {
-            if (! $request->user()?->isActive()) {
+            $account = $request->user();
+            // Old BAC sessions must not become a way into the new personal login.
+            if (! $account?->isActive() || $account->principal_user_id) {
                 auth()->logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
@@ -21,7 +23,29 @@ class Authenticate extends Middleware
                     : redirect()->route('login');
             }
 
-            return $next($request);
+            $request->attributes->set('login_account', $account);
+            $workspaceId = $request->session()->get('active_workspace_id', $account->id);
+            $workspace = $account;
+            if ((int) $workspaceId !== (int) $account->id && ! $request->routeIs('workspaces.switch', 'logout', 'session.timeout', 'switch-account')) {
+                $workspace = $account->linkedWorkspaces()->whereKey($workspaceId)->where('status', \App\Models\User::STATUS_ACTIVE)->first();
+                if (! $workspace) {
+                    $request->session()->forget('active_workspace_id');
+                    return $request->isMethod('GET')
+                        ? redirect()->route('dashboard')->with('warning', 'That workspace is no longer available.')
+                        : abort(409, 'Your workspace changed. Reload the page before continuing.');
+                }
+                $workspace->setRelation('principalAccount', $account);
+            }
+
+            auth()->setUser($workspace);
+            try {
+                return $next($request);
+            } finally {
+                // Only the principal is persisted in the login session, never the selected role.
+                if (auth()->hasUser()) {
+                    auth()->setUser($account);
+                }
+            }
         }, ...$guards);
     }
 

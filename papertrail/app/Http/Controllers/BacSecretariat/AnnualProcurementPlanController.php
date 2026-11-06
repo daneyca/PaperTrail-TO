@@ -2548,7 +2548,7 @@ class AnnualProcurementPlanController extends Controller
         return [
             'prepared_by' => [
                 'label' => 'Prepared By:',
-                'name' => 'JOBELLE A. SOLER',
+                'name' => '',
                 'title' => '',
                 'office' => '',
                 'order' => 1,
@@ -2556,14 +2556,14 @@ class AnnualProcurementPlanController extends Controller
             'recommended_by' => [
                 'label' => 'Recommended By:',
                 'authority' => 'By the Authority of the Bids and Awards Com.',
-                'name' => 'EDMAR PETER T. TAMBIS',
+                'name' => '',
                 'title' => '',
                 'office' => '',
                 'order' => 2,
             ],
             'approved_by' => [
                 'label' => 'Approved By:',
-                'name' => 'AURELIO H. SUNGA, JR.',
+                'name' => '',
                 'title' => '',
                 'office' => '',
                 'order' => 3,

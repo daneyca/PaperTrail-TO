@@ -55,6 +55,7 @@ class ElectronicSignatureService
 
     public function ensureSignatureProfile(User $user): bool
     {
+        $user = $user->loginAccount();
         return filled($user->typed_signature_name) && filled($user->signer_position);
     }
 
@@ -65,6 +66,9 @@ class ElectronicSignatureService
 
     public function canSignWithReason(User $user, Model $document, string $documentType, string $action, ?SignatureRequest $signatureRequest = null): array
     {
+        if (! $user->isActive() || ! $user->loginAccount()->isActive()) {
+            return ['ok' => false, 'message' => 'This account or workspace is inactive.'];
+        }
         $type = $this->normalizeDocumentType($documentType);
 
         if ($type === 'purchase_request' && $document instanceof ProcurementDocument) {
@@ -294,7 +298,7 @@ class ElectronicSignatureService
             ];
         }
 
-        if (! Hash::check((string) ($input['current_password'] ?? ''), $user->password)) {
+        if (! Hash::check((string) ($input['current_password'] ?? ''), $user->loginAccount()->password)) {
             AuditLogger::signature('signature_password_failed', $document, [
                 'description' => 'Signer entered an incorrect password.',
                 'severity' => 'warning',
@@ -332,7 +336,7 @@ class ElectronicSignatureService
                 ? ($signatureRequest->requested_to_role ?: $signatureRequest->signatory_label ?: ($user->signer_position ?: ($user->position ?: $user->role)))
                 : ($user->signer_position ?: ($user->position ?: $user->role));
             $requestMetadata = $signatureRequest?->metadata ?: [];
-            $typedSignatureName = $user->typed_signature_name ?: $user->name;
+            $typedSignatureName = $user->loginAccount()->typed_signature_name ?: $user->name;
 
             if (($isPurchaseRequestSignature || $isCompetitiveBiddingSignature) && filled($requestMetadata['printed_name'] ?? null)) {
                 $typedSignatureName = $requestMetadata['printed_name'];
@@ -346,7 +350,7 @@ class ElectronicSignatureService
                 'consent_text' => $consent,
                 'typed_signature_name' => $typedSignatureName,
                 'signer_position' => $signerPosition,
-                'signature_image_path' => $user->signature_image_path,
+                'signature_image_path' => $user->loginAccount()->signature_image_path,
                 'password_confirmed_at' => now(),
                 'document_hash_before' => $documentHash,
                 'signed_at' => now(),
@@ -359,6 +363,8 @@ class ElectronicSignatureService
                     'signatory_slot' => $signatureRequest?->signatory_slot,
                     'signatory_label' => $signatureRequest?->signatory_label,
                     'signatory_designation' => $signatureRequest?->requested_to_role,
+                    'login_account_id' => $user->loginAccount()->id,
+                    'workspace_id' => $user->id,
                     'assigned_account_user_id' => $signatureRequest?->requestedTo?->user_id,
                     'pr_signatory_column' => $requestMetadata['pr_signatory_column'] ?? null,
                     'ppmp_signature_workflow' => $requestMetadata['ppmp_signature_workflow'] ?? null,
@@ -1012,8 +1018,8 @@ class ElectronicSignatureService
             'signer_office_id' => $user->office_id,
             'signer_office_name' => $user->assignedOffice?->name ?? $user->office,
             'signer_position' => $user->signer_position ?: ($user->position ?: $user->role),
-            'typed_signature_name' => $user->typed_signature_name ?: $user->name,
-            'signature_image_path' => $user->signature_image_path,
+            'typed_signature_name' => $user->loginAccount()->typed_signature_name ?: $user->name,
+            'signature_image_path' => $user->loginAccount()->signature_image_path,
             'signature_action' => $action,
         ];
     }

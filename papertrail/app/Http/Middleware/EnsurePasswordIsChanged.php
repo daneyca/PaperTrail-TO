@@ -19,7 +19,7 @@ class EnsurePasswordIsChanged
 
     public function handle(Request $request, Closure $next): Response
     {
-        $user = $request->user();
+        $user = $request->user()?->loginAccount();
 
         if (! $user?->must_change_password || $request->routeIs(self::ALLOWED_ROUTES)) {
             return $next($request);

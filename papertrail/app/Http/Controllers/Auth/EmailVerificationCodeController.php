@@ -23,7 +23,7 @@ class EmailVerificationCodeController extends Controller
     public function send(Request $request): RedirectResponse
     {
         /** @var User $user */
-        $user = $request->user();
+        $user = $request->user()->loginAccount();
 
         if (! $user->email) {
             return back()->with('error', 'Please add an official email address before sending a verification code.');
@@ -98,7 +98,7 @@ class EmailVerificationCodeController extends Controller
         ]);
 
         /** @var User $user */
-        $user = $request->user()->fresh();
+        $user = $request->user()->loginAccount()->fresh();
 
         if ($user->hasVerifiedEmail()) {
             return back()->with('status', 'Your official email address is already verified.');

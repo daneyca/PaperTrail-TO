@@ -21,7 +21,7 @@ class ProfileSignatureController extends Controller
 
     public function edit(Request $request): View
     {
-        $user = $request->user()->loadMissing(['assignedRole', 'assignedOffice']);
+        $user = $request->user()->loginAccount()->loadMissing(['assignedRole', 'assignedOffice']);
 
         AuditLogger::signature('signature_profile_viewed', $user, [
             'description' => 'User opened e-signature profile setup.',
@@ -60,7 +60,7 @@ class ProfileSignatureController extends Controller
 
     public function update(Request $request): RedirectResponse
     {
-        $user = $request->user();
+        $user = $request->user()->loginAccount();
 
         $validated = $request->validate([
             'typed_signature_name' => ['required', 'string', 'max:150'],
@@ -127,7 +127,7 @@ class ProfileSignatureController extends Controller
 
     public function destroyImage(Request $request): RedirectResponse
     {
-        $user = $request->user();
+        $user = $request->user()->loginAccount();
 
         $oldPath = $user->signature_image_path;
         $this->deleteExistingSignatureImage($user);
@@ -150,7 +150,7 @@ class ProfileSignatureController extends Controller
 
     public function showImage(Request $request, User $user): BinaryFileResponse
     {
-        if (! $this->canViewSignatureImage($request->user(), $user)) {
+        if (! $this->canViewSignatureImage($request->user()->loginAccount(), $user)) {
             AuditLogger::signature('unauthorized_signature_attempt', $user, [
                 'description' => 'Unauthorized signature image access attempt.',
                 'severity' => 'warning',

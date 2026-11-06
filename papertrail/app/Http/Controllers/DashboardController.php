@@ -92,7 +92,7 @@ class DashboardController extends Controller
 
     public function bacChair(): View
     {
-        return $this->view('BAC Chair Dashboard', User::ROLE_BAC_CHAIR);
+        return $this->view('BAC Chairperson Dashboard', User::ROLE_BAC_CHAIR);
     }
 
     public function approvingAuthority(): View

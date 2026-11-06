@@ -19,7 +19,7 @@ class ProfileController extends Controller
 {
     public function show(Request $request): View
     {
-        $user = $request->user()->fresh(['assignedRole.permissions', 'assignedOffice']) ?? $request->user()->loadMissing('assignedRole.permissions', 'assignedOffice');
+        $user = $request->user()->loginAccount()->fresh(['assignedRole.permissions', 'assignedOffice']);
 
         AuditLogger::log('Profile', $this->auditAction($user, 'Profile Viewed'), 'User viewed own profile.');
 
@@ -35,7 +35,7 @@ class ProfileController extends Controller
 
     public function edit(Request $request): View
     {
-        $user = $request->user();
+        $user = $request->user()->loginAccount();
 
         AuditLogger::log('Profile', $this->auditAction($user, 'Profile Edit Page Viewed'), 'User opened own profile edit page.');
 
@@ -46,7 +46,7 @@ class ProfileController extends Controller
 
     public function update(Request $request): RedirectResponse
     {
-        $user = $request->user();
+        $user = $request->user()->loginAccount();
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -94,7 +94,7 @@ class ProfileController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        $user = $request->user();
+        $user = $request->user()->loginAccount();
 
         if (! Hash::check($validated['current_password'], $user->password)) {
             return back()
@@ -130,7 +130,7 @@ class ProfileController extends Controller
 
     public function destroyPhoto(Request $request): RedirectResponse
     {
-        $user = $request->user();
+        $user = $request->user()->loginAccount();
 
         if ($user->profile_photo_path) {
             Storage::disk('public')->delete($user->profile_photo_path);

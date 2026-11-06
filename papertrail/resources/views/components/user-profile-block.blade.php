@@ -12,7 +12,7 @@
     $roleDisplayLabel = function (string $value): string {
         $normalized = strtolower(trim(preg_replace('/[\s_\-]+/', ' ', $value) ?? $value));
 
-        return $normalized === 'bac chair' ? 'BAC Chairman' : $value;
+        return in_array($normalized, ['bac chair', 'bac chairman'], true) ? 'BAC Chairperson' : $value;
     };
     $isHeadOfficeEndUser = collect([$roleCode, $roleName, $user?->role])
         ->filter()
@@ -20,7 +20,7 @@
             'head_office',
             'head of office / end user',
         ], true));
-    $displayRoleName = $isHeadOfficeEndUser ? '' : ($positionName !== '' ? $positionName : $roleDisplayLabel($roleName));
+    $displayRoleName = $isHeadOfficeEndUser ? '' : $roleDisplayLabel($positionName !== '' ? $positionName : $roleName);
     $displayOfficeName = $isHeadOfficeEndUser ? $officeName : '';
     if ($displayOfficeName !== '' && $displayRoleName !== '' && strcasecmp($displayOfficeName, $displayRoleName) === 0) {
         $displayOfficeName = '';

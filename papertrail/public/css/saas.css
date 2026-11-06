@@ -6481,6 +6481,43 @@ body.dashboard-body .topbar-account-dropdown form button {
     color: #b42318 !important;
 }
 
+body.dashboard-body .workspace-menu__title {
+    display: block;
+    padding: 12px 13px 4px;
+    font-size: 12px;
+}
+
+body.dashboard-body .workspace-menu form button {
+    color: var(--pt-saas-ink) !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+}
+
+body.dashboard-body .workspace-menu button small {
+    display: block;
+    margin-top: 4px;
+    font-size: 11px;
+    font-weight: 400;
+}
+
+body.dashboard-body .workspace-menu button[aria-current="true"] {
+    background: #edf7f2 !important;
+    color: #196b48 !important;
+    cursor: default !important;
+}
+
+.workspace-assignment-form {
+    display: grid;
+    gap: 12px;
+    margin-top: 20px;
+    max-width: 640px;
+}
+
+.workspace-assignment-form select {
+    width: 100%;
+    min-width: 0;
+}
+
 body.dashboard-body .notification-button .notification-badge {
     top: -5px !important;
     right: -5px !important;

@@ -6,6 +6,10 @@
     @php
         $activeStatus = $filters['status'] ?? request('status');
         $documentTypeLabel = function (?string $documentType): string {
+            if ($documentType === 'app') {
+                return 'APP';
+            }
+
             return str($documentType ?: 'Document')
                 ->replace('_', ' ')
                 ->title()
@@ -90,7 +94,7 @@
                             <th>Date Requested</th>
                             <th>Document Type</th>
                             <th>Tracking Number</th>
-                            <th>Signatory Role</th>
+                            <th>Signing As</th>
                             <th>Requested By</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -116,7 +120,11 @@
                                     : ($isPurchaseRequest && filled($requestItem->requested_to_role)
                                     ? $requestItem->requested_to_role
                                     : ($requestItem->signatory_label ?? 'Signer'));
-                                $signatureTaskLabel = ! $isPpmp && $requestItem->signatory_label && $requestItem->signatory_label !== $signatureDesignation
+                                $isAppRecommendation = $requestItem->document_type === 'app'
+                                    && ($requestItem->signatory_slot === 'recommended_by'
+                                        || strcasecmp((string) $requestItem->signatory_label, 'Recommended By') === 0);
+                                $signingAsLabel = $isAppRecommendation ? 'Recommending Approval' : $signatureDesignation;
+                                $signatureTaskLabel = ! $isAppRecommendation && ! $isPpmp && $requestItem->signatory_label && $requestItem->signatory_label !== $signatureDesignation
                                     ? $requestItem->signatory_label
                                     : null;
                                 $isBacsec002ResolutionUser = auth()->user()?->user_id === 'BACSEC-001';
@@ -124,6 +132,13 @@
                                 $documentContextLabel = $requestItem->document_context_label ?: ($isPurchaseRequest || $isPpmp ? null : $requestItem->document_label);
                                 $requestDocumentTypeLabel = $documentTypeLabel($requestItem->document_type);
                                 $requestTrackingNumber = $requestItem->display_tracking_number ?? $requestItem->tracking_number ?? 'N/A';
+                                $normalizedContextLabel = strtolower(trim((string) preg_replace('/\s+/', ' ', (string) $documentContextLabel)));
+                                $normalizedTrackingNumber = strtolower(trim((string) preg_replace('/\s+/', ' ', (string) $requestTrackingNumber)));
+                                if ($normalizedTrackingNumber !== ''
+                                    && ($normalizedContextLabel === $normalizedTrackingNumber
+                                        || str_ends_with($normalizedContextLabel, ' ' . $normalizedTrackingNumber))) {
+                                    $documentContextLabel = null;
+                                }
                                 $signActionLabel = $canSignNow && ($isPurchaseRequest || $isPpmp)
                                     ? 'Sign as ' . $signatureDesignation
                                     : 'Review & Sign';
@@ -145,7 +160,7 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <div class="signature-role">{{ $signatureDesignation }}</div>
+                                    <div class="signature-role">{{ $signingAsLabel }}</div>
                                     @if ($signatureTaskLabel)
                                         <div class="signature-document-title">{{ $signatureTaskLabel }}</div>
                                     @endif

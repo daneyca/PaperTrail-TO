@@ -19,7 +19,7 @@ class AdminUserController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = User::query()->whereNotNull('user_id')->where('user_id', '!=', 'BACSEC-RETIRED-001');
+        $query = User::query()->whereNull('principal_user_id')->with('linkedWorkspaces')->whereNotNull('user_id')->where('user_id', '!=', 'BACSEC-RETIRED-001');
 
         if ($request->filled('search')) {
             $search = $request->string('search')->toString();
@@ -33,7 +33,8 @@ class AdminUserController extends Controller
         }
 
         if ($request->filled('role')) {
-            $query->where('role', $request->string('role')->toString());
+            $query->where(fn ($query) => $query->where('role', $request->string('role')->toString())
+                ->orWhereHas('linkedWorkspaces', fn ($workspace) => $workspace->where('role', $request->string('role')->toString())));
         }
 
         if ($request->filled('office')) {
@@ -97,10 +98,17 @@ class AdminUserController extends Controller
             ->with('status', 'Account created successfully.');
     }
 
-    public function edit(User $user): View
+    public function edit(User $user): View|RedirectResponse
     {
+        if ($user->principal_user_id) {
+            return redirect()->route('admin.users.edit', $user->principal_user_id);
+        }
         return view('admin.users.edit', [
             'user' => $user,
+            'linkedWorkspaces' => $user->linkedWorkspaces()->get(),
+            'availableWorkspaces' => $user->isAdmin() ? collect() : User::whereNull('principal_user_id')
+                ->where('id', '!=', $user->id)->where('status', User::STATUS_ACTIVE)
+                ->where('role', '!=', User::ROLE_ADMIN)->whereDoesntHave('linkedWorkspaces')->orderBy('user_id')->get(),
             'roles' => Role::where('status', Role::STATUS_ACTIVE)
                 ->whereNotIn('name', User::officeWorkflowRoleNames())
                 ->orderBy('name')
@@ -114,6 +122,7 @@ class AdminUserController extends Controller
 
     public function update(Request $request, User $user): RedirectResponse
     {
+        abort_if($user->principal_user_id, 403, 'Edit the main login or its workspace access instead.');
         $validated = $request->validate($this->rules($user));
         $validated['user_id'] = strtoupper($validated['user_id']);
         $office = Office::findOrFail($validated['office_id']);
@@ -187,6 +196,7 @@ class AdminUserController extends Controller
 
     public function updateStatus(Request $request, User $user): RedirectResponse
     {
+        abort_if($user->principal_user_id, 403, 'Change workspace access on the main login instead.');
         if (array_key_exists($user->user_id, User::RETIRED_ACCOUNT_REPLACEMENTS)) {
             return back()->with('error', 'Use the existing office account. This duplicate account has been retired.');
         }
@@ -213,6 +223,7 @@ class AdminUserController extends Controller
 
     public function resetPassword(User $user): RedirectResponse
     {
+        abort_if($user->principal_user_id, 403, 'Reset the main login password instead.');
         $user->update([
             'password' => Hash::make('password123'),
             'must_change_password' => true,

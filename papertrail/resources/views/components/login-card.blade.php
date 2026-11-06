@@ -6,7 +6,7 @@
 @php
     $roleDisplayLabels = [
         'Head of Office / End User' => 'Head of Office',
-        'BAC Chair' => 'BAC Chairman',
+        'BAC Chair' => 'BAC Chairperson',
     ];
     $roleUserIdHints = [
         'Admin' => 'ADMIN-001',

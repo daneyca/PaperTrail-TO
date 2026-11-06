@@ -43,7 +43,7 @@ class PasswordResetController extends Controller
                 ->withInput($request->except('security_code'));
         }
 
-        $user = User::where('user_id', strtoupper($validated['user_id']))->first();
+        $user = User::whereNull('principal_user_id')->where('user_id', strtoupper($validated['user_id']))->first();
 
         if (! $user || ! $user->email || strcasecmp($user->email, $validated['email']) !== 0) {
             AuditLogger::log('Authentication', 'Unauthorized Password Reset Attempt', 'Password reset requested with mismatched account details.', null, null, null, 'warning', [
@@ -89,7 +89,7 @@ class PasswordResetController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        $user = User::where('email', $validated['email'])->first();
+        $user = User::whereNull('principal_user_id')->where('email', $validated['email'])->first();
 
         if (! $user || ! Password::broker()->tokenExists($user, $validated['token'])) {
             AuditLogger::log('Authentication', 'Password Reset Failed', 'Invalid or expired reset link used.', $user, null, null, 'warning');

@@ -108,7 +108,12 @@
                             <td class="nowrap">{{ $user->user_id }}</td>
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->office }}</td>
-                            <td>{{ $user->role }}</td>
+                            <td>
+                                {{ $user->role }}
+                                @foreach ($user->linkedWorkspaces as $workspace)
+                                    <div>{{ $workspace->role }} ({{ $workspace->user_id }}{{ $workspace->isActive() ? '' : ', inactive' }})</div>
+                                @endforeach
+                            </td>
                             <td>
                                 <span class="status-pill status-{{ $user->status }}">
                                     {{ ucfirst($user->status) }}

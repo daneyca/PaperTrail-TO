@@ -174,7 +174,10 @@ class AuditLogger
                 'auditable_id' => $auditable?->getKey(),
                 'old_values' => self::sanitize($data['old_values'] ?? null),
                 'new_values' => self::sanitize($data['new_values'] ?? null),
-                'metadata' => self::sanitize($data['metadata'] ?? self::metadataFrom($data)),
+                'metadata' => self::sanitize(array_merge($data['metadata'] ?? self::metadataFrom($data), $user?->principal_user_id ? [
+                    'login_account_id' => $user->principal_user_id,
+                    'workspace_id' => $user->id,
+                ] : [])),
                 'ip_address' => Request::ip(),
                 'user_agent' => Request::userAgent(),
                 'request_method' => Request::method(),

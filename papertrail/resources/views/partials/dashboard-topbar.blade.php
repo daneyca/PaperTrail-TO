@@ -10,7 +10,7 @@
         $value = trim((string) $value);
         $normalized = strtolower(trim(preg_replace('/[\s_\-]+/', ' ', $value) ?? $value));
 
-        return $normalized === 'bac chair' ? 'BAC Chairman' : $value;
+        return in_array($normalized, ['bac chair', 'bac chairman'], true) ? 'BAC Chairperson' : $value;
     };
     $isHeadOfficeEndUser = collect([$roleCode, $roleName, $user?->role])
         ->filter()
@@ -18,7 +18,7 @@
             'head_office',
             'head of office / end user',
         ], true));
-    $displayRoleName = $isHeadOfficeEndUser ? '' : ($positionName !== '' ? $positionName : $roleDisplayLabel($roleName));
+    $displayRoleName = $isHeadOfficeEndUser ? '' : $roleDisplayLabel($positionName !== '' ? $positionName : $roleName);
     $displayOfficeName = $isHeadOfficeEndUser ? $officeName : '';
     if ($displayOfficeName !== '' && $displayRoleName !== '' && strcasecmp($displayOfficeName, $displayRoleName) === 0) {
         $displayOfficeName = '';
@@ -155,6 +155,21 @@
                 </button>
 
                 <div class="topbar-account-dropdown" data-user-menu-dropdown>
+                    @php($workspaces = $user->availableWorkspaces())
+                    @if ($workspaces->count() > 1)
+                        <div class="workspace-menu" aria-label="Assigned workspaces">
+                            <strong class="workspace-menu__title">Switch Workspace</strong>
+                            @foreach ($workspaces as $workspace)
+                                <form method="POST" action="{{ route('workspaces.switch') }}">
+                                    @csrf
+                                    <input type="hidden" name="workspace_id" value="{{ $workspace->id }}">
+                                    <button type="submit" @disabled($workspace->is($user)) aria-current="{{ $workspace->is($user) ? 'true' : 'false' }}">
+                                        <span>{{ $workspace->workspaceLabel() }}<small>{{ $workspace->user_id }}{{ $workspace->is($user) ? ' (Active)' : '' }}</small></span>
+                                    </button>
+                                </form>
+                            @endforeach
+                        </div>
+                    @endif
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit">
