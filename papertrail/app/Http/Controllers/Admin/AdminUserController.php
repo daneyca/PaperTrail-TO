@@ -53,8 +53,8 @@ class AdminUserController extends Controller
 
         return view('admin.users.index', [
             'users' => $query
-                ->orderBy('role')
                 ->orderBy('office')
+                ->orderBy('name')
                 ->orderBy('user_id')
                 ->paginate(10)
                 ->withQueryString(),
@@ -88,7 +88,7 @@ class AdminUserController extends Controller
         $validated['role'] = $role->name;
         $validated['password'] = Hash::make($validated['password']);
         $validated['email_verified_at'] = null;
-        $validated['must_change_password'] = false;
+        $validated['must_change_password'] = true;
 
         $user = User::create($validated);
         AuditLogger::log('User Management', 'user_created', 'User account created.', $user, null, $user->only(['user_id', 'name', 'office', 'role', 'status']));
@@ -106,7 +106,7 @@ class AdminUserController extends Controller
         return view('admin.users.edit', [
             'user' => $user,
             'linkedWorkspaces' => $user->linkedWorkspaces()->get(),
-            'availableWorkspaces' => $user->isAdmin() ? collect() : User::whereNull('principal_user_id')
+            'availableWorkspaces' => ($user->isAdmin() || $user->isOfficeDocumentPreparer()) ? collect() : User::whereNull('principal_user_id')
                 ->where('id', '!=', $user->id)->where('status', User::STATUS_ACTIVE)
                 ->where('role', '!=', User::ROLE_ADMIN)->whereDoesntHave('linkedWorkspaces')->orderBy('user_id')->get(),
             'roles' => Role::where('status', Role::STATUS_ACTIVE)
@@ -262,12 +262,12 @@ class AdminUserController extends Controller
 
     private function headOfficeAssignmentError(Office $office, Role $role): ?string
     {
-        if ($role->name !== User::ROLE_HEAD_OFFICE) {
+        if (! in_array($role->name, [User::ROLE_HEAD_OFFICE, User::ROLE_OFFICE_PREPARER], true)) {
             return null;
         }
 
         return $office->isRequestingOffice()
             ? null
-            : 'Head of Office / End User accounts can only be assigned to offices marked as requesting/end-user offices.';
+            : 'Head of Office and Office Document Preparer accounts can only be assigned to requesting/end-user offices.';
     }
 }

@@ -15,7 +15,7 @@ class EnsureRequestingOfficeForHeadOfficeTransactions
     {
         $user = $request->user();
 
-        if (! $user || ! ($user->hasRole('head_office') || $user->hasRole(User::ROLE_HEAD_OFFICE))) {
+        if (! $user || ! $user->isOfficeDocumentActor()) {
             return $next($request);
         }
 

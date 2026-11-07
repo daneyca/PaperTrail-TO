@@ -105,7 +105,8 @@ class LoginController extends Controller
                 ->withInput($request->except('password', 'security_code'));
         }
 
-        if ($user->role === User::ROLE_HEAD_OFFICE && !$this->officeMatchesUser($user, $validated['office'])) {
+        if (in_array($user->role, [User::ROLE_HEAD_OFFICE, User::ROLE_OFFICE_PREPARER], true)
+            && ! $this->officeMatchesUser($user, $validated['office'])) {
             AuditLogger::failed('user_login_failed', [
                 'module' => 'Authentication',
                 'description' => 'Selected office did not match account.',
@@ -216,6 +217,7 @@ class LoginController extends Controller
         $roleOrder = [
             User::ROLE_ADMIN,
             User::ROLE_HEAD_OFFICE,
+            User::ROLE_OFFICE_PREPARER,
             User::ROLE_BAC_SECRETARIAT,
             User::ROLE_BAC_MEMBER,
             User::ROLE_BAC_CHAIR,

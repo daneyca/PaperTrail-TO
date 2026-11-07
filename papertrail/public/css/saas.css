@@ -6506,16 +6506,345 @@ body.dashboard-body .workspace-menu button[aria-current="true"] {
     cursor: default !important;
 }
 
-.workspace-assignment-form {
-    display: grid;
-    gap: 12px;
-    margin-top: 20px;
-    max-width: 640px;
+body.dashboard-body .workspace-management-panel {
+    overflow: hidden;
+    border: 1px solid #dbe5f1;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
 }
 
-.workspace-assignment-form select {
+body.dashboard-body .workspace-management-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 18px 20px 16px;
+    border-bottom: 1px solid #e5edf6;
+}
+
+body.dashboard-body .workspace-management-eyebrow {
+    margin: 0 0 4px;
+    color: #2563eb;
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+body.dashboard-body .workspace-management-header h2,
+body.dashboard-body .workspace-link-heading h3 {
+    margin: 0;
+    color: var(--pt-saas-ink);
+    letter-spacing: 0;
+}
+
+body.dashboard-body .workspace-management-header h2 {
+    font-size: 1.05rem;
+    line-height: 1.25;
+}
+
+body.dashboard-body .workspace-management-header p:not(.workspace-management-eyebrow),
+body.dashboard-body .workspace-link-heading p {
+    margin: 5px 0 0;
+    color: var(--pt-saas-muted);
+    font-size: 0.78rem;
+    line-height: 1.45;
+}
+
+body.dashboard-body .workspace-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    flex: 0 0 auto;
+    border: 1px solid #dbeafe;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    padding: 4px 10px;
+    font-size: 0.7rem;
+    font-weight: 850;
+}
+
+body.dashboard-body .workspace-table-wrap {
+    overflow-x: auto;
+}
+
+body.dashboard-body .workspace-table {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+}
+
+body.dashboard-body .workspace-table th,
+body.dashboard-body .workspace-table td {
+    padding: 11px 20px;
+    vertical-align: middle;
+}
+
+body.dashboard-body .workspace-table th {
+    background: #f8fafc;
+    color: #52627a;
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+body.dashboard-body .workspace-table td {
+    border-top: 1px solid #edf2f7;
+    color: var(--pt-saas-ink);
+    font-size: 0.78rem;
+}
+
+body.dashboard-body .workspace-table td strong,
+body.dashboard-body .workspace-table td small {
+    display: block;
+}
+
+body.dashboard-body .workspace-table td strong {
+    font-size: 0.79rem;
+}
+
+body.dashboard-body .workspace-table td small {
+    margin-top: 2px;
+    color: var(--pt-saas-muted);
+    font-size: 0.69rem;
+}
+
+body.dashboard-body .workspace-table__action-heading,
+body.dashboard-body .workspace-table__action {
+    text-align: right;
+}
+
+body.dashboard-body .workspace-table__action form {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0;
+}
+
+body.dashboard-body .workspace-access-button {
+    min-height: 32px;
+    border: 1px solid #dbe5f1;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #334155;
+    padding: 0 12px;
+    font: inherit;
+    font-size: 0.72rem;
+    font-weight: 850;
+    cursor: pointer;
+}
+
+body.dashboard-body .workspace-access-button.is-enable {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+    color: #047857;
+}
+
+body.dashboard-body .workspace-access-button.is-disable:hover {
+    border-color: #fecaca;
+    background: #fff7f7;
+    color: #b91c1c;
+}
+
+body.dashboard-body .workspace-empty-row td {
+    padding: 0;
+}
+
+body.dashboard-body .workspace-empty-state {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    padding: 18px 20px;
+    text-align: center;
+}
+
+body.dashboard-body .workspace-empty-state strong {
+    color: var(--pt-saas-ink);
+    font-size: 0.8rem;
+}
+
+body.dashboard-body .workspace-empty-state span {
+    color: var(--pt-saas-muted);
+    font-size: 0.72rem;
+    line-height: 1.45;
+}
+
+body.dashboard-body .workspace-link-section {
+    padding: 18px 20px 20px;
+    border-top: 1px solid #e5edf6;
+    background: #fbfdff;
+}
+
+body.dashboard-body .workspace-link-heading h3 {
+    font-size: 0.9rem;
+    line-height: 1.25;
+}
+
+body.dashboard-body .workspace-assignment-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px 16px;
+    align-items: end;
+    margin-top: 14px;
+}
+
+body.dashboard-body .workspace-assignment-field {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+body.dashboard-body .workspace-assignment-field label {
+    color: #53627a;
+    font-size: 0.64rem;
+    font-weight: 900;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+body.dashboard-body .workspace-assignment-field select {
     width: 100%;
     min-width: 0;
+    min-height: 40px;
+    border: 1px solid #dbe5f1;
+    border-radius: 11px;
+    background: #ffffff;
+    color: var(--pt-saas-ink);
+    padding: 8px 36px 8px 11px;
+    font: inherit;
+    font-size: 0.79rem;
+    outline: none;
+}
+
+body.dashboard-body .workspace-assignment-field select:focus {
+    border-color: rgba(37, 99, 235, 0.55);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+body.dashboard-body .workspace-assignment-field select:disabled {
+    background: #f1f5f9;
+    color: #64748b;
+    cursor: not-allowed;
+}
+
+body.dashboard-body .workspace-confirmation {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    grid-column: 1 / -1;
+    border: 1px solid #dbe5f1;
+    border-radius: 11px;
+    background: #ffffff;
+    padding: 11px 12px;
+    color: var(--pt-saas-ink);
+    cursor: pointer;
+}
+
+body.dashboard-body .workspace-confirmation input {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
+    margin: 2px 0 0;
+    accent-color: var(--pt-saas-blue);
+}
+
+body.dashboard-body .workspace-confirmation span,
+body.dashboard-body .workspace-confirmation strong,
+body.dashboard-body .workspace-confirmation small {
+    display: block;
+}
+
+body.dashboard-body .workspace-confirmation strong {
+    font-size: 0.75rem;
+    line-height: 1.35;
+}
+
+body.dashboard-body .workspace-confirmation small {
+    margin-top: 3px;
+    color: var(--pt-saas-muted);
+    font-size: 0.7rem;
+    line-height: 1.45;
+}
+
+body.dashboard-body .workspace-link-actions {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+body.dashboard-body .workspace-link-actions button {
+    min-height: 40px;
+    border: 1px solid var(--pt-saas-gold);
+    border-radius: 11px;
+    background: var(--pt-saas-gold);
+    color: #08264a;
+    padding: 0 16px;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 900;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(245, 184, 46, 0.18);
+}
+
+body.dashboard-body .workspace-link-actions button:disabled {
+    border-color: #dbe5f1;
+    background: #e8eef5;
+    color: #7b8ba1;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+html.papertrail-dark-mode body.dashboard-body .workspace-management-panel,
+html.papertrail-dark-mode body.dashboard-body .workspace-confirmation,
+html.papertrail-dark-mode body.dashboard-body .workspace-assignment-field select {
+    border-color: rgba(71, 85, 105, 0.7);
+    background: #0b213d;
+    color: #e5edf6;
+}
+
+html.papertrail-dark-mode body.dashboard-body .workspace-management-header,
+html.papertrail-dark-mode body.dashboard-body .workspace-link-section {
+    border-color: rgba(71, 85, 105, 0.55);
+}
+
+html.papertrail-dark-mode body.dashboard-body .workspace-link-section,
+html.papertrail-dark-mode body.dashboard-body .workspace-table th {
+    background: #0d2747;
+}
+
+html.papertrail-dark-mode body.dashboard-body .workspace-table td {
+    border-color: rgba(71, 85, 105, 0.45);
+}
+
+@media (max-width: 640px) {
+    body.dashboard-body .workspace-management-header {
+        padding: 16px;
+    }
+
+    body.dashboard-body .workspace-link-section {
+        padding: 16px;
+    }
+
+    body.dashboard-body .workspace-table th,
+    body.dashboard-body .workspace-table td {
+        padding: 10px 14px;
+    }
+
+    body.dashboard-body .workspace-assignment-form {
+        grid-template-columns: 1fr;
+    }
+
+    body.dashboard-body .workspace-link-actions {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
+    body.dashboard-body .workspace-link-actions button {
+        width: 100%;
+    }
 }
 
 body.dashboard-body .notification-button .notification-badge {

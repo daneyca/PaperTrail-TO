@@ -6,11 +6,13 @@
 @php
     $roleDisplayLabels = [
         'Head of Office / End User' => 'Head of Office',
+        'Office Document Preparer' => 'Office Document Preparer',
         'BAC Chair' => 'BAC Chairperson',
     ];
     $roleUserIdHints = [
         'Admin' => 'ADMIN-001',
         'Head of Office / End User' => 'MCR-001',
+        'Office Document Preparer' => 'MPDO-STAFF-001',
         'Budget Officer' => 'BUDGET-001',
         'Accounting Officer' => 'ACCOUNTING-001',
         'BAC Secretariat' => 'BACSEC-001',
@@ -68,7 +70,7 @@
             @enderror
         </div>
 
-        <div id="office-selector" class="pt-field office-selector" data-head-office-role="Head of Office / End User" aria-hidden="true">
+        <div id="office-selector" class="pt-field office-selector" data-office-roles='@json(["Head of Office / End User", "Office Document Preparer"])' aria-hidden="true">
             <label for="office">End-User Office</label>
             <select id="office" name="office" disabled>
                 <option value="">Choose end-user office</option>

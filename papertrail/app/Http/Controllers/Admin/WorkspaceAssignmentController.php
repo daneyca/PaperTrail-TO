@@ -13,11 +13,21 @@ class WorkspaceAssignmentController extends Controller
 {
     public function store(Request $request, User $user, PersonWorkspaceService $service): RedirectResponse
     {
+        if ($user->isOfficeDocumentPreparer()) {
+            return back()->with('error', 'Office Document Preparer accounts cannot be linked to BAC or other workspaces.');
+        }
+
         $data = $request->validate([
             'workspace_id' => ['required', 'integer', 'exists:users,id'],
             'same_person' => ['accepted'],
         ]);
-        $service->link($user, User::findOrFail($data['workspace_id']));
+        $workspace = User::findOrFail($data['workspace_id']);
+
+        if ($workspace->isOfficeDocumentPreparer()) {
+            return back()->with('error', 'Office Document Preparer accounts cannot be linked to BAC or other workspaces.');
+        }
+
+        $service->link($user, $workspace);
 
         return back()->with('status', 'Workspace linked. Use the main office login to access both roles.');
     }

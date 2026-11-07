@@ -204,7 +204,7 @@ class PersonWorkspacesTest extends TestCase
         $chair = $this->user('BACCHAIR-001');
         $this->actingAs($this->user('ADMIN-001'))->get(route('admin.users.index', ['search' => 'Edmar']))
             ->assertOk()->assertViewHas('users', fn ($users) => $users->total() === 1);
-        $this->get(route('admin.users.edit', $account))->assertOk()->assertSee('Assigned Workspaces')->assertSee('BACCHAIR-001');
+        $this->get(route('admin.users.edit', $account))->assertOk()->assertSee('Linked Workspaces')->assertSee('BACCHAIR-001');
         $this->patch(route('admin.users.workspaces.status', [$account, $chair]), ['status' => 'inactive'])->assertRedirect();
         $this->assertSame(User::STATUS_INACTIVE, $chair->fresh()->status);
         $this->assertSame($account->id, $chair->fresh()->principal_user_id);

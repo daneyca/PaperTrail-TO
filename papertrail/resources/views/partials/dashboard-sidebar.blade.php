@@ -246,6 +246,30 @@
         ['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'dashboard'],
     ];
 
+    if ($user?->isOfficeDocumentPreparer()) {
+        $items = [
+            ['section' => 'Workspace'],
+            ['label' => 'Dashboard', 'route' => 'head-office.dashboard', 'icon' => 'dashboard'],
+            [
+                'label' => 'Documents',
+                'icon' => 'planning',
+                'children' => [
+                    ['label' => 'My Documents', 'route' => 'head-office.documents.index', 'active' => ['head-office.documents.*', 'head-office.returned.*']],
+                    ['label' => 'Status Tracking', 'route' => 'head-office.svp-tracking.index', 'active' => 'head-office.svp-tracking.*'],
+                ],
+            ],
+            [
+                'label' => 'Office Preparation',
+                'icon' => 'workflow',
+                'children' => [
+                    ['label' => 'PPMP', 'route' => 'head-office.ppmp.index', 'active' => 'head-office.ppmp.*'],
+                    ['label' => 'Create PR', 'route' => 'head-office.pr.create', 'active' => 'head-office.pr.create'],
+                ],
+            ],
+            ['label' => 'AI Center', 'route' => 'assistant.index', 'icon' => 'review', 'active' => 'assistant.*'],
+        ];
+    }
+
     if ($duty = $user?->officeWorkflowRole()) {
         array_splice($items, 4, 0, [$roleMenus[$duty['slug']][2]]);
     }
@@ -382,7 +406,7 @@
         array_splice($items, $competitiveBiddingInsertIndex, 0, $menusToInsert);
     }
 
-    $canShowSignatureMenu = in_array($roleSlug, [
+    $canShowSignatureMenu = ! $user?->isOfficeDocumentPreparer() && in_array($roleSlug, [
         'head-office',
         'budget',
         'accounting',
@@ -403,11 +427,11 @@
         [
             'label' => 'Security & Recovery',
             'icon' => 'settings',
-            'children' => [
+            'children' => array_values(array_filter([
                 ['label' => 'Change Password', 'route' => 'profile.show', 'active' => 'profile.show', 'query' => ['password' => 1]],
-                ['label' => 'Manage E-Signature', 'route' => 'profile.signature.edit', 'active' => 'profile.signature.*'],
+                $user?->isOfficeDocumentPreparer() ? null : ['label' => 'Manage E-Signature', 'route' => 'profile.signature.edit', 'active' => 'profile.signature.*'],
                 ['label' => 'Email Verification', 'route' => 'profile.show', 'active' => 'profile.show', 'query' => ['email_recovery' => 1], 'modal' => 'email-verification'],
-            ],
+            ])),
         ],
     ]);
 

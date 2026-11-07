@@ -66,6 +66,7 @@ class DatabaseSeeder extends Seeder
         $roleSeeds = [
             ['admin', User::ROLE_ADMIN, 'admin.dashboard', 'Full system administration and configuration access.'],
             ['head_office', User::ROLE_HEAD_OFFICE, 'head-office.dashboard', 'Submits and monitors procurement documents for assigned office.'],
+            ['office_preparer', User::ROLE_OFFICE_PREPARER, 'head-office.dashboard', 'Prepares and submits office procurement documents for Head of Office approval.'],
             ['budget_officer', User::ROLE_BUDGET, 'budget.dashboard', 'Reviews budget availability and budget-related document requirements.'],
             ['accounting_officer', User::ROLE_ACCOUNTING, 'accounting.dashboard', 'Reviews accounting requirements and validates accounting-related document details.'],
             ['bac_secretariat', User::ROLE_BAC_SECRETARIAT, 'bac-secretariat.dashboard', 'Receives, records, routes, and monitors procurement documents.'],
@@ -124,6 +125,7 @@ class DatabaseSeeder extends Seeder
         $assignments = [
             'admin' => Permission::pluck('key')->all(),
             'head_office' => ['dashboard.view', 'profile.view', 'profile.update', 'notifications.view', 'documents.view.own', 'documents.track', 'documents.submit', 'documents.edit.own', 'documents.upload', 'documents.comment', 'ppmp.submit', 'ppmp.view', 'pr.submit', 'pr.view'],
+            'office_preparer' => ['dashboard.view', 'profile.view', 'profile.update', 'notifications.view', 'documents.view.own', 'documents.track', 'documents.submit', 'documents.edit.own', 'documents.upload', 'documents.comment', 'ppmp.submit', 'ppmp.view', 'pr.submit', 'pr.view'],
             'budget_officer' => ['dashboard.view', 'profile.view', 'profile.update', 'notifications.view', 'documents.view.assigned', 'documents.track', 'documents.return', 'documents.comment', 'review.budget', 'reports.budget', 'esignature.use'],
             'accounting_officer' => ['dashboard.view', 'profile.view', 'profile.update', 'notifications.view', 'documents.view.assigned', 'documents.track', 'documents.return', 'documents.comment', 'review.accounting', 'reports.accounting', 'esignature.use'],
             'bac_secretariat' => ['dashboard.view', 'profile.view', 'profile.update', 'notifications.view', 'documents.view.all', 'documents.track', 'documents.return', 'documents.comment', 'workflow.route', 'workflow.update_status', 'workflow.view_history', 'ppmp.review', 'app.view', 'app.consolidate', 'pr.view', 'pr.review', 'bac.resolution.view', 'bac.resolution.create', 'bac.resolution.update', 'bac.resolution.submit', 'po.view', 'po.prepare', 'reports.procurement', 'audit.view'],

@@ -30,7 +30,7 @@
     <script>
         const roleSelect = document.querySelector('#role');
         const officeSelector = document.querySelector('#office-selector');
-        const headOfficeRole = officeSelector?.dataset.headOfficeRole;
+        const officeRoles = JSON.parse(officeSelector?.dataset.officeRoles || '[]');
         const userIdInput = document.querySelector('#user_id');
         const captchaImage = document.querySelector('#captcha-image');
         const captchaRefresh = document.querySelector('#captcha-refresh');
@@ -41,7 +41,7 @@
                 return;
             }
 
-            const isHeadOffice = roleSelect.value === headOfficeRole;
+            const isHeadOffice = officeRoles.includes(roleSelect.value);
             const officeSelect = officeSelector.querySelector('select[name="office"]');
 
             officeSelector.classList.toggle('is-visible', isHeadOffice);

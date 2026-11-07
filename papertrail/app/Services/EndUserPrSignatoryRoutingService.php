@@ -50,7 +50,7 @@ class EndUserPrSignatoryRoutingService
     {
         return $user
             && ! $this->isBacsec002($user)
-            && ($user->hasRole('head_office') || $user->hasRole(User::ROLE_HEAD_OFFICE));
+            && $user->isOfficeDocumentActor();
     }
 
     public function isWorkflowDocument(ProcurementDocument $document): bool
@@ -63,7 +63,7 @@ class EndUserPrSignatoryRoutingService
 
         return $creator
             && ! $this->isBacsec002($creator)
-            && ($creator->hasRole('head_office') || $creator->hasRole(User::ROLE_HEAD_OFFICE));
+            && $creator->isOfficeDocumentActor();
     }
 
     public function hasSignatureRouting(ProcurementDocument $document): bool

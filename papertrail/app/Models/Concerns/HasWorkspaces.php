@@ -28,6 +28,10 @@ trait HasWorkspaces
     {
         $account = $this->loginAccount();
 
+        if ($account->isOfficeDocumentPreparer()) {
+            return collect([$account])->filter(fn (User $workspace) => $workspace->isActive())->values();
+        }
+
         return collect([$account])->merge($account->linkedWorkspaces()->with('assignedOffice', 'assignedRole')->get())
             ->filter(fn (User $workspace) => $workspace->isActive())->values();
     }

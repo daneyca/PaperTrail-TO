@@ -9,6 +9,7 @@ use App\Models\SystemNotification;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 class HeadOfficePpmpSignatureWorkflowService
 {
@@ -40,7 +41,7 @@ class HeadOfficePpmpSignatureWorkflowService
 
         return $creator
             && ! in_array($creator->user_id, self::EXCLUDED_USER_IDS, true)
-            && ($creator->hasRole('head_office') || $creator->hasRole(User::ROLE_HEAD_OFFICE));
+            && $creator->isOfficeDocumentActor();
     }
 
     public function hasSignatureRouting(ProcurementDocument $document): bool
@@ -80,7 +81,7 @@ class HeadOfficePpmpSignatureWorkflowService
             return;
         }
 
-        $signer = $this->responsibleSigner($document) ?: $actor;
+        $signer = $this->responsibleSigner($document);
 
         if (! $signer) {
             return;
@@ -92,7 +93,7 @@ class HeadOfficePpmpSignatureWorkflowService
             [
                 'signing_mode' => 'parallel',
                 'signers' => [
-                    $this->signerPayload(self::SIGNATURE_SLOTS[self::COMBINED_SIGNATURE_SLOT], $signer, $document),
+                    $this->signerPayload($this->signatureDefinition($document), $signer, $document),
                 ],
             ],
             $actor ?: $signer,
@@ -103,7 +104,7 @@ class HeadOfficePpmpSignatureWorkflowService
     {
         return $this->isWorkflowDocument($document)
             && ! in_array($actor->user_id, self::EXCLUDED_USER_IDS, true)
-            && ($actor->hasRole('head_office') || $actor->hasRole(User::ROLE_HEAD_OFFICE))
+            && $actor->isOfficeDocumentActor()
             && (int) $document->submitting_office_id === (int) $actor->office_id
             && in_array($document->status, [
                 ProcurementDocument::STATUS_PPMP_DRAFT,
@@ -116,7 +117,7 @@ class HeadOfficePpmpSignatureWorkflowService
     {
         return $this->isWorkflowDocument($document)
             && ! in_array($actor->user_id, self::EXCLUDED_USER_IDS, true)
-            && ($actor->hasRole('head_office') || $actor->hasRole(User::ROLE_HEAD_OFFICE))
+            && $actor->isOfficeDocumentActor()
             && (int) $document->submitting_office_id === (int) $actor->office_id
             && $document->status === ProcurementDocument::STATUS_PPMP_SIGNATORIES_COMPLETED
             && $this->hasCompletedRequiredSignatures($document);
@@ -129,6 +130,14 @@ class HeadOfficePpmpSignatureWorkflowService
         }
 
         $document->loadMissing(['submittingOffice', 'submittedBy', 'preparedBy']);
+        $signer = $this->responsibleSigner($document);
+
+        if (! $signer) {
+            throw ValidationException::withMessages([
+                'signatory' => 'No active Head of Office account is configured for this office. Ask the administrator to assign one before submitting.',
+            ]);
+        }
+
         $oldStatus = $document->status;
         $fromOfficeId = $document->current_office_id;
         $officeId = $document->submitting_office_id ?: $actor->office_id;
@@ -138,7 +147,7 @@ class HeadOfficePpmpSignatureWorkflowService
             'stage' => ProcurementDocument::STAGE_PPMP_SIGNATURE_WORKFLOW,
             'returned_at' => null,
             'current_office_id' => $officeId,
-            'assigned_to_user_id' => $document->submitted_by_user_id ?: $actor->id,
+            'assigned_to_user_id' => $signer->id,
         ])->save();
 
         $this->retireLegacySplitRequests($document->refresh());
@@ -148,7 +157,7 @@ class HeadOfficePpmpSignatureWorkflowService
             self::DOCUMENT_TYPE,
             [
                 'signing_mode' => 'parallel',
-                'signers' => $this->signersFor($document->refresh(), $actor),
+                'signers' => [$this->signerPayload($this->signatureDefinition($document), $signer, $document)],
             ],
             $actor,
         );
@@ -159,7 +168,9 @@ class HeadOfficePpmpSignatureWorkflowService
             'PPMP Signature Requests Generated',
             $oldStatus,
             ProcurementDocument::STATUS_PPMP_PENDING_SIGNATORIES,
-            'Prepared and Submitted By electronic signature request was generated.',
+            $actor->isOfficeDocumentPreparer()
+                ? 'The PPMP was routed to the Head of Office for approval and electronic signature.'
+                : 'Prepared and Submitted By electronic signature request was generated.',
             $fromOfficeId,
             $document->current_office_id,
         );
@@ -266,7 +277,7 @@ class HeadOfficePpmpSignatureWorkflowService
 
                 return [
                     'slot' => $definition['slot'],
-                    'label' => $definition['label'],
+                    'label' => $this->signatureDefinition($document)['label'],
                     'signer_name' => $request?->requestedTo?->name ?? $fallbackSigner?->name ?? 'Unassigned',
                     'signer_user_id' => $request?->requestedTo?->user_id ?? $fallbackSigner?->user_id,
                     'designation' => $request?->requested_to_role ?? $this->positionForUser($fallbackSigner),
@@ -395,15 +406,6 @@ class HeadOfficePpmpSignatureWorkflowService
         );
     }
 
-    private function signersFor(ProcurementDocument $document, User $actor): array
-    {
-        $signer = $this->responsibleSigner($document) ?: $actor;
-
-        return [
-            $this->signerPayload(self::SIGNATURE_SLOTS[self::COMBINED_SIGNATURE_SLOT], $signer, $document),
-        ];
-    }
-
     private function signerPayload(array $definition, User $signer, ProcurementDocument $document): array
     {
         $position = $this->positionForUser($signer);
@@ -426,7 +428,29 @@ class HeadOfficePpmpSignatureWorkflowService
 
     private function responsibleSigner(ProcurementDocument $document): ?User
     {
-        return $this->submittedSigner($document) ?: $this->preparedSigner($document);
+        $submitted = $this->submittedSigner($document);
+        $prepared = $this->preparedSigner($document);
+        $creator = $submitted ?: $prepared;
+
+        if ($creator && ! $creator->isOfficeDocumentPreparer() && $creator->isOfficeDocumentActor() && $creator->isActive()) {
+            return $creator;
+        }
+
+        return $this->headSignerForOffice(
+            $document->submitting_office_id ?: $creator?->office_id,
+        );
+    }
+
+    private function signatureDefinition(ProcurementDocument $document): array
+    {
+        $creator = $this->submittedSigner($document) ?: $this->preparedSigner($document);
+        $definition = self::SIGNATURE_SLOTS[self::COMBINED_SIGNATURE_SLOT];
+
+        if ($creator?->isOfficeDocumentPreparer()) {
+            $definition['label'] = 'Head of Office Approval';
+        }
+
+        return $definition;
     }
 
     private function retireLegacySplitRequests(ProcurementDocument $document): void
@@ -473,6 +497,15 @@ class HeadOfficePpmpSignatureWorkflowService
 
         $officeId = $document->submitting_office_id;
 
+        if (! $officeId) {
+            return null;
+        }
+
+        return $this->headSignerForOffice($officeId);
+    }
+
+    private function headSignerForOffice(?int $officeId): ?User
+    {
         if (! $officeId) {
             return null;
         }

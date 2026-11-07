@@ -17,6 +17,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public const ROLE_ADMIN = 'Admin';
     public const ROLE_HEAD_OFFICE = 'Head of Office / End User';
+    public const ROLE_OFFICE_PREPARER = 'Office Document Preparer';
     public const ROLE_BUDGET = 'Budget Officer';
     public const ROLE_ACCOUNTING = 'Accounting Officer';
     public const ROLE_BAC_SECRETARIAT = 'BAC Secretariat';
@@ -255,6 +256,18 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasRole('admin') || $this->hasRole(self::ROLE_ADMIN);
     }
 
+    public function isOfficeDocumentPreparer(): bool
+    {
+        return $this->hasRole('office_preparer') || $this->hasRole(self::ROLE_OFFICE_PREPARER);
+    }
+
+    public function isOfficeDocumentActor(): bool
+    {
+        return $this->isOfficeDocumentPreparer()
+            || $this->hasRole('head_office')
+            || $this->hasRole(self::ROLE_HEAD_OFFICE);
+    }
+
     public function dashboardRoute(): string
     {
         if ($this->assignedRole?->dashboard_route) {
@@ -264,6 +277,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return match ($this->role) {
             self::ROLE_ADMIN => 'admin.dashboard',
             self::ROLE_HEAD_OFFICE => 'head-office.dashboard',
+            self::ROLE_OFFICE_PREPARER => 'head-office.dashboard',
             self::ROLE_BUDGET => 'budget.dashboard',
             self::ROLE_ACCOUNTING => 'accounting.dashboard',
             self::ROLE_BAC_SECRETARIAT => 'bac-secretariat.dashboard',
@@ -281,6 +295,7 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($this->assignedRole?->code) {
             return match ($this->assignedRole->code) {
                 'head_office' => 'head-office',
+                'office_preparer' => 'head-office',
                 'budget_officer' => 'budget',
                 'accounting_officer' => 'accounting',
                 'bac_secretariat' => 'bac-secretariat',
@@ -296,6 +311,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return match ($this->role) {
             self::ROLE_ADMIN => 'admin',
             self::ROLE_HEAD_OFFICE => 'head-office',
+            self::ROLE_OFFICE_PREPARER => 'head-office',
             self::ROLE_BUDGET => 'budget',
             self::ROLE_ACCOUNTING => 'accounting',
             self::ROLE_BAC_SECRETARIAT => 'bac-secretariat',

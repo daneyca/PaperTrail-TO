@@ -58,8 +58,9 @@
 
     @if ($mode === 'create')
         <div class="form-field">
-            <label for="password">Password</label>
+            <label for="password">Temporary Password</label>
             <input id="password" name="password" type="password" required>
+            <small>The employee must change this password after the first login.</small>
             @error('password')<p class="field-error">{{ $message }}</p>@enderror
         </div>
     @endif
@@ -90,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const syncOfficeEligibility = () => {
         const selectedRole = roleSelect.options[roleSelect.selectedIndex]?.dataset.roleName || '';
-        const requiresRequestingOffice = selectedRole === 'Head of Office / End User';
+        const requiresRequestingOffice = ['Head of Office / End User', 'Office Document Preparer'].includes(selectedRole);
 
         Array.from(officeSelect.options).forEach((option) => {
             if (!option.value) {

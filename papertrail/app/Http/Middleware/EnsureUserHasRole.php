@@ -19,6 +19,19 @@ class EnsureUserHasRole
 
         $roleCodes = collect($roles)->flatMap(fn ($role) => [$role, str_replace('-', '_', $role)])->all();
 
+        if ($user->isOfficeDocumentPreparer()
+            && (in_array('head-office', $roles, true) || in_array('head_office', $roleCodes, true))
+            && ! $this->allowsOfficeDocumentPreparerRoute($request)) {
+            AuditLogger::log('Access Control', 'Unauthorized Access Attempt', 'Office Document Preparer attempted to access a Head of Office-only route.', null, null, null, 'warning', [
+                'attempted_url' => $request->fullUrl(),
+                'route_name' => $request->route()?->getName(),
+            ]);
+
+            return redirect()
+                ->route('head-office.dashboard')
+                ->with('error', 'This page is only available to the Head of Office.');
+        }
+
         if (!in_array($user->roleSlug(), $roles, true)
             && !in_array($user->assignedRole?->code, $roleCodes, true)
             && !collect($roleCodes)->contains(fn ($role) => $user->hasRole($role))) {
@@ -38,6 +51,22 @@ class EnsureUserHasRole
         }
 
         return $next($request);
+    }
+
+    private function allowsOfficeDocumentPreparerRoute(Request $request): bool
+    {
+        return $request->routeIs(
+            'head-office.dashboard',
+            'head-office.ppmps.menu',
+            'head-office.purchase-requests.menu',
+            'head-office.my-documents.menu',
+            'head-office.returned-documents.menu',
+            'head-office.documents.*',
+            'head-office.returned.*',
+            'head-office.ppmp.*',
+            'head-office.pr.*',
+            'head-office.svp-tracking.*',
+        );
     }
 
     private function allowsBacsec002PurchaseRequestRoutes(Request $request, mixed $user, array $roles, array $roleCodes): bool
