@@ -47,6 +47,15 @@ class User extends Authenticatable implements MustVerifyEmail
         return array_column(self::OFFICE_WORKFLOW_ROLES, 'name');
     }
 
+    public static function hiddenLoginRoleNames(): array
+    {
+        return array_merge(self::officeWorkflowRoleNames(), [
+            self::ROLE_BAC_MEMBER,
+            self::ROLE_BAC_CHAIR,
+            self::ROLE_BAC_VICE_CHAIRPERSON,
+        ]);
+    }
+
     public function officeWorkflowRole(): ?array
     {
         return $this->role === self::ROLE_HEAD_OFFICE && $this->isActive()

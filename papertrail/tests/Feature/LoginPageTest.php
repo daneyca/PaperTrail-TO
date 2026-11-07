@@ -35,8 +35,7 @@ class LoginPageTest extends TestCase
             ['code' => 'accounting_officer', 'name' => User::ROLE_ACCOUNTING, 'route' => 'accounting.dashboard'],
             ['code' => 'approving_authority', 'name' => User::ROLE_APPROVING_AUTHORITY, 'route' => 'approving-authority.dashboard'],
         ] as $role) {
-            Role::create([
-                'code' => $role['code'],
+            Role::updateOrCreate(['code' => $role['code']], [
                 'name' => $role['name'],
                 'dashboard_route' => $role['route'],
                 'status' => Role::STATUS_ACTIVE,
@@ -49,5 +48,27 @@ class LoginPageTest extends TestCase
             ->assertDontSee('value="'.User::ROLE_BUDGET.'"', false)
             ->assertDontSee('value="'.User::ROLE_ACCOUNTING.'"', false)
             ->assertDontSee('value="'.User::ROLE_APPROVING_AUTHORITY.'"', false);
+    }
+
+    public function test_linked_bac_workspaces_are_not_separate_login_roles(): void
+    {
+        foreach ([
+            ['code' => 'bac_member', 'name' => User::ROLE_BAC_MEMBER, 'route' => 'bac-member.dashboard'],
+            ['code' => 'bac_chair', 'name' => User::ROLE_BAC_CHAIR, 'route' => 'bac-chair.dashboard'],
+            ['code' => 'bac_vice_chairperson', 'name' => User::ROLE_BAC_VICE_CHAIRPERSON, 'route' => 'bac-chair.dashboard'],
+        ] as $role) {
+            Role::updateOrCreate(['code' => $role['code']], [
+                'name' => $role['name'],
+                'dashboard_route' => $role['route'],
+                'status' => Role::STATUS_ACTIVE,
+                'is_system' => true,
+            ]);
+        }
+
+        $response = $this->get(route('login'))->assertOk();
+
+        foreach ([User::ROLE_BAC_MEMBER, User::ROLE_BAC_CHAIR, User::ROLE_BAC_VICE_CHAIRPERSON] as $role) {
+            $response->assertDontSee('value="'.$role.'"', false);
+        }
     }
 }

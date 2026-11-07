@@ -73,7 +73,9 @@ class PersonWorkspacesTest extends TestCase
 
     public function test_chairperson_label_does_not_change_the_routing_role(): void
     {
-        $this->get(route('login'))->assertOk()->assertSee('BAC Chairperson')->assertDontSee('BAC Chairman');
+        $this->get(route('login'))->assertOk()
+            ->assertDontSee('value="'.User::ROLE_BAC_CHAIR.'"', false)
+            ->assertDontSee('BAC Chairman');
         $this->linkAccounts();
         $account = $this->user('MPDO-001');
         $chair = $this->user('BACCHAIR-001');
@@ -117,7 +119,7 @@ class PersonWorkspacesTest extends TestCase
         $this->withSession(['login_captcha_hash' => Hash::make('ABCDE')])->post(route('login.store'), [
             'user_id' => 'BACCHAIR-001', 'role' => User::ROLE_BAC_CHAIR,
             'password' => 'password123', 'security_code' => 'ABCDE',
-        ])->assertSessionHasErrors('user_id');
+        ])->assertSessionHasErrors('role');
         $this->assertGuest();
     }
 

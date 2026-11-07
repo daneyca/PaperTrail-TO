@@ -32,7 +32,7 @@ class LoginController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'role' => ['required', 'string', \Illuminate\Validation\Rule::notIn(User::officeWorkflowRoleNames())],
+            'role' => ['required', 'string', \Illuminate\Validation\Rule::notIn(User::hiddenLoginRoleNames())],
             'office' => ['nullable', 'string'],
             'user_id' => ['required', 'string'],
             'password' => ['required', 'string'],
@@ -219,9 +219,6 @@ class LoginController extends Controller
             User::ROLE_HEAD_OFFICE,
             User::ROLE_OFFICE_PREPARER,
             User::ROLE_BAC_SECRETARIAT,
-            User::ROLE_BAC_MEMBER,
-            User::ROLE_BAC_CHAIR,
-            User::ROLE_BAC_VICE_CHAIRPERSON,
             User::ROLE_APPROVING_AUTHORITY,
             User::ROLE_BUDGET,
             User::ROLE_ACCOUNTING,
@@ -229,7 +226,7 @@ class LoginController extends Controller
         ];
 
         return Role::where('status', Role::STATUS_ACTIVE)
-            ->whereNotIn('name', User::officeWorkflowRoleNames())
+            ->whereNotIn('name', User::hiddenLoginRoleNames())
             ->where('is_system', true)
             ->where('code', '!=', '099')
             ->where('name', '!=', 'President of the Philippines')
