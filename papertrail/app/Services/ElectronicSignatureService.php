@@ -93,12 +93,36 @@ class ElectronicSignatureService
             return ['ok' => false, 'message' => 'This document type is not configured for e-signature yet.'];
         }
 
-        $requestForUser = app(SignatureRequestService::class)->openRequestForUser($document, $type, $user, $signatureRequest);
+        $signatureRequests = app(SignatureRequestService::class);
+
+        if ($signatureRequest
+            && $signatureRequests->isBacResolutionApprovalRequest($signatureRequest)
+            && ! $signatureRequests->bacResolutionAttestationsComplete($document)) {
+            return [
+                'ok' => false,
+                'message' => 'All Attested By signatures must be completed before Approved By can sign.',
+            ];
+        }
+
+        if ($type === 'bac_resolution') {
+            $signatureRequests->activateBacResolutionApprovalIfReady($document);
+        }
+        $signatureRequest?->refresh();
+        $requestForUser = $signatureRequests->openRequestForUser($document, $type, $user, $signatureRequest);
 
         if ($requestForUser) {
+            if ($signatureRequests->isBacResolutionApprovalRequest($requestForUser)
+                && ! $signatureRequests->bacResolutionAttestationsComplete($document)) {
+                return [
+                    'ok' => false,
+                    'message' => 'All Attested By signatures must be completed before Approved By can sign.',
+                ];
+            }
+
             if (! in_array($document->status, [
                 BacResolution::STATUS_SUBMITTED_TO_BAC_CHAIR,
                 BacResolution::STATUS_CONFIRMED_BY_BAC_CHAIR,
+                BacResolution::STATUS_FORWARDED_TO_HOPE,
             ], true)) {
                 return ['ok' => false, 'message' => 'This BAC Resolution is no longer open for signatures.'];
             }

@@ -411,7 +411,7 @@ class BacResolutionController extends Controller
                     'action' => 'BAC Resolution Submitted for Signatures',
                     'status_from' => $sourceOldStatus,
                     'status_to' => ProcurementDocument::STATUS_PENDING_BAC_CHAIR_REVIEW,
-                    'comments' => "BAC Resolution {$resolution->displayNumber()} was submitted for parallel electronic signatures.",
+                    'comments' => "BAC Resolution {$resolution->displayNumber()} was submitted for staged electronic signatures.",
                     'action_at' => now(),
                 ]);
             }
@@ -423,7 +423,7 @@ class BacResolutionController extends Controller
                 $request->user(),
             );
 
-            AuditLogger::log('BAC Resolutions', 'BAC Resolution Submitted for Signatures', 'BAC Secretariat submitted a BAC Resolution for parallel electronic signatures.', $resolution, ['status' => $oldStatus], ['status' => BacResolution::STATUS_SUBMITTED_TO_BAC_CHAIR]);
+            AuditLogger::log('BAC Resolutions', 'BAC Resolution Submitted for Signatures', 'BAC Secretariat submitted a BAC Resolution for staged electronic signatures.', $resolution, ['status' => $oldStatus], ['status' => BacResolution::STATUS_SUBMITTED_TO_BAC_CHAIR]);
 
             AuditLogger::signature('signature_requests_created', $resolution, [
                 'description' => 'BAC Secretariat routed BAC Resolution for electronic signatures.',
@@ -1194,6 +1194,7 @@ class BacResolutionController extends Controller
                 'printed_name' => trim((string) ($approval['name'] ?? '')),
                 'order' => (int) ($approval['display_order'] ?? 7),
                 'required' => true,
+                'initial_status' => SignatureRequest::STATUS_WAITING,
             ];
         }
 

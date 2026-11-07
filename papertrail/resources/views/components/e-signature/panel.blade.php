@@ -2,6 +2,7 @@
     $existingSignature = $existingSignature ?? null;
     $signedSignature = $signedSignature ?? ($existingSignature?->isValid() ? $existingSignature : null);
     $canSign = (bool) ($canSign ?? false);
+    $canSignMessage = $canSignMessage ?? null;
     $signatureProfileComplete = (bool) ($signatureProfileComplete ?? auth()->user()?->hasSignatureProfile());
     $actionLabel = $actionLabel ?? 'Confirm / Sign';
     $signatureAction = $signatureAction ?? 'confirmed';
@@ -180,7 +181,7 @@
         @else
             <div class="empty-state">
                 <strong>No signature action available</strong>
-                <p>This document is not currently in a status that can be electronically signed by your account.</p>
+                <p>{{ $canSignMessage ?: 'This document is not currently in a status that can be electronically signed by your account.' }}</p>
             </div>
         @endif
     </div>

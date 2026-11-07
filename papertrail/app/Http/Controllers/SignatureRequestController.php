@@ -118,6 +118,13 @@ class SignatureRequestController extends Controller
         $canSubmitPpmpToAppConsolidation = $signatureRequest->document_type === 'ppmp'
             && $document instanceof ProcurementDocument
             && app(HeadOfficePpmpSignatureWorkflowService::class)->canSubmitToAppConsolidation($request->user(), $document);
+        $signingCheck = $this->signatures->canSignWithReason(
+            $request->user(),
+            $document,
+            $signatureRequest->document_type,
+            'confirmed',
+            $signatureRequest,
+        );
 
         return view('signature-requests.show', [
             'signatureRequest' => $signatureRequest->fresh(['requestedBy', 'requestedTo', 'requestedOffice']),
@@ -126,7 +133,8 @@ class SignatureRequestController extends Controller
             'signedSignature' => $signedSignature,
             'existingSignature' => $existingSignature,
             'signatureSlots' => $signatureSlots,
-            'canSign' => $this->signatures->canSign($request->user(), $document, $signatureRequest->document_type, 'confirmed', $signatureRequest),
+            'canSign' => $signingCheck['ok'],
+            'canSignMessage' => $signingCheck['message'],
             'signatureProfileComplete' => $this->signatures->ensureSignatureProfile($request->user()),
             'canSubmitPpmpToAppConsolidation' => $canSubmitPpmpToAppConsolidation,
         ]);

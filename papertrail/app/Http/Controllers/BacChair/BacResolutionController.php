@@ -75,6 +75,7 @@ class BacResolutionController extends Controller
         $signatureRequestService = app(SignatureRequestService::class);
         $signatureRequest = $signatureRequestService->openRequestForUser($resolution, 'bac-resolution', $request->user());
         $signedSignature = $signatureService->signedSignatureFor($resolution, 'bac-resolution', 'confirmed');
+        $attestationsComplete = $signatureRequestService->bacResolutionAttestationsComplete($resolution);
 
         return view('bac-chair.resolutions.show', [
             'resolution' => $resolution,
@@ -87,6 +88,7 @@ class BacResolutionController extends Controller
             'signatureRequests' => $this->signatureRequestsFor($resolution),
             'canSignResolution' => $signatureService->canSign($request->user(), $resolution, 'bac-resolution', 'confirmed', $signatureRequest),
             'signatureProfileComplete' => $signatureService->ensureSignatureProfile($request->user()),
+            'attestationsComplete' => $attestationsComplete,
         ]);
     }
 
@@ -211,6 +213,10 @@ class BacResolutionController extends Controller
             AuditLogger::log('BAC Chair Resolutions', 'Unauthorized Access Attempt', 'Invalid BAC Resolution forward-to-HOPE attempt.', $resolution, null, null, 'warning');
 
             return back()->with('error', 'Only confirmed BAC Resolutions can be forwarded to HOPE.');
+        }
+
+        if (! app(SignatureRequestService::class)->bacResolutionAttestationsComplete($resolution)) {
+            return back()->with('error', 'All Attested By signatures must be completed before the BAC Resolution can be forwarded to Approved By.');
         }
 
         $validated = $request->validate([

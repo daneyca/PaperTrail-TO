@@ -77,6 +77,7 @@
                 'existingSignature' => $existingSignature,
                 'signedSignature' => $signedSignature,
                 'canSign' => $canSign,
+                'canSignMessage' => $canSignMessage ?? null,
                 'signatureProfileComplete' => $signatureProfileComplete,
                 'actionLabel' => 'Confirm Signature',
                 'signatureAction' => 'confirmed',

@@ -362,6 +362,16 @@ class PersonWorkspacesTest extends TestCase
         $this->assertTrue($result['ok']);
         $this->assertSame($signatureRequest->id, $result['signature_request']->id);
 
+        $resolution->update(['status' => BacResolution::STATUS_FORWARDED_TO_HOPE]);
+
+        $this->assertTrue(app(ElectronicSignatureService::class)->canSign(
+            $viceChair,
+            $resolution->fresh(),
+            'bac_resolution',
+            'confirmed',
+            $signatureRequest,
+        ));
+
         $resolution->update(['status' => BacResolution::STATUS_RETURNED_BY_BAC_CHAIR]);
 
         $this->assertFalse(app(ElectronicSignatureService::class)->canSign(
@@ -370,6 +380,84 @@ class PersonWorkspacesTest extends TestCase
             'bac_resolution',
             'confirmed',
             $signatureRequest,
+        ));
+    }
+
+    public function test_bac_resolution_approved_by_waits_for_all_attested_by_signatures(): void
+    {
+        $this->linkAccounts();
+        $chair = $this->user('BACCHAIR-001');
+        $viceChair = $this->user('BACVICE-001');
+        $approver = $this->user('MO-001');
+        $resolution = BacResolution::create([
+            'resolution_number' => 'BAC-STAGED-SIGNATURE-TEST',
+            'title' => 'Staged BAC Resolution signing test',
+            'prepared_by_user_id' => $chair->id,
+            'status' => BacResolution::STATUS_SUBMITTED_TO_BAC_CHAIR,
+            'signature_status' => 'pending_signatures',
+        ]);
+        $requests = app(SignatureRequestService::class)->createRequestsForDocument(
+            $resolution,
+            'bac_resolution',
+            [
+                'signers' => [
+                    [
+                        'slot' => 'bac_chairperson',
+                        'label' => 'BAC Chairperson',
+                        'account_code' => $chair->user_id,
+                        'required' => true,
+                    ],
+                    [
+                        'slot' => 'bac_vice_chairperson',
+                        'label' => 'BAC Vice Chairperson',
+                        'account_code' => $viceChair->user_id,
+                        'required' => true,
+                    ],
+                    [
+                        'slot' => 'hope',
+                        'label' => 'Approved By',
+                        'account_code' => $approver->user_id,
+                        'required' => true,
+                        'initial_status' => SignatureRequest::STATUS_WAITING,
+                    ],
+                ],
+            ],
+            $chair,
+        );
+        $chairRequest = $requests->firstWhere('signatory_slot', 'bac_chairperson');
+        $viceRequest = $requests->firstWhere('signatory_slot', 'bac_vice_chairperson');
+        $approvalRequest = $requests->firstWhere('signatory_slot', 'hope');
+
+        $this->assertSame(SignatureRequest::STATUS_WAITING, $approvalRequest->status);
+        $this->assertNull($approvalRequest->notification_sent_at);
+
+        $blocked = app(ElectronicSignatureService::class)->canSignWithReason(
+            $approver,
+            $resolution,
+            'bac_resolution',
+            'confirmed',
+            $approvalRequest,
+        );
+
+        $this->assertFalse($blocked['ok']);
+        $this->assertSame('All Attested By signatures must be completed before Approved By can sign.', $blocked['message']);
+
+        $chairRequest->update(['status' => SignatureRequest::STATUS_SIGNED, 'signed_at' => now()]);
+        app(SignatureRequestService::class)->markSigned(
+            $viceRequest,
+            new ElectronicSignature(['signed_at' => now(), 'metadata' => []]),
+        );
+
+        $this->assertContains($approvalRequest->fresh()->status, [
+            SignatureRequest::STATUS_PENDING,
+            SignatureRequest::STATUS_NOTIFIED,
+        ]);
+        $this->assertTrue(app(ElectronicSignatureService::class)->canSign(
+            $approver,
+            $resolution->fresh(),
+            'bac_resolution',
+            'confirmed',
+            $approvalRequest->fresh(),
         ));
     }
 }

@@ -9,7 +9,13 @@
         $canConfirm = $resolution->status === \App\Models\BacResolution::STATUS_SUBMITTED_TO_BAC_CHAIR;
         $isSigned = $signedSignature?->isValid();
         $canReturn = ! $isSigned && in_array($resolution->status, [\App\Models\BacResolution::STATUS_SUBMITTED_TO_BAC_CHAIR, \App\Models\BacResolution::STATUS_CONFIRMED_BY_BAC_CHAIR], true);
-        $canForward = ! $isSigned && $resolution->status === \App\Models\BacResolution::STATUS_CONFIRMED_BY_BAC_CHAIR;
+        $attestationsComplete = $attestationsComplete ?? false;
+        $waitingForAttestations = ! $isSigned
+            && $resolution->status === \App\Models\BacResolution::STATUS_CONFIRMED_BY_BAC_CHAIR
+            && ! $attestationsComplete;
+        $canForward = ! $isSigned
+            && $resolution->status === \App\Models\BacResolution::STATUS_CONFIRMED_BY_BAC_CHAIR
+            && $attestationsComplete;
     @endphp
 
     <section class="dashboard-hero admin-users-hero pt-smooth-enter" style="--pt-delay: 0ms">
@@ -91,6 +97,13 @@
                 </form>
             @endif
 
+            @if ($waitingForAttestations)
+                <div class="empty-state">
+                    <strong>Waiting for Attested By signatures</strong>
+                    <p>All required BAC signatories must sign before this resolution can be forwarded to Approved By.</p>
+                </div>
+            @endif
+
             @if ($canReturn && ! $canConfirm)
                 <form id="return-resolution" method="POST" action="{{ route('bac-chair.resolutions.return', $resolution) }}" onsubmit="return confirm('Return this BAC Resolution to BAC Secretariat?');" class="budget-action-form">
                     @csrf
@@ -106,7 +119,7 @@
                 </form>
             @endif
 
-            @if (! $signedSignature && ! $canConfirm && ! $canForward && ! $canReturn)
+            @if (! $signedSignature && ! $canConfirm && ! $canForward && ! $canReturn && ! $waitingForAttestations)
                 <div class="empty-state">
                     <strong>No action available</strong>
                     <p>This BAC Resolution has already moved out of the BAC Chair action queue.</p>

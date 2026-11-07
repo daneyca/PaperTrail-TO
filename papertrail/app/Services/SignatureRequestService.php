@@ -21,6 +21,12 @@ use Throwable;
 
 class SignatureRequestService
 {
+    private const BAC_RESOLUTION_APPROVAL_SLOTS = [
+        'hope',
+        'approving_authority',
+        'local_chief_executive',
+    ];
+
     public function __construct(private readonly NotificationDispatchService $notifications)
     {
     }
@@ -56,6 +62,9 @@ class SignatureRequestService
     {
         $type = $this->normalizeDocumentType($documentType);
         $slot = $this->canonicalSignatureSlot($signerData['slot'] ?? $signerData['signatory_slot'] ?? null);
+        $initialStatus = ($signerData['initial_status'] ?? null) === SignatureRequest::STATUS_WAITING
+            ? SignatureRequest::STATUS_WAITING
+            : SignatureRequest::STATUS_PENDING;
 
         if (! $slot) {
             return null;
@@ -80,7 +89,7 @@ class SignatureRequestService
 
         $signatureRequest = $query->latest('updated_at')->first() ?: new SignatureRequest([
             'request_uuid' => (string) Str::uuid(),
-            'status' => SignatureRequest::STATUS_PENDING,
+            'status' => $initialStatus,
         ]);
 
         if ($signatureRequest->status === SignatureRequest::STATUS_SIGNED) {
@@ -103,7 +112,9 @@ class SignatureRequestService
             'requested_to_office_id' => $recipient?->office_id ?? ($signerData['office_id'] ?? null),
             'status' => in_array($signatureRequest->status, SignatureRequest::OPEN_STATUSES, true)
                 ? $signatureRequest->status
-                : SignatureRequest::STATUS_PENDING,
+                : ($signatureRequest->status === SignatureRequest::STATUS_WAITING
+                    ? SignatureRequest::STATUS_WAITING
+                    : $initialStatus),
             'metadata' => [
                 ...($signatureRequest->metadata ?: []),
                 'account_code' => $signerData['account_code'] ?? null,
@@ -131,7 +142,9 @@ class SignatureRequestService
             ],
         ]);
 
-        if (! $signatureRequest->notification_sent_at && $signatureRequest->requested_to_user_id) {
+        if ($signatureRequest->status !== SignatureRequest::STATUS_WAITING
+            && ! $signatureRequest->notification_sent_at
+            && $signatureRequest->requested_to_user_id) {
             $this->notifySigner($signatureRequest);
         } elseif (! $signatureRequest->requested_to_user_id) {
             AuditLogger::signature('signature_request_notification_skipped', $document, [
@@ -308,6 +321,51 @@ class SignatureRequestService
             'signed_at' => $electronicSignature->signed_at ?: now(),
             'remarks' => $electronicSignature->metadata['remarks'] ?? $signatureRequest->remarks,
         ])->save();
+
+        if ($signatureRequest->document_type === 'bac_resolution') {
+            $this->activateBacResolutionApprovalIfReady($signatureRequest->document_id);
+        }
+    }
+
+    public function isBacResolutionApprovalRequest(?SignatureRequest $signatureRequest): bool
+    {
+        return $signatureRequest
+            && $signatureRequest->document_type === 'bac_resolution'
+            && $this->canonicalSignatureSlot($signatureRequest->signatory_slot) === 'hope';
+    }
+
+    public function bacResolutionAttestationsComplete(Model|int|string $document): bool
+    {
+        $documentId = $document instanceof Model ? $document->getKey() : $document;
+        $attestations = SignatureRequest::query()
+            ->forDocument('bac_resolution', $documentId)
+            ->where('is_required', true)
+            ->whereNotIn('signatory_slot', self::BAC_RESOLUTION_APPROVAL_SLOTS);
+
+        return (clone $attestations)->exists()
+            && ! (clone $attestations)->where('status', '!=', SignatureRequest::STATUS_SIGNED)->exists();
+    }
+
+    public function activateBacResolutionApprovalIfReady(Model|int|string $document): bool
+    {
+        $documentId = $document instanceof Model ? $document->getKey() : $document;
+
+        if (! $this->bacResolutionAttestationsComplete($documentId)) {
+            return false;
+        }
+
+        $approvalRequests = SignatureRequest::query()
+            ->forDocument('bac_resolution', $documentId)
+            ->whereIn('signatory_slot', self::BAC_RESOLUTION_APPROVAL_SLOTS)
+            ->where('status', SignatureRequest::STATUS_WAITING)
+            ->get();
+
+        foreach ($approvalRequests as $approvalRequest) {
+            $approvalRequest->forceFill(['status' => SignatureRequest::STATUS_PENDING])->save();
+            $this->notifySigner($approvalRequest);
+        }
+
+        return $approvalRequests->isNotEmpty();
     }
 
     public function markDeclined(SignatureRequest $signatureRequest, string $remarks): void
