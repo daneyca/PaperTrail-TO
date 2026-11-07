@@ -31,7 +31,7 @@ return new class extends Migration
 
         $now = now();
         $payload = [
-            'name' => 'Office Document Preparer',
+            'name' => 'Procurement Staff',
             'description' => 'Prepares and submits office procurement documents for Head of Office approval.',
             'dashboard_route' => 'head-office.dashboard',
             'status' => 'active',

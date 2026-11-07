@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const syncOfficeEligibility = () => {
         const selectedRole = roleSelect.options[roleSelect.selectedIndex]?.dataset.roleName || '';
-        const requiresRequestingOffice = ['Head of Office / End User', 'Office Document Preparer'].includes(selectedRole);
+        const requiresRequestingOffice = ['Head of Office / End User', 'Procurement Staff'].includes(selectedRole);
 
         Array.from(officeSelect.options).forEach((option) => {
             if (!option.value) {

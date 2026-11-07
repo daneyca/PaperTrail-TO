@@ -22,7 +22,7 @@ class EnsureUserHasRole
         if ($user->isOfficeDocumentPreparer()
             && (in_array('head-office', $roles, true) || in_array('head_office', $roleCodes, true))
             && ! $this->allowsOfficeDocumentPreparerRoute($request)) {
-            AuditLogger::log('Access Control', 'Unauthorized Access Attempt', 'Office Document Preparer attempted to access a Head of Office-only route.', null, null, null, 'warning', [
+            AuditLogger::log('Access Control', 'Unauthorized Access Attempt', 'Procurement Staff attempted to access a Head of Office-only route.', null, null, null, 'warning', [
                 'attempted_url' => $request->fullUrl(),
                 'route_name' => $request->route()?->getName(),
             ]);

@@ -268,6 +268,6 @@ class AdminUserController extends Controller
 
         return $office->isRequestingOffice()
             ? null
-            : 'Head of Office and Office Document Preparer accounts can only be assigned to requesting/end-user offices.';
+            : 'Head of Office and Procurement Staff accounts can only be assigned to requesting/end-user offices.';
     }
 }

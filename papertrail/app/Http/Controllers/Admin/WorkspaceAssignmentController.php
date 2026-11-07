@@ -14,7 +14,7 @@ class WorkspaceAssignmentController extends Controller
     public function store(Request $request, User $user, PersonWorkspaceService $service): RedirectResponse
     {
         if ($user->isOfficeDocumentPreparer()) {
-            return back()->with('error', 'Office Document Preparer accounts cannot be linked to BAC or other workspaces.');
+            return back()->with('error', 'Procurement Staff accounts cannot be linked to BAC or other workspaces.');
         }
 
         $data = $request->validate([
@@ -24,7 +24,7 @@ class WorkspaceAssignmentController extends Controller
         $workspace = User::findOrFail($data['workspace_id']);
 
         if ($workspace->isOfficeDocumentPreparer()) {
-            return back()->with('error', 'Office Document Preparer accounts cannot be linked to BAC or other workspaces.');
+            return back()->with('error', 'Procurement Staff accounts cannot be linked to BAC or other workspaces.');
         }
 
         $service->link($user, $workspace);

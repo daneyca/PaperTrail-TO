@@ -17,7 +17,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public const ROLE_ADMIN = 'Admin';
     public const ROLE_HEAD_OFFICE = 'Head of Office / End User';
-    public const ROLE_OFFICE_PREPARER = 'Office Document Preparer';
+    public const ROLE_OFFICE_PREPARER = 'Procurement Staff';
     public const ROLE_BUDGET = 'Budget Officer';
     public const ROLE_ACCOUNTING = 'Accounting Officer';
     public const ROLE_BAC_SECRETARIAT = 'BAC Secretariat';
