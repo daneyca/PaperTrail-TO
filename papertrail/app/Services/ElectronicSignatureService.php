@@ -119,11 +119,21 @@ class ElectronicSignatureService
                 ];
             }
 
-            if (! in_array($document->status, [
+            $isApprovalRequest = $signatureRequests->isBacResolutionApprovalRequest($requestForUser);
+            $isClosedAttestation = ! $isApprovalRequest && in_array($document->status, [
+                BacResolution::STATUS_DRAFT,
+                BacResolution::STATUS_RETURNED_BY_BAC_CHAIR,
+                BacResolution::STATUS_RETURNED_BY_HOPE,
+                BacResolution::STATUS_RETURNED,
+                BacResolution::STATUS_CANCELLED,
+            ], true);
+            $isClosedApproval = $isApprovalRequest && ! in_array($document->status, [
                 BacResolution::STATUS_SUBMITTED_TO_BAC_CHAIR,
                 BacResolution::STATUS_CONFIRMED_BY_BAC_CHAIR,
                 BacResolution::STATUS_FORWARDED_TO_HOPE,
-            ], true)) {
+            ], true);
+
+            if ($isClosedAttestation || $isClosedApproval) {
                 return ['ok' => false, 'message' => 'This BAC Resolution is no longer open for signatures.'];
             }
 

@@ -372,6 +372,26 @@ class PersonWorkspacesTest extends TestCase
             $signatureRequest,
         ));
 
+        $resolution->update(['status' => BacResolution::STATUS_APPROVED_BY_HOPE]);
+
+        $this->assertTrue(app(ElectronicSignatureService::class)->canSign(
+            $viceChair,
+            $resolution->fresh(),
+            'bac_resolution',
+            'confirmed',
+            $signatureRequest,
+        ));
+
+        $resolution->update(['status' => BacResolution::STATUS_RETURNED_TO_END_USER]);
+
+        $this->assertTrue(app(ElectronicSignatureService::class)->canSign(
+            $viceChair,
+            $resolution->fresh(),
+            'bac_resolution',
+            'confirmed',
+            $signatureRequest,
+        ));
+
         $resolution->update(['status' => BacResolution::STATUS_RETURNED_BY_BAC_CHAIR]);
 
         $this->assertFalse(app(ElectronicSignatureService::class)->canSign(
