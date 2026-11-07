@@ -5,21 +5,20 @@
     $signatureProfileComplete = (bool) ($signatureProfileComplete ?? auth()->user()?->hasSignatureProfile());
     $actionLabel = $actionLabel ?? 'Confirm / Sign';
     $signatureAction = $signatureAction ?? 'confirmed';
-    $componentKey = 'esignature_' . substr(md5(($sendCodeRoute ?? '') . ($signRoute ?? '') . ($declineRoute ?? '') . ($panelTitle ?? '')), 0, 10);
+    $componentKey = 'esignature_' . substr(md5(($signRoute ?? '') . ($declineRoute ?? '') . ($panelTitle ?? '')), 0, 10);
     $panelIcon = $panelIcon ?? 'signature';
     $showPanelIcon = (bool) ($showPanelIcon ?? false);
     $panelDescription = $panelDescription ?? 'Electronically sign this document through the verified internal PaperTrail workflow.';
     $openSignLabel = $openSignLabel ?? 'Sign Document';
     $openDeclineLabel = $openDeclineLabel ?? 'Return / Decline';
-    $compactHelpText = $compactHelpText ?? 'Open the secure signing window when you are ready to enter your password and signing code.';
+    $compactHelpText = $compactHelpText ?? 'Open the secure signing window when you are ready to confirm your account password.';
     $signModalId = $componentKey . '_sign_modal';
     $returnModalId = $componentKey . '_return_modal';
     $passwordInputId = $componentKey . '_current_password';
-    $codeInputId = $componentKey . '_signing_code';
     $remarksInputId = $componentKey . '_signature_remarks';
     $consentInputId = $componentKey . '_signature_consent';
     $declineReasonId = $componentKey . '_decline_reason';
-    $hasSignatureErrors = $errors->has('current_password') || $errors->has('signing_code') || $errors->has('signature_consent');
+    $hasSignatureErrors = $errors->has('current_password') || $errors->has('signature_consent');
     $hasDeclineErrors = $errors->has('reason');
 @endphp
 
@@ -99,55 +98,37 @@
                     </header>
 
                     <div class="e-signature-modal__body e-signature-modal__body--sign">
-                        <form method="POST" action="{{ $sendCodeRoute }}" class="e-signature-form e-signature-code-form">
-                            @csrf
-                            <input type="hidden" name="signature_action" value="{{ $signatureAction }}">
-                            <div>
-                                <strong>1. Get signing code</strong>
-                                <span>Send a one-time 6-digit code before confirming.</span>
-                            </div>
-                            <button type="submit">Send Code</button>
-                        </form>
-
                         <form method="POST" action="{{ $signRoute }}" class="e-signature-form">
                             @csrf
                             <input type="hidden" name="signature_action" value="{{ $signatureAction }}">
 
                             <div class="e-signature-step">
-                                <strong>2. Confirm identity</strong>
-                                <div class="e-signature-field-grid">
-                                    <div>
-                                        <label for="{{ $passwordInputId }}">Password</label>
-                                        <div class="e-signature-password-field">
-                                            <input id="{{ $passwordInputId }}" name="current_password" type="password" autocomplete="current-password" required data-e-signature-focus>
-                                            <button
-                                                type="button"
-                                                class="e-signature-password-toggle"
-                                                data-e-signature-password-toggle="{{ $passwordInputId }}"
-                                                data-password-visible="false"
-                                                aria-label="Show password"
-                                                title="Show password"
-                                            >
-                                                <svg class="e-signature-password-icon e-signature-password-icon--show" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                    <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
-                                                    <circle cx="12" cy="12" r="3" />
-                                                </svg>
-                                                <svg class="e-signature-password-icon e-signature-password-icon--hide" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                    <path d="M3 3l18 18" />
-                                                    <path d="M10.6 10.6A2 2 0 0 0 12 14a2 2 0 0 0 1.4-.6" />
-                                                    <path d="M7.1 7.1C4.2 8.6 2.5 12 2.5 12s3.5 6 9.5 6c1.4 0 2.7-.3 3.8-.8" />
-                                                    <path d="M17.4 14.9C20 13.3 21.5 12 21.5 12s-3.5-6-9.5-6c-.9 0-1.8.1-2.6.4" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                        @error('current_password')<p class="field-error">{{ $message }}</p>@enderror
+                                <strong>Confirm identity</strong>
+                                <div>
+                                    <label for="{{ $passwordInputId }}">Account Password</label>
+                                    <div class="e-signature-password-field">
+                                        <input id="{{ $passwordInputId }}" name="current_password" type="password" autocomplete="current-password" required data-e-signature-focus>
+                                        <button
+                                            type="button"
+                                            class="e-signature-password-toggle"
+                                            data-e-signature-password-toggle="{{ $passwordInputId }}"
+                                            data-password-visible="false"
+                                            aria-label="Show password"
+                                            title="Show password"
+                                        >
+                                            <svg class="e-signature-password-icon e-signature-password-icon--show" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                                <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
+                                                <circle cx="12" cy="12" r="3" />
+                                            </svg>
+                                            <svg class="e-signature-password-icon e-signature-password-icon--hide" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                                <path d="M3 3l18 18" />
+                                                <path d="M10.6 10.6A2 2 0 0 0 12 14a2 2 0 0 0 1.4-.6" />
+                                                <path d="M7.1 7.1C4.2 8.6 2.5 12 2.5 12s3.5 6 9.5 6c1.4 0 2.7-.3 3.8-.8" />
+                                                <path d="M17.4 14.9C20 13.3 21.5 12 21.5 12s-3.5-6-9.5-6c-.9 0-1.8.1-2.6.4" />
+                                            </svg>
+                                        </button>
                                     </div>
-
-                                    <div>
-                                        <label for="{{ $codeInputId }}">6-Digit Code</label>
-                                        <input id="{{ $codeInputId }}" name="signing_code" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required>
-                                        @error('signing_code')<p class="field-error">{{ $message }}</p>@enderror
-                                    </div>
+                                    @error('current_password')<p class="field-error">{{ $message }}</p>@enderror
                                 </div>
                             </div>
 

@@ -17,24 +17,10 @@ class ElectronicSignatureController extends Controller
     {
     }
 
-    public function sendCode(Request $request, string $documentType, int|string $documentId): RedirectResponse
-    {
-        $document = $this->documentOrFail($documentType, $documentId);
-        $result = $this->signatures->sendSigningCode(
-            $request->user(),
-            $document,
-            $documentType,
-            $request->input('signature_action', 'confirmed'),
-        );
-
-        return back()->with($result['ok'] ? 'status' : 'error', $result['message']);
-    }
-
     public function sign(Request $request, string $documentType, int|string $documentId): RedirectResponse
     {
         $validated = $request->validate([
             'current_password' => ['required', 'string'],
-            'signing_code' => ['required', 'digits:6'],
             'signature_consent' => ['accepted'],
             'remarks' => ['nullable', 'string', 'max:2000'],
             'signature_action' => ['nullable', 'string', 'max:50'],
@@ -56,7 +42,7 @@ class ElectronicSignatureController extends Controller
         if (! $result['ok']) {
             return back()
                 ->with('error', $result['message'])
-                ->withInput($request->except(['current_password', 'signing_code']));
+                ->withInput($request->except('current_password'));
         }
 
         return back()->with('status', $result['message']);

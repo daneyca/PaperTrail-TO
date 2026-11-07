@@ -71,7 +71,6 @@
                 'signatureProfileComplete' => $signatureProfileComplete,
                 'actionLabel' => 'Confirm Resolution',
                 'signatureAction' => 'confirmed',
-                'sendCodeRoute' => route('e-signatures.send-code', ['documentType' => 'bac-resolution', 'documentId' => $resolution->id]),
                 'signRoute' => route('e-signatures.sign', ['documentType' => 'bac-resolution', 'documentId' => $resolution->id]),
                 'declineRoute' => $canConfirm ? route('e-signatures.decline', ['documentType' => 'bac-resolution', 'documentId' => $resolution->id]) : null,
                 'panelTitle' => 'BAC Chair Confirmation',

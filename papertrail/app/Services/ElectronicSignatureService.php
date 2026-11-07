@@ -14,14 +14,12 @@ use App\Models\SignatureRequest;
 use App\Models\SignedDocumentSnapshot;
 use App\Models\SystemNotification;
 use App\Models\User;
-use App\Notifications\SigningCodeNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
-use Throwable;
 
 class ElectronicSignatureService
 {
@@ -120,162 +118,6 @@ class ElectronicSignatureService
         return ['ok' => true, 'message' => 'This document can be signed.'];
     }
 
-    public function sendSigningCode(User $user, Model $document, string $documentType, string $action, ?SignatureRequest $signatureRequest = null): array
-    {
-        $type = $this->normalizeDocumentType($documentType);
-        $check = $this->canSignWithReason($user, $document, $type, $action, $signatureRequest);
-        $signatureRequest = $check['signature_request'] ?? $signatureRequest;
-
-        if (! $check['ok']) {
-            AuditLogger::signature('unauthorized_signature_attempt', $document, [
-                'description' => $check['message'],
-                'severity' => 'warning',
-            ]);
-
-            return $check;
-        }
-
-        if (! $this->ensureSignatureProfile($user)) {
-            return [
-                'ok' => false,
-                'message' => 'Please complete your E-Signature Setup in your Profile before requesting a signing code.',
-            ];
-        }
-
-        if (! filled($user->email)) {
-            return [
-                'ok' => false,
-                'message' => 'Please add an official email address before requesting a signing code.',
-            ];
-        }
-
-        $code = (string) random_int(100000, 999999);
-        $signature = $this->pendingSignatureFor($document, $type, $action, $user, $signatureRequest) ?: new ElectronicSignature();
-
-        $signature->fill([
-            ...$this->signatureIdentityPayload($document, $type, $action, $user),
-            ...$this->signatureRequestPayload($signatureRequest),
-            'signature_status' => ElectronicSignature::STATUS_PENDING,
-            'signing_code_hash' => Hash::make($code),
-            'signing_code_sent_at' => now(),
-            'signing_code_expires_at' => now()->addMinutes(10),
-            'signing_code_verified_at' => null,
-            'signing_attempts' => 0,
-            'document_hash_before' => $this->computeDocumentHash($document),
-            'metadata' => [
-                'action_label' => $this->actionLabel($action),
-                'signature_request_id' => $signatureRequest?->id,
-                'signatory_slot' => $signatureRequest?->signatory_slot,
-                'signatory_label' => $signatureRequest?->signatory_label,
-            ],
-        ]);
-
-        if (! $signature->signature_uuid) {
-            $signature->signature_uuid = (string) Str::uuid();
-        }
-
-        if (! $signature->signature_code) {
-            $signature->signature_code = $this->generateSignatureCode();
-        }
-
-        $signature->save();
-
-        try {
-            $user->notify(new SigningCodeNotification(
-                code: $code,
-                documentLabel: $this->documentLabel($document),
-                actionLabel: $this->actionLabel($action),
-            ));
-
-            AuditLogger::signature('signing_code_sent', $document, [
-                'description' => 'Signing code sent to allowed signer.',
-                'metadata' => [
-                    'signature_id' => $signature->signature_code,
-                    'signer_user_id' => $user->user_id,
-                ],
-            ]);
-
-            return [
-                'ok' => true,
-                'message' => 'Signing code sent to your official email address.',
-                'signature' => $signature,
-            ];
-        } catch (Throwable $exception) {
-            $signature->update([
-                'signing_code_hash' => null,
-                'signing_code_sent_at' => null,
-                'signing_code_expires_at' => null,
-                'signing_attempts' => 0,
-            ]);
-
-            Log::error('PaperTrail signing code email failed.', [
-                'signature_id' => $signature->id,
-                'signer_user_id' => $user->id,
-                'exception' => $exception->getMessage(),
-            ]);
-
-            AuditLogger::signature('signing_code_failed', $document, [
-                'description' => 'Signing code email failed.',
-                'severity' => 'warning',
-                'metadata' => [
-                    'signature_id' => $signature->signature_code,
-                    'error' => $exception->getMessage(),
-                ],
-            ]);
-
-            return [
-                'ok' => false,
-                'message' => 'Unable to send signing code. Please contact the administrator.',
-            ];
-        }
-    }
-
-    public function verifySigningCode(ElectronicSignature $signature, string $inputCode): array
-    {
-        if (! $signature->signing_code_hash) {
-            return ['ok' => false, 'message' => 'Please request a signing code first.'];
-        }
-
-        if (! $signature->signing_code_expires_at || $signature->signing_code_expires_at->isPast()) {
-            $signature->update([
-                'signing_code_hash' => null,
-                'signing_code_expires_at' => null,
-            ]);
-
-            return ['ok' => false, 'message' => 'Signing code expired. Please request a new code.'];
-        }
-
-        if ($signature->signing_attempts >= 5) {
-            $signature->update([
-                'signing_code_hash' => null,
-                'signing_code_expires_at' => null,
-            ]);
-
-            return ['ok' => false, 'message' => 'Too many invalid attempts. Please request a new signing code.'];
-        }
-
-        if (! Hash::check($inputCode, $signature->signing_code_hash)) {
-            $signature->increment('signing_attempts');
-
-            AuditLogger::signature('signing_code_invalid_attempt', $signature, [
-                'description' => 'Invalid signing code attempt.',
-                'severity' => 'warning',
-                'metadata' => ['signature_id' => $signature->signature_code],
-            ]);
-
-            return ['ok' => false, 'message' => 'Invalid signing code. Please try again.'];
-        }
-
-        $signature->update(['signing_code_verified_at' => now()]);
-
-        AuditLogger::signature('signing_code_verified', $signature, [
-            'description' => 'Signing code verified.',
-            'metadata' => ['signature_id' => $signature->signature_code],
-        ]);
-
-        return ['ok' => true, 'message' => 'Signing code verified.'];
-    }
-
     public function signDocument(Model $document, User $user, string $documentType, string $action, array $input, ?Request $request = null, ?SignatureRequest $signatureRequest = null): array
     {
         $type = $this->normalizeDocumentType($documentType);
@@ -298,7 +140,23 @@ class ElectronicSignatureService
             ];
         }
 
+        $passwordThrottleKey = $this->passwordThrottleKey($user, $document, $type, $signatureRequest);
+
+        if (RateLimiter::tooManyAttempts($passwordThrottleKey, 5)) {
+            $seconds = RateLimiter::availableIn($passwordThrottleKey);
+
+            AuditLogger::signature('signature_password_rate_limited', $document, [
+                'description' => 'Signer reached the password attempt limit.',
+                'severity' => 'warning',
+                'metadata' => ['retry_after_seconds' => $seconds],
+            ]);
+
+            return ['ok' => false, 'message' => "Too many incorrect password attempts. Try again in {$seconds} seconds."];
+        }
+
         if (! Hash::check((string) ($input['current_password'] ?? ''), $user->loginAccount()->password)) {
+            RateLimiter::hit($passwordThrottleKey, 300);
+
             AuditLogger::signature('signature_password_failed', $document, [
                 'description' => 'Signer entered an incorrect password.',
                 'severity' => 'warning',
@@ -307,21 +165,13 @@ class ElectronicSignatureService
             return ['ok' => false, 'message' => 'The current password is incorrect.'];
         }
 
+        RateLimiter::clear($passwordThrottleKey);
+
         if (empty($input['signature_consent'])) {
             return ['ok' => false, 'message' => 'Please confirm the electronic signature consent before signing.'];
         }
 
-        $signature = $this->pendingSignatureFor($document, $type, $action, $user, $signatureRequest);
-
-        if (! $signature) {
-            return ['ok' => false, 'message' => 'Please send a signing code before confirming the signature.'];
-        }
-
-        $verification = $this->verifySigningCode($signature, (string) ($input['signing_code'] ?? ''));
-
-        if (! $verification['ok']) {
-            return $verification;
-        }
+        $signature = $this->preparePasswordConfirmedSignature($document, $type, $action, $user, $signatureRequest);
 
         return DB::transaction(function () use ($document, $user, $type, $action, $input, $request, $signature, $signatureRequest) {
             $document->refresh();
@@ -1000,6 +850,64 @@ class ElectronicSignatureService
         return $query
             ->latest('updated_at')
             ->first();
+    }
+
+    private function preparePasswordConfirmedSignature(
+        Model $document,
+        string $documentType,
+        string $action,
+        User $user,
+        ?SignatureRequest $signatureRequest = null,
+    ): ElectronicSignature {
+        $signature = $this->pendingSignatureFor($document, $documentType, $action, $user, $signatureRequest)
+            ?: new ElectronicSignature();
+
+        $signature->fill([
+            ...$this->signatureIdentityPayload($document, $documentType, $action, $user),
+            ...$this->signatureRequestPayload($signatureRequest),
+            'signature_status' => ElectronicSignature::STATUS_PENDING,
+            'signing_code_hash' => null,
+            'signing_code_sent_at' => null,
+            'signing_code_expires_at' => null,
+            'signing_code_verified_at' => null,
+            'signing_attempts' => 0,
+            'document_hash_before' => $this->computeDocumentHash($document),
+            'metadata' => [
+                ...($signature->metadata ?: []),
+                'authentication_method' => 'account_password',
+                'action_label' => $this->actionLabel($action),
+                'signature_request_id' => $signatureRequest?->id,
+                'signatory_slot' => $signatureRequest?->signatory_slot,
+                'signatory_label' => $signatureRequest?->signatory_label,
+            ],
+        ]);
+
+        if (! $signature->signature_uuid) {
+            $signature->signature_uuid = (string) Str::uuid();
+        }
+
+        if (! $signature->signature_code) {
+            $signature->signature_code = $this->generateSignatureCode();
+        }
+
+        $signature->save();
+
+        return $signature;
+    }
+
+    private function passwordThrottleKey(
+        User $user,
+        Model $document,
+        string $documentType,
+        ?SignatureRequest $signatureRequest = null,
+    ): string {
+        return implode(':', [
+            'e-signature-password',
+            $user->loginAccount()->id,
+            $documentType,
+            $document->getKey(),
+            $signatureRequest?->id ?: 'direct',
+        ]);
     }
 
     private function signatureIdentityPayload(Model $document, string $documentType, string $action, User $user): array

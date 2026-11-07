@@ -337,7 +337,6 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         ->middleware('role:admin')
         ->name('admin.management.menu');
 
-    Route::post('/e-signatures/{documentType}/{documentId}/send-code', [ElectronicSignatureController::class, 'sendCode'])->name('e-signatures.send-code');
     Route::post('/e-signatures/{documentType}/{documentId}/sign', [ElectronicSignatureController::class, 'sign'])->name('e-signatures.sign');
     Route::post('/e-signatures/{documentType}/{documentId}/decline', [ElectronicSignatureController::class, 'decline'])->name('e-signatures.decline');
     Route::get('/e-signatures/{signature}/image', [ElectronicSignatureController::class, 'image'])->name('e-signatures.image');
@@ -358,7 +357,6 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
     Route::prefix('signature-requests')->name('signature-requests.')->group(function () {
         Route::get('/', [SignatureRequestController::class, 'index'])->name('index');
         Route::get('/{signatureRequest}', [SignatureRequestController::class, 'show'])->name('show');
-        Route::post('/{signatureRequest}/send-code', [SignatureRequestController::class, 'sendCode'])->name('send-code');
         Route::post('/{signatureRequest}/sign', [SignatureRequestController::class, 'sign'])->name('sign');
         Route::post('/{signatureRequest}/decline', [SignatureRequestController::class, 'decline'])->name('decline');
     });

@@ -132,24 +132,6 @@ class SignatureRequestController extends Controller
         ]);
     }
 
-    public function sendCode(Request $request, SignatureRequest $signatureRequest): RedirectResponse
-    {
-        $this->authorizeRequest($request, $signatureRequest);
-        $this->activatePilotParallelRequest($signatureRequest);
-        $signatureRequest->refresh();
-        $document = $this->documentOrFail($signatureRequest);
-
-        $result = $this->signatures->sendSigningCode(
-            $request->user(),
-            $document,
-            $signatureRequest->document_type,
-            $request->input('signature_action', 'confirmed'),
-            $signatureRequest,
-        );
-
-        return back()->with($result['ok'] ? 'status' : 'error', $result['message']);
-    }
-
     public function sign(Request $request, SignatureRequest $signatureRequest): RedirectResponse
     {
         $this->authorizeRequest($request, $signatureRequest);
@@ -158,7 +140,6 @@ class SignatureRequestController extends Controller
 
         $validated = $request->validate([
             'current_password' => ['required', 'string'],
-            'signing_code' => ['required', 'digits:6'],
             'signature_consent' => ['accepted'],
             'remarks' => ['nullable', 'string', 'max:2000'],
             'signature_action' => ['nullable', 'string', 'max:50'],
@@ -182,7 +163,7 @@ class SignatureRequestController extends Controller
         if (! $result['ok']) {
             return back()
                 ->with('error', $result['message'])
-                ->withInput($request->except(['current_password', 'signing_code']));
+                ->withInput($request->except('current_password'));
         }
 
         return back()->with('status', $result['message']);

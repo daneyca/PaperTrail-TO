@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\AuditLog;
 use App\Models\AnnualProcurementPlan;
 use App\Models\ElectronicSignature;
-use App\Notifications\SigningCodeNotification;
 use App\Models\SignatureRequest;
 use App\Models\User;
 use App\Services\ElectronicSignatureService;
@@ -13,7 +12,6 @@ use App\Services\PersonWorkspaceService;
 use App\Services\SignatureRequestService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
@@ -270,9 +268,8 @@ class PersonWorkspacesTest extends TestCase
         ]);
     }
 
-    public function test_signing_uses_personal_email_password_and_signature_but_records_only_the_selected_role(): void
+    public function test_signing_uses_personal_password_and_signature_but_records_only_the_selected_role(): void
     {
-        Notification::fake();
         $account = $this->user('MPDO-001');
         $account->update([
             'email' => 'edmar@example.test', 'password' => Hash::make('personal-secret-42'),
@@ -297,23 +294,34 @@ class PersonWorkspacesTest extends TestCase
             ->assertOk()
             ->assertSee($document->displayNumber())
             ->assertDontSee('APP ' . $document->displayNumber());
-        $service = app(ElectronicSignatureService::class);
-        $result = $service->sendSigningCode($chair, $document, 'app', 'confirmed', $request);
-        $this->assertTrue($result['ok'], $result['message']);
-        $code = null;
-        Notification::assertSentTo($chair, SigningCodeNotification::class, function ($notification, $channels, $recipient) use (&$code) {
-            $code = $notification->code;
-            return $recipient->email === 'edmar@example.test';
-        });
-        $input = ['signature_consent' => true, 'current_password' => 'wrong-old-password', 'signing_code' => $code];
-        $this->assertFalse($service->signDocument($document, $chair, 'app', 'confirmed', $input, null, $request)['ok']);
-        $input['current_password'] = 'personal-secret-42';
-        $result = $service->signDocument($document, $chair, 'app', 'confirmed', $input, null, $request);
-        $this->assertTrue($result['ok'], $result['message']);
+
+        $this->actingAs($account)->withSession(['active_workspace_id' => $chair->id])
+            ->get(route('signature-requests.show', $request))
+            ->assertOk()
+            ->assertSee('Account Password')
+            ->assertDontSee('Send Code')
+            ->assertDontSee('6-Digit Code');
+
+        $this->actingAs($account)->withSession(['active_workspace_id' => $chair->id])
+            ->post(route('signature-requests.sign', $request), [
+                'signature_consent' => '1',
+                'current_password' => 'wrong-old-password',
+            ])
+            ->assertSessionHas('error', 'The current password is incorrect.');
+
+        $this->actingAs($account)->withSession(['active_workspace_id' => $chair->id])
+            ->post(route('signature-requests.sign', $request), [
+                'signature_consent' => '1',
+                'current_password' => 'personal-secret-42',
+            ])
+            ->assertSessionHas('status');
+
         $signature = ElectronicSignature::where('signature_request_id', $request->id)->firstOrFail();
         $this->assertSame($chair->id, $signature->signer_user_id);
         $this->assertSame(User::ROLE_BAC_CHAIR, $signature->signer_role);
         $this->assertSame($account->id, $signature->metadata['login_account_id']);
+        $this->assertSame('account_password', $signature->metadata['authentication_method']);
+        $this->assertNull($signature->signing_code_hash);
         $this->assertSame(SignatureRequest::STATUS_PENDING, $other->fresh()->status);
     }
 }

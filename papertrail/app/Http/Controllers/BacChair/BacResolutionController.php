@@ -117,7 +117,6 @@ class BacResolutionController extends Controller
     {
         $validated = $request->validate([
             'current_password' => ['required', 'string'],
-            'signing_code' => ['required', 'digits:6'],
             'signature_consent' => ['accepted'],
             'remarks' => ['nullable', 'string', 'max:2000'],
         ]);
@@ -142,7 +141,7 @@ class BacResolutionController extends Controller
 
         return back()
             ->with($result['ok'] ? 'status' : 'error', $result['message'])
-            ->withInput($request->except(['current_password', 'signing_code']));
+            ->withInput($request->except('current_password'));
     }
 
     public function return(Request $request, BacResolution $resolution): RedirectResponse
