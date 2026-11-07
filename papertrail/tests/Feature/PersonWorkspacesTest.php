@@ -479,5 +479,32 @@ class PersonWorkspacesTest extends TestCase
             'confirmed',
             $approvalRequest->fresh(),
         ));
+
+        foreach ([
+            BacResolution::STATUS_CONFIRMED_BY_BAC_CHAIR,
+            BacResolution::STATUS_FORWARDED_TO_HOPE,
+            BacResolution::STATUS_APPROVED_BY_HOPE,
+            BacResolution::STATUS_RETURNED_TO_END_USER,
+        ] as $laterStatus) {
+            $resolution->update(['status' => $laterStatus]);
+
+            $this->assertTrue(app(ElectronicSignatureService::class)->canSign(
+                $approver,
+                $resolution->fresh(),
+                'bac_resolution',
+                'confirmed',
+                $approvalRequest->fresh(),
+            ), "The pending approval request should remain signable at status [{$laterStatus}].");
+        }
+
+        $resolution->update(['status' => BacResolution::STATUS_RETURNED_BY_HOPE]);
+
+        $this->assertFalse(app(ElectronicSignatureService::class)->canSign(
+            $approver,
+            $resolution->fresh(),
+            'bac_resolution',
+            'confirmed',
+            $approvalRequest->fresh(),
+        ));
     }
 }
