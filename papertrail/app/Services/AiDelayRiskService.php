@@ -943,7 +943,7 @@ class AiDelayRiskService
         }
 
         return match ($role) {
-            User::ROLE_HEAD_OFFICE, 'head_office' => 'Head of Office / End User',
+            User::ROLE_HEAD_OFFICE, 'head_office' => 'Head of Office',
             User::ROLE_BAC_SECRETARIAT, 'bac_secretariat' => 'BAC Secretariat',
             User::ROLE_BAC_MEMBER, 'bac_member' => 'BAC Member',
             User::ROLE_BAC_CHAIR, 'bac_chair' => 'BAC Chair',

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\AuditLog;
 use App\Models\AnnualProcurementPlan;
+use App\Models\BacResolution;
 use App\Models\ElectronicSignature;
 use App\Models\SignatureRequest;
 use App\Models\User;
@@ -325,5 +326,50 @@ class PersonWorkspacesTest extends TestCase
         $this->assertSame('account_password', $signature->metadata['authentication_method']);
         $this->assertNull($signature->signing_code_hash);
         $this->assertSame(SignatureRequest::STATUS_PENDING, $other->fresh()->status);
+    }
+
+    public function test_pending_bac_signer_can_sign_when_resolution_is_already_marked_confirmed(): void
+    {
+        $this->linkAccounts();
+        $viceChair = $this->user('BACVICE-001');
+        $resolution = BacResolution::create([
+            'resolution_number' => 'BAC-WORKSPACE-TEST',
+            'title' => 'Pending BAC signatory test',
+            'prepared_by_user_id' => $viceChair->id,
+            'status' => BacResolution::STATUS_CONFIRMED_BY_BAC_CHAIR,
+            'signature_status' => 'pending_signatures',
+        ]);
+        $signatureRequest = SignatureRequest::create([
+            'request_uuid' => (string) Str::uuid(),
+            'document_type' => 'bac_resolution',
+            'document_id' => $resolution->id,
+            'signatory_slot' => 'bac_vice_chairperson',
+            'signatory_label' => 'BAC Vice Chairperson',
+            'requested_to_user_id' => $viceChair->id,
+            'requested_to_role' => User::ROLE_BAC_VICE_CHAIRPERSON,
+            'status' => SignatureRequest::STATUS_VIEWED,
+            'is_required' => true,
+        ]);
+
+        $result = app(ElectronicSignatureService::class)->canSignWithReason(
+            $viceChair,
+            $resolution,
+            'bac_resolution',
+            'confirmed',
+            $signatureRequest,
+        );
+
+        $this->assertTrue($result['ok']);
+        $this->assertSame($signatureRequest->id, $result['signature_request']->id);
+
+        $resolution->update(['status' => BacResolution::STATUS_RETURNED_BY_BAC_CHAIR]);
+
+        $this->assertFalse(app(ElectronicSignatureService::class)->canSign(
+            $viceChair,
+            $resolution->fresh(),
+            'bac_resolution',
+            'confirmed',
+            $signatureRequest,
+        ));
     }
 }

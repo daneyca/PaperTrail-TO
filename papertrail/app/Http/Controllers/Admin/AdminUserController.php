@@ -266,6 +266,10 @@ class AdminUserController extends Controller
             return null;
         }
 
+        if ($role->name === User::ROLE_OFFICE_PREPARER && ! $office->allowsProcurementStaff()) {
+            return 'This office is managed directly by its Head of Office and does not use a separate Procurement Staff account.';
+        }
+
         return $office->isRequestingOffice()
             ? null
             : 'Head of Office and Procurement Staff accounts can only be assigned to requesting/end-user offices.';

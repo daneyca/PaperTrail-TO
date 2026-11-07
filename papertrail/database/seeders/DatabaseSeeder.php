@@ -253,7 +253,7 @@ class DatabaseSeeder extends Seeder
             $existing = User::where('user_id', $userId)->first();
 
             if ($existing && $existing->role !== User::ROLE_HEAD_OFFICE) {
-                $this->command?->warn("Skipped {$userId}: existing account role is {$existing->role}, not Head of Office / End User.");
+                $this->command?->warn("Skipped {$userId}: existing account role is {$existing->role}, not Head of Office.");
                 continue;
             }
 

@@ -25,7 +25,8 @@ return new class extends Migration
                 }
 
                 $office = DB::table('users')->where('user_id', $officeCode)
-                    ->where('role', 'Head of Office / End User')->where('status', 'active')->first();
+                    ->whereIn('role', ['Head of Office / End User', 'Head of Office'])
+                    ->where('status', 'active')->first();
                 if (! $office) {
                     throw new RuntimeException("Cannot retire {$oldCode}: active office account {$officeCode} is missing.");
                 }

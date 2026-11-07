@@ -44,12 +44,23 @@
             const isHeadOffice = officeRoles.includes(roleSelect.value);
             const officeSelect = officeSelector.querySelector('select[name="office"]');
 
+            Array.from(officeSelect.options).forEach((option) => {
+                if (!option.value) {
+                    return;
+                }
+
+                const unavailableForProcurementStaff = roleSelect.value === 'Procurement Staff'
+                    && option.dataset.procurementStaffEligible !== '1';
+                option.hidden = unavailableForProcurementStaff;
+                option.disabled = unavailableForProcurementStaff;
+            });
+
             officeSelector.classList.toggle('is-visible', isHeadOffice);
             officeSelector.setAttribute('aria-hidden', String(!isHeadOffice));
             officeSelect.required = isHeadOffice;
             officeSelect.disabled = !isHeadOffice;
 
-            if (!isHeadOffice) {
+            if (!isHeadOffice || officeSelect.options[officeSelect.selectedIndex]?.disabled) {
                 officeSelect.value = '';
             }
         }

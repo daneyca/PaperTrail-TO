@@ -45,7 +45,7 @@ class SvpTrackingController extends Controller
             'statuses' => $this->statuses($user),
             'context' => 'head-office',
             'title' => 'Status Tracking',
-            'eyebrow' => 'Head of Office / End User',
+            'eyebrow' => 'Head of Office',
             'subtitle' => 'Track document movement by opening each document hierarchy.',
             'indexRoute' => 'head-office.svp-tracking.index',
             'showRoute' => 'head-office.svp-tracking.show',
@@ -86,7 +86,7 @@ class SvpTrackingController extends Controller
             'workflowSteps' => $this->chains->workflowSteps($chain),
             'context' => 'head-office',
             'backRoute' => 'head-office.svp-tracking.index',
-            'eyebrow' => 'Head of Office / End User',
+            'eyebrow' => 'Head of Office',
         ]);
     }
 
@@ -96,7 +96,7 @@ class SvpTrackingController extends Controller
 
         return view('svp-tracking.mock-preview', [
             'backRoute' => 'head-office.svp-tracking.index',
-            'eyebrow' => 'Head of Office / End User',
+            'eyebrow' => 'Head of Office',
         ]);
     }
 

@@ -247,6 +247,7 @@ class LoginController extends Controller
             ->map(fn (Office $office) => [
                 'value' => (string) $office->id,
                 'label' => $office->name,
+                'procurement_staff_eligible' => $office->allowsProcurementStaff(),
             ])
             ->all();
     }
@@ -264,6 +265,7 @@ class LoginController extends Controller
         }
 
         return $office->isRequestingOffice()
+            && ($user->role !== User::ROLE_OFFICE_PREPARER || $office->allowsProcurementStaff())
             && ((int) $user->office_id === $office->id || $user->office === $office->name);
     }
 }

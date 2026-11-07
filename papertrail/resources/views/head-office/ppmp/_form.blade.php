@@ -1,7 +1,7 @@
 @php
     $useDocumentCreateFlow = (bool) ($useDocumentCreateFlow ?? false);
     $ppmpOfficeName = $office?->name ?? $user->assignedOffice?->name ?? $user->office ?? 'your office';
-    $ppmpRoleName = trim((string) ($user->assignedRole?->name ?? $user->role ?? 'Head of Office / End User'));
+    $ppmpRoleName = trim((string) ($user->assignedRole?->name ?? $user->role ?? 'Head of Office'));
 @endphp
 
 @csrf

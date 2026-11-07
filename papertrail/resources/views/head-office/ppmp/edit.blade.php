@@ -5,7 +5,7 @@
 @section('content')
     <section class="dashboard-hero admin-users-hero ppmp-page-hero">
         <div>
-            <p class="eyebrow">Head of Office / End User</p>
+            <p class="eyebrow">Head of Office</p>
             <h1>Edit PPMP</h1>
             <p>{{ $document->tracking_number ?? 'Draft PPMP' }} &middot; Fiscal Year {{ $document->fiscal_year }}</p>
         </div>

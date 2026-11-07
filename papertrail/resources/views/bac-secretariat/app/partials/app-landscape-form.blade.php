@@ -106,7 +106,7 @@
 
         $title = (string) $signatoryValue($key, 'title');
 
-        if ($isEditable && $title === 'Head of Office / End User') {
+        if ($isEditable && $title === 'Head of Office') {
             return '';
         }
 

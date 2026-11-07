@@ -24,7 +24,7 @@
 
     <section class="dashboard-hero admin-users-hero">
         <div>
-            <p class="eyebrow">Head of Office / End User</p>
+            <p class="eyebrow">Head of Office</p>
             <h1>My Documents</h1>
             <p>Track all procurement documents submitted by {{ $officeName }}, including records returned for correction.</p>
         </div>

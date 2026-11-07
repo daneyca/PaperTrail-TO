@@ -5,13 +5,13 @@
 
 @php
     $roleDisplayLabels = [
-        'Head of Office / End User' => 'Head of Office',
+        'Head of Office' => 'Head of Office',
         'Procurement Staff' => 'Procurement Staff',
         'BAC Chair' => 'BAC Chairperson',
     ];
     $roleUserIdHints = [
         'Admin' => 'ADMIN-001',
-        'Head of Office / End User' => 'MCR-001',
+        'Head of Office' => 'MCR-001',
         'Procurement Staff' => 'MPDO-STAFF-001',
         'Budget Officer' => 'BUDGET-001',
         'Accounting Officer' => 'ACCOUNTING-001',
@@ -70,13 +70,17 @@
             @enderror
         </div>
 
-        <div id="office-selector" class="pt-field office-selector" data-office-roles='@json(["Head of Office / End User", "Procurement Staff"])' aria-hidden="true">
+        <div id="office-selector" class="pt-field office-selector" data-office-roles='@json(["Head of Office", "Procurement Staff"])' aria-hidden="true">
             <label for="office">End-User Office</label>
             <select id="office" name="office" disabled>
                 <option value="">Choose end-user office</option>
                 @if (count($offices) > 0)
                     @foreach ($offices as $office)
-                        <option value="{{ $office['value'] }}" @selected(old('office') === $office['value'])>{{ $office['label'] }}</option>
+                        <option
+                            value="{{ $office['value'] }}"
+                            data-procurement-staff-eligible="{{ $office['procurement_staff_eligible'] ? '1' : '0' }}"
+                            @selected(old('office') === $office['value'])
+                        >{{ $office['label'] }}</option>
                     @endforeach
                 @else
                     <option value="" disabled>No offices available</option>

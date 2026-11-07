@@ -136,7 +136,7 @@
     $displayDesignation = function (?string $value) use ($normalizeDesignation): string {
         $designation = trim((string) $value);
 
-        return $normalizeDesignation($designation) === $normalizeDesignation('Head of Office / End User')
+        return $normalizeDesignation($designation) === $normalizeDesignation('Head of Office')
             ? 'Head of Office'
             : $designation;
     };

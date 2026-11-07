@@ -2631,7 +2631,7 @@ class AnnualProcurementPlanController extends Controller
                 'office_code' => 'MO',
             ],
             'head of office end user' => [
-                'title' => 'Head of Office / End User',
+                'title' => 'Head of Office',
                 'role_code' => 'head_office',
                 'role_name' => User::ROLE_HEAD_OFFICE,
             ],

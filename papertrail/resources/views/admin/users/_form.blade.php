@@ -39,7 +39,7 @@
         <select id="office_id" name="office_id" required>
             <option value="">Choose office</option>
             @foreach ($offices as $office)
-                <option value="{{ $office->id }}" data-requesting-office="{{ $office->is_requesting_office ? '1' : '0' }}" @selected((int) old('office_id', $user->office_id) === $office->id)>{{ $office->name }} @if($office->status === 'inactive') (Inactive) @endif @unless($office->is_requesting_office) (Not Requesting) @endunless</option>
+                <option value="{{ $office->id }}" data-requesting-office="{{ $office->is_requesting_office ? '1' : '0' }}" data-procurement-staff-eligible="{{ $office->allowsProcurementStaff() ? '1' : '0' }}" @selected((int) old('office_id', $user->office_id) === $office->id)>{{ $office->name }} @if($office->status === 'inactive') (Inactive) @endif @unless($office->is_requesting_office) (Not Requesting) @endunless</option>
             @endforeach
         </select>
         @error('office_id')<p class="field-error">{{ $message }}</p>@enderror
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const syncOfficeEligibility = () => {
         const selectedRole = roleSelect.options[roleSelect.selectedIndex]?.dataset.roleName || '';
-        const requiresRequestingOffice = ['Head of Office / End User', 'Procurement Staff'].includes(selectedRole);
+        const requiresRequestingOffice = ['Head of Office', 'Procurement Staff'].includes(selectedRole);
 
         Array.from(officeSelect.options).forEach((option) => {
             if (!option.value) {
@@ -99,7 +99,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const isRequestingOffice = option.dataset.requestingOffice === '1';
-            option.disabled = requiresRequestingOffice && !isRequestingOffice;
+            const unavailableForProcurementStaff = selectedRole === 'Procurement Staff'
+                && option.dataset.procurementStaffEligible !== '1';
+            option.hidden = unavailableForProcurementStaff;
+            option.disabled = (requiresRequestingOffice && !isRequestingOffice) || unavailableForProcurementStaff;
         });
 
         const selectedOffice = officeSelect.options[officeSelect.selectedIndex];

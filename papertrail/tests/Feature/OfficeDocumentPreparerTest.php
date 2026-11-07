@@ -50,6 +50,36 @@ class OfficeDocumentPreparerTest extends TestCase
         ]);
     }
 
+    public function test_admin_cannot_assign_procurement_staff_to_an_office_managed_by_its_head(): void
+    {
+        $adminRole = $this->role('admin', User::ROLE_ADMIN, 'admin.dashboard');
+        $preparerRole = $this->role('office_preparer', User::ROLE_OFFICE_PREPARER, 'head-office.dashboard');
+        $office = Office::create([
+            'code' => 'MCR',
+            'name' => 'Municipal Civil Registrar',
+            'type' => Office::TYPE_END_USER,
+            'status' => Office::STATUS_ACTIVE,
+            'is_requesting_office' => true,
+        ]);
+        $admin = User::factory()->create([
+            'user_id' => 'ADMIN-PREPARER-RESTRICTED',
+            'role' => User::ROLE_ADMIN,
+            'role_id' => $adminRole->id,
+            'status' => User::STATUS_ACTIVE,
+        ]);
+
+        $this->actingAs($admin)->post(route('admin.users.store'), [
+            'user_id' => 'MCR-STAFF',
+            'name' => 'Unused MCR Staff',
+            'office_id' => $office->id,
+            'role_id' => $preparerRole->id,
+            'password' => 'Temporary123!',
+            'status' => User::STATUS_ACTIVE,
+        ])->assertSessionHasErrors('office_id');
+
+        $this->assertDatabaseMissing('users', ['user_id' => 'MCR-STAFF']);
+    }
+
     public function test_admin_accounts_are_sorted_by_office_then_employee_name(): void
     {
         $adminRole = $this->role('admin', User::ROLE_ADMIN, 'admin.dashboard');
@@ -127,7 +157,7 @@ class OfficeDocumentPreparerTest extends TestCase
         $routing = app(EndUserPrSignatoryRoutingService::class);
 
         $this->assertTrue($routing->shouldUseForUser($preparer));
-        $this->assertSame($head->id, $routing->signerForDesignation('Head of Office / End User', $document)?->id);
+        $this->assertSame($head->id, $routing->signerForDesignation('Head of Office', $document)?->id);
     }
 
     public function test_preparer_cannot_submit_a_ppmp_when_the_office_has_no_active_head(): void

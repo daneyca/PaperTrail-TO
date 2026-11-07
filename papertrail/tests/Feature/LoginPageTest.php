@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Office;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -70,5 +71,40 @@ class LoginPageTest extends TestCase
         foreach ([User::ROLE_BAC_MEMBER, User::ROLE_BAC_CHAIR, User::ROLE_BAC_VICE_CHAIRPERSON] as $role) {
             $response->assertDontSee('value="'.$role.'"', false);
         }
+    }
+
+    public function test_procurement_staff_office_choices_exclude_offices_managed_by_their_heads(): void
+    {
+        foreach ([
+            'MCR' => 'Municipal Civil Registrar',
+            'Accounting' => 'Municipal Accounting Office',
+            'MEO' => 'Municipal Engineering Office',
+            'MENRO' => 'Municipal Environment and Natural Resources Office',
+            'MPDO' => 'Municipal Planning and Development Office',
+        ] as $code => $name) {
+            Office::updateOrCreate(['code' => $code], [
+                'name' => $name,
+                'type' => Office::TYPE_END_USER,
+                'status' => Office::STATUS_ACTIVE,
+                'is_requesting_office' => true,
+            ]);
+        }
+
+        $this->get(route('login'))
+            ->assertOk()
+            ->assertViewHas('offices', function (array $offices): bool {
+                $excluded = collect($offices)
+                    ->where('procurement_staff_eligible', false)
+                    ->pluck('label')
+                    ->all();
+
+                return collect([
+                    'Municipal Civil Registrar',
+                    'Municipal Accounting Office',
+                    'Municipal Engineering Office',
+                    'Municipal Environment and Natural Resources Office',
+                    'Municipal Planning and Development Office',
+                ])->every(fn (string $office) => in_array($office, $excluded, true));
+            });
     }
 }

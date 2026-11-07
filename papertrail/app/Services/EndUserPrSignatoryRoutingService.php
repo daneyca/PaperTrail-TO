@@ -23,7 +23,7 @@ class EndUserPrSignatoryRoutingService
     ];
 
     private const DESIGNATION_OPTIONS = [
-        'Head of Office / End User',
+        'Head of Office',
         'Municipal Mayor',
         'Municipal Budget Officer',
         'Municipal Treasurer',
@@ -257,7 +257,7 @@ class EndUserPrSignatoryRoutingService
         $normalized = $this->normalizeDesignation($designation);
 
         return match ($normalized) {
-            'head of office end user', 'other authorized signatory' => $this->requestingOfficeSigner($document),
+            'head of office', 'head of office end user', 'other authorized signatory' => $this->requestingOfficeSigner($document),
             'municipal mayor' => $this->activeUserByIds(['MO-001'])
                 ?: $this->activeHeadOfficeUserByOffice(['MO'], ['Office of the Municipal Mayor', "Mayor's Office"]),
             'municipal budget officer' => $this->activeUserByIds(['MBO-001'])

@@ -6,7 +6,7 @@
     @php
         $predefinedRoles = [
             'Administrator',
-            'Head of Office / End User',
+            'Head of Office',
             'BAC Secretariat',
             'BAC Member',
             'BAC Chairperson',

@@ -11,7 +11,7 @@
 
     <section class="dashboard-hero admin-users-hero">
         <div>
-            <p class="eyebrow">Head of Office / End User</p>
+            <p class="eyebrow">Head of Office</p>
             <h1>Purchase Request</h1>
             <p>Prepare official LGU Purchase Request forms for {{ $officeName }} and submit them for official PR number assignment.</p>
         </div>

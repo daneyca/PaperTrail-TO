@@ -9,7 +9,7 @@
 
     <section class="dashboard-hero admin-users-hero">
         <div>
-            <p class="eyebrow">Head of Office / End User</p>
+            <p class="eyebrow">Head of Office</p>
             <h1>{{ $document->displayNumber() }}</h1>
             <p>{{ $document->title ?? $document->purpose ?? 'Returned document details' }}</p>
         </div>

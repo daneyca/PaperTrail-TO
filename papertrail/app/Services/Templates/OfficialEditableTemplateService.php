@@ -271,7 +271,7 @@ class OfficialEditableTemplateService
         $rows[] = ['Certification (Sec. 7.8 of IRR of RA 12009)', 'Certified that the following items are in accordance with approved Procurement Plan.', '', 'Requested by:', '', 'Approved by:'];
         $rows[] = ['Signature:', '', '', '', '', ''];
         $rows[] = ['Printed Name:', 'MEAGAN C. MATUTES', 'ENGR. AURELIO H. SUNGA, JR.', $user?->name ?? '', 'JESSICA MARIE G. ESCANO', ''];
-        $rows[] = ['Designation:', 'BAC Secretariat', 'Municipal Budget Officer', $user?->role ?? 'Head of Office / End User', 'Municipal Mayor', ''];
+        $rows[] = ['Designation:', 'BAC Secretariat', 'Municipal Budget Officer', $user?->role ?? 'Head of Office', 'Municipal Mayor', ''];
         $rows[] = ['Date:', '', '', '', '', ''];
 
         $this->saveOfficialXlsx('pr', 'Purchase Request', $rows, [18, 18, 45, 12, 16, 16], $this->portraitOptions(6));

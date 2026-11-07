@@ -93,18 +93,25 @@ class ElectronicSignatureService
             return ['ok' => false, 'message' => 'This document type is not configured for e-signature yet.'];
         }
 
-        if ($document->status !== BacResolution::STATUS_SUBMITTED_TO_BAC_CHAIR) {
-            return ['ok' => false, 'message' => 'Only BAC Resolutions submitted for signatures can be signed.'];
-        }
-
         $requestForUser = app(SignatureRequestService::class)->openRequestForUser($document, $type, $user, $signatureRequest);
 
         if ($requestForUser) {
+            if (! in_array($document->status, [
+                BacResolution::STATUS_SUBMITTED_TO_BAC_CHAIR,
+                BacResolution::STATUS_CONFIRMED_BY_BAC_CHAIR,
+            ], true)) {
+                return ['ok' => false, 'message' => 'This BAC Resolution is no longer open for signatures.'];
+            }
+
             if (app(SignatureRequestService::class)->signedSignatureForRequest($requestForUser)) {
                 return ['ok' => false, 'message' => 'Your assigned signature request has already been signed.'];
             }
 
             return ['ok' => true, 'message' => 'This document can be signed.', 'signature_request' => $requestForUser];
+        }
+
+        if ($document->status !== BacResolution::STATUS_SUBMITTED_TO_BAC_CHAIR) {
+            return ['ok' => false, 'message' => 'Only BAC Resolutions submitted for signatures can be signed.'];
         }
 
         if (! $this->isBacChairSigner($user)) {

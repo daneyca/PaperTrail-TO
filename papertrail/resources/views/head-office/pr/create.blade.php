@@ -9,7 +9,7 @@
         $selectedRequestingOfficeId = old('requesting_office_id', $office?->id);
         $hasBacsec002PrCapability = method_exists($user, 'hasBacsec002PurchaseRequestCapability') && $user->hasBacsec002PurchaseRequestCapability();
         $usesPrSignatureRouting = $hasBacsec002PrCapability || $user->roleSlug() === 'head-office';
-        $roleLabel = $hasBacsec002PrCapability ? 'BAC Secretariat' : 'Head of Office / End User';
+        $roleLabel = $hasBacsec002PrCapability ? 'BAC Secretariat' : 'Head of Office';
         $status = $document->status ?: 'pr_draft';
         $submitButtonLabel = $usesPrSignatureRouting ? 'Submit for Signatures' : 'Submit for PR Number';
         $submitConfirmMessage = $usesPrSignatureRouting

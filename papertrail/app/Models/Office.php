@@ -21,6 +21,15 @@ class Office extends Model
     public const TYPE_APPROVING = 'Approving Office';
     public const TYPE_LEGISLATIVE = 'Legislative Office';
 
+    public const PROCUREMENT_STAFF_EXCLUDED_CODES = [
+        'ACCOUNTING',
+        'MACCO',
+        'MCR',
+        'MENRO',
+        'MEO',
+        'MPDO',
+    ];
+
     protected $fillable = [
         'code',
         'name',
@@ -47,6 +56,12 @@ class Office extends Model
     public function isRequestingOffice(): bool
     {
         return $this->isActive() && (bool) $this->is_requesting_office;
+    }
+
+    public function allowsProcurementStaff(): bool
+    {
+        return $this->isRequestingOffice()
+            && ! in_array(strtoupper((string) $this->code), self::PROCUREMENT_STAFF_EXCLUDED_CODES, true);
     }
 
     public function scopeRequesting(Builder $query): Builder

@@ -12,7 +12,7 @@
 
     <section class="dashboard-hero admin-users-hero">
         <div>
-            <p class="eyebrow">Head of Office / End User</p>
+            <p class="eyebrow">Head of Office</p>
             <h1>Returned Documents</h1>
             <p>View documents returned to {{ $officeName }} for correction.</p>
         </div>
