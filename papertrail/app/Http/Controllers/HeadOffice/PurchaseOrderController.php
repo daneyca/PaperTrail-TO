@@ -391,7 +391,19 @@ class PurchaseOrderController extends Controller
 
         $rules['items'] = array_values(array_filter($rules['items']));
 
-        return Validator::make($request->all(), $rules)->validate();
+        return Validator::make($request->all(), $rules, [
+            'supplier_name.required' => 'Enter the supplier name.',
+            'mode_of_procurement.required' => 'Enter the mode of procurement.',
+            'total_amount.required' => 'Enter the total amount.',
+            'total_amount.numeric' => 'The total amount must be a valid number.',
+            'items.required' => 'Add at least one Purchase Order item.',
+            'items.min' => 'Add at least one Purchase Order item.',
+            'items.*.quantity.required' => 'Enter the quantity for every item.',
+            'items.*.quantity.numeric' => 'Every item quantity must be a valid number.',
+            'items.*.description.required' => 'Enter the description for every item.',
+            'items.*.unit_cost.required' => 'Enter the unit cost for every item.',
+            'items.*.unit_cost.numeric' => 'Every item unit cost must be a valid number.',
+        ])->validate();
     }
 
     private function orderPayload(array $validated, ?ProcurementDocument $sourceDocument, ?AbstractQuotation $sourceAbstract = null): array
