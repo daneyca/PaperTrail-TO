@@ -183,7 +183,29 @@
             <div class="po-signature-section">
                 <div class="po-sign-block">
                     <p class="po-label po-sign-heading">Conforme:</p>
-                    @if (! $isEditable && $supplierSignatureIsImage)
+                    @if ($isEditable)
+                        <div class="po-signature-editor-panel">
+                            <span class="po-signature-recipient-label">Recipient</span>
+                            <strong class="po-signature-recipient">Supplier / Contractor (secure signing link)</strong>
+                            <span
+                                class="po-cell po-signature-editor-field"
+                                data-field="supplier_representative_name"
+                                data-placeholder="Enter name"
+                            >{!! $text($field('supplier_representative_name')) !!}</span>
+                            <span
+                                class="po-cell po-signature-editor-field"
+                                data-field="supplier_representative_designation"
+                                data-placeholder="Enter position"
+                            >{!! $text($field('supplier_representative_designation')) !!}</span>
+                        </div>
+                        <div class="po-signature-template-output" aria-hidden="true">
+                            <span class="po-sign-line po-sign-name" data-print-field="supplier_representative_name"></span>
+                            <span class="po-sign-label">(Signature over printed name)</span>
+                            <span class="po-sign-label" data-print-field="supplier_representative_designation"></span>
+                            <span class="po-sign-line po-sign-date" data-print-field="supplier_conforme_date"></span>
+                            <span class="po-sign-label">(Date)</span>
+                        </div>
+                    @elseif ($supplierSignatureIsImage)
                         <img
                             class="po-external-signature-image"
                             src="{{ route('supplier-signing.signed-document', $supplierSignatureRequest->public_token) }}"
@@ -201,7 +223,26 @@
                 </div>
                 <div class="po-sign-block">
                     <p class="po-label po-sign-heading">Very truly yours,</p>
-                    @if (! $isEditable && $mayorSignature)
+                    @if ($isEditable)
+                        <div class="po-signature-editor-panel">
+                            <span class="po-signature-recipient-label">Recipient account</span>
+                            <strong class="po-signature-recipient">Office of the Municipal Mayor (MO-001)</strong>
+                            <span
+                                class="po-cell po-signature-editor-field"
+                                data-field="authorized_official_name"
+                                data-placeholder="Enter name"
+                            >{!! $text($field('authorized_official_name')) !!}</span>
+                            <span
+                                class="po-cell po-signature-editor-field"
+                                data-field="authorized_official_designation"
+                                data-placeholder="Enter position"
+                            >{!! $text($field('authorized_official_designation')) !!}</span>
+                        </div>
+                        <div class="po-signature-template-output" aria-hidden="true">
+                            <span class="po-sign-line po-sign-name" data-print-field="authorized_official_name"></span>
+                            <span class="po-sign-label" data-print-field="authorized_official_designation">Authorized Official</span>
+                        </div>
+                    @elseif ($mayorSignature)
                         <x-e-signature.compact-signed-block :signature="$mayorSignature" />
                     @else
                         <span class="po-cell po-sign-line po-sign-name" data-field="authorized_official_name">{!! $text($field('authorized_official_name')) !!}</span>
@@ -213,7 +254,26 @@
             <div class="po-fund-section">
                 <div class="po-fund-left">
                     <p class="po-cell po-fund-label" data-field="fund_available_text">{!! $text($field('fund_available_text', 'Funds Available:')) !!}</p>
-                    @if (! $isEditable && $accountantSignature)
+                    @if ($isEditable)
+                        <div class="po-signature-editor-panel">
+                            <span class="po-signature-recipient-label">Recipient account</span>
+                            <strong class="po-signature-recipient">Municipal Accounting Office (ACC-001)</strong>
+                            <span
+                                class="po-cell po-signature-editor-field"
+                                data-field="accountant_name"
+                                data-placeholder="Enter name"
+                            >{!! $text($field('accountant_name')) !!}</span>
+                            <span
+                                class="po-cell po-signature-editor-field"
+                                data-field="accountant_designation"
+                                data-placeholder="Enter position"
+                            >{!! $text($field('accountant_designation')) !!}</span>
+                        </div>
+                        <div class="po-signature-template-output" aria-hidden="true">
+                            <span class="po-sign-line po-sign-name" data-print-field="accountant_name"></span>
+                            <span class="po-sign-label" data-print-field="accountant_designation">Municipal Accountant</span>
+                        </div>
+                    @elseif ($accountantSignature)
                         <x-e-signature.compact-signed-block :signature="$accountantSignature" />
                     @else
                         <span class="po-cell po-sign-line po-sign-name" data-field="accountant_name">{!! $text($field('accountant_name')) !!}</span>
@@ -412,6 +472,12 @@
                     return;
                 }
                 const clone = editor.cloneNode(true);
+                clone.querySelectorAll('[data-print-field]').forEach((output) => {
+                    const source = clone.querySelector(`[data-field="${output.dataset.printField}"]`);
+                    const value = getCellValue(source);
+
+                    if (value !== '') output.textContent = value;
+                });
                 clone.querySelectorAll('[contenteditable]').forEach((el) => el.removeAttribute('contenteditable'));
                 printPaper.innerHTML = '';
                 printPaper.appendChild(clone);

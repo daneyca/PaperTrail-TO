@@ -586,6 +586,56 @@
     text-align: left;
 }
 
+.po-signature-editor-panel {
+    display: grid;
+    gap: 5px;
+    padding: 9px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: #f8fafc;
+    text-align: left;
+}
+
+.po-signature-recipient-label {
+    color: #64748b;
+    font-size: 8pt;
+    font-weight: 700;
+    line-height: 1.1;
+    text-transform: uppercase;
+}
+
+.po-signature-recipient {
+    display: block;
+    margin-bottom: 3px;
+    color: #0f172a;
+    font-size: 9pt;
+    line-height: 1.25;
+}
+
+.po-clean-document .po-signature-editor-field {
+    display: block !important;
+    width: 100%;
+    min-height: 30px !important;
+    padding: 6px 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: #fff;
+    color: #0f172a;
+    font-size: 9pt !important;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.po-signature-editor-field:empty::before {
+    color: #64748b;
+    content: attr(data-placeholder);
+    pointer-events: none;
+}
+
+.po-signature-template-output {
+    display: none;
+}
+
 .po-clean-document .po-sign-line {
     display: block;
     min-height: 18px;
@@ -1031,6 +1081,14 @@
     #purchaseOrderPrintPaper .po-sign-line {
         outline: none !important;
         background: transparent !important;
+    }
+
+    #purchaseOrderPrintPaper .po-signature-editor-panel {
+        display: none !important;
+    }
+
+    #purchaseOrderPrintPaper .po-signature-template-output {
+        display: block !important;
     }
 
     #purchaseOrderPrintPaper input,
