@@ -4,7 +4,7 @@
     $field = fn (string $name, mixed $default = '') => old($name, filled($rfq->{$name} ?? null) ? $rfq->{$name} : $default);
     $money = fn ($value) => filled($value) ? number_format((float) $value, 2, '.', '') : '';
     $text = fn ($value, string $fallback = '') => e(filled($value) ? $value : $fallback);
-    $rfqDate = old('rfq_date', $rfq->rfq_date?->format('Y-m-d') ?? now()->toDateString());
+    $rfqDate = $rfq->rfq_date?->format('Y-m-d');
     $items = collect(old('items_json') ? json_decode(old('items_json'), true) : null);
 
     if ($items->isEmpty()) {
@@ -132,7 +132,7 @@
     <input type="hidden" name="document_text" id="rfq_document_text">
     <input type="hidden" name="items_json" id="rfq_items_json">
     @foreach ([
-        'rfq_number', 'rfq_date', 'supplier_name', 'supplier_address', 'procurement_officer_name',
+        'supplier_name', 'supplier_address', 'procurement_officer_name',
         'procurement_officer_designation', 'abc_amount', 'purpose', 'delivery_period', 'warranty_text',
         'price_validity_text', 'philgeps_requirement_text', 'mayors_permit_requirement_text'
     ] as $hiddenField)
@@ -161,12 +161,12 @@
                     <tr>
                         <td colspan="3" class="rfq-no-border"></td>
                         <td class="rfq-no-border rfq-label">Date:</td>
-                        <td colspan="2" class="rfq-cell rfq-bottom-line" data-field="rfq_date">{!! $text($rfqDate) !!}</td>
+                        <td colspan="2" class="rfq-cell rfq-control-field rfq-bottom-line" data-field="rfq_date">{!! $text($rfqDate, 'Pending Procurement Controller') !!}</td>
                     </tr>
                     <tr>
                         <td colspan="3" class="rfq-no-border"></td>
                         <td class="rfq-no-border rfq-label">Quotation No.:</td>
-                        <td colspan="2" class="rfq-cell rfq-bottom-line" data-field="rfq_number">{!! $text($field('rfq_number')) !!}</td>
+                        <td colspan="2" class="rfq-cell rfq-control-field rfq-bottom-line" data-field="rfq_number">{!! $text($rfq->rfq_number, 'Pending Procurement Controller') !!}</td>
                     </tr>
                     <tr>
                         <td colspan="2" class="rfq-cell rfq-no-border rfq-bottom-line" data-field="supplier_name">{!! $text($field('supplier_name')) !!}</td>
@@ -364,7 +364,7 @@
             const minimumOfficialRows = {{ $rowCount }};
 
             function setEditableState() {
-                editor.querySelectorAll('.rfq-cell').forEach((cell) => cell.setAttribute('contenteditable', 'true'));
+                editor.querySelectorAll('.rfq-cell:not(.rfq-control-field):not([data-field="rfq_number"]):not([data-field="rfq_date"])').forEach((cell) => cell.setAttribute('contenteditable', 'true'));
                 reindexRows();
             }
 

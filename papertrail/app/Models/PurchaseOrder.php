@@ -16,6 +16,7 @@ class PurchaseOrder extends Model
     protected static string $documentReferenceType = DocumentReferenceNumberService::TYPE_PO;
 
     public const STATUS_DRAFT = 'draft';
+    public const STATUS_PENDING_CONTROL = 'pending_control';
     public const STATUS_SUBMITTED = 'submitted';
     public const STATUS_FORWARDED_TO_SUPPLIER = 'forwarded_to_supplier';
     public const STATUS_FUND_CERTIFIED = 'fund_certified';
@@ -69,6 +70,9 @@ class PurchaseOrder extends Model
         'prepared_by_user_id',
         'submitted_by_user_id',
         'submitted_at',
+        'control_assigned_by_user_id',
+        'control_assigned_at',
+        'control_remarks',
         'issued_by_user_id',
         'issued_at',
         'completed_at',
@@ -85,6 +89,7 @@ class PurchaseOrder extends Model
         'po_date' => 'date',
         'delivery_date' => 'date',
         'submitted_at' => 'datetime',
+        'control_assigned_at' => 'datetime',
         'issued_at' => 'datetime',
         'completed_at' => 'datetime',
         'returned_at' => 'datetime',
@@ -131,6 +136,11 @@ class PurchaseOrder extends Model
     public function submittedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'submitted_by_user_id');
+    }
+
+    public function controlAssignedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'control_assigned_by_user_id');
     }
 
     public function items(): HasMany

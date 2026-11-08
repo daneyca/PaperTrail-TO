@@ -21,7 +21,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class PurchaseOrderController extends Controller
@@ -97,7 +96,7 @@ class PurchaseOrderController extends Controller
                 ...$this->orderPayload($validated, $sourceDocument, $sourceAbstract),
                 ...$this->documentPayload($validated),
                 'prepared_by_user_id' => $request->user()->id,
-                'status' => $isSubmitting ? PurchaseOrder::STATUS_SUBMITTED : PurchaseOrder::STATUS_DRAFT,
+                'status' => $isSubmitting ? PurchaseOrder::STATUS_PENDING_CONTROL : PurchaseOrder::STATUS_DRAFT,
                 'submitted_by_user_id' => $isSubmitting ? $request->user()->id : null,
                 'submitted_at' => $isSubmitting ? now() : null,
             ]);
@@ -106,24 +105,24 @@ class PurchaseOrderController extends Controller
             $this->refreshTotal($purchaseOrder, $validated);
 
             if ($isSubmitting) {
-                $this->recordSubmission($purchaseOrder->refresh(), $request->user());
+                $this->notifyProcurementController($purchaseOrder->refresh());
             }
 
             AuditLogger::log(
                 'Purchase Orders',
-                $isSubmitting ? 'Purchase Order Submitted' : 'PO Draft Created',
-                $isSubmitting ? 'Head Office submitted a Purchase Order.' : 'Head Office created a Purchase Order draft.',
+                $isSubmitting ? 'Purchase Order Sent for Procurement Control' : 'PO Draft Created',
+                $isSubmitting ? 'Head Office sent a Purchase Order for its official PO number and date.' : 'Head Office created a Purchase Order draft.',
                 $purchaseOrder,
                 null,
                 ['source_pr' => $sourceDocument?->tracking_number, 'source_abstract' => $sourceAbstract?->abstract_number, 'status' => $purchaseOrder->status],
             );
 
-            app(SvpChainService::class)->linkPurchaseOrder($purchaseOrder->refresh(), $request->user(), $isSubmitting ? 'Purchase Order submitted' : 'Purchase Order draft created');
+            app(SvpChainService::class)->linkPurchaseOrder($purchaseOrder->refresh(), $request->user(), $isSubmitting ? 'Purchase Order sent for official PO number and date' : 'Purchase Order draft created');
         });
 
         return redirect()
             ->route('head-office.purchase-orders.show', $purchaseOrder)
-            ->with('status', $isSubmitting ? 'Purchase Order submitted.' : 'Purchase Order draft saved.');
+            ->with('status', $isSubmitting ? 'Purchase Order sent to the Procurement Controller for its official PO number and date.' : 'Purchase Order draft saved.');
     }
 
     public function show(PurchaseOrder $purchaseOrder): View
@@ -191,7 +190,7 @@ class PurchaseOrderController extends Controller
             $purchaseOrder->update([
                 ...$this->orderPayload($validated, $sourceDocument, $sourceAbstract),
                 ...$this->documentPayload($validated, $purchaseOrder),
-                'status' => $isSubmitting ? PurchaseOrder::STATUS_SUBMITTED : PurchaseOrder::STATUS_DRAFT,
+                'status' => $isSubmitting ? PurchaseOrder::STATUS_PENDING_CONTROL : PurchaseOrder::STATUS_DRAFT,
                 'submitted_by_user_id' => $isSubmitting ? $request->user()->id : $purchaseOrder->submitted_by_user_id,
                 'submitted_at' => $isSubmitting ? now() : $purchaseOrder->submitted_at,
             ]);
@@ -200,24 +199,24 @@ class PurchaseOrderController extends Controller
             $this->refreshTotal($purchaseOrder, $validated);
 
             if ($isSubmitting) {
-                $this->recordSubmission($purchaseOrder->refresh(), $request->user());
+                $this->notifyProcurementController($purchaseOrder->refresh());
             }
 
             AuditLogger::log(
                 'Purchase Orders',
-                $isSubmitting ? 'Purchase Order Submitted' : 'Purchase Order Updated',
-                $isSubmitting ? 'Head Office submitted a Purchase Order.' : 'Head Office updated a Purchase Order.',
+                $isSubmitting ? 'Purchase Order Sent for Procurement Control' : 'Purchase Order Updated',
+                $isSubmitting ? 'Head Office sent a Purchase Order for its official PO number and date.' : 'Head Office updated a Purchase Order.',
                 $purchaseOrder,
                 $oldValues,
                 $purchaseOrder->only(['po_number', 'status', 'total_amount', 'source_pr_document_id']),
             );
 
-            app(SvpChainService::class)->linkPurchaseOrder($purchaseOrder->refresh(), $request->user(), $isSubmitting ? 'Purchase Order submitted' : 'Purchase Order updated');
+            app(SvpChainService::class)->linkPurchaseOrder($purchaseOrder->refresh(), $request->user(), $isSubmitting ? 'Purchase Order sent for official PO number and date' : 'Purchase Order updated');
         });
 
         return redirect()
             ->route('head-office.purchase-orders.show', $purchaseOrder)
-            ->with('status', $isSubmitting ? 'Purchase Order submitted.' : 'Purchase Order updated.');
+            ->with('status', $isSubmitting ? 'Purchase Order sent to the Procurement Controller for its official PO number and date.' : 'Purchase Order updated.');
     }
 
     public function submit(Request $request, PurchaseOrder $purchaseOrder): RedirectResponse
@@ -239,26 +238,26 @@ class PurchaseOrderController extends Controller
             $oldStatus = $purchaseOrder->status;
 
             $purchaseOrder->update([
-                'status' => PurchaseOrder::STATUS_SUBMITTED,
+                'status' => PurchaseOrder::STATUS_PENDING_CONTROL,
                 'submitted_by_user_id' => $request->user()->id,
                 'submitted_at' => now(),
             ]);
 
-            $this->recordSubmission($purchaseOrder->refresh(), $request->user());
+            $this->notifyProcurementController($purchaseOrder->refresh());
 
             AuditLogger::log(
                 'Purchase Orders',
-                'Purchase Order Submitted',
-                'Head Office submitted a Purchase Order.',
+                'Purchase Order Sent for Procurement Control',
+                'Head Office sent a Purchase Order for its official PO number and date.',
                 $purchaseOrder,
                 ['status' => $oldStatus],
-                ['status' => PurchaseOrder::STATUS_SUBMITTED],
+                ['status' => PurchaseOrder::STATUS_PENDING_CONTROL],
             );
 
-            app(SvpChainService::class)->linkPurchaseOrder($purchaseOrder->refresh(), $request->user(), 'Purchase Order submitted');
+            app(SvpChainService::class)->linkPurchaseOrder($purchaseOrder->refresh(), $request->user(), 'Purchase Order sent for official PO number and date');
         });
 
-        return back()->with('status', 'Purchase Order submitted.');
+        return back()->with('status', 'Purchase Order sent to the Procurement Controller for its official PO number and date.');
     }
 
     public function print(PurchaseOrder $purchaseOrder): View
@@ -320,8 +319,6 @@ class PurchaseOrderController extends Controller
         $rules = [
             'source_pr_document_id' => ['nullable', 'exists:procurement_documents,id'],
             'source_abstract_id' => ['nullable', 'exists:abstracts,id'],
-            'po_number' => [$submitting ? 'required' : 'nullable', 'string', 'max:100', Rule::unique('purchase_orders', 'po_number')->ignore($purchaseOrder?->id)],
-            'po_date' => [$submitting ? 'required' : 'nullable', 'date'],
             'supplier_name' => [$submitting ? 'required' : 'nullable', 'string', 'max:255'],
             'supplier_address' => ['nullable', 'string'],
             'mode_of_procurement' => [$submitting ? 'required' : 'nullable', 'string', 'max:255'],
@@ -369,8 +366,6 @@ class PurchaseOrderController extends Controller
             'source_pr_document_id' => $sourceDocument?->id,
             'source_abstract_id' => $sourceAbstract?->id,
             'source_bac_resolution_id' => $sourceAbstract?->source_bac_resolution_id,
-            'po_number' => $validated['po_number'] ?? null,
-            'po_date' => $validated['po_date'] ?? null,
             'fiscal_year' => $sourceDocument?->fiscal_year ?? now()->year,
             'supplier_name' => $validated['supplier_name'] ?? null,
             'supplier_address' => $validated['supplier_address'] ?? null,
@@ -526,6 +521,27 @@ class PurchaseOrderController extends Controller
         ]);
     }
 
+    private function notifyProcurementController(PurchaseOrder $purchaseOrder): void
+    {
+        $controller = User::query()
+            ->where('user_id', User::PROCUREMENT_CONTROLLER_USER_ID)
+            ->first();
+
+        if (! $controller) {
+            return;
+        }
+
+        SystemNotificationService::notify(
+            $controller,
+            'Purchase Order Needs Official Number and Date',
+            "Purchase Order {$purchaseOrder->document_reference_number} is ready for its official PO number and date.",
+            SystemNotification::TYPE_INFO,
+            'Procurement Control',
+            $purchaseOrder,
+            route('pr-numbering.purchase-orders.show', $purchaseOrder),
+        );
+    }
+
     private function recordSubmission(PurchaseOrder $purchaseOrder, User $user): void
     {
         $office = $user->assignedOffice ?: ($user->office_id ? Office::find($user->office_id) : null);
@@ -634,8 +650,6 @@ class PurchaseOrderController extends Controller
 
         foreach ([
             'supplier_name' => 'Supplier name is required.',
-            'po_number' => 'P.O. number is required.',
-            'po_date' => 'P.O. date is required.',
             'mode_of_procurement' => 'Mode of procurement is required.',
         ] as $field => $message) {
             if (! filled($purchaseOrder->{$field})) {
@@ -731,7 +745,7 @@ class PurchaseOrderController extends Controller
 
         return [
             'draft' => (clone $base)->whereIn('status', [PurchaseOrder::STATUS_DRAFT, PurchaseOrder::STATUS_PREPARED])->count(),
-            'submitted' => (clone $base)->whereIn('status', [PurchaseOrder::STATUS_SUBMITTED, PurchaseOrder::STATUS_ISSUED])->count(),
+            'submitted' => (clone $base)->whereIn('status', [PurchaseOrder::STATUS_PENDING_CONTROL, PurchaseOrder::STATUS_SUBMITTED, PurchaseOrder::STATUS_ISSUED])->count(),
             'fund_certified' => (clone $base)->where('status', PurchaseOrder::STATUS_FUND_CERTIFIED)->count(),
             'approved' => (clone $base)->whereIn('status', [PurchaseOrder::STATUS_APPROVED, PurchaseOrder::STATUS_COMPLETED])->count(),
             'returned' => (clone $base)->where('status', PurchaseOrder::STATUS_RETURNED)->count(),
@@ -780,6 +794,7 @@ class PurchaseOrderController extends Controller
     {
         return [
             PurchaseOrder::STATUS_DRAFT,
+            PurchaseOrder::STATUS_PENDING_CONTROL,
             PurchaseOrder::STATUS_SUBMITTED,
             PurchaseOrder::STATUS_FORWARDED_TO_SUPPLIER,
             PurchaseOrder::STATUS_FUND_CERTIFIED,

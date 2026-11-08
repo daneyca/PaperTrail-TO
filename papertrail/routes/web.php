@@ -607,6 +607,12 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         ->name('pr-numbering.dashboard');
     Route::middleware(['role:pr-numbering', 'permission:pr-number.view', 'permission:documents.track'])->prefix('pr-numbering')->name('pr-numbering.')->group(function () {
         Route::get('/pending', [PrNumberingController::class, 'index'])->name('pending.index');
+        Route::get('/pending/rfqs/{rfq}', [PrNumberingController::class, 'showRfq'])->name('rfqs.show');
+        Route::patch('/pending/rfqs/{rfq}/assign', [PrNumberingController::class, 'assignRfq'])->middleware('permission:pr-number.assign')->name('rfqs.assign');
+        Route::patch('/pending/rfqs/{rfq}/return', [PrNumberingController::class, 'returnRfq'])->middleware('permission:pr-number.return')->name('rfqs.return');
+        Route::get('/pending/purchase-orders/{purchaseOrder}', [PrNumberingController::class, 'showPurchaseOrder'])->name('purchase-orders.show');
+        Route::patch('/pending/purchase-orders/{purchaseOrder}/assign', [PrNumberingController::class, 'assignPurchaseOrder'])->middleware('permission:pr-number.assign')->name('purchase-orders.assign');
+        Route::patch('/pending/purchase-orders/{purchaseOrder}/return', [PrNumberingController::class, 'returnPurchaseOrder'])->middleware('permission:pr-number.return')->name('purchase-orders.return');
         Route::get('/pending/{document}', [PrNumberingController::class, 'show'])->name('pending.show');
         Route::patch('/pending/{document}/assign', [PrNumberingController::class, 'assign'])
             ->middleware('permission:pr-number.assign')

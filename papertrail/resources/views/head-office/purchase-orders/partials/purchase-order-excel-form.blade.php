@@ -8,7 +8,7 @@
     $text = fn ($value, string $fallback = '') => e(filled($value) ? $value : $fallback);
     $sourceId = old('source_pr_document_id', $po->source_pr_document_id ?? $sourceDocument?->id);
     $sourceAbstractId = old('source_abstract_id', $po->source_abstract_id ?? $sourceAbstract?->id);
-    $poDate = old('po_date', $po->po_date?->format('Y-m-d'));
+    $poDate = $po->po_date?->format('Y-m-d');
     $items = collect(old('items_json') ? json_decode(old('items_json'), true) : null);
 
     if ($items->isEmpty()) {
@@ -37,7 +37,7 @@
     <input type="hidden" name="document_text" id="po_document_text">
     <input type="hidden" name="items_json" id="po_items_json">
     @foreach ([
-        'po_number', 'po_date', 'supplier_name', 'supplier_address', 'mode_of_procurement', 'place_of_delivery',
+        'supplier_name', 'supplier_address', 'mode_of_procurement', 'place_of_delivery',
         'date_of_delivery', 'delivery_term', 'payment_term', 'total_amount', 'total_amount_words', 'penalty_clause',
         'authorized_official_name', 'authorized_official_designation', 'supplier_representative_name',
         'supplier_representative_designation', 'supplier_conforme_date', 'fund_available_text', 'alobs_number',
@@ -75,12 +75,12 @@
                     <div class="po-line-field">
                         <span class="po-label">P.O. No.</span>
                         <span class="po-colon">:</span>
-                        <span class="po-cell po-edit-line" data-field="po_number">{!! $text($field('po_number')) !!}</span>
+                        <span class="po-cell po-control-field po-edit-line" data-field="po_number">{!! $text($po->po_number, 'Pending Procurement Controller') !!}</span>
                     </div>
                     <div class="po-line-field">
                         <span class="po-label">Date</span>
                         <span class="po-colon">:</span>
-                        <span class="po-cell po-edit-line" data-field="po_date">{!! $text($poDate) !!}</span>
+                        <span class="po-cell po-control-field po-edit-line" data-field="po_date">{!! $text($poDate, 'Pending Procurement Controller') !!}</span>
                     </div>
                     <div class="po-line-field">
                         <span class="po-label">Mode of Procurement</span>
@@ -226,7 +226,7 @@
             const columns = ['item_no', 'quantity', 'unit', 'description', 'unit_cost', 'total_cost'];
 
             function setEditableState() {
-                editor.querySelectorAll('.po-cell').forEach((cell) => cell.setAttribute('contenteditable', 'true'));
+                editor.querySelectorAll('.po-cell:not(.po-control-field):not([data-field="po_number"]):not([data-field="po_date"])').forEach((cell) => cell.setAttribute('contenteditable', 'true'));
                 reindexRows();
             }
 

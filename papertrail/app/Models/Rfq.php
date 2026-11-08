@@ -15,6 +15,7 @@ class Rfq extends Model
     protected static string $documentReferenceType = DocumentReferenceNumberService::TYPE_RFQ;
 
     public const STATUS_DRAFT = 'draft';
+    public const STATUS_PENDING_CONTROL = 'pending_control';
     public const STATUS_SUBMITTED = 'submitted';
     public const STATUS_ISSUED = 'issued';
     public const STATUS_QUOTED = 'quoted';
@@ -49,6 +50,9 @@ class Rfq extends Model
         'prepared_by_user_id',
         'submitted_by_user_id',
         'submitted_at',
+        'control_assigned_by_user_id',
+        'control_assigned_at',
+        'control_remarks',
         'remarks',
     ];
 
@@ -57,6 +61,7 @@ class Rfq extends Model
         'abc_amount' => 'decimal:2',
         'items_json' => 'array',
         'submitted_at' => 'datetime',
+        'control_assigned_at' => 'datetime',
         'sequence_number' => 'integer',
         'created_year' => 'integer',
         'created_month' => 'integer',
@@ -80,6 +85,11 @@ class Rfq extends Model
     public function submittedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'submitted_by_user_id');
+    }
+
+    public function controlAssignedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'control_assigned_by_user_id');
     }
 
     public function items(): HasMany

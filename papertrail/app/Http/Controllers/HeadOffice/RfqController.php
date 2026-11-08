@@ -18,7 +18,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class RfqController extends Controller
@@ -86,7 +85,7 @@ class RfqController extends Controller
         DB::transaction(function () use ($request, $validated, $sourceDocument, $sourceResolution, $isSubmitting, &$rfq) {
             $rfq = Rfq::create([
                 ...$this->payload($validated, $sourceDocument, $sourceResolution),
-                'status' => $isSubmitting ? Rfq::STATUS_SUBMITTED : Rfq::STATUS_DRAFT,
+                'status' => $isSubmitting ? Rfq::STATUS_PENDING_CONTROL : Rfq::STATUS_DRAFT,
                 'prepared_by_user_id' => $request->user()->id,
                 'submitted_by_user_id' => $isSubmitting ? $request->user()->id : null,
                 'submitted_at' => $isSubmitting ? now() : null,
@@ -96,12 +95,16 @@ class RfqController extends Controller
 
             AuditLogger::log('RFQ', $isSubmitting ? 'RFQ Submitted' : 'RFQ Draft Created', $isSubmitting ? 'Head Office submitted an RFQ.' : 'Head Office created an RFQ draft.', $rfq);
 
-            app(SvpChainService::class)->linkRfq($rfq->refresh(), $request->user(), $isSubmitting ? 'RFQ submitted' : 'RFQ draft created');
+            app(SvpChainService::class)->linkRfq($rfq->refresh(), $request->user(), $isSubmitting ? 'RFQ sent for official number and date' : 'RFQ draft created');
+
+            if ($isSubmitting) {
+                $this->notifyProcurementController($rfq);
+            }
         });
 
         return redirect()
             ->route('head-office.rfqs.show', $rfq)
-            ->with('status', $isSubmitting ? 'RFQ submitted.' : 'RFQ draft saved.');
+            ->with('status', $isSubmitting ? 'RFQ sent to the Procurement Controller for its official quotation number and date.' : 'RFQ draft saved.');
     }
 
     public function show(Rfq $rfq): View
@@ -151,7 +154,7 @@ class RfqController extends Controller
 
             $rfq->update([
                 ...$this->payload($validated, $sourceDocument, $sourceResolution),
-                'status' => $isSubmitting ? Rfq::STATUS_SUBMITTED : Rfq::STATUS_DRAFT,
+                'status' => $isSubmitting ? Rfq::STATUS_PENDING_CONTROL : Rfq::STATUS_DRAFT,
                 'submitted_by_user_id' => $isSubmitting ? $request->user()->id : $rfq->submitted_by_user_id,
                 'submitted_at' => $isSubmitting ? now() : $rfq->submitted_at,
             ]);
@@ -160,24 +163,16 @@ class RfqController extends Controller
 
             AuditLogger::log('RFQ', $isSubmitting ? 'RFQ Submitted' : 'RFQ Updated', $isSubmitting ? 'Head Office submitted an RFQ.' : 'Head Office updated an RFQ.', $rfq, $oldValues, $rfq->only(['rfq_number', 'status', 'abc_amount']));
 
-            app(SvpChainService::class)->linkRfq($rfq->refresh(), $request->user(), $isSubmitting ? 'RFQ submitted' : 'RFQ updated');
+            app(SvpChainService::class)->linkRfq($rfq->refresh(), $request->user(), $isSubmitting ? 'RFQ sent for official number and date' : 'RFQ updated');
 
             if ($isSubmitting) {
-                SystemNotificationService::notify(
-                    $request->user(),
-                    'RFQ Submitted',
-                    'Your RFQ record has been submitted.',
-                    SystemNotification::TYPE_SUCCESS,
-                    'RFQ',
-                    $rfq,
-                    route('head-office.rfqs.show', $rfq),
-                );
+                $this->notifyProcurementController($rfq);
             }
         });
 
         return redirect()
             ->route('head-office.rfqs.show', $rfq)
-            ->with('status', $isSubmitting ? 'RFQ submitted.' : 'RFQ updated.');
+            ->with('status', $isSubmitting ? 'RFQ sent to the Procurement Controller for its official quotation number and date.' : 'RFQ updated.');
     }
 
     public function submit(Request $request, Rfq $rfq): RedirectResponse
@@ -194,26 +189,17 @@ class RfqController extends Controller
 
         $oldStatus = $rfq->status;
         $rfq->update([
-            'status' => Rfq::STATUS_SUBMITTED,
+            'status' => Rfq::STATUS_PENDING_CONTROL,
             'submitted_by_user_id' => $request->user()->id,
             'submitted_at' => now(),
         ]);
 
-        AuditLogger::log('RFQ', 'RFQ Submitted', 'Head Office submitted an RFQ.', $rfq, ['status' => $oldStatus], ['status' => Rfq::STATUS_SUBMITTED]);
+        AuditLogger::log('RFQ', 'RFQ Sent for Procurement Control', 'Head Office sent an RFQ for official quotation number and date.', $rfq, ['status' => $oldStatus], ['status' => Rfq::STATUS_PENDING_CONTROL]);
 
-        app(SvpChainService::class)->linkRfq($rfq->refresh(), $request->user(), 'RFQ submitted');
+        app(SvpChainService::class)->linkRfq($rfq->refresh(), $request->user(), 'RFQ sent for official number and date');
+        $this->notifyProcurementController($rfq);
 
-        SystemNotificationService::notify(
-            $request->user(),
-            'RFQ Submitted',
-            'Your RFQ record has been submitted.',
-            SystemNotification::TYPE_SUCCESS,
-            'RFQ',
-            $rfq,
-            route('head-office.rfqs.show', $rfq),
-        );
-
-        return back()->with('status', 'RFQ submitted.');
+        return back()->with('status', 'RFQ sent to the Procurement Controller for its official quotation number and date.');
     }
 
     public function print(Rfq $rfq): View
@@ -262,8 +248,6 @@ class RfqController extends Controller
         return Validator::make($request->all(), [
             'source_pr_document_id' => ['nullable', 'exists:procurement_documents,id'],
             'source_bac_resolution_id' => ['nullable', 'exists:bac_resolutions,id'],
-            'rfq_number' => [$submitting ? 'required' : 'nullable', 'string', 'max:255', Rule::unique('rfqs', 'rfq_number')->ignore($rfq?->id)],
-            'rfq_date' => [$submitting ? 'required' : 'nullable', 'date'],
             'supplier_name' => ['nullable', 'string', 'max:255'],
             'supplier_address' => ['nullable', 'string'],
             'procurement_officer_name' => ['nullable', 'string', 'max:255'],
@@ -288,8 +272,6 @@ class RfqController extends Controller
         return [
             'source_pr_document_id' => $sourceDocument?->id,
             'source_bac_resolution_id' => $sourceResolution?->id,
-            'rfq_number' => $validated['rfq_number'] ?? null,
-            'rfq_date' => $validated['rfq_date'] ?? null,
             'supplier_name' => $validated['supplier_name'] ?? null,
             'supplier_address' => $validated['supplier_address'] ?? null,
             'procurement_officer_name' => $validated['procurement_officer_name'] ?? null,
@@ -335,7 +317,7 @@ class RfqController extends Controller
         return [
             'source_pr_document_id' => $sourceDocument?->id,
             'source_bac_resolution_id' => $sourceResolution?->id,
-            'rfq_date' => now()->toDateString(),
+            'rfq_date' => null,
             'abc_amount' => $sourceResolution?->abc_amount ?? $sourceDocument?->total_amount,
             'purpose' => $sourceResolution?->project_title ?? $sourceResolution?->title ?? $sourceDocument?->purpose ?? $sourceDocument?->title,
             'procurement_officer_name' => 'ROLAND P. FELICILDA',
@@ -464,7 +446,7 @@ class RfqController extends Controller
 
         return [
             'draft' => (clone $base)->where('status', Rfq::STATUS_DRAFT)->count(),
-            'submitted' => (clone $base)->where('status', Rfq::STATUS_SUBMITTED)->count(),
+            'submitted' => (clone $base)->whereIn('status', [Rfq::STATUS_PENDING_CONTROL, Rfq::STATUS_SUBMITTED])->count(),
             'issued' => (clone $base)->where('status', Rfq::STATUS_ISSUED)->count(),
             'quoted' => (clone $base)->where('status', Rfq::STATUS_QUOTED)->count(),
         ];
@@ -513,9 +495,30 @@ class RfqController extends Controller
             && $this->officeRfqQuery($user)->whereKey($rfq->id)->exists();
     }
 
+    private function notifyProcurementController(Rfq $rfq): void
+    {
+        $controller = User::query()
+            ->where('user_id', User::PROCUREMENT_CONTROLLER_USER_ID)
+            ->first();
+
+        if (! $controller) {
+            return;
+        }
+
+        SystemNotificationService::notify(
+            $controller,
+            'RFQ Needs Official Number and Date',
+            "RFQ {$rfq->document_reference_number} is ready for its official quotation number and date.",
+            SystemNotification::TYPE_INFO,
+            'Procurement Control',
+            $rfq,
+            route('pr-numbering.rfqs.show', $rfq),
+        );
+    }
+
     private function statuses(): array
     {
-        return [Rfq::STATUS_DRAFT, Rfq::STATUS_SUBMITTED, Rfq::STATUS_ISSUED, Rfq::STATUS_QUOTED, Rfq::STATUS_RETURNED, Rfq::STATUS_CANCELLED];
+        return [Rfq::STATUS_DRAFT, Rfq::STATUS_PENDING_CONTROL, Rfq::STATUS_SUBMITTED, Rfq::STATUS_ISSUED, Rfq::STATUS_QUOTED, Rfq::STATUS_RETURNED, Rfq::STATUS_CANCELLED];
     }
 
     private function numericString(mixed $value): mixed

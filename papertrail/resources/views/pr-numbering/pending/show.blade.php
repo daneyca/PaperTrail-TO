@@ -65,7 +65,7 @@
                     <div class="pr-numbering-field-grid">
                         <div class="pr-numbering-field">
                             <label for="pr_no">Official PR No.</label>
-                            <input id="pr_no" name="pr_no" type="text" value="{{ old('pr_no', $document->pr_no ?? $suggestedPrNo) }}" required>
+                            <input id="pr_no" name="pr_no" type="text" value="{{ old('pr_no', $document->pr_no) }}" placeholder="Enter official PR number" required>
                             @error('pr_no')<span class="field-error">{{ $message }}</span>@enderror
                         </div>
 

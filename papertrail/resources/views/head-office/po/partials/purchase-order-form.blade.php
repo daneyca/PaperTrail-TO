@@ -68,11 +68,7 @@
                     </td>
                     <td class="po-label">P.O. No.:</td>
                     <td>
-                        @if ($isEditable)
-                            <input class="po-editable" name="po_number" type="text" value="{{ $field('po_number') }}">
-                        @else
-                            <span class="po-cell-text">{{ $text($po->po_number) }}</span>
-                        @endif
+                        <span class="po-cell-text">{{ $text($po->po_number, 'Pending Procurement Controller') }}</span>
                     </td>
                 </tr>
                 <tr>
@@ -86,11 +82,7 @@
                     </td>
                     <td class="po-label">Date :</td>
                     <td>
-                        @if ($isEditable)
-                            <input class="po-editable" name="po_date" type="text" value="{{ $poDate }}">
-                        @else
-                            <span class="po-cell-text">{{ $po->po_date?->format('M d, Y') }}</span>
-                        @endif
+                        <span class="po-cell-text">{{ $po->po_date?->format('M d, Y') ?? 'Pending Procurement Controller' }}</span>
                     </td>
                 </tr>
                 <tr>

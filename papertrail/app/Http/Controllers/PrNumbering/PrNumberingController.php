@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\DocumentRoutingHistory;
 use App\Models\Office;
 use App\Models\ProcurementDocument;
+use App\Models\PurchaseOrder;
+use App\Models\Rfq;
 use App\Models\SystemNotification;
 use App\Models\User;
 use App\Services\AuditLogger;
@@ -31,6 +33,16 @@ class PrNumberingController extends Controller
 
         return view('pr-numbering.pending.index', [
             'documents' => $query->latest('pr_no_requested_at')->paginate(10)->withQueryString(),
+            'pendingRfqs' => Rfq::query()
+                ->where('status', Rfq::STATUS_PENDING_CONTROL)
+                ->with(['sourcePrDocument.submittingOffice', 'preparedBy.assignedOffice'])
+                ->latest('submitted_at')
+                ->get(),
+            'pendingPurchaseOrders' => PurchaseOrder::query()
+                ->where('status', PurchaseOrder::STATUS_PENDING_CONTROL)
+                ->with(['sourcePrDocument.submittingOffice', 'preparedBy.assignedOffice'])
+                ->latest('submitted_at')
+                ->get(),
             'summary' => $this->summary($request->user()),
             'filters' => $request->only(['search', 'fiscal_year', 'office_id', 'date_from', 'date_to']),
             'fiscalYears' => ProcurementDocument::query()
@@ -68,10 +80,7 @@ class PrNumberingController extends Controller
             'routingHistories.toOffice',
         ]);
 
-        return view('pr-numbering.pending.show', [
-            'document' => $document,
-            'suggestedPrNo' => $this->suggestedPrNo($document),
-        ]);
+        return view('pr-numbering.pending.show', ['document' => $document]);
     }
 
     public function assign(Request $request, ProcurementDocument $document): RedirectResponse
@@ -212,6 +221,240 @@ class PrNumberingController extends Controller
             ->with('status', 'Purchase Request returned to the requesting office.');
     }
 
+    public function showRfq(Rfq $rfq): View|RedirectResponse
+    {
+        if ($rfq->status !== Rfq::STATUS_PENDING_CONTROL) {
+            return redirect()
+                ->route('pr-numbering.pending.index')
+                ->with('error', 'This RFQ is not pending procurement control.');
+        }
+
+        $rfq->load(['sourcePrDocument.submittingOffice', 'sourceBacResolution', 'preparedBy.assignedOffice', 'submittedBy', 'items']);
+
+        AuditLogger::log('Procurement Control', 'Pending RFQ Viewed', 'Procurement Controller viewed an RFQ awaiting its official number and date.', $rfq);
+
+        return view('pr-numbering.pending.rfq-show', ['rfq' => $rfq]);
+    }
+
+    public function assignRfq(Request $request, Rfq $rfq): RedirectResponse
+    {
+        if ($rfq->status !== Rfq::STATUS_PENDING_CONTROL) {
+            return back()->with('error', 'This RFQ cannot be assigned an official number.');
+        }
+
+        $validated = $request->validate([
+            'rfq_number' => ['required', 'string', 'max:100', Rule::unique('rfqs', 'rfq_number')->ignore($rfq->id)],
+            'rfq_date' => ['required', 'date'],
+            'remarks' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        DB::transaction(function () use ($request, $rfq, $validated) {
+            $oldValues = $rfq->only(['rfq_number', 'rfq_date', 'status']);
+            $originator = $rfq->preparedBy ?: $rfq->submittedBy;
+
+            $rfq->update([
+                'rfq_number' => trim($validated['rfq_number']),
+                'rfq_date' => $validated['rfq_date'],
+                'status' => Rfq::STATUS_SUBMITTED,
+                'control_assigned_by_user_id' => $request->user()->id,
+                'control_assigned_at' => now(),
+                'control_remarks' => $validated['remarks'] ?? null,
+            ]);
+
+            if ($originator) {
+                SystemNotificationService::notify(
+                    $originator,
+                    'RFQ Number and Date Assigned',
+                    "RFQ {$rfq->document_reference_number} now has its official quotation number and date and has been returned to your office.",
+                    SystemNotification::TYPE_SUCCESS,
+                    'Procurement Control',
+                    $rfq,
+                    route('head-office.rfqs.show', $rfq),
+                );
+            }
+
+            AuditLogger::log('Procurement Control', 'RFQ Control Details Assigned', 'Procurement Controller assigned the official RFQ quotation number and date.', $rfq, $oldValues, $rfq->fresh()->only(['rfq_number', 'rfq_date', 'status']));
+        });
+
+        return redirect()
+            ->route('pr-numbering.pending.index')
+            ->with('status', 'Official RFQ quotation number and date assigned. The RFQ was returned to its requesting office.');
+    }
+
+    public function returnRfq(Request $request, Rfq $rfq): RedirectResponse
+    {
+        if ($rfq->status !== Rfq::STATUS_PENDING_CONTROL) {
+            return back()->with('error', 'This RFQ cannot be returned.');
+        }
+
+        $validated = $request->validate([
+            'remarks' => ['required', 'string', 'min:5', 'max:2000'],
+        ]);
+
+        DB::transaction(function () use ($rfq, $validated) {
+            $originator = $rfq->preparedBy ?: $rfq->submittedBy;
+            $oldStatus = $rfq->status;
+
+            $rfq->update([
+                'status' => Rfq::STATUS_RETURNED,
+                'control_remarks' => $validated['remarks'],
+                'remarks' => $validated['remarks'],
+            ]);
+
+            if ($originator) {
+                SystemNotificationService::notify(
+                    $originator,
+                    'RFQ Returned for Correction',
+                    "RFQ {$rfq->document_reference_number} was returned by the Procurement Controller.",
+                    SystemNotification::TYPE_WARNING,
+                    'Procurement Control',
+                    $rfq,
+                    route('head-office.rfqs.show', $rfq),
+                );
+            }
+
+            AuditLogger::log('Procurement Control', 'RFQ Returned', 'Procurement Controller returned an RFQ for correction.', $rfq, ['status' => $oldStatus], ['status' => Rfq::STATUS_RETURNED, 'remarks' => $validated['remarks']], 'warning');
+        });
+
+        return redirect()
+            ->route('pr-numbering.pending.index')
+            ->with('status', 'RFQ returned to the requesting office for correction.');
+    }
+
+    public function showPurchaseOrder(PurchaseOrder $purchaseOrder): View|RedirectResponse
+    {
+        if ($purchaseOrder->status !== PurchaseOrder::STATUS_PENDING_CONTROL) {
+            return redirect()
+                ->route('pr-numbering.pending.index')
+                ->with('error', 'This Purchase Order is not pending procurement control.');
+        }
+
+        $purchaseOrder->load(['sourcePrDocument.submittingOffice', 'preparedBy.assignedOffice', 'submittedBy', 'items']);
+
+        AuditLogger::log('Procurement Control', 'Pending Purchase Order Viewed', 'Procurement Controller viewed a Purchase Order awaiting its official number and date.', $purchaseOrder);
+
+        return view('pr-numbering.pending.purchase-order-show', ['purchaseOrder' => $purchaseOrder]);
+    }
+
+    public function assignPurchaseOrder(Request $request, PurchaseOrder $purchaseOrder): RedirectResponse
+    {
+        if ($purchaseOrder->status !== PurchaseOrder::STATUS_PENDING_CONTROL) {
+            return back()->with('error', 'This Purchase Order cannot be assigned an official number.');
+        }
+
+        $validated = $request->validate([
+            'po_number' => ['required', 'string', 'max:100', Rule::unique('purchase_orders', 'po_number')->ignore($purchaseOrder->id)],
+            'po_date' => ['required', 'date'],
+            'remarks' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        DB::transaction(function () use ($request, $purchaseOrder, $validated) {
+            $purchaseOrder->loadMissing(['sourcePrDocument', 'preparedBy', 'submittedBy', 'procurementDocument']);
+            $oldValues = $purchaseOrder->only(['po_number', 'po_date', 'status']);
+            $originator = $purchaseOrder->preparedBy ?: $purchaseOrder->submittedBy;
+            $officeId = $purchaseOrder->sourcePrDocument?->submitting_office_id ?: $originator?->office_id;
+
+            $purchaseOrder->update([
+                'po_number' => trim($validated['po_number']),
+                'po_date' => $validated['po_date'],
+                'status' => PurchaseOrder::STATUS_SUBMITTED,
+                'control_assigned_by_user_id' => $request->user()->id,
+                'control_assigned_at' => now(),
+                'control_remarks' => $validated['remarks'] ?? null,
+            ]);
+
+            $document = $purchaseOrder->procurementDocument ?: ProcurementDocument::create([
+                'tracking_number' => trim($validated['po_number']),
+                'document_type' => 'PO',
+                'title' => 'Purchase Order '.trim($validated['po_number']),
+                'description' => $purchaseOrder->remarks,
+                'fiscal_year' => $purchaseOrder->fiscal_year,
+                'submitting_office_id' => $officeId,
+                'submitted_by_user_id' => $originator?->id,
+                'current_office_id' => $officeId,
+                'assigned_to_user_id' => $originator?->id,
+                'status' => ProcurementDocument::STATUS_PO_PREPARED,
+                'stage' => ProcurementDocument::STAGE_PURCHASE_ORDER_PREPARATION,
+                'priority' => 'normal',
+                'total_amount' => $purchaseOrder->total_amount,
+                'submitted_at' => now(),
+            ]);
+
+            $document->update([
+                'tracking_number' => trim($validated['po_number']),
+                'title' => 'Purchase Order '.trim($validated['po_number']),
+                'status' => ProcurementDocument::STATUS_PO_PREPARED,
+                'stage' => ProcurementDocument::STAGE_PURCHASE_ORDER_PREPARATION,
+                'current_office_id' => $officeId,
+                'assigned_to_user_id' => $originator?->id,
+                'total_amount' => $purchaseOrder->total_amount,
+            ]);
+
+            $purchaseOrder->update(['procurement_document_id' => $document->id]);
+
+            if ($originator) {
+                SystemNotificationService::notify(
+                    $originator,
+                    'PO Number and Date Assigned',
+                    "Purchase Order {$purchaseOrder->document_reference_number} now has its official PO number and date and has been returned to your office.",
+                    SystemNotification::TYPE_SUCCESS,
+                    'Procurement Control',
+                    $purchaseOrder,
+                    route('head-office.purchase-orders.show', $purchaseOrder),
+                );
+            }
+
+            AuditLogger::log('Procurement Control', 'PO Control Details Assigned', 'Procurement Controller assigned the official Purchase Order number and date.', $purchaseOrder, $oldValues, $purchaseOrder->fresh()->only(['po_number', 'po_date', 'status']));
+
+            app(SvpChainService::class)->linkPurchaseOrder($purchaseOrder->refresh(), $request->user(), 'Official PO number and date assigned; returned to requesting office');
+        });
+
+        return redirect()
+            ->route('pr-numbering.pending.index')
+            ->with('status', 'Official PO number and date assigned. The Purchase Order was returned to its requesting office.');
+    }
+
+    public function returnPurchaseOrder(Request $request, PurchaseOrder $purchaseOrder): RedirectResponse
+    {
+        if ($purchaseOrder->status !== PurchaseOrder::STATUS_PENDING_CONTROL) {
+            return back()->with('error', 'This Purchase Order cannot be returned.');
+        }
+
+        $validated = $request->validate([
+            'remarks' => ['required', 'string', 'min:5', 'max:2000'],
+        ]);
+
+        DB::transaction(function () use ($purchaseOrder, $validated) {
+            $originator = $purchaseOrder->preparedBy ?: $purchaseOrder->submittedBy;
+            $oldStatus = $purchaseOrder->status;
+
+            $purchaseOrder->update([
+                'status' => PurchaseOrder::STATUS_RETURNED,
+                'control_remarks' => $validated['remarks'],
+                'remarks' => $validated['remarks'],
+                'returned_at' => now(),
+            ]);
+
+            if ($originator) {
+                SystemNotificationService::notify(
+                    $originator,
+                    'Purchase Order Returned for Correction',
+                    "Purchase Order {$purchaseOrder->document_reference_number} was returned by the Procurement Controller.",
+                    SystemNotification::TYPE_WARNING,
+                    'Procurement Control',
+                    $purchaseOrder,
+                    route('head-office.purchase-orders.show', $purchaseOrder),
+                );
+            }
+
+            AuditLogger::log('Procurement Control', 'Purchase Order Returned', 'Procurement Controller returned a Purchase Order for correction.', $purchaseOrder, ['status' => $oldStatus], ['status' => PurchaseOrder::STATUS_RETURNED, 'remarks' => $validated['remarks']], 'warning');
+        });
+
+        return redirect()
+            ->route('pr-numbering.pending.index')
+            ->with('status', 'Purchase Order returned to the requesting office for correction.');
+    }
+
     public function assigned(Request $request): View
     {
         AuditLogger::log('PR Number Assignment', 'Assigned PR Numbers Viewed', 'Procurement Controller viewed assigned PR numbers.');
@@ -279,34 +522,19 @@ class PrNumberingController extends Controller
             ->whereIn('document_type', ['PR', 'Purchase Request']);
 
         return [
-            'pending' => (clone $base)->where('status', ProcurementDocument::STATUS_PENDING_PR_NUMBER_ASSIGNMENT)->where('pr_number_status', ProcurementDocument::PR_NUMBER_STATUS_PENDING_ASSIGNMENT)->count(),
-            'assignedToday' => (clone $base)->where('pr_number_status', ProcurementDocument::PR_NUMBER_STATUS_ASSIGNED)->whereDate('pr_no_assigned_at', today())->count(),
-            'assignedByYou' => (clone $base)->where('pr_no_assigned_by_user_id', $user?->id)->count(),
-            'returned' => (clone $base)->where('status', ProcurementDocument::STATUS_RETURNED_BY_PR_NUMBERING_STAFF)->count(),
+            'pending' => (clone $base)->where('status', ProcurementDocument::STATUS_PENDING_PR_NUMBER_ASSIGNMENT)->where('pr_number_status', ProcurementDocument::PR_NUMBER_STATUS_PENDING_ASSIGNMENT)->count()
+                + Rfq::where('status', Rfq::STATUS_PENDING_CONTROL)->count()
+                + PurchaseOrder::where('status', PurchaseOrder::STATUS_PENDING_CONTROL)->count(),
+            'assignedToday' => (clone $base)->where('pr_number_status', ProcurementDocument::PR_NUMBER_STATUS_ASSIGNED)->whereDate('pr_no_assigned_at', today())->count()
+                + Rfq::whereDate('control_assigned_at', today())->count()
+                + PurchaseOrder::whereDate('control_assigned_at', today())->count(),
+            'assignedByYou' => (clone $base)->where('pr_no_assigned_by_user_id', $user?->id)->count()
+                + Rfq::where('control_assigned_by_user_id', $user?->id)->count()
+                + PurchaseOrder::where('control_assigned_by_user_id', $user?->id)->count(),
+            'returned' => (clone $base)->where('status', ProcurementDocument::STATUS_RETURNED_BY_PR_NUMBERING_STAFF)->count()
+                + Rfq::where('status', Rfq::STATUS_RETURNED)->count()
+                + PurchaseOrder::where('status', PurchaseOrder::STATUS_RETURNED)->count(),
         ];
-    }
-
-    private function suggestedPrNo(ProcurementDocument $document): string
-    {
-        $year = (int) ($document->fiscal_year ?: now()->year);
-        $prefix = "PR-{$year}-";
-        $lastSequence = (int) DB::table('pr_number_sequences')
-            ->where('fiscal_year', $year)
-            ->where('prefix', $prefix)
-            ->value('last_sequence');
-
-        if ($lastSequence < 1) {
-            $lastPrNo = ProcurementDocument::query()
-                ->whereIn('document_type', ['PR', 'Purchase Request'])
-                ->where('pr_no', 'like', $prefix . '%')
-                ->lockForUpdate()
-                ->orderByDesc('pr_no')
-                ->value('pr_no');
-
-            $lastSequence = $this->extractTrailingSequence($lastPrNo);
-        }
-
-        return $prefix . str_pad((string) ($lastSequence + 1), 4, '0', STR_PAD_LEFT);
     }
 
     private function updateSequence(ProcurementDocument $document, User $user): void

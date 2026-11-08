@@ -1,13 +1,13 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Pending PR Number Requests | PaperTrail')
+@section('title', 'Procurement Control | PaperTrail')
 
 @section('content')
     <section class="dashboard-hero admin-users-hero">
         <div>
-            <p class="eyebrow">PR Number Assignment</p>
-            <h1>Pending PR Number Requests</h1>
-            <p>Assign official LGU Purchase Request numbers before BAC Secretariat validation.</p>
+            <p class="eyebrow">Procurement Controller</p>
+            <h1>Pending Control Assignments</h1>
+            <p>Assign official numbers and dates to Purchase Requests, RFQs, and Purchase Orders.</p>
         </div>
     </section>
 
@@ -19,6 +19,9 @@
     </section>
 
     <section class="table-panel" aria-label="Pending PR number requests">
+        <div class="panel-heading">
+            <div><p class="eyebrow">Purchase Requests</p><h2>Pending PR Number and Date</h2></div>
+        </div>
         <form method="GET" action="{{ route('pr-numbering.pending.index') }}" class="budget-filter-toolbar pr-filter-toolbar">
             <div class="user-search">
                 <label for="pr-number-search">Search Requests</label>
@@ -110,5 +113,55 @@
                 {{ $documents->appends(request()->query())->links('vendor.pagination.papertrail') }}
             </div>
         @endif
+    </section>
+
+    <section class="table-panel" aria-label="Pending RFQ control assignments">
+        <div class="panel-heading">
+            <div><p class="eyebrow">Request for Quotation</p><h2>Pending RFQ Number and Date</h2></div>
+        </div>
+        <div class="table-scroll">
+            <table class="user-management-table">
+                <thead><tr><th>Tracking Number</th><th>Requesting Office</th><th>Prepared By</th><th>Submitted Date</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>
+                    @forelse ($pendingRfqs as $rfq)
+                        <tr>
+                            <td class="nowrap">{{ $rfq->document_reference_number }}</td>
+                            <td>{{ $rfq->sourcePrDocument?->submittingOffice?->name ?? $rfq->preparedBy?->assignedOffice?->name ?? 'N/A' }}</td>
+                            <td>{{ $rfq->preparedBy?->name ?? 'N/A' }}</td>
+                            <td class="nowrap">{{ $rfq->submitted_at?->format('M d, Y') ?? $rfq->updated_at?->format('M d, Y') }}</td>
+                            <td><span class="status-pill status-pending">Pending Assignment</span></td>
+                            <td><div class="table-actions"><a href="{{ route('pr-numbering.rfqs.show', $rfq) }}">Review / Assign RFQ No.</a></div></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="6"><div class="empty-state"><strong>No pending RFQs</strong><p>RFQs waiting for an official quotation number and date will appear here.</p></div></td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="table-panel" aria-label="Pending Purchase Order control assignments">
+        <div class="panel-heading">
+            <div><p class="eyebrow">Purchase Orders</p><h2>Pending PO Number and Date</h2></div>
+        </div>
+        <div class="table-scroll">
+            <table class="user-management-table">
+                <thead><tr><th>Tracking Number</th><th>Requesting Office</th><th>Prepared By</th><th>Submitted Date</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>
+                    @forelse ($pendingPurchaseOrders as $purchaseOrder)
+                        <tr>
+                            <td class="nowrap">{{ $purchaseOrder->document_reference_number }}</td>
+                            <td>{{ $purchaseOrder->sourcePrDocument?->submittingOffice?->name ?? $purchaseOrder->preparedBy?->assignedOffice?->name ?? 'N/A' }}</td>
+                            <td>{{ $purchaseOrder->preparedBy?->name ?? 'N/A' }}</td>
+                            <td class="nowrap">{{ $purchaseOrder->submitted_at?->format('M d, Y') ?? $purchaseOrder->updated_at?->format('M d, Y') }}</td>
+                            <td><span class="status-pill status-pending">Pending Assignment</span></td>
+                            <td><div class="table-actions"><a href="{{ route('pr-numbering.purchase-orders.show', $purchaseOrder) }}">Review / Assign PO No.</a></div></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="6"><div class="empty-state"><strong>No pending Purchase Orders</strong><p>Purchase Orders waiting for an official number and date will appear here.</p></div></td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </section>
 @endsection
