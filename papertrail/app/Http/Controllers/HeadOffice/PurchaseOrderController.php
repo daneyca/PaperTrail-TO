@@ -13,6 +13,7 @@ use App\Models\SystemNotification;
 use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\DocumentDraftService;
+use App\Services\PurchaseOrderSignatureWorkflowService;
 use App\Services\SvpChainService;
 use App\Services\SystemNotificationService;
 use Illuminate\Database\Eloquent\Builder;
@@ -147,7 +148,13 @@ class PurchaseOrderController extends Controller
             'items',
         ]);
 
-        return view('head-office.po.show', ['po' => $purchaseOrder]);
+        $workflow = app(PurchaseOrderSignatureWorkflowService::class);
+
+        return view('head-office.po.show', [
+            'po' => $purchaseOrder,
+            'signatureSlots' => $workflow->signatureSlots($purchaseOrder),
+            'supplierSignatureRequest' => $workflow->supplierRequestFor($purchaseOrder),
+        ]);
     }
 
     public function edit(PurchaseOrder $purchaseOrder): View|RedirectResponse
@@ -260,6 +267,29 @@ class PurchaseOrderController extends Controller
         return back()->with('status', 'Purchase Order sent to the Procurement Controller for its official PO number and date.');
     }
 
+    public function submitForSignatures(
+        Request $request,
+        PurchaseOrder $purchaseOrder,
+        PurchaseOrderSignatureWorkflowService $workflow
+    ): RedirectResponse {
+        abort_unless($this->canAccess($purchaseOrder), 403);
+
+        try {
+            $workflow->submit($purchaseOrder, $request->user());
+        } catch (\RuntimeException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
+
+        AuditLogger::log(
+            'Purchase Orders',
+            'Purchase Order Submitted for Signatures',
+            'Purchase Order routed to the Mayor, Municipal Accountant, and supplier.',
+            $purchaseOrder,
+        );
+
+        return back()->with('status', 'Purchase Order sent to the Mayor, Municipal Accountant, and supplier for signature.');
+    }
+
     public function print(PurchaseOrder $purchaseOrder): View
     {
         abort_unless($this->canAccess($purchaseOrder), 403);
@@ -268,7 +298,13 @@ class PurchaseOrderController extends Controller
 
         $purchaseOrder->load(['sourcePrDocument.submittingOffice', 'sourceAbstract', 'preparedBy', 'submittedBy', 'items']);
 
-        return view('head-office.po.print', ['po' => $purchaseOrder]);
+        $workflow = app(PurchaseOrderSignatureWorkflowService::class);
+
+        return view('head-office.po.print', [
+            'po' => $purchaseOrder,
+            'signatureSlots' => $workflow->signatureSlots($purchaseOrder),
+            'supplierSignatureRequest' => $workflow->supplierRequestFor($purchaseOrder),
+        ]);
     }
 
     private function applyFilters(Builder $query, Request $request): void

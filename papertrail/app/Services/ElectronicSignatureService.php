@@ -10,6 +10,7 @@ use App\Models\DocumentRoutingHistory;
 use App\Models\ElectronicSignature;
 use App\Models\Office;
 use App\Models\ProcurementDocument;
+use App\Models\PurchaseOrder;
 use App\Models\SignatureRequest;
 use App\Models\SignedDocumentSnapshot;
 use App\Models\SystemNotification;
@@ -30,6 +31,7 @@ class ElectronicSignatureService
             'bac_resolution', 'bacresolution' => 'bac_resolution',
             'competitive_bidding_document', 'competitive_bidding_signature_document' => 'competitive_bidding_document',
             'ppmp', 'project_procurement_management_plan' => 'ppmp',
+            'po', 'purchase_order', 'purchaseorder' => 'purchase_order',
             default => strtolower(str_replace('-', '_', $documentType)),
         };
     }
@@ -47,6 +49,7 @@ class ElectronicSignatureService
             'ppmp' => ProcurementDocument::query()
                 ->where('document_type', 'PPMP')
                 ->find($documentId),
+            'purchase_order' => PurchaseOrder::find($documentId),
             default => null,
         };
     }
@@ -87,6 +90,30 @@ class ElectronicSignatureService
 
         if ($type === 'competitive_bidding_document' && $document instanceof CompetitiveBiddingSignatureDocument) {
             return $this->canSignCompetitiveBiddingDocumentWithReason($user, $document, $type, $signatureRequest);
+        }
+
+        if ($type === 'purchase_order' && $document instanceof PurchaseOrder) {
+            if (in_array($document->status, [
+                PurchaseOrder::STATUS_DRAFT,
+                PurchaseOrder::STATUS_PENDING_CONTROL,
+                PurchaseOrder::STATUS_RETURNED,
+                PurchaseOrder::STATUS_CANCELLED,
+            ], true)) {
+                return ['ok' => false, 'message' => 'This Purchase Order is not open for signatures.'];
+            }
+
+            $requestForUser = app(SignatureRequestService::class)
+                ->openRequestForUser($document, $type, $user, $signatureRequest);
+
+            if (! $requestForUser) {
+                return ['ok' => false, 'message' => 'Only the assigned Purchase Order signatory can sign this document.'];
+            }
+
+            if (app(SignatureRequestService::class)->signedSignatureForRequest($requestForUser)) {
+                return ['ok' => false, 'message' => 'Your assigned Purchase Order signature has already been signed.'];
+            }
+
+            return ['ok' => true, 'message' => 'This Purchase Order can be signed.', 'signature_request' => $requestForUser];
         }
 
         if ($type !== 'bac_resolution' || ! $document instanceof BacResolution) {
@@ -216,7 +243,7 @@ class ElectronicSignatureService
             $isPurchaseRequestSignature = $type === 'purchase_request' && $signatureRequest;
             $isPpmpSignature = $type === 'ppmp' && $signatureRequest;
             $isCompetitiveBiddingSignature = $type === 'competitive_bidding_document' && $signatureRequest;
-            $isRoutedDocumentSignature = in_array($type, ['purchase_request', 'bac_resolution', 'ppmp', 'abstract', 'app', 'competitive_bidding_document'], true) && $signatureRequest;
+            $isRoutedDocumentSignature = in_array($type, ['purchase_request', 'purchase_order', 'bac_resolution', 'ppmp', 'abstract', 'app', 'competitive_bidding_document'], true) && $signatureRequest;
             $signerPosition = $isRoutedDocumentSignature
                 ? ($signatureRequest->requested_to_role ?: $signatureRequest->signatory_label ?: ($user->signer_position ?: ($user->position ?: $user->role)))
                 : ($user->signer_position ?: ($user->position ?: $user->role));
@@ -285,6 +312,9 @@ class ElectronicSignatureService
                         ? CompetitiveBiddingSignatureDocument::STATUS_FULLY_SIGNED
                         : CompetitiveBiddingSignatureDocument::STATUS_PARTIALLY_SIGNED,
                 ])->save();
+            } elseif ($type === 'purchase_order' && $document instanceof PurchaseOrder && $signatureRequest) {
+                app(PurchaseOrderSignatureWorkflowService::class)
+                    ->handleInternalSigned($document, $signatureRequest, $signature);
             } elseif ($fullySigned && $type === 'bac_resolution') {
                 $outcomeSignature = $signature;
                 $outcomeUser = $user;
@@ -306,6 +336,7 @@ class ElectronicSignatureService
             $documentTypeLabel = match ($type) {
                 'app' => 'Annual Procurement Plan',
                 'purchase_request' => 'Purchase Request',
+                'purchase_order' => 'Purchase Order',
                 'ppmp' => 'PPMP',
                 'abstract' => 'Abstract',
                 'competitive_bidding_document' => 'Competitive Bidding Document',
@@ -391,6 +422,8 @@ class ElectronicSignatureService
                     ->whereKeyNot($signatureRequest?->id)
                     ->open()
                     ->update(['status' => SignatureRequest::STATUS_CANCELLED]);
+            } elseif ($type === 'purchase_order' && $document instanceof PurchaseOrder) {
+                app(PurchaseOrderSignatureWorkflowService::class)->handleDeclined($document);
             } else {
                 $this->applyBacResolutionDeclineOutcome($document, $user, $reason);
             }
@@ -398,6 +431,7 @@ class ElectronicSignatureService
             $documentTypeLabel = match ($type) {
                 'app' => 'Annual Procurement Plan',
                 'purchase_request' => 'Purchase Request',
+                'purchase_order' => 'Purchase Order',
                 'ppmp' => 'PPMP',
                 'abstract' => 'Abstract',
                 'competitive_bidding_document' => match ($document instanceof CompetitiveBiddingSignatureDocument ? $document->template_key : '') {
@@ -419,6 +453,7 @@ class ElectronicSignatureService
                 'message' => match ($type) {
                     'app' => 'APP signature request declined.',
                     'purchase_request' => 'Purchase Request signature request declined.',
+                    'purchase_order' => 'Purchase Order signature request declined and returned for correction.',
                     'ppmp' => 'PPMP signature request declined.',
                     'abstract' => 'Abstract signature request declined.',
                     'competitive_bidding_document' => match ($document instanceof CompetitiveBiddingSignatureDocument ? $document->template_key : '') {
@@ -1234,6 +1269,12 @@ class ElectronicSignatureService
             return $fullySigned
                 ? 'All Abstract signatures completed.'
                 : 'Abstract signature recorded. Other required signatures are still pending.';
+        }
+
+        if ($type === 'purchase_order') {
+            return $fullySigned
+                ? 'Purchase Order signature recorded. The supplier signature may still be pending.'
+                : 'Purchase Order signature recorded. Other required signatures are still pending.';
         }
 
         if ($type === 'app') {

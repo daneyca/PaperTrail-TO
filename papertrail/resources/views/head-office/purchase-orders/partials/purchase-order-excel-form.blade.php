@@ -9,6 +9,12 @@
     $sourceId = old('source_pr_document_id', $po->source_pr_document_id ?? $sourceDocument?->id);
     $sourceAbstractId = old('source_abstract_id', $po->source_abstract_id ?? $sourceAbstract?->id);
     $poDate = $po->po_date?->format('Y-m-d');
+    $signatureSlots = collect($signatureSlots ?? []);
+    $mayorSignature = $signatureSlots->get('authorized_official');
+    $accountantSignature = $signatureSlots->get('municipal_accountant');
+    $supplierSignatureRequest = $supplierSignatureRequest ?? null;
+    $supplierSignatureIsImage = $supplierSignatureRequest?->hasSignedDocument()
+        && str_starts_with((string) $supplierSignatureRequest->signed_document_mime, 'image/');
     $items = collect(old('items_json') ? json_decode(old('items_json'), true) : null);
 
     if ($items->isEmpty()) {
@@ -177,23 +183,42 @@
             <div class="po-signature-section">
                 <div class="po-sign-block">
                     <p class="po-label po-sign-heading">Conforme:</p>
-                    <span class="po-cell po-sign-line po-sign-name" data-field="supplier_representative_name">{!! $text($field('supplier_representative_name')) !!}</span>
-                    <span class="po-sign-label">(Signature over printed name)</span>
-                    <span class="po-cell po-sign-line po-sign-date" data-field="supplier_conforme_date">{!! $text($field('supplier_conforme_date')) !!}</span>
-                    <span class="po-sign-label">(Date)</span>
+                    @if (! $isEditable && $supplierSignatureIsImage)
+                        <img
+                            class="po-external-signature-image"
+                            src="{{ route('supplier-signing.signed-document', $supplierSignatureRequest->public_token) }}"
+                            alt="Supplier electronic signature"
+                        >
+                        <span class="po-sign-line po-sign-name">{{ $supplierSignatureRequest->signatory_name ?: $supplierSignatureRequest->supplier_name }}</span>
+                        <span class="po-sign-label">{{ data_get($supplierSignatureRequest->metadata, 'supplier_designation', 'Authorized Supplier Representative') }}</span>
+                        <span class="po-sign-date">{{ $supplierSignatureRequest->submitted_at?->format('M d, Y') }}</span>
+                    @else
+                        <span class="po-cell po-sign-line po-sign-name" data-field="supplier_representative_name">{!! $text($field('supplier_representative_name')) !!}</span>
+                        <span class="po-sign-label">(Signature over printed name)</span>
+                        <span class="po-cell po-sign-line po-sign-date" data-field="supplier_conforme_date">{!! $text($field('supplier_conforme_date')) !!}</span>
+                        <span class="po-sign-label">(Date)</span>
+                    @endif
                 </div>
                 <div class="po-sign-block">
                     <p class="po-label po-sign-heading">Very truly yours,</p>
-                    <span class="po-cell po-sign-line po-sign-name" data-field="authorized_official_name">{!! $text($field('authorized_official_name')) !!}</span>
-                    <span class="po-cell po-sign-label" data-field="authorized_official_designation">{!! $text($field('authorized_official_designation', 'Authorized Official')) !!}</span>
+                    @if (! $isEditable && $mayorSignature)
+                        <x-e-signature.compact-signed-block :signature="$mayorSignature" />
+                    @else
+                        <span class="po-cell po-sign-line po-sign-name" data-field="authorized_official_name">{!! $text($field('authorized_official_name')) !!}</span>
+                        <span class="po-cell po-sign-label" data-field="authorized_official_designation">{!! $text($field('authorized_official_designation', 'Authorized Official')) !!}</span>
+                    @endif
                 </div>
             </div>
 
             <div class="po-fund-section">
                 <div class="po-fund-left">
                     <p class="po-cell po-fund-label" data-field="fund_available_text">{!! $text($field('fund_available_text', 'Funds Available:')) !!}</p>
-                    <span class="po-cell po-sign-line po-sign-name" data-field="accountant_name">{!! $text($field('accountant_name')) !!}</span>
-                    <span class="po-cell po-sign-label" data-field="accountant_designation">{!! $text($field('accountant_designation', 'Municipal Accountant')) !!}</span>
+                    @if (! $isEditable && $accountantSignature)
+                        <x-e-signature.compact-signed-block :signature="$accountantSignature" />
+                    @else
+                        <span class="po-cell po-sign-line po-sign-name" data-field="accountant_name">{!! $text($field('accountant_name')) !!}</span>
+                        <span class="po-cell po-sign-label" data-field="accountant_designation">{!! $text($field('accountant_designation', 'Municipal Accountant')) !!}</span>
+                    @endif
                 </div>
                 <div class="po-fund-right">
                     <div class="po-line-field">

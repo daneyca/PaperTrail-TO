@@ -12,6 +12,7 @@
         $isPpmp = $signatureRequest->document_type === 'ppmp';
         $isAbstract = $signatureRequest->document_type === 'abstract';
         $isApp = $signatureRequest->document_type === 'app';
+        $isPurchaseOrder = $signatureRequest->document_type === 'purchase_order';
         $isCompetitiveBiddingDocument = $signatureRequest->document_type === 'competitive_bidding_document';
         $signatureDesignation = filled($signatureRequest->requested_to_role)
             ? $signatureRequest->requested_to_role
@@ -27,6 +28,7 @@
             $isPpmp => 'PPMP form',
             $isAbstract => 'Abstract form',
             $isApp => 'APP form',
+            $isPurchaseOrder => 'Purchase Order',
             $isCompetitiveBiddingDocument && $document?->template_key === 'annual_investment_program' => 'AIP form',
             $isCompetitiveBiddingDocument && $document?->template_key === 'coa_transmittal' => 'COA cover letter',
             $isCompetitiveBiddingDocument && $document?->template_key === 'bac_secretariat_head_certification' => 'BAC Secretariat certification',
@@ -38,6 +40,7 @@
             $isPpmp => 'Sign PPMP Form',
             $isAbstract => 'Sign Abstract Form',
             $isApp => 'Sign APP Form',
+            $isPurchaseOrder => 'Sign Purchase Order',
             $isCompetitiveBiddingDocument && $document?->template_key === 'annual_investment_program' => 'Sign AIP Form',
             $isCompetitiveBiddingDocument && $document?->template_key === 'coa_transmittal' => 'Sign COA Cover Letter',
             $isCompetitiveBiddingDocument && $document?->template_key === 'bac_secretariat_head_certification' => 'Sign BAC Secretariat Certification',
@@ -116,7 +119,7 @@
                 <div class="signature-document-card__header no-print">
                     <div>
                         <p class="eyebrow">Document Preview</p>
-                        <h2>{{ $isPurchaseRequest ? 'Purchase Request Form' : ($isPpmp ? 'Project Procurement Management Plan' : ($isApp ? 'Annual Procurement Plan' : ($signatureRequest->document_label ?? 'Document'))) }}</h2>
+                        <h2>{{ $isPurchaseRequest ? 'Purchase Request Form' : ($isPpmp ? 'Project Procurement Management Plan' : ($isApp ? 'Annual Procurement Plan' : ($isPurchaseOrder ? 'Purchase Order' : ($signatureRequest->document_label ?? 'Document')))) }}</h2>
                     </div>
                     <span class="signature-status-badge signature-status-badge--{{ $statusClass }}">{{ $statusText }}</span>
                 </div>
@@ -163,6 +166,17 @@
                                 'app' => $document->loadMissing(['items', 'preparedBy', 'submittedBy', 'approvedBy', 'office']),
                                 'mode' => 'show',
                                 'signatureSlots' => $signatureSlots,
+                            ])
+                        </div>
+                    @elseif ($isPurchaseOrder)
+                        <div class="signature-purchase-order-preview-area">
+                            @include('head-office.purchase-orders.partials.purchase-order-excel-form', [
+                                'po' => $document->loadMissing(['sourcePrDocument', 'sourceAbstract', 'items']),
+                                'sourceDocument' => $document->sourcePrDocument,
+                                'sourceAbstract' => $document->sourceAbstract,
+                                'mode' => 'show',
+                                'signatureSlots' => $signatureSlots,
+                                'supplierSignatureRequest' => $supplierSignatureRequest,
                             ])
                         </div>
                     @elseif ($isCompetitiveBiddingDocument)

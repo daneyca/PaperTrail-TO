@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $po->po_number ? 'Purchase Order '.$po->po_number : 'Purchase Order' }} | PaperTrail</title>
     <link rel="stylesheet" href="{{ asset('css/landing.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/e-signature.css') }}">
     <link rel="stylesheet" href="{{ asset('css/purchase-order.css') }}">
 </head>
 <body class="po-print-body">
@@ -13,6 +14,8 @@
             'po' => $po,
             'sourceDocument' => $po->sourcePrDocument,
             'mode' => 'print',
+            'signatureSlots' => $signatureSlots,
+            'supplierSignatureRequest' => $supplierSignatureRequest,
         ])
     </main>
 </body>

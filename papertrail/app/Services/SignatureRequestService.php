@@ -8,6 +8,7 @@ use App\Models\AbstractQuotation;
 use App\Models\ElectronicSignature;
 use App\Models\Office;
 use App\Models\ProcurementDocument;
+use App\Models\PurchaseOrder;
 use App\Models\SignatureRequest;
 use App\Models\SystemNotification;
 use App\Models\User;
@@ -37,6 +38,7 @@ class SignatureRequestService
             'app', 'annual_procurement_plan', 'annualprocurementplan' => 'app',
             'bac_resolution', 'bacresolution' => 'bac_resolution',
             'ppmp', 'project_procurement_management_plan' => 'ppmp',
+            'po', 'purchase_order', 'purchaseorder' => 'purchase_order',
             default => strtolower(str_replace('-', '_', $documentType)),
         };
     }
@@ -570,6 +572,10 @@ class SignatureRequestService
             return 'APP ' . $document->displayNumber();
         }
 
+        if ($document instanceof PurchaseOrder) {
+            return 'Purchase Order ' . $document->displayNumber();
+        }
+
         if ($document instanceof ProcurementDocument) {
             $type = match (true) {
                 in_array($document->document_type, ['PR', 'Purchase Request'], true) => 'Purchase Request',
@@ -594,6 +600,10 @@ class SignatureRequestService
         }
 
         if ($document instanceof AnnualProcurementPlan) {
+            return $document->displayNumber();
+        }
+
+        if ($document instanceof PurchaseOrder) {
             return $document->displayNumber();
         }
 

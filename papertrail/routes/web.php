@@ -140,6 +140,7 @@ Route::middleware('no.cache')->prefix('supplier-signing')->name('supplier-signin
     Route::get('/{token}', [SupplierSigningController::class, 'show'])->name('show');
     Route::post('/{token}', [SupplierSigningController::class, 'submit'])->name('submit');
     Route::get('/{token}/source-document', [SupplierSigningController::class, 'downloadSource'])->name('source-document');
+    Route::get('/{token}/signed-document', [SupplierSigningController::class, 'signedDocument'])->name('signed-document');
 });
 
 Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->group(function () {
@@ -589,6 +590,7 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         Route::patch('/{purchaseOrder}', [HeadOfficePurchaseOrderController::class, 'update'])->name('update');
         Route::get('/{purchaseOrder}/print', [HeadOfficePurchaseOrderController::class, 'print'])->name('print');
         Route::patch('/{purchaseOrder}/submit', [HeadOfficePurchaseOrderController::class, 'submit'])->name('submit');
+        Route::patch('/{purchaseOrder}/submit-for-signatures', [HeadOfficePurchaseOrderController::class, 'submitForSignatures'])->name('submit-for-signatures');
     });
     Route::middleware(['role:head-office', 'requesting.office'])->prefix('head-office/inspection-acceptance')->name('head-office.inspection.')->group(function () {
         Route::get('/', [HeadOfficeInspectionAcceptanceController::class, 'index'])->name('index');

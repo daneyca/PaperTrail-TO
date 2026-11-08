@@ -10,6 +10,7 @@ use App\Services\Bacsec002PrSignatoryRoutingService;
 use App\Services\EndUserPrSignatoryRoutingService;
 use App\Services\ElectronicSignatureService;
 use App\Services\HeadOfficePpmpSignatureWorkflowService;
+use App\Services\PurchaseOrderSignatureWorkflowService;
 use App\Services\SignatureRequestService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -115,6 +116,9 @@ class SignatureRequestController extends Controller
         $signedSignature = $this->signatureRequests->signedSignatureForRequest($signatureRequest);
         $existingSignature = $signedSignature ?: $this->signatureRequests->signatureForRequest($signatureRequest);
         $signatureSlots = $this->signatureRequests->signedSignaturesForDocument($document, $signatureRequest->document_type);
+        $supplierSignatureRequest = $signatureRequest->document_type === 'purchase_order'
+            ? app(PurchaseOrderSignatureWorkflowService::class)->supplierRequestFor($document)
+            : null;
         $canSubmitPpmpToAppConsolidation = $signatureRequest->document_type === 'ppmp'
             && $document instanceof ProcurementDocument
             && app(HeadOfficePpmpSignatureWorkflowService::class)->canSubmitToAppConsolidation($request->user(), $document);
@@ -133,6 +137,7 @@ class SignatureRequestController extends Controller
             'signedSignature' => $signedSignature,
             'existingSignature' => $existingSignature,
             'signatureSlots' => $signatureSlots,
+            'supplierSignatureRequest' => $supplierSignatureRequest,
             'canSign' => $signingCheck['ok'],
             'canSignMessage' => $signingCheck['message'],
             'signatureProfileComplete' => $this->signatures->ensureSignatureProfile($request->user()),

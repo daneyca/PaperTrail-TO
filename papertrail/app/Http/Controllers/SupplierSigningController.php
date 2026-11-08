@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SupplierSignatureRequest;
 use App\Services\AuditLogger;
+use App\Services\PurchaseOrderSignatureWorkflowService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -37,7 +38,11 @@ class SupplierSigningController extends Controller
         ]);
     }
 
-    public function submit(Request $request, string $token): RedirectResponse
+    public function submit(
+        Request $request,
+        string $token,
+        PurchaseOrderSignatureWorkflowService $purchaseOrderWorkflow
+    ): RedirectResponse
     {
         $supplierRequest = $this->supplierRequest($token);
         $this->expireIfNeeded($supplierRequest);
@@ -50,31 +55,61 @@ class SupplierSigningController extends Controller
             'signatory_name' => ['required', 'string', 'max:255'],
             'signatory_position' => ['nullable', 'string', 'max:255'],
             'supplier_remarks' => ['nullable', 'string', 'max:2000'],
-            'signed_document' => ['required', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png'],
+            'signature_data' => ['nullable', 'string', 'required_without:signed_document'],
+            'signed_document' => ['nullable', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png', 'required_without:signature_data'],
             'signature_consent' => ['accepted'],
         ]);
 
         $file = $request->file('signed_document');
-        $extension = strtolower((string) $file->getClientOriginalExtension());
-        $storedFilename = (string) Str::uuid() . ($extension ? ".{$extension}" : '');
-        $path = $file->storeAs('supplier-signatures/signed', $storedFilename, 'local');
+        $signatureData = (string) ($validated['signature_data'] ?? '');
+
+        if ($signatureData !== '') {
+            abort_unless(str_starts_with($signatureData, 'data:image/png;base64,'), 422, 'The drawn signature format is invalid.');
+            $binary = base64_decode(substr($signatureData, strlen('data:image/png;base64,')), true);
+            abort_if($binary === false || strlen($binary) > 2 * 1024 * 1024, 422, 'The drawn signature is invalid or too large.');
+
+            $storedFilename = (string) Str::uuid().'.png';
+            $path = 'supplier-signatures/signed/'.$storedFilename;
+            Storage::disk('local')->put($path, $binary);
+            $originalName = 'supplier-conforme-signature.png';
+            $mimeType = 'image/png';
+            $size = strlen($binary);
+            $hash = hash('sha256', $binary);
+        } else {
+            $extension = strtolower((string) $file->getClientOriginalExtension());
+            $storedFilename = (string) Str::uuid() . ($extension ? ".{$extension}" : '');
+            $path = $file->storeAs('supplier-signatures/signed', $storedFilename, 'local');
+            $originalName = $file->getClientOriginalName();
+            $mimeType = $file->getMimeType();
+            $size = $file->getSize();
+            $hash = hash_file('sha256', $file->getRealPath());
+        }
 
         $supplierRequest->update([
             'status' => SupplierSignatureRequest::STATUS_SUBMITTED,
             'signatory_name' => $validated['signatory_name'],
             'signatory_position' => $validated['signatory_position'] ?? $supplierRequest->signatory_position,
             'signed_document_path' => $path,
-            'signed_document_name' => $file->getClientOriginalName(),
-            'signed_document_mime' => $file->getMimeType(),
-            'signed_document_size' => $file->getSize(),
-            'signed_document_hash' => hash_file('sha256', $file->getRealPath()),
+            'signed_document_name' => $originalName,
+            'signed_document_mime' => $mimeType,
+            'signed_document_size' => $size,
+            'signed_document_hash' => $hash,
             'signed_document_disk' => 'local',
             'submitted_at' => now(),
             'signer_ip_address' => $request->ip(),
             'signer_user_agent' => $request->userAgent(),
             'supplier_remarks' => $validated['supplier_remarks'] ?? null,
             'consent_text' => 'Supplier representative confirmed the uploaded signed document is complete and authorized for this procurement record.',
+            'metadata' => [
+                ...($supplierRequest->metadata ?: []),
+                'supplier_designation' => $validated['signatory_position'] ?? 'Authorized Supplier Representative',
+                'signature_method' => $signatureData !== '' ? 'drawn_signature' : 'uploaded_signed_document',
+            ],
         ]);
+
+        if ($supplierRequest->document_type === 'purchase_order') {
+            $purchaseOrderWorkflow->handleSupplierSigned($supplierRequest->fresh());
+        }
 
         AuditLogger::signature('supplier_signed_document_submitted', $supplierRequest, [
             'description' => 'Supplier uploaded a signed document through the external signing portal.',
@@ -101,6 +136,21 @@ class SupplierSigningController extends Controller
         abort_if(! Storage::disk($disk)->exists($supplierRequest->source_document_path), 404);
 
         return Storage::disk($disk)->download($supplierRequest->source_document_path, $supplierRequest->sourceDocumentName());
+    }
+
+    public function signedDocument(string $token): StreamedResponse
+    {
+        $supplierRequest = $this->supplierRequest($token);
+        abort_unless($supplierRequest->hasSignedDocument(), 404);
+
+        $disk = $supplierRequest->signed_document_disk ?: 'local';
+        abort_if(! Storage::disk($disk)->exists($supplierRequest->signed_document_path), 404);
+
+        return Storage::disk($disk)->response(
+            $supplierRequest->signed_document_path,
+            $supplierRequest->signedDocumentName(),
+            ['Content-Type' => $supplierRequest->signed_document_mime ?: 'application/octet-stream']
+        );
     }
 
     private function supplierRequest(string $token): SupplierSignatureRequest

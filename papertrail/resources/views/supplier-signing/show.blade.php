@@ -135,6 +135,49 @@
             font-weight: 600;
         }
 
+        .supplier-signature-pad {
+            display: grid;
+            gap: 8px;
+        }
+
+        .supplier-signature-pad__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .supplier-signature-pad__clear {
+            min-height: 34px;
+            border: 1px solid #cbd7e6;
+            border-radius: 8px;
+            padding: 0 12px;
+            background: #fff;
+            color: #0b2341;
+            font: 800 0.78rem/1 "Plus Jakarta Sans", Arial, sans-serif;
+            cursor: pointer;
+        }
+
+        .supplier-signature-canvas {
+            display: block;
+            width: 100%;
+            height: 180px;
+            border: 1px solid #aebed2;
+            border-radius: 8px;
+            background: #fff;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .supplier-signature-error {
+            display: none;
+            color: #b91c1c !important;
+        }
+
+        .supplier-signature-error.is-visible {
+            display: block;
+        }
+
         .supplier-check {
             display: grid;
             grid-template-columns: 18px minmax(0, 1fr);
@@ -237,7 +280,7 @@
                     @elseif (! $supplierRequest->isOpenForSupplier())
                         <div class="supplier-alert supplier-alert--error">This signing link is closed. Please contact BAC Secretariat for assistance.</div>
                     @else
-                        <form method="POST" action="{{ route('supplier-signing.submit', $supplierRequest->public_token) }}" enctype="multipart/form-data" class="supplier-form">
+                        <form id="supplierSigningForm" method="POST" action="{{ route('supplier-signing.submit', $supplierRequest->public_token) }}" enctype="multipart/form-data" class="supplier-form">
                             @csrf
 
                             <label>
@@ -252,10 +295,22 @@
                                 @error('signatory_position')<small>{{ $message }}</small>@enderror
                             </label>
 
+                            <div class="supplier-signature-pad">
+                                <div class="supplier-signature-pad__header">
+                                    <strong>Draw Signature</strong>
+                                    <button id="clearSupplierSignature" type="button" class="supplier-signature-pad__clear">Clear</button>
+                                </div>
+                                <canvas id="supplierSignatureCanvas" class="supplier-signature-canvas" aria-label="Draw your signature"></canvas>
+                                <input id="supplierSignatureData" name="signature_data" type="hidden" value="{{ old('signature_data') }}">
+                                <small>Sign inside the box using a mouse, touchpad, or touchscreen.</small>
+                                <small id="supplierSignatureError" class="supplier-signature-error">Draw your signature or upload a signed file.</small>
+                                @error('signature_data')<small>{{ $message }}</small>@enderror
+                            </div>
+
                             <label>
-                                <span>Signed Document</span>
-                                <input name="signed_document" type="file" accept=".pdf,.jpg,.jpeg,.png" required>
-                                <small>Accepted files: PDF, JPG, JPEG, PNG. Maximum 10 MB.</small>
+                                <span>Upload Signed File (optional fallback)</span>
+                                <input id="supplierSignedDocument" name="signed_document" type="file" accept=".pdf,.jpg,.jpeg,.png">
+                                <small>Use this only if you cannot draw above. Accepted files: PDF, JPG, JPEG, PNG. Maximum 10 MB.</small>
                                 @error('signed_document')<small>{{ $message }}</small>@enderror
                             </label>
 
@@ -267,16 +322,102 @@
 
                             <label class="supplier-check">
                                 <input name="signature_consent" type="checkbox" value="1" required>
-                                <span>I confirm that I am authorized to submit this signed document for {{ $supplierRequest->supplier_name }} and that the uploaded file is complete and accurate.</span>
+                                <span>I confirm that I am authorized to sign for {{ $supplierRequest->supplier_name }} and that the information submitted is complete and accurate.</span>
                             </label>
                             @error('signature_consent')<small>{{ $message }}</small>@enderror
 
-                            <button type="submit" class="supplier-button">Submit Signed Document</button>
+                            <button type="submit" class="supplier-button">Submit Signature</button>
                         </form>
                     @endif
                 </section>
             </div>
         </section>
     </main>
+    <script>
+        (() => {
+            const form = document.getElementById('supplierSigningForm');
+            const canvas = document.getElementById('supplierSignatureCanvas');
+
+            if (!form || !canvas) {
+                return;
+            }
+
+            const context = canvas.getContext('2d');
+            const signatureData = document.getElementById('supplierSignatureData');
+            const signedDocument = document.getElementById('supplierSignedDocument');
+            const clearButton = document.getElementById('clearSupplierSignature');
+            const errorMessage = document.getElementById('supplierSignatureError');
+            let drawing = false;
+            let hasSignature = false;
+
+            const resizeCanvas = () => {
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = Math.max(1, Math.floor(rect.width * ratio));
+                canvas.height = Math.max(1, Math.floor(rect.height * ratio));
+                context.setTransform(ratio, 0, 0, ratio, 0, 0);
+                context.lineCap = 'round';
+                context.lineJoin = 'round';
+                context.lineWidth = 2;
+                context.strokeStyle = '#111827';
+                hasSignature = false;
+                signatureData.value = '';
+            };
+
+            const point = (event) => {
+                const rect = canvas.getBoundingClientRect();
+                const source = event.touches?.[0] || event;
+                return { x: source.clientX - rect.left, y: source.clientY - rect.top };
+            };
+
+            const start = (event) => {
+                event.preventDefault();
+                drawing = true;
+                const current = point(event);
+                context.beginPath();
+                context.moveTo(current.x, current.y);
+            };
+
+            const move = (event) => {
+                if (!drawing) return;
+                event.preventDefault();
+                const current = point(event);
+                context.lineTo(current.x, current.y);
+                context.stroke();
+                hasSignature = true;
+                errorMessage.classList.remove('is-visible');
+            };
+
+            const stop = () => {
+                drawing = false;
+                context.closePath();
+            };
+
+            resizeCanvas();
+            canvas.addEventListener('pointerdown', start);
+            canvas.addEventListener('pointermove', move);
+            canvas.addEventListener('pointerup', stop);
+            canvas.addEventListener('pointerleave', stop);
+
+            clearButton.addEventListener('click', () => {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                hasSignature = false;
+                signatureData.value = '';
+            });
+
+            form.addEventListener('submit', (event) => {
+                if (hasSignature) {
+                    signatureData.value = canvas.toDataURL('image/png');
+                    return;
+                }
+
+                if (signedDocument.files.length === 0) {
+                    event.preventDefault();
+                    errorMessage.classList.add('is-visible');
+                    canvas.focus();
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

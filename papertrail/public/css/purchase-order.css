@@ -626,6 +626,37 @@
     min-width: 0;
 }
 
+.po-sign-block .compact-signed-block,
+.po-fund-left .compact-signed-block {
+    min-height: 72px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.po-sign-block .compact-signed-block__visual,
+.po-fund-left .compact-signed-block__visual {
+    min-height: 48px;
+}
+
+.po-sign-block .compact-signed-block img,
+.po-fund-left .compact-signed-block img,
+.po-external-signature-image {
+    display: block;
+    width: auto;
+    max-width: 170px;
+    height: 54px;
+    margin: 0 auto 2px;
+    object-fit: contain;
+}
+
+.po-sign-block .compact-signed-block__name,
+.po-fund-left .compact-signed-block__name {
+    border-bottom: 1px solid #000;
+    font-weight: 700;
+}
+
 @media (max-width: 900px) {
     .po-meta-grid,
     .po-delivery-grid,

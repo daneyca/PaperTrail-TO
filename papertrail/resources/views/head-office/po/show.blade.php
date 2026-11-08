@@ -25,12 +25,34 @@
                 <button type="submit">Submit</button>
             </form>
         @endif
+        @if ($po->status === \App\Models\PurchaseOrder::STATUS_SUBMITTED)
+            <form method="POST" action="{{ route('head-office.purchase-orders.submit-for-signatures', $po) }}" onsubmit="return confirm('Send this Purchase Order to all signatories?');">
+                @csrf
+                @method('PATCH')
+                <button type="submit">Submit for Signatures</button>
+            </form>
+        @endif
     </section>
+
+    @if ($supplierSignatureRequest)
+        <section class="dashboard-widget widget-wide no-print">
+            <div class="widget-heading">
+                <div>
+                    <p class="eyebrow">Supplier Conforme</p>
+                    <h2>Supplier Signing Link</h2>
+                    <p>Status: {{ $supplierSignatureRequest->statusLabel() }}</p>
+                </div>
+                <a href="{{ $supplierSignatureRequest->publicUrl() }}" target="_blank" rel="noopener">Open Supplier Link</a>
+            </div>
+        </section>
+    @endif
 
     @include('head-office.purchase-orders.partials.purchase-order-excel-form', [
         'po' => $po,
         'sourceDocument' => $po->sourcePrDocument,
         'mode' => 'show',
+        'signatureSlots' => $signatureSlots,
+        'supplierSignatureRequest' => $supplierSignatureRequest,
     ])
 
     <x-documents.attachments-panel
