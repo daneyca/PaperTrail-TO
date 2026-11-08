@@ -11,7 +11,7 @@
         </div>
 
         <div class="hero-actions no-print">
-            <a href="{{ route('pr-numbering.pending.index') }}" class="dashboard-action secondary-action">Back to Pending Requests</a>
+            <a href="{{ route('pr-numbering.pending.index') }}" class="dashboard-action secondary-action">Back to Pending Assignments</a>
             <x-ai.completeness-check-button
                 document-type="purchase_request"
                 :document-id="$document->id"

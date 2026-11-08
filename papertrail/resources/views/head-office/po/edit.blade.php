@@ -10,7 +10,7 @@
         @if ($errors->any())
             <div class="session-alert session-alert-error po-validation-alert no-print" role="alert">
                 <strong>Purchase Order was not submitted.</strong>
-                <span>Complete the following required information, then click Submit again:</span>
+                <span>Correct the information below, then click Submit again:</span>
                 <ul>
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>

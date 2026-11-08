@@ -78,7 +78,7 @@ class PurchaseOrderController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $isSubmitting = $request->input('save_action') === 'submit';
-        $validated = $this->validatedOrder($request, $isSubmitting);
+        $validated = $this->validatedOrder($request);
         $sourceAbstract = $this->selectedEligibleAbstract($validated['source_abstract_id'] ?? null);
         $sourceDocument = $sourceAbstract?->sourcePrDocument ?: $this->selectedEligiblePr($validated['source_pr_document_id'] ?? null);
 
@@ -187,7 +187,7 @@ class PurchaseOrderController extends Controller
         }
 
         $isSubmitting = $request->input('save_action') === 'submit';
-        $validated = $this->validatedOrder($request, $isSubmitting, $purchaseOrder);
+        $validated = $this->validatedOrder($request, $purchaseOrder);
         $sourceAbstract = $this->selectedEligibleAbstract($validated['source_abstract_id'] ?? null) ?: $purchaseOrder->sourceAbstract;
         $sourceDocument = $sourceAbstract?->sourcePrDocument ?: ($this->selectedEligiblePr($validated['source_pr_document_id'] ?? null) ?: $purchaseOrder->sourcePrDocument);
 
@@ -232,13 +232,6 @@ class PurchaseOrderController extends Controller
 
         if (! $purchaseOrder->canSubmit()) {
             return back()->with('error', 'This Purchase Order is not eligible for submission.');
-        }
-
-        $purchaseOrder->load(['items', 'sourcePrDocument']);
-        $errors = $this->submissionErrors($purchaseOrder);
-
-        if ($errors) {
-            return back()->with('error', implode(' ', $errors));
         }
 
         DB::transaction(function () use ($request, $purchaseOrder) {
@@ -332,7 +325,7 @@ class PurchaseOrderController extends Controller
         $query->when($request->filled('date_to'), fn (Builder $builder) => $builder->whereDate('updated_at', '<=', $request->date('date_to')));
     }
 
-    private function validatedOrder(Request $request, bool $submitting, ?PurchaseOrder $purchaseOrder = null): array
+    private function validatedOrder(Request $request, ?PurchaseOrder $purchaseOrder = null): array
     {
         $jsonItems = $this->itemsFromJson($request->input('items_json'));
         $items = $this->filteredItems($jsonItems ?: $request->input('items', []));
@@ -355,14 +348,14 @@ class PurchaseOrderController extends Controller
         $rules = [
             'source_pr_document_id' => ['nullable', 'exists:procurement_documents,id'],
             'source_abstract_id' => ['nullable', 'exists:abstracts,id'],
-            'supplier_name' => [$submitting ? 'required' : 'nullable', 'string', 'max:255'],
+            'supplier_name' => ['nullable', 'string', 'max:255'],
             'supplier_address' => ['nullable', 'string'],
-            'mode_of_procurement' => [$submitting ? 'required' : 'nullable', 'string', 'max:255'],
+            'mode_of_procurement' => ['nullable', 'string', 'max:255'],
             'place_of_delivery' => ['nullable', 'string', 'max:255'],
             'date_of_delivery' => ['nullable', 'string', 'max:255'],
             'delivery_term' => ['nullable', 'string', 'max:255'],
             'payment_term' => ['nullable', 'string', 'max:255'],
-            'total_amount' => [$submitting ? 'required' : 'nullable', 'numeric', 'min:0'],
+            'total_amount' => ['nullable', 'numeric', 'min:0'],
             'total_amount_words' => ['nullable', 'string', 'max:500'],
             'penalty_clause' => ['nullable', 'string'],
             'authorized_official_name' => ['nullable', 'string', 'max:255'],
@@ -379,29 +372,19 @@ class PurchaseOrderController extends Controller
             'document_html' => ['nullable', 'string'],
             'document_text' => ['nullable', 'string'],
             'items_json' => ['nullable', 'json'],
-            'items' => [$submitting ? 'required' : 'nullable', 'array', $submitting ? 'min:1' : ''],
+            'items' => ['nullable', 'array'],
             'items.*.source_pr_item_id' => ['nullable', 'integer'],
             'items.*.item_no' => ['nullable', 'string', 'max:50'],
-            'items.*.quantity' => [$submitting ? 'required' : 'nullable', 'numeric', 'min:0'],
+            'items.*.quantity' => ['nullable', 'numeric', 'min:0'],
             'items.*.unit' => ['nullable', 'string', 'max:100'],
-            'items.*.description' => [$submitting ? 'required' : 'nullable', 'string'],
-            'items.*.unit_cost' => [$submitting ? 'required' : 'nullable', 'numeric', 'min:0'],
+            'items.*.description' => ['nullable', 'string'],
+            'items.*.unit_cost' => ['nullable', 'numeric', 'min:0'],
             'items.*.total_cost' => ['nullable', 'numeric', 'min:0'],
         ];
 
-        $rules['items'] = array_values(array_filter($rules['items']));
-
         return Validator::make($request->all(), $rules, [
-            'supplier_name.required' => 'Enter the supplier name.',
-            'mode_of_procurement.required' => 'Enter the mode of procurement.',
-            'total_amount.required' => 'Enter the total amount.',
             'total_amount.numeric' => 'The total amount must be a valid number.',
-            'items.required' => 'Add at least one Purchase Order item.',
-            'items.min' => 'Add at least one Purchase Order item.',
-            'items.*.quantity.required' => 'Enter the quantity for every item.',
             'items.*.quantity.numeric' => 'Every item quantity must be a valid number.',
-            'items.*.description.required' => 'Enter the description for every item.',
-            'items.*.unit_cost.required' => 'Enter the unit cost for every item.',
             'items.*.unit_cost.numeric' => 'Every item unit cost must be a valid number.',
         ])->validate();
     }
@@ -690,30 +673,6 @@ class PurchaseOrderController extends Controller
                 'sort_order' => $index,
             ]);
         });
-    }
-
-    private function submissionErrors(PurchaseOrder $purchaseOrder): array
-    {
-        $errors = [];
-
-        foreach ([
-            'supplier_name' => 'Supplier name is required.',
-            'mode_of_procurement' => 'Mode of procurement is required.',
-        ] as $field => $message) {
-            if (! filled($purchaseOrder->{$field})) {
-                $errors[] = $message;
-            }
-        }
-
-        if (! $purchaseOrder->items()->exists()) {
-            $errors[] = 'At least one Purchase Order item is required.';
-        }
-
-        if ((float) $purchaseOrder->total_amount <= 0) {
-            $errors[] = 'Total amount is required.';
-        }
-
-        return $errors;
     }
 
     private function selectedEligiblePr(mixed $id): ?ProcurementDocument

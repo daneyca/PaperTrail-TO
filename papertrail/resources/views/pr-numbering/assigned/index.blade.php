@@ -1,26 +1,32 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Assigned PR Numbers | PaperTrail')
+@section('title', 'Procurement Control History | PaperTrail')
 
 @section('content')
     <section class="dashboard-hero admin-users-hero">
         <div>
-            <p class="eyebrow">PR Number Assignment</p>
-            <h1>Assigned PR Numbers</h1>
-            <p>Review Purchase Requests with official LGU PR numbers assigned by the Procurement Controller.</p>
+            <p class="eyebrow">Procurement Control</p>
+            <h1>Assignment History</h1>
+            <p>Review official PR, RFQ, and PO numbers and dates assigned by the Procurement Controller.</p>
         </div>
 
-        <a href="{{ route('pr-numbering.pending.index') }}" class="dashboard-action">Pending Requests</a>
+        <a href="{{ route('pr-numbering.pending.index') }}" class="dashboard-action">Pending Assignments</a>
     </section>
 
     <section class="stat-grid stat-grid-modern" aria-label="PR numbering summary">
-        <x-dashboard.stat-card href="{{ url()->current() }}" value="{{ $summary['pending'] }}" label="Pending Requests" accent="gold" />
+        <x-dashboard.stat-card href="{{ url()->current() }}" value="{{ $summary['pending'] }}" label="Pending Assignments" accent="gold" />
         <x-dashboard.stat-card href="{{ url()->current() }}" value="{{ $summary['assignedToday'] }}" label="Assigned Today" accent="green" />
         <x-dashboard.stat-card href="{{ url()->current() }}" value="{{ $summary['assignedByYou'] }}" label="Assigned by You" accent="navy" />
         <x-dashboard.stat-card href="{{ url()->current() }}" value="{{ $summary['returned'] }}" label="Returned" accent="red" />
     </section>
 
     <section class="table-panel" aria-label="Assigned PR numbers">
+        <div class="panel-heading">
+            <div>
+                <p class="eyebrow">Purchase Requests</p>
+                <h2>Assigned PR Numbers and Dates</h2>
+            </div>
+        </div>
         <form method="GET" action="{{ route('pr-numbering.assigned.index') }}" class="budget-filter-toolbar pr-filter-toolbar">
             <div class="user-search">
                 <label for="assigned-pr-search">Search Assigned PRs</label>
@@ -118,5 +124,79 @@
                 {{ $documents->appends(request()->query())->links('vendor.pagination.papertrail') }}
             </div>
         @endif
+    </section>
+
+    <section class="table-panel" aria-label="Assigned RFQ numbers">
+        <div class="panel-heading">
+            <div>
+                <p class="eyebrow">Requests for Quotation</p>
+                <h2>Assigned RFQ Numbers and Dates</h2>
+            </div>
+        </div>
+        <div class="table-scroll">
+            <table class="user-management-table">
+                <thead>
+                    <tr>
+                        <th>Official RFQ No.</th>
+                        <th>PR Tracking Number</th>
+                        <th>Requesting Office</th>
+                        <th>Assigned By</th>
+                        <th>Assigned Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($assignedRfqs as $rfq)
+                        <tr>
+                            <td class="nowrap"><strong>{{ $rfq->rfq_number ?? 'N/A' }}</strong></td>
+                            <td class="nowrap">{{ $rfq->sourcePrDocument?->tracking_number ?? 'N/A' }}</td>
+                            <td>{{ $rfq->sourcePrDocument?->submittingOffice?->name ?? 'N/A' }}</td>
+                            <td>{{ $rfq->controlAssignedBy?->name ?? 'N/A' }}</td>
+                            <td class="nowrap">{{ $rfq->control_assigned_at?->format('M d, Y') ?? 'N/A' }}</td>
+                            <td><span class="status-pill status-{{ $rfq->status }}">{{ str($rfq->status)->replace('_', ' ')->title() }}</span></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="6"><div class="empty-state"><strong>No assigned RFQ numbers yet</strong></div></td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="table-panel" aria-label="Assigned PO numbers">
+        <div class="panel-heading">
+            <div>
+                <p class="eyebrow">Purchase Orders</p>
+                <h2>Assigned PO Numbers and Dates</h2>
+            </div>
+        </div>
+        <div class="table-scroll">
+            <table class="user-management-table">
+                <thead>
+                    <tr>
+                        <th>Official PO No.</th>
+                        <th>PR Tracking Number</th>
+                        <th>Requesting Office</th>
+                        <th>Assigned By</th>
+                        <th>Assigned Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($assignedPurchaseOrders as $purchaseOrder)
+                        <tr>
+                            <td class="nowrap"><strong>{{ $purchaseOrder->po_number ?? 'N/A' }}</strong></td>
+                            <td class="nowrap">{{ $purchaseOrder->sourcePrDocument?->tracking_number ?? 'N/A' }}</td>
+                            <td>{{ $purchaseOrder->sourcePrDocument?->submittingOffice?->name ?? 'N/A' }}</td>
+                            <td>{{ $purchaseOrder->controlAssignedBy?->name ?? 'N/A' }}</td>
+                            <td class="nowrap">{{ $purchaseOrder->control_assigned_at?->format('M d, Y') ?? 'N/A' }}</td>
+                            <td><span class="status-pill status-{{ $purchaseOrder->status }}">{{ str($purchaseOrder->status)->replace('_', ' ')->title() }}</span></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="6"><div class="empty-state"><strong>No assigned PO numbers yet</strong></div></td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </section>
 @endsection

@@ -26,10 +26,18 @@
             ->count();
     });
 
-    $pendingPrNumberCount = $roleSlug === 'pr-numbering' ? $safeCount(fn () => \App\Models\ProcurementDocument::query()
-        ->where('status', \App\Models\ProcurementDocument::STATUS_PENDING_PR_NUMBER_ASSIGNMENT)
-        ->where('pr_number_status', \App\Models\ProcurementDocument::PR_NUMBER_STATUS_PENDING_ASSIGNMENT)
-        ->count()) : 0;
+    $pendingControlCount = $roleSlug === 'pr-numbering' ? $safeCount(fn () =>
+        \App\Models\ProcurementDocument::query()
+            ->where('status', \App\Models\ProcurementDocument::STATUS_PENDING_PR_NUMBER_ASSIGNMENT)
+            ->where('pr_number_status', \App\Models\ProcurementDocument::PR_NUMBER_STATUS_PENDING_ASSIGNMENT)
+            ->count()
+        + \App\Models\Rfq::query()
+            ->where('status', \App\Models\Rfq::STATUS_PENDING_CONTROL)
+            ->count()
+        + \App\Models\PurchaseOrder::query()
+            ->where('status', \App\Models\PurchaseOrder::STATUS_PENDING_CONTROL)
+            ->count()
+    ) : 0;
 
     $pendingPpmpReviewCount = $roleSlug === 'bac-secretariat' ? $safeCount(fn () => \App\Models\ProcurementDocument::query()
         ->whereIn('status', [
@@ -153,10 +161,10 @@
             [
                 'label' => 'Procurement Control',
                 'icon' => 'hash',
-                'count' => $pendingPrNumberCount,
+                'count' => $pendingControlCount,
                 'children' => [
-                    ['label' => 'Pending Requests', 'route' => 'pr-numbering.pending.index', 'active' => 'pr-numbering.pending.*', 'count' => $pendingPrNumberCount],
-                    ['label' => 'Assigned PR Numbers', 'route' => 'pr-numbering.assigned.index', 'active' => 'pr-numbering.assigned.*'],
+                    ['label' => 'Pending Assignments', 'route' => 'pr-numbering.pending.index', 'active' => 'pr-numbering.pending.*', 'count' => $pendingControlCount],
+                    ['label' => 'Assignment History', 'route' => 'pr-numbering.assigned.index', 'active' => 'pr-numbering.assigned.*'],
                 ],
             ],
             ['label' => 'AI Center', 'route' => 'assistant.index', 'icon' => 'review', 'active' => 'assistant.*'],

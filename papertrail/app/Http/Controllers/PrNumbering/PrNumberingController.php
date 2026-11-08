@@ -457,7 +457,7 @@ class PrNumberingController extends Controller
 
     public function assigned(Request $request): View
     {
-        AuditLogger::log('PR Number Assignment', 'Assigned PR Numbers Viewed', 'Procurement Controller viewed assigned PR numbers.');
+        AuditLogger::log('Procurement Control', 'Assignment History Viewed', 'Procurement Controller viewed assigned PR, RFQ, and PO numbers and dates.');
 
         $query = ProcurementDocument::query()
             ->whereIn('document_type', ['PR', 'Purchase Request'])
@@ -468,6 +468,16 @@ class PrNumberingController extends Controller
 
         return view('pr-numbering.assigned.index', [
             'documents' => $query->latest('pr_no_assigned_at')->paginate(10)->withQueryString(),
+            'assignedRfqs' => Rfq::query()
+                ->whereNotNull('control_assigned_at')
+                ->with(['sourcePrDocument.submittingOffice', 'controlAssignedBy'])
+                ->latest('control_assigned_at')
+                ->get(),
+            'assignedPurchaseOrders' => PurchaseOrder::query()
+                ->whereNotNull('control_assigned_at')
+                ->with(['sourcePrDocument.submittingOffice', 'controlAssignedBy'])
+                ->latest('control_assigned_at')
+                ->get(),
             'summary' => $this->summary($request->user()),
             'filters' => $request->only(['search', 'fiscal_year', 'office_id', 'date_from', 'date_to']),
             'fiscalYears' => ProcurementDocument::query()

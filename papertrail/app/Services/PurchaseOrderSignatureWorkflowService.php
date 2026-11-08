@@ -158,13 +158,9 @@ class PurchaseOrderSignatureWorkflowService
     {
         $internalComplete = $this->signatureRequests
             ->documentHasRequiredSignatures($purchaseOrder, 'purchase_order');
-        $supplierComplete = SupplierSignatureRequest::query()
-            ->where('document_type', 'purchase_order')
-            ->where('tracking_number', $purchaseOrder->displayNumber())
-            ->whereIn('status', [SupplierSignatureRequest::STATUS_SUBMITTED, SupplierSignatureRequest::STATUS_ACCEPTED])
-            ->exists();
 
-        if ($internalComplete && $supplierComplete) {
+        // The supplier Conforme is optional and must not block the internal PO approval.
+        if ($internalComplete) {
             $purchaseOrder->forceFill(['status' => PurchaseOrder::STATUS_APPROVED])->save();
         }
     }

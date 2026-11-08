@@ -75,4 +75,27 @@ class ProcurementControllerDocumentControlTest extends TestCase
             'assigned_to_user_id' => $originator->id,
         ]);
     }
+
+    public function test_head_office_can_submit_an_incomplete_po_for_control_assignment(): void
+    {
+        $originator = User::where('user_id', 'MCR-001')->firstOrFail();
+
+        $purchaseOrder = PurchaseOrder::create([
+            'fiscal_year' => 2026,
+            'status' => PurchaseOrder::STATUS_DRAFT,
+            'prepared_by_user_id' => $originator->id,
+        ]);
+
+        $this->actingAs($originator)
+            ->patch(route('head-office.purchase-orders.update', $purchaseOrder), [
+                'save_action' => 'submit',
+            ])
+            ->assertRedirect(route('head-office.purchase-orders.show', $purchaseOrder));
+
+        $this->assertDatabaseHas('purchase_orders', [
+            'id' => $purchaseOrder->id,
+            'status' => PurchaseOrder::STATUS_PENDING_CONTROL,
+            'submitted_by_user_id' => $originator->id,
+        ]);
+    }
 }

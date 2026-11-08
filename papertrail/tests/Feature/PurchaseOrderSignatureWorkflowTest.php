@@ -22,7 +22,7 @@ class PurchaseOrderSignatureWorkflowTest extends TestCase
         $this->seed();
     }
 
-    public function test_purchase_order_requires_mayor_accountant_and_supplier_signatures(): void
+    public function test_purchase_order_requires_mayor_and_accountant_signatures_but_not_supplier(): void
     {
         $requester = User::query()->where('user_id', 'BACSEC-003')->firstOrFail();
         $purchaseOrder = PurchaseOrder::create([
@@ -82,10 +82,7 @@ class PurchaseOrderSignatureWorkflowTest extends TestCase
             $workflow->handleInternalSigned($purchaseOrder->refresh(), $request, $signature);
         }
 
-        $this->assertSame(
-            PurchaseOrder::STATUS_FORWARDED_TO_SUPPLIER,
-            $purchaseOrder->refresh()->status
-        );
+        $this->assertSame(PurchaseOrder::STATUS_APPROVED, $purchaseOrder->refresh()->status);
 
         $supplierRequest->forceFill([
             'status' => SupplierSignatureRequest::STATUS_SUBMITTED,

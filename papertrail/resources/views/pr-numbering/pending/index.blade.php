@@ -12,7 +12,7 @@
     </section>
 
     <section class="stat-grid stat-grid-modern" aria-label="PR numbering summary">
-        <x-dashboard.stat-card href="{{ url()->current() }}" value="{{ $summary['pending'] }}" label="Pending Requests" accent="gold" />
+        <x-dashboard.stat-card href="{{ url()->current() }}" value="{{ $summary['pending'] }}" label="Pending Assignments" accent="gold" />
         <x-dashboard.stat-card href="{{ url()->current() }}" value="{{ $summary['assignedToday'] }}" label="Assigned Today" accent="green" />
         <x-dashboard.stat-card href="{{ url()->current() }}" value="{{ $summary['assignedByYou'] }}" label="Assigned by You" accent="navy" />
         <x-dashboard.stat-card href="{{ url()->current() }}" value="{{ $summary['returned'] }}" label="Returned" accent="red" />
