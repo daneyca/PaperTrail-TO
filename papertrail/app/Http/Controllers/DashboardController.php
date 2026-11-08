@@ -102,9 +102,9 @@ class DashboardController extends Controller
 
     public function prNumbering(): View
     {
-        return $this->view('PR Numbering Staff Dashboard', User::ROLE_PR_NUMBERING, [
-            'heroLabel' => 'PR Number Assignment',
-            'subtitle' => 'Assign official LGU Purchase Request numbers before BAC Secretariat validation.',
+        return $this->view('Procurement Controller Dashboard', User::ROLE_PR_NUMBERING, [
+            'heroLabel' => 'Procurement Control',
+            'subtitle' => 'Record and control official PR, RFQ, PO, and inspection numbers and dates.',
             'primaryActionRoute' => 'pr-numbering.pending.index',
         ]);
     }
@@ -231,9 +231,9 @@ class DashboardController extends Controller
                 'tasks' => ['Approve pending document', 'Review returned documents', 'Check approval notifications'],
             ],
             User::ROLE_PR_NUMBERING => [
-                'primaryAction' => 'Assign PR Numbers',
+                'primaryAction' => 'Open Procurement Control',
                 'stats' => $this->prNumberingStats(),
-                'tasks' => ['Review pending PR number requests', 'Assign official PR numbers', 'Return PRs that need correction'],
+                'tasks' => ['Assign PR numbers and dates', 'Record RFQ, PO, and inspection control details', 'Return documents that need correction'],
             ],
             default => [
                 'primaryAction' => 'View Documents',

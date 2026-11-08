@@ -14,7 +14,7 @@
         $submitButtonLabel = $usesPrSignatureRouting ? 'Submit for Signatures' : 'Submit for PR Number';
         $submitConfirmMessage = $usesPrSignatureRouting
             ? 'Generate signature requests for this Purchase Request?'
-            : 'Submit this Purchase Request to PR Numbering Staff?';
+            : 'Submit this Purchase Request to the Procurement Controller?';
         $selectedAppItem = $selectedAppItem ?? null;
         $appReferenceItems = collect($appReferenceItems ?? []);
         $ppmpSupplyItems = collect($ppmpSupplyItems ?? []);

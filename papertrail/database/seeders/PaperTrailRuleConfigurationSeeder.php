@@ -144,8 +144,8 @@ class PaperTrailRuleConfigurationSeeder extends Seeder
             ['app', 'submitted', 'approved', 'Head of the Procuring Entity', 'BAC Secretariat', 'Approve APP', 'APP records for approval should be reviewed by HOPE before use as procurement reference.', false, false, 70],
             ['app', 'returned', 'submitted', 'BAC Secretariat', 'Head of the Procuring Entity', 'Resubmit APP', 'Returned APP records should be corrected by BAC Secretariat before resubmission.', false, false, 80],
 
-            ['purchase_request', 'pr_draft', 'pending_pr_number_assignment', 'Head Office / End User', 'PR Numbering Staff', 'Submit for PR Number', 'Draft Purchase Requests route to PR Numbering Staff for official number assignment.', false, true, 90],
-            ['purchase_request', 'pending_pr_number_assignment', 'pr_number_assigned_returned_to_end_user', 'PR Numbering Staff', 'Head Office / End User', 'Assign PR Number', 'PR Numbering Staff assigns the official PR number and returns the request to the requesting office.', false, false, 100],
+            ['purchase_request', 'pr_draft', 'pending_pr_number_assignment', 'Head of Office', 'Procurement Controller', 'Submit for PR Number', 'Draft Purchase Requests route to the Procurement Controller for official number assignment.', false, true, 90],
+            ['purchase_request', 'pending_pr_number_assignment', 'pr_number_assigned_returned_to_end_user', 'Procurement Controller', 'Head of Office', 'Assign PR Number', 'The Procurement Controller assigns the official PR number and returns the request to the requesting office.', false, false, 100],
             ['purchase_request', 'pr_number_assigned_returned_to_end_user', 'submitted_to_bac_secretariat', 'Head Office / End User', 'BAC Secretariat', 'Submit to BAC Secretariat', 'PR-numbered Purchase Requests route to BAC Secretariat for validation.', false, true, 110],
             ['purchase_request', 'submitted_to_bac_secretariat', 'pr_received_by_bac_secretariat', 'Head Office / End User', 'BAC Secretariat', 'Acknowledge PR Receipt', 'BAC Secretariat should acknowledge receipt before validation starts.', false, false, 120],
             ['purchase_request', 'pr_received_by_bac_secretariat', 'under_pr_validation', 'BAC Secretariat', 'BAC Secretariat', 'Start PR Validation', 'Received Purchase Requests should undergo BAC Secretariat validation.', false, false, 130],
@@ -198,7 +198,7 @@ class PaperTrailRuleConfigurationSeeder extends Seeder
     private function delayThresholds(): void
     {
         $rules = [
-            ['purchase_request', 'PR Number Assignment', 'pending_pr_number_assignment', 1, 2, 3, 5, 'PR Numbering Staff'],
+            ['purchase_request', 'PR Number Assignment', 'pending_pr_number_assignment', 1, 2, 3, 5, 'Procurement Controller'],
             ['bac_resolution', 'BAC Chair Signature', 'pending_bac_chair_signature', 1, 2, 4, 7, 'BAC Chair'],
             ['purchase_request', 'BAC Secretariat PR Validation', 'under_pr_validation', 1, 3, 5, 7, 'BAC Secretariat'],
         ];

@@ -20,7 +20,7 @@
         'BAC Chair' => 'BACCHAIR-001',
         'BAC Vice Chairperson' => 'BACVICE-001',
         'Head of the Procuring Entity' => 'HOPE-001',
-        'PR Numbering Staff' => 'PRNO-001',
+        'Procurement Controller' => 'PC-001',
     ];
 @endphp
 

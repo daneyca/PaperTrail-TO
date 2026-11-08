@@ -62,7 +62,7 @@
                 />
                 <a href="{{ route('head-office.pr.print', $document) }}" class="btn-pr-primary">Print PR</a>
                 @if ($canSubmitForPrNumber ?? false)
-                    <form method="POST" action="{{ route('head-office.pr.submit', $document) }}" onsubmit="return confirm('Submit this signed Purchase Request to PR Numbering Staff?');">
+                    <form method="POST" action="{{ route('head-office.pr.submit', $document) }}" onsubmit="return confirm('Submit this signed Purchase Request to the Procurement Controller?');">
                         @csrf
                         <button type="submit" class="btn-pr-primary">Submit for PR Number</button>
                     </form>

@@ -7,10 +7,12 @@ use App\Models\AnnualProcurementPlan;
 use App\Models\BacResolution;
 use App\Models\ElectronicSignature;
 use App\Models\SignatureRequest;
+use App\Models\SystemNotification;
 use App\Models\User;
 use App\Services\ElectronicSignatureService;
 use App\Services\PersonWorkspaceService;
 use App\Services\SignatureRequestService;
+use App\Services\WorkspaceAttentionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -89,7 +91,8 @@ class PersonWorkspacesTest extends TestCase
             ->get(route('bac-chair.dashboard'))->assertOk()
             ->assertSee('BAC Chairperson Dashboard')
             ->assertSee('BAC Chairperson Review')
-            ->assertSee('BAC Chairperson<small>BACCHAIR-001', false)
+            ->assertSee('BAC Chairperson')
+            ->assertSee('BACCHAIR-001')
             ->assertSee('class="pt-user-profile-block__role">BAC Chairperson</span>', false)
             ->assertDontSee('BAC Chairman');
         $this->blade('<x-user-profile-block :user="$user" />', ['user' => $chair])
@@ -104,6 +107,45 @@ class PersonWorkspacesTest extends TestCase
             'workspace_id' => $this->user('BACSEC-002')->id,
         ])->assertForbidden();
         $this->get(route('bac-secretariat.dashboard'))->assertOk()->assertDontSee('Switch Workspace');
+    }
+
+    public function test_workspace_menu_shows_attention_from_notifications_and_pending_signatures(): void
+    {
+        $this->linkAccounts();
+        $account = $this->user('MPDO-001');
+        $chair = $this->user('BACCHAIR-001');
+        $signatureRequest = $this->signature($chair);
+
+        SystemNotification::create([
+            'user_id' => $chair->id,
+            'title' => 'Signature required',
+            'message' => 'A document needs your signature.',
+            'type' => SystemNotification::TYPE_INFO,
+            'module' => 'E-Signature',
+            'related_type' => SignatureRequest::class,
+            'related_id' => $signatureRequest->id,
+        ]);
+        SystemNotification::create([
+            'user_id' => $chair->id,
+            'title' => 'Document returned',
+            'message' => 'Another document needs your attention.',
+            'type' => SystemNotification::TYPE_WARNING,
+            'module' => 'Documents',
+        ]);
+
+        $summary = app(WorkspaceAttentionService::class)->summaryFor($chair);
+
+        $this->assertSame(1, $summary['pending_signatures']);
+        $this->assertSame(2, $summary['unread_notifications']);
+        $this->assertSame(1, $summary['other_notifications']);
+        $this->assertSame(2, $summary['total']);
+
+        $this->actingAs($account)
+            ->get(route('head-office.dashboard'))
+            ->assertOk()
+            ->assertSee('2 items need attention in BAC Chairperson')
+            ->assertSee('class="workspace-menu__badge"', false)
+            ->assertSee('>2</span>', false);
     }
 
     public function test_main_office_credentials_work_but_linked_account_cannot_log_in(): void

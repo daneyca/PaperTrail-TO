@@ -20,7 +20,7 @@ class ProcurementChatbotFallbackTest extends TestCase
 
         $response = $method->invoke($service, 'What happens after submitting a PR?');
 
-        $this->assertStringContainsString('PR Numbering Staff', $response);
+        $this->assertStringContainsString('Procurement Controller', $response);
         $this->assertStringContainsString('BAC Secretariat', $response);
         $this->assertStringContainsString('Status Tracking', $response);
     }

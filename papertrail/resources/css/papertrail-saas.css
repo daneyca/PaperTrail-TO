@@ -5060,7 +5060,7 @@ body.dashboard-body .dashboard-content > form :where(input:not([type="checkbox"]
     font-size: 0.84rem !important;
 }
 
-/* PR Numbering Staff assignment workspace. */
+/* Procurement Controller assignment workspace. */
 body.dashboard-body .pr-numbering-workspace {
     display: grid !important;
     gap: 14px !important;

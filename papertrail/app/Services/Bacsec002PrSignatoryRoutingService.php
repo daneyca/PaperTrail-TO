@@ -826,7 +826,7 @@ class Bacsec002PrSignatoryRoutingService
             })
             ->first()
             ?: User::where('status', User::STATUS_ACTIVE)
-                ->where('user_id', 'PRNO-001')
+                ->where('user_id', User::PROCUREMENT_CONTROLLER_USER_ID)
                 ->first();
 
         $office = $user?->assignedOffice ?: Office::where('code', 'MEO')

@@ -85,7 +85,7 @@
         'Accounting Officer' => 'Municipal Accounting Office',
         'Municipal Mayor' => 'Office of the Municipal Mayor',
         'Head of the Procuring Entity' => 'Office of the Municipal Mayor',
-        'PR Numbering Staff' => '',
+        'Procurement Controller' => '',
     ];
     $legacySignatoryDesignations = [
         'Municipal Budget Officer' => 'Budget Officer',

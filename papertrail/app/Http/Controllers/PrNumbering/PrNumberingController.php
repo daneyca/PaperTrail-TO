@@ -22,7 +22,7 @@ class PrNumberingController extends Controller
 {
     public function index(Request $request): View
     {
-        AuditLogger::log('PR Number Assignment', 'Pending PR Number Requests Viewed', 'PR Numbering Staff viewed pending PR number requests.');
+        AuditLogger::log('PR Number Assignment', 'Pending PR Number Requests Viewed', 'Procurement Controller viewed pending PR number requests.');
 
         $query = $this->pendingQuery()
             ->with(['submittingOffice', 'submittedBy', 'currentOffice']);
@@ -54,7 +54,7 @@ class PrNumberingController extends Controller
                 ->with('error', 'This Purchase Request is not pending PR number assignment.');
         }
 
-        AuditLogger::log('PR Number Assignment', 'Pending PR Number Detail Viewed', 'PR Numbering Staff viewed a pending Purchase Request.', $document);
+        AuditLogger::log('PR Number Assignment', 'Pending PR Number Detail Viewed', 'Procurement Controller viewed a pending Purchase Request.', $document);
 
         $document->load([
             'submittingOffice',
@@ -143,7 +143,7 @@ class PrNumberingController extends Controller
                 );
             }
 
-            AuditLogger::log('PR Number Assignment', 'PR Number Assigned', 'PR Numbering Staff assigned an official PR number and returned the PR to the requesting office.', $document, $oldValues, $document->fresh()->only(['status', 'pr_number_status', 'pr_no', 'pr_date', 'current_office_id', 'assigned_to_user_id']));
+            AuditLogger::log('PR Number Assignment', 'PR Number Assigned', 'Procurement Controller assigned an official PR number and returned the PR to the requesting office.', $document, $oldValues, $document->fresh()->only(['status', 'pr_number_status', 'pr_no', 'pr_date', 'current_office_id', 'assigned_to_user_id']));
 
             app(SvpChainService::class)->findOrCreateFromPr($document->refresh(), $request->user(), 'PR number assigned and returned to Requesting Office', $validated['remarks'] ?? null);
         });
@@ -184,7 +184,7 @@ class PrNumberingController extends Controller
             $this->recordRouting(
                 $document,
                 $request->user(),
-                'PR Returned by PR Numbering Staff',
+                'PR Returned by Procurement Controller',
                 $oldStatus,
                 ProcurementDocument::STATUS_RETURNED_BY_PR_NUMBERING_STAFF,
                 $validated['remarks'],
@@ -195,16 +195,16 @@ class PrNumberingController extends Controller
             SystemNotificationService::notify(
                 $document->submittedBy,
                 'Purchase Request Returned Before PR Number Assignment',
-                "Purchase Request {$document->tracking_number} was returned by PR Numbering Staff for correction.",
+                "Purchase Request {$document->tracking_number} was returned by the Procurement Controller for correction.",
                 SystemNotification::TYPE_WARNING,
                 'PR Number Assignment',
                 $document,
                 route('head-office.returned.show', $document),
             );
 
-            AuditLogger::log('PR Number Assignment', 'PR Returned by PR Numbering Staff', 'PR Numbering Staff returned a Purchase Request before official PR number assignment.', $document, $oldValues, $document->fresh()->only(['status', 'pr_number_status', 'current_office_id', 'assigned_to_user_id']), 'warning');
+            AuditLogger::log('PR Number Assignment', 'PR Returned by Procurement Controller', 'Procurement Controller returned a Purchase Request before official PR number assignment.', $document, $oldValues, $document->fresh()->only(['status', 'pr_number_status', 'current_office_id', 'assigned_to_user_id']), 'warning');
 
-            app(SvpChainService::class)->findOrCreateFromPr($document->refresh(), $request->user(), 'PR returned by PR Numbering Staff', $validated['remarks']);
+            app(SvpChainService::class)->findOrCreateFromPr($document->refresh(), $request->user(), 'PR returned by the Procurement Controller', $validated['remarks']);
         });
 
         return redirect()
@@ -214,7 +214,7 @@ class PrNumberingController extends Controller
 
     public function assigned(Request $request): View
     {
-        AuditLogger::log('PR Number Assignment', 'Assigned PR Numbers Viewed', 'PR Numbering Staff viewed assigned PR numbers.');
+        AuditLogger::log('PR Number Assignment', 'Assigned PR Numbers Viewed', 'Procurement Controller viewed assigned PR numbers.');
 
         $query = ProcurementDocument::query()
             ->whereIn('document_type', ['PR', 'Purchase Request'])

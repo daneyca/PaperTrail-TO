@@ -14,7 +14,7 @@
         $submitButtonLabel = $usesPrSignatureRouting ? 'Submit for Signatures' : 'Submit for PR Number';
         $submitConfirmMessage = $usesPrSignatureRouting
             ? 'Generate signature requests for this Purchase Request?'
-            : 'Submit this Purchase Request to PR Numbering Staff?';
+            : 'Submit this Purchase Request to the Procurement Controller?';
         $statusLabels = [
             'pr_draft' => 'Draft',
             'pr_pending_signatories' => 'Pending Signatures',

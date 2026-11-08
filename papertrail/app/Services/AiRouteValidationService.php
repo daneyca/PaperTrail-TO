@@ -390,11 +390,11 @@ class AiRouteValidationService
                 'Purchase Request Draft',
                 ProcurementDocument::STATUS_PENDING_PR_NUMBER_ASSIGNMENT,
                 ProcurementDocument::STAGE_PR_NUMBER_ASSIGNMENT,
-                'PR Numbering Staff',
+                'Procurement Controller',
                 'Submit the PR for official PR number assignment.'
             ),
             ProcurementDocument::STATUS_PENDING_PR_NUMBER_ASSIGNMENT => $this->route(
-                'PR Numbering Staff',
+                'Procurement Controller',
                 ProcurementDocument::STAGE_PR_NUMBER_ASSIGNMENT,
                 ProcurementDocument::STATUS_PR_NUMBER_ASSIGNED_RETURNED_TO_END_USER,
                 ProcurementDocument::STAGE_PR_NUMBER_ASSIGNED,
@@ -1225,7 +1225,7 @@ class AiRouteValidationService
             User::ROLE_BUDGET, 'budget_officer', 'budget' => 'Budget Office',
             User::ROLE_ACCOUNTING, 'accounting_officer', 'accounting' => 'Accounting Office',
             User::ROLE_APPROVING_AUTHORITY, 'approving_authority' => 'Head of the Procuring Entity',
-            User::ROLE_PR_NUMBERING, 'pr_numbering_staff', 'pr-numbering' => 'PR Numbering Staff',
+            User::ROLE_PR_NUMBERING, 'pr_numbering_staff', 'pr-numbering' => 'Procurement Controller',
             User::ROLE_ADMIN, 'admin' => 'Admin',
             default => Str::title(str_replace(['_', '-'], ' ', $role)),
         };

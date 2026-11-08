@@ -155,16 +155,47 @@
                 </button>
 
                 <div class="topbar-account-dropdown" data-user-menu-dropdown>
-                    @php($workspaces = $user->availableWorkspaces())
+                    @php
+                        $workspaces = $user->availableWorkspaces();
+                        $workspaceAttention = app(\App\Services\WorkspaceAttentionService::class)->summaries($workspaces);
+                    @endphp
                     @if ($workspaces->count() > 1)
                         <div class="workspace-menu" aria-label="Assigned workspaces">
                             <strong class="workspace-menu__title">Switch Workspace</strong>
                             @foreach ($workspaces as $workspace)
+                                @php
+                                    $attention = $workspaceAttention->get($workspace->id, [
+                                        'total' => 0,
+                                        'pending_signatures' => 0,
+                                        'other_notifications' => 0,
+                                    ]);
+                                    $attentionDetails = collect([
+                                        $attention['pending_signatures'] > 0
+                                            ? $attention['pending_signatures'].' pending '.\Illuminate\Support\Str::plural('signature', $attention['pending_signatures'])
+                                            : null,
+                                        $attention['other_notifications'] > 0
+                                            ? $attention['other_notifications'].' other unread '.\Illuminate\Support\Str::plural('notification', $attention['other_notifications'])
+                                            : null,
+                                    ])->filter()->implode(' and ');
+                                    $attentionLabel = $attention['total'].' '.\Illuminate\Support\Str::plural('item', $attention['total'])
+                                        .' need attention in '.$workspace->workspaceLabel()
+                                        .($attentionDetails !== '' ? ': '.$attentionDetails : '');
+                                @endphp
                                 <form method="POST" action="{{ route('workspaces.switch') }}">
                                     @csrf
                                     <input type="hidden" name="workspace_id" value="{{ $workspace->id }}">
                                     <button type="submit" @disabled($workspace->is($user)) aria-current="{{ $workspace->is($user) ? 'true' : 'false' }}">
-                                        <span>{{ $workspace->workspaceLabel() }}<small>{{ $workspace->user_id }}{{ $workspace->is($user) ? ' (Active)' : '' }}</small></span>
+                                        <span class="workspace-menu__identity">
+                                            {{ $workspace->workspaceLabel() }}
+                                            <small>{{ $workspace->user_id }}{{ $workspace->is($user) ? ' (Active)' : '' }}</small>
+                                        </span>
+                                        @if ($attention['total'] > 0)
+                                            <span
+                                                class="workspace-menu__badge"
+                                                title="{{ $attentionLabel }}"
+                                                aria-label="{{ $attentionLabel }}"
+                                            >{{ $attention['total'] > 99 ? '99+' : $attention['total'] }}</span>
+                                        @endif
                                     </button>
                                 </form>
                             @endforeach

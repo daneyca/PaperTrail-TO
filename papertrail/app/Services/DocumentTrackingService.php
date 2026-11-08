@@ -516,7 +516,7 @@ SUMMARY;
             ProcurementDocument::STATUS_UNDER_PPMP_REVIEW => 'BACSEC-003 reviews and either returns or accepts for APP consolidation.',
             ProcurementDocument::STATUS_ACCEPTED_FOR_APP_CONSOLIDATION => 'Include this PPMP in APP consolidation.',
             ProcurementDocument::STATUS_PR_DRAFT => 'Submit the Purchase Request for PR number assignment.',
-            ProcurementDocument::STATUS_PENDING_PR_NUMBER_ASSIGNMENT => 'Waiting for PR Numbering Staff to assign an official PR number.',
+            ProcurementDocument::STATUS_PENDING_PR_NUMBER_ASSIGNMENT => 'Waiting for the Procurement Controller to assign an official PR number.',
             ProcurementDocument::STATUS_PR_NUMBER_ASSIGNED => 'Submit the numbered Purchase Request to BAC Secretariat.',
             ProcurementDocument::STATUS_PR_NUMBER_ASSIGNED_RETURNED_TO_END_USER => 'Requesting Office forwards the finalized Purchase Request reference to BACSEC-001.',
             ProcurementDocument::STATUS_RETURNED_BY_PR_NUMBERING_STAFF => 'End User corrects the Purchase Request and resubmits for PR number assignment.',
@@ -773,7 +773,7 @@ SUMMARY;
         $value = Str::lower($status);
 
         return match (true) {
-            str_contains($value, 'pr_number') => 'PR Numbering Staff',
+            str_contains($value, 'pr_number') => 'Procurement Controller',
             str_contains($value, 'bac_secretariat') => 'BAC Secretariat',
             str_contains($value, 'bac_chair') => 'BAC Chair',
             str_contains($value, 'bac_member') => 'BAC Member',

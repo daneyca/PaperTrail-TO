@@ -74,7 +74,7 @@ class DatabaseSeeder extends Seeder
             ['bac_chair', User::ROLE_BAC_CHAIR, 'bac-chair.dashboard', 'Confirms BAC-level reviews and actions.'],
             ['bac_vice_chairperson', User::ROLE_BAC_VICE_CHAIRPERSON, 'bac-chair.dashboard', 'Reviews and signs BAC documents using the BAC Chair workspace.'],
             ['approving_authority', User::ROLE_APPROVING_AUTHORITY, 'approving-authority.dashboard', 'Final authorized approval role for procurement documents.'],
-            ['pr_numbering_staff', User::ROLE_PR_NUMBERING, 'pr-numbering.dashboard', 'Assigns official LGU Purchase Request numbers before BAC Secretariat validation.'],
+            ['pr_numbering_staff', User::ROLE_PR_NUMBERING, 'pr-numbering.dashboard', 'Records and controls official procurement numbers and dates, including PR, RFQ, PO, and inspection details.'],
         ];
 
         foreach ($roleSeeds as [$code, $name, $dashboardRoute, $description]) {
@@ -99,7 +99,7 @@ class DatabaseSeeder extends Seeder
             'PPMP' => ['ppmp.submit', 'ppmp.view', 'ppmp.review', 'ppmp.approve'],
             'APP' => ['app.view', 'app.consolidate', 'app.approve'],
             'Purchase Request' => ['pr.submit', 'pr.view', 'pr.review', 'pr.approve'],
-            'PR Numbering' => ['pr-number.view', 'pr-number.assign', 'pr-number.return'],
+            'Procurement Control' => ['pr-number.view', 'pr-number.assign', 'pr-number.return'],
             'BAC Resolution' => ['bac.resolution.view', 'bac.resolution.create', 'bac.resolution.update', 'bac.resolution.submit', 'bac.resolution.review', 'bac.resolution.confirm', 'bac.resolution.return', 'bac.resolution.forward_to_hope'],
             'Purchase Order' => ['po.view', 'po.prepare', 'po.approve'],
             'Workflow' => ['workflow.route', 'workflow.update_status', 'workflow.view_history'],
@@ -200,7 +200,7 @@ class DatabaseSeeder extends Seeder
             ['BACMEM-003', 'BAC Member', 'BAC', User::ROLE_BAC_MEMBER],
             ['BACCHAIR-001', 'BAC Chair', 'BAC', User::ROLE_BAC_CHAIR],
             ['BACVICE-001', 'BAC Vice Chairperson', 'BAC', User::ROLE_BAC_VICE_CHAIRPERSON],
-            ['PRNO-001', 'PR Numbering Staff', 'MEO', User::ROLE_PR_NUMBERING],
+            [User::PROCUREMENT_CONTROLLER_USER_ID, 'Procurement Controller', 'MEO', User::ROLE_PR_NUMBERING],
         ];
 
         foreach ($workflowUsers as [$userId, $name, $officeCode, $role]) {
@@ -223,7 +223,7 @@ class DatabaseSeeder extends Seeder
         }
 
         User::where('role', User::ROLE_PR_NUMBERING)
-            ->where('user_id', '!=', 'PRNO-001')
+            ->where('user_id', '!=', User::PROCUREMENT_CONTROLLER_USER_ID)
             ->update(['status' => User::STATUS_INACTIVE]);
 
         $finalHeadOfficeUsers = [

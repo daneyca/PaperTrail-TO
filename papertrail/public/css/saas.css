@@ -6488,9 +6488,14 @@ body.dashboard-body .workspace-menu__title {
 }
 
 body.dashboard-body .workspace-menu form button {
+    justify-content: space-between !important;
     color: var(--pt-saas-ink) !important;
     white-space: normal !important;
     overflow-wrap: anywhere;
+}
+
+body.dashboard-body .workspace-menu__identity {
+    min-width: 0;
 }
 
 body.dashboard-body .workspace-menu button small {
@@ -6504,6 +6509,22 @@ body.dashboard-body .workspace-menu button[aria-current="true"] {
     background: #edf7f2 !important;
     color: #196b48 !important;
     cursor: default !important;
+}
+
+body.dashboard-body .workspace-menu__badge {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: #7c3aed;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1;
 }
 
 body.dashboard-body .workspace-management-panel {

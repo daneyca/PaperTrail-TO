@@ -384,7 +384,7 @@
             }
 
             const confirmed = await window.PaperTrailDialog.confirm(
-                submitForPrNumberButton.dataset.submitConfirm || 'Submit this Purchase Request to PR Numbering Staff?',
+                submitForPrNumberButton.dataset.submitConfirm || 'Submit this Purchase Request to the Procurement Controller?',
                 {
                     title: 'Submit Purchase Request?',
                     confirmLabel: 'Confirm Submission',

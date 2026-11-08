@@ -7,7 +7,7 @@
         <div>
             <p class="eyebrow">PR Number Assignment</p>
             <h1>Assigned PR Numbers</h1>
-            <p>Review Purchase Requests with official LGU PR numbers assigned by the PR Numbering Staff.</p>
+            <p>Review Purchase Requests with official LGU PR numbers assigned by the Procurement Controller.</p>
         </div>
 
         <a href="{{ route('pr-numbering.pending.index') }}" class="dashboard-action">Pending Requests</a>

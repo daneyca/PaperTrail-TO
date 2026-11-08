@@ -25,7 +25,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public const ROLE_BAC_CHAIR = 'BAC Chair';
     public const ROLE_BAC_VICE_CHAIRPERSON = 'BAC Vice Chairperson';
     public const ROLE_APPROVING_AUTHORITY = 'Head of the Procuring Entity';
-    public const ROLE_PR_NUMBERING = 'PR Numbering Staff';
+    public const ROLE_PROCUREMENT_CONTROLLER = 'Procurement Controller';
+    public const ROLE_PR_NUMBERING = self::ROLE_PROCUREMENT_CONTROLLER;
+
+    public const PROCUREMENT_CONTROLLER_USER_ID = 'PC-001';
 
     public const STATUS_ACTIVE = 'active';
     public const STATUS_INACTIVE = 'inactive';

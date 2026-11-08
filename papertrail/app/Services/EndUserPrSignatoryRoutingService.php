@@ -515,7 +515,7 @@ class EndUserPrSignatoryRoutingService
             'PR Signatories Completed and Submitted for PR Number Assignment',
             $oldStatus,
             ProcurementDocument::STATUS_PENDING_PR_NUMBER_ASSIGNMENT,
-            'All required Purchase Request signatories have signed. Purchase Request routed to PR Numbering Staff for official PR number assignment.',
+            'All required Purchase Request signatories have signed. Purchase Request routed to the Procurement Controller for official PR number assignment.',
             $fromOfficeId,
             $numberingOffice->id,
         );
@@ -536,7 +536,7 @@ class EndUserPrSignatoryRoutingService
             SystemNotificationService::notify(
                 $creator,
                 'PR Signatures Completed',
-                'All required Purchase Request signatures are complete. The PR was submitted to PR Numbering Staff.',
+                'All required Purchase Request signatures are complete. The PR was submitted to the Procurement Controller.',
                 SystemNotification::TYPE_SUCCESS,
                 'Purchase Request Signatures',
                 $document,
@@ -544,12 +544,12 @@ class EndUserPrSignatoryRoutingService
             );
         }
 
-        AuditLogger::log('Purchase Request Signature Workflow', 'pr_signatories_completed_submitted_to_pr_numbering', 'End User Purchase Request signatures were completed and routed to PR Numbering Staff.', $document, $oldValues, [
+        AuditLogger::log('Purchase Request Signature Workflow', 'pr_signatories_completed_submitted_to_pr_numbering', 'End User Purchase Request signatures were completed and routed to the Procurement Controller.', $document, $oldValues, [
             'status' => ProcurementDocument::STATUS_PENDING_PR_NUMBER_ASSIGNMENT,
             'tracking_number' => $document->tracking_number,
         ]);
 
-        app(SvpChainService::class)->findOrCreateFromPr($document->refresh(), $actor, 'PR signatures completed and submitted to PR Numbering Staff');
+        app(SvpChainService::class)->findOrCreateFromPr($document->refresh(), $actor, 'PR signatures completed and submitted to the Procurement Controller');
     }
 
     private function completeAndReturnToCreator(ProcurementDocument $document, User $actor): void
@@ -578,7 +578,7 @@ class EndUserPrSignatoryRoutingService
             'PR Signatories Completed',
             $oldStatus,
             ProcurementDocument::STATUS_PR_SIGNATORIES_COMPLETED,
-            'All required Purchase Request signatories have signed. PR Numbering Staff target is not configured.',
+            'All required Purchase Request signatories have signed. Procurement Controller target is not configured.',
             $fromOfficeId,
             $document->current_office_id,
         );
@@ -587,7 +587,7 @@ class EndUserPrSignatoryRoutingService
             SystemNotificationService::notify(
                 $creator,
                 'PR Signatures Completed',
-                'All required Purchase Request signatures are complete. PR Numbering Staff routing target is not configured.',
+                'All required Purchase Request signatures are complete. Procurement Controller routing target is not configured.',
                 SystemNotification::TYPE_WARNING,
                 'Purchase Request Signatures',
                 $document,
@@ -904,7 +904,7 @@ class EndUserPrSignatoryRoutingService
             })
             ->first()
             ?: User::where('status', User::STATUS_ACTIVE)
-                ->where('user_id', 'PRNO-001')
+                ->where('user_id', User::PROCUREMENT_CONTROLLER_USER_ID)
                 ->first();
 
         $office = $user?->assignedOffice ?: Office::where('code', 'MEO')

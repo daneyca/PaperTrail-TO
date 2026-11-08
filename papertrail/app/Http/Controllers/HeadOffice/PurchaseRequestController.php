@@ -228,7 +228,7 @@ class PurchaseRequestController extends Controller
         }
 
         if ($submit && ! $useSignatoryRouting && (! $target['office'] || ! $target['user'])) {
-            return back()->withInput()->with('error', 'PR Numbering Staff routing target is not configured.');
+            return back()->withInput()->with('error', 'Procurement Controller routing target is not configured.');
         }
 
         if ($submit && $useBacsec002SignatoryRouting && ($error = $bacsec002SignatoryRouting->submissionError($signatories))) {
@@ -296,7 +296,7 @@ class PurchaseRequestController extends Controller
                 ? (($useBacsec002SignatoryRouting || $useEndUserSignatoryRouting)
                     ? ($useBacsec002SignatoryRouting
                         ? 'Purchase Request signature requests generated. After completion, submit the PR for number assignment.'
-                        : 'Purchase Request signature requests generated. After all required signatures are completed, it will route to PR Numbering Staff.')
+                        : 'Purchase Request signature requests generated. After all required signatures are completed, it will route to the Procurement Controller.')
                     : 'Purchase Request submitted for PR number assignment.')
                 : 'Purchase Request draft saved.');
     }
@@ -414,7 +414,7 @@ class PurchaseRequestController extends Controller
         }
 
         if ($submit && ! $useSignatoryRouting && (! $target['office'] || ! $target['user'])) {
-            return back()->withInput()->with('error', 'PR Numbering Staff routing target is not configured.');
+            return back()->withInput()->with('error', 'Procurement Controller routing target is not configured.');
         }
 
         if ($submit && $useBacsec002SignatoryRouting && ($error = $bacsec002SignatoryRouting->submissionError($signatories))) {
@@ -480,7 +480,7 @@ class PurchaseRequestController extends Controller
                 ? (($useBacsec002SignatoryRouting || $useEndUserSignatoryRouting)
                     ? ($useBacsec002SignatoryRouting
                         ? 'Purchase Request signature requests generated. After completion, submit the PR for number assignment.'
-                        : 'Purchase Request signature requests generated. After all required signatures are completed, it will route to PR Numbering Staff.')
+                        : 'Purchase Request signature requests generated. After all required signatures are completed, it will route to the Procurement Controller.')
                     : 'Purchase Request submitted for PR number assignment.')
                 : 'Purchase Request draft updated.');
     }
@@ -539,7 +539,7 @@ class PurchaseRequestController extends Controller
         if (! $useSignatoryRouting && (! $target['office'] || ! $target['user'])) {
             return back()->with('error', $submitToBac
                 ? 'BAC Resolution routing target is not configured.'
-                : 'PR Numbering Staff routing target is not configured.');
+                : 'Procurement Controller routing target is not configured.');
         }
 
         DB::transaction(function () use ($request, $document, $target, $submitToBac, $useBacsec002SignatoryRouting, $useEndUserSignatoryRouting) {
@@ -573,7 +573,7 @@ class PurchaseRequestController extends Controller
                     : ($useSignatoryRouting
                         ? ($useBacsec002SignatoryRouting
                             ? 'Purchase Request signature requests generated. After completion, submit the PR for number assignment.'
-                            : 'Purchase Request signature requests generated. After all required signatures are completed, it will route to PR Numbering Staff.')
+                            : 'Purchase Request signature requests generated. After all required signatures are completed, it will route to the Procurement Controller.')
                         : 'Purchase Request submitted for PR number assignment.')));
     }
 
@@ -1736,7 +1736,7 @@ class PurchaseRequestController extends Controller
             'PR Submitted for PR Number Assignment',
             $oldStatus,
             ProcurementDocument::STATUS_PENDING_PR_NUMBER_ASSIGNMENT,
-            'Purchase Request routed to PR Numbering Staff for official PR number assignment.',
+            'Purchase Request routed to the Procurement Controller for official PR number assignment.',
             $fromOffice,
             $numberingOffice->id,
         );
@@ -1751,12 +1751,12 @@ class PurchaseRequestController extends Controller
             route('pr-numbering.pending.show', $document),
         );
 
-        AuditLogger::log('Purchase Request Submission', 'pr_submitted_to_pr_numbering', 'Head of Office submitted a Purchase Request to PR Numbering Staff.', $document, ['status' => $oldStatus], [
+        AuditLogger::log('Purchase Request Submission', 'pr_submitted_to_pr_numbering', 'Head of Office submitted a Purchase Request to the Procurement Controller.', $document, ['status' => $oldStatus], [
             'status' => ProcurementDocument::STATUS_PENDING_PR_NUMBER_ASSIGNMENT,
             'tracking_number' => $document->tracking_number,
         ]);
 
-        app(SvpChainService::class)->findOrCreateFromPr($document->refresh(), $user, 'PR submitted to PR Numbering Staff');
+        app(SvpChainService::class)->findOrCreateFromPr($document->refresh(), $user, 'PR submitted to the Procurement Controller');
     }
 
     private function forwardPrReferenceToBacsec002(ProcurementDocument $document, User $user, User $bacsec002): void
@@ -1879,7 +1879,7 @@ class PurchaseRequestController extends Controller
             })
             ->first()
             ?: User::where('status', User::STATUS_ACTIVE)
-                ->where('user_id', 'PRNO-001')
+                ->where('user_id', User::PROCUREMENT_CONTROLLER_USER_ID)
                 ->first();
 
         $office = $user?->assignedOffice ?: Office::where('code', 'MEO')

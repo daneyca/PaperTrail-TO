@@ -2644,10 +2644,10 @@ class AnnualProcurementPlanController extends Controller
                 'office_code' => 'MO',
             ],
             'pr numbering staff' => [
-                'title' => 'PR Numbering Staff',
+                'title' => 'Procurement Controller',
                 'role_code' => 'pr_numbering_staff',
                 'role_name' => User::ROLE_PR_NUMBERING,
-                'account_code' => 'PRNO-001',
+                'account_code' => User::PROCUREMENT_CONTROLLER_USER_ID,
             ],
             default => [],
         };

@@ -151,7 +151,7 @@
             ['section' => 'Workspace'],
             ['label' => 'Dashboard', 'route' => 'pr-numbering.dashboard', 'icon' => 'dashboard'],
             [
-                'label' => 'PR Numbering',
+                'label' => 'Procurement Control',
                 'icon' => 'hash',
                 'count' => $pendingPrNumberCount,
                 'children' => [

@@ -1214,7 +1214,7 @@ class ElectronicSignatureService
         if ($type === 'purchase_request') {
             return match ($prSignatureResult) {
                 'completed_signatories' => 'All PR signatures completed. Purchase Request returned to BACSEC-001 for PR number submission.',
-                'submitted_to_pr_numbering' => 'All PR signatures completed. Purchase Request submitted to PR Numbering Staff.',
+                'submitted_to_pr_numbering' => 'All PR signatures completed. Purchase Request submitted to the Procurement Controller.',
                 default => $fullySigned
                     ? 'All PR signatures completed.'
                     : 'PR signature recorded. Other required signatures are still pending.',

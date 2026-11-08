@@ -46,7 +46,7 @@ class MyDocumentController extends Controller
 
     private const SOURCE_OPTIONS = [
         'bac_secretariat' => 'BAC Secretariat',
-        'pr_numbering' => 'PR Numbering Staff',
+        'pr_numbering' => 'Procurement Controller',
         'budget' => 'Budget Office',
         'accounting' => 'Accounting Office',
         'bac_member' => 'BAC Member',
@@ -424,7 +424,7 @@ class MyDocumentController extends Controller
             ProcurementDocument::STATUS_RETURNED_BY_BUDGET => $document->budgetReviewedBy?->name ?? 'Budget Office',
             ProcurementDocument::STATUS_RETURNED_BY_ACCOUNTING => $document->accountingReviewedBy?->name ?? 'Accounting Office',
             ProcurementDocument::STATUS_RETURNED_BY_BAC_SECRETARIAT => $document->prValidatedBy?->name ?? $document->bacSecretariatReceivedBy?->name ?? 'BAC Secretariat',
-            ProcurementDocument::STATUS_RETURNED_BY_PR_NUMBERING_STAFF => $document->prNoAssignedBy?->name ?? 'PR Numbering Staff',
+            ProcurementDocument::STATUS_RETURNED_BY_PR_NUMBERING_STAFF => $document->prNoAssignedBy?->name ?? 'Procurement Controller',
             ProcurementDocument::STATUS_RETURNED_BY_BAC_MEMBER => $document->bacMemberReviewedBy?->name ?? 'BAC Member',
             ProcurementDocument::STATUS_RETURNED_BY_BAC_CHAIR => $document->bacChairReviewedBy?->name ?? 'BAC Chair',
             ProcurementDocument::STATUS_RETURNED_BY_APPROVING_AUTHORITY => $document->approvedBy?->name ?? 'Head of the Procuring Entity',
@@ -453,7 +453,7 @@ class MyDocumentController extends Controller
     {
         return match ($status) {
             ProcurementDocument::STATUS_RETURNED_BY_BAC_SECRETARIAT => 'BAC Secretariat',
-            ProcurementDocument::STATUS_RETURNED_BY_PR_NUMBERING_STAFF => 'PR Numbering Staff',
+            ProcurementDocument::STATUS_RETURNED_BY_PR_NUMBERING_STAFF => 'Procurement Controller',
             ProcurementDocument::STATUS_RETURNED_BY_BUDGET => 'Budget Office',
             ProcurementDocument::STATUS_RETURNED_BY_ACCOUNTING => 'Accounting Office',
             ProcurementDocument::STATUS_RETURNED_BY_BAC_MEMBER => 'BAC Member',
