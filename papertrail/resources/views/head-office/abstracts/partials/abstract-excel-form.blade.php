@@ -70,6 +70,9 @@
         }
 
         $name = $committeeName($role);
+        if ($name === '') {
+            return '';
+        }
         $matchedUser = $signatoryUsers->first(function ($user) use ($name) {
             return strcasecmp((string) $user->name, $name) === 0
                 || strcasecmp((string) $user->typed_signature_name, $name) === 0;
@@ -579,7 +582,12 @@
             }
 
             function matchSelectedAccount(config, currentName) {
-                return '';
+                const options = config.options || [];
+                if (config.selected && options.some(option => option.value === config.selected)) {
+                    return config.selected;
+                }
+                const name = String(currentName || '').trim().toLowerCase();
+                return name ? (options.find(option => String(option.name || '').trim().toLowerCase() === name)?.value || '') : '';
             }
 
             function isCommitteeCaptionText(value) {
@@ -638,7 +646,7 @@
 
             function appendCommitteeDesignationCaptions(root) {
                 Object.entries(signatoryConfig || {}).forEach(([role, config]) => {
-                    const nameCell = root.querySelector(`[data-committee-role="${role}"]`);
+                    const nameCell = root.querySelector(`.abstract-committee-name[data-committee-role="${role}"]`);
                     const person = nameCell?.closest('.abstract-committee-person');
                     const designation = committeeDesignationForRole(role, config);
 
@@ -656,7 +664,7 @@
 
             function ensureInlineSignatorySelects() {
                 Object.entries(signatoryConfig || {}).forEach(([role, config]) => {
-                    const nameCell = editor.querySelector(`[data-committee-role="${role}"]`);
+                    const nameCell = editor.querySelector(`.abstract-committee-name[data-committee-role="${role}"]`);
                     const person = nameCell?.closest('.abstract-committee-person');
 
                     if (!nameCell || !person || person.querySelector('[data-abstract-signatory-select]')) {
@@ -691,7 +699,7 @@
                     const insertedSelect = person.querySelector(`[data-abstract-signatory-select][data-committee-role="${role}"]`);
 
                     if (insertedSelect) {
-                        insertedSelect.value = '';
+                        insertedSelect.value = selectedValue;
                     }
                 });
 
@@ -700,7 +708,7 @@
                 editor.querySelectorAll('[data-abstract-signatory-name-input]').forEach((input) => {
                     input.addEventListener('input', () => {
                         const role = input.dataset.committeeRole;
-                        const nameCell = editor.querySelector(`[data-committee-role="${role}"]`);
+                        const nameCell = editor.querySelector(`.abstract-committee-name[data-committee-role="${role}"]`);
 
                         if (nameCell) {
                             nameCell.innerText = input.value.trim();
@@ -881,18 +889,19 @@
 
             function collectCommittee() {
                 const committee = {};
-                editor.querySelectorAll('[data-committee-role]').forEach((cell) => {
-                    const role = cell.dataset.committeeRole;
-                    const select = document.querySelector(`[data-abstract-signatory-select][data-committee-role="${role}"]`);
-                    const designationCell = editor.querySelector(`[data-committee-designation="${role}"]`);
+                Object.keys(signatoryConfig || {}).forEach((role) => {
+                    const input = editor.querySelector(`[data-abstract-signatory-name-input][data-committee-role="${role}"]`);
+                    const cell = editor.querySelector(`.abstract-committee-name[data-committee-role="${role}"]`);
+                    const select = editor.querySelector(`[data-abstract-signatory-select][data-committee-role="${role}"]`);
                     const selectedOption = select?.selectedOptions?.[0];
                     const selectedDesignation = select?.value ? (selectedOption?.dataset.designation || '') : '';
-                    const config = signatoryConfig?.[role] || {};
+                    const name = (input?.value ?? cell?.textContent ?? '').trim();
+                    if (cell) cell.textContent = name;
 
                     committee[role] = {
-                        name: cell.innerText.trim(),
+                        name,
                         account_code: select?.value || '',
-                        designation: designationCell?.innerText.trim() || selectedDesignation,
+                        designation: selectedDesignation,
                     };
                 });
                 return committee;
@@ -924,13 +933,14 @@
 
             function collectAbstractData() {
                 recalcAll();
+                const committee = collectCommittee();
                 const clone = cleanDocumentClone();
                 document.getElementById('abstract_document_html').value = clone.outerHTML.trim();
-                document.getElementById('abstract_document_text').value = clone.innerText.trim();
+                document.getElementById('abstract_document_text').value = (clone.innerText || clone.textContent || '').trim();
                 document.getElementById('abstract_items_json').value = JSON.stringify(collectItems());
                 document.getElementById('abstract_suppliers_json').value = JSON.stringify(collectSuppliers());
                 document.getElementById('abstract_awards_json').value = JSON.stringify(collectAwards());
-                document.getElementById('abstract_committee_json').value = JSON.stringify(collectCommittee());
+                document.getElementById('abstract_committee_json').value = JSON.stringify(committee);
 
                 form.querySelectorAll('[data-hidden-field]').forEach((input) => {
                     input.value = fieldValue(input.dataset.hiddenField);
@@ -938,6 +948,7 @@
             }
 
             function cleanDocumentClone() {
+                collectCommittee();
                 const clone = editor.cloneNode(true);
                 clone.querySelectorAll('[contenteditable]').forEach((el) => el.removeAttribute('contenteditable'));
                 clone.querySelectorAll('[data-abstract-signatory-control]').forEach((el) => el.remove());

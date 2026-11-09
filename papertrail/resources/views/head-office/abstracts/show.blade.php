@@ -3,6 +3,13 @@
 @section('title', ($abstract->abstract_number ?? 'Abstract') . ' | PaperTrail')
 
 @section('content')
+    @if ($abstract->status === \App\Models\AbstractQuotation::STATUS_SUBMITTED)
+        <section class="session-alert no-print" role="status" aria-label="Abstract submission status">
+            <strong>Abstract submitted successfully.</strong>
+            <p>{{ $abstract->displayNumber() }} has been sent to the selected BAC signatories for e-signatures.</p>
+            <span>Submitted {{ $abstract->submitted_at?->format('M d, Y h:i A') }} by {{ $abstract->submittedBy?->name }}.</span>
+        </section>
+    @endif
     <section class="abstract-toolbar no-print">
         <div><strong>{{ $abstract->abstract_number ? 'Abstract '.$abstract->abstract_number : 'Abstract Draft' }}</strong><span>Tracking Number {{ $abstract->document_reference_number ?? 'Pending' }} &middot; {{ str($abstract->status)->replace('_', ' ')->title() }}</span></div>
         <a href="{{ route('head-office.abstracts.index') }}">Back</a>

@@ -3,6 +3,7 @@
 @section('title', 'Edit Abstract | PaperTrail')
 
 @section('content')
+    @include('head-office.abstracts.partials.form-feedback')
     <form method="POST" action="{{ route('head-office.abstracts.update', $abstract) }}" class="abstract-editor-form">
         @csrf
         @method('PATCH')

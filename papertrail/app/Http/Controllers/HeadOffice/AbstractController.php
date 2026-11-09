@@ -354,6 +354,10 @@ class AbstractController extends Controller
             'awards' => ['nullable', 'array'],
             'committee' => ['nullable', 'array'],
             'remarks' => ['nullable', 'string'],
+        ], [
+            'abstract_number.required' => 'Enter the Abstract No. in the official form before submitting.',
+            'project_name.required' => 'Enter the project name before submitting.',
+            'document_text.required' => 'Complete the Abstract form before submitting.',
         ])->validate();
     }
 

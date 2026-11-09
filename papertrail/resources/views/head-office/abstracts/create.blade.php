@@ -3,6 +3,7 @@
 @section('title', 'Create Abstract | PaperTrail')
 
 @section('content')
+    @include('head-office.abstracts.partials.form-feedback')
     <x-documents.document-create-flow
         eyebrow="Abstract Creation"
         title="Create Abstract"
@@ -10,7 +11,7 @@
         proceed-label="Proceed to Abstract Form"
         :back-url="route('head-office.abstracts.index')"
         back-label="Back to Abstracts"
-        :autoshow="$errors->any()"
+        :autoshow="$errors->any() || session()->hasOldInput()"
         :workflow-steps="['Select RFQ', 'Review Quotations', 'Prepare Abstract', 'Submit']"
         :form-step="3"
     >
