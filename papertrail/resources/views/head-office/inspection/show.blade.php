@@ -3,7 +3,7 @@
 @section('title', 'Inspection / Acceptance Detail | PaperTrail')
 
 @section('content')
-    <link rel="stylesheet" href="{{ asset('css/inspection-acceptance.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/inspection-acceptance.css') }}?v={{ filemtime(public_path('css/inspection-acceptance.css')) }}">
     @php
         $statusLabel = fn (?string $status) => $status ? str($status)->replace('_', ' ')->title() : 'Pending';
         $latestRecord = $records->first();
@@ -62,7 +62,7 @@
         </x-slot:source>
 
         <x-slot:form>
-    <section class="budget-review-layout reviewed-detail-layout">
+    <section class="budget-review-layout reviewed-detail-layout iar-review-layout">
         <article class="table-panel budget-detail-panel">
             <div class="panel-heading">
                 <div>
@@ -91,7 +91,7 @@
             </div>
         </article>
 
-        <aside class="table-panel budget-action-panel">
+        <aside class="table-panel budget-action-panel iar-controls-panel">
             <div class="panel-heading">
                 <div>
                     <p class="eyebrow">Actions</p>
@@ -101,7 +101,7 @@
             </div>
 
             @if (auth()->user()->canManageSvpDocuments())
-            <form method="POST" action="{{ route('head-office.inspection.store', $purchaseOrder) }}" class="budget-action-form">
+            <form method="POST" action="{{ route('head-office.inspection.store', $purchaseOrder) }}" class="budget-action-form iar-control-form" aria-label="Inspection details">
                 @csrf
 
                 <label for="report_date">IAR Date</label>
@@ -143,7 +143,7 @@
                 <input id="quality_condition" name="quality_condition" type="text" value="{{ old('quality_condition', $record->quality_condition ?? 'Conforming') }}" required>
                 @error('quality_condition')<span class="field-error">{{ $message }}</span>@enderror
 
-                <label for="inspector_name">Inspection Officer - Des.</label>
+                <label for="inspector_name">Inspection Officer / Designee</label>
                 <input id="inspector_name" name="inspector_name" type="text" maxlength="255" value="{{ old('inspector_name', $record->inspector_name) }}" placeholder="Enter Name">
                 @error('inspector_name')<span class="field-error">{{ $message }}</span>@enderror
 
@@ -168,9 +168,10 @@
             @endif
 
             @if ($canAccept)
-                <form method="POST" action="{{ route('head-office.inspection.accept', $purchaseOrder) }}" class="budget-action-form" onsubmit="return confirm('Mark this Purchase Order as accepted?');">
+                <form method="POST" action="{{ route('head-office.inspection.accept', $purchaseOrder) }}" class="budget-action-form iar-control-form" aria-label="Accept Purchase Order" onsubmit="return confirm('Mark this Purchase Order as accepted?');">
                     @csrf
                     @method('PATCH')
+                    <h3>Acceptance</h3>
                     <label for="acceptance_date_action">Acceptance Date</label>
                     <input id="acceptance_date_action" name="acceptance_date" type="date" value="{{ now()->toDateString() }}" required>
                     <label for="acceptance_remarks">Acceptance Remarks</label>
@@ -180,9 +181,10 @@
             @endif
 
             @if ($canComplete)
-                <form method="POST" action="{{ route('head-office.inspection.complete', $purchaseOrder) }}" class="budget-action-form" onsubmit="return confirm('Mark this Purchase Order as completed?');">
+                <form method="POST" action="{{ route('head-office.inspection.complete', $purchaseOrder) }}" class="budget-action-form iar-control-form" aria-label="Complete Purchase Order" onsubmit="return confirm('Mark this Purchase Order as completed?');">
                     @csrf
                     @method('PATCH')
+                    <h3>Completion</h3>
                     <label for="completion_remarks">Completion Remarks</label>
                     <textarea id="completion_remarks" name="remarks" rows="3" placeholder="Optional completion remarks.">{{ old('remarks', $record->remarks) }}</textarea>
                     <button type="submit">Mark Completed</button>
