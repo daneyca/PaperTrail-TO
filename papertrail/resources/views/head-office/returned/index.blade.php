@@ -110,10 +110,10 @@
                             $returnMeta = $document->return_meta;
                             $canRevisePpmp = $document->document_type === 'PPMP'
                                 && $document->status === 'returned_by_bac_secretariat'
-                                && Route::has('head-office.ppmp.edit');
+                                && auth()->user()->canManageSvpDocuments() && Route::has('head-office.ppmp.edit');
                             $canRevisePr = in_array($document->document_type, ['PR', 'Purchase Request'], true)
                                 && in_array($document->status, ['returned_by_pr_numbering_staff', 'returned_by_bac_secretariat'], true)
-                                && Route::has('head-office.pr.edit');
+                                && auth()->user()->canManageSvpDocuments() && Route::has('head-office.pr.edit');
                         @endphp
                         <tr>
                             <td class="nowrap">{{ $document->tracking_number ?? 'Draft' }}</td>

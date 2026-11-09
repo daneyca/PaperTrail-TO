@@ -67,6 +67,10 @@ class ElectronicSignatureService
 
     public function canSignWithReason(User $user, Model $document, string $documentType, string $action, ?SignatureRequest $signatureRequest = null): array
     {
+        if ($user->isOfficeDocumentPreparer()) {
+            return ['ok' => false, 'message' => 'Procurement Staff prepares SVP documents. Signatures and approvals must be completed by the designated Head of Office or signatory.'];
+        }
+
         if (! $user->isActive() || ! $user->loginAccount()->isActive()) {
             return ['ok' => false, 'message' => 'This account or workspace is inactive.'];
         }

@@ -9,7 +9,7 @@
             <span>Tracking Number {{ $po->document_reference_number ?? 'Pending' }} &middot; {{ str($po->status)->replace('_', ' ')->title() }}{{ $po->sourcePrDocument?->tracking_number ? ' - Source PR '.$po->sourcePrDocument->tracking_number : '' }}</span>
         </div>
         <a href="{{ route('head-office.purchase-orders.index') }}">Back</a>
-        @if ($po->isEditable())
+        @if (auth()->user()->canManageSvpDocuments() && $po->isEditable())
             <a href="{{ route('head-office.purchase-orders.edit', $po) }}">Edit</a>
         @endif
         <x-ai.completeness-check-button
@@ -18,14 +18,14 @@
             :tracking-number="$po->po_number"
         />
         <a href="{{ route('head-office.purchase-orders.print', $po) }}" target="_blank">Print</a>
-        @if ($po->canSubmit())
+        @if (auth()->user()->canManageSvpDocuments() && $po->canSubmit())
             <form method="POST" action="{{ route('head-office.purchase-orders.submit', $po) }}" onsubmit="return confirm('Submit this Purchase Order?');">
                 @csrf
                 @method('PATCH')
                 <button type="submit">Submit</button>
             </form>
         @endif
-        @if ($po->status === \App\Models\PurchaseOrder::STATUS_SUBMITTED)
+        @if (auth()->user()->canManageSvpDocuments() && $po->status === \App\Models\PurchaseOrder::STATUS_SUBMITTED)
             <form method="POST" action="{{ route('head-office.purchase-orders.submit-for-signatures', $po) }}" onsubmit="return confirm('Send this Purchase Order to all signatories?');">
                 @csrf
                 @method('PATCH')
@@ -58,7 +58,7 @@
     <x-documents.attachments-panel
         :document="$po"
         document-type="purchase_order"
-        :can-upload="$po->isEditable()"
+        :can-upload="auth()->user()->canManageSvpDocuments() && $po->isEditable()"
         title="Supporting Documents"
     />
 

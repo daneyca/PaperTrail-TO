@@ -13,7 +13,9 @@
             <h1>Purchase Orders</h1>
             <p>Prepare official Purchase Orders from approved procurement records.</p>
         </div>
-        <a href="{{ route('head-office.purchase-orders.create') }}" class="dashboard-action">Create Purchase Order</a>
+        @if (auth()->user()->canManageSvpDocuments())
+            <a href="{{ route('head-office.purchase-orders.create') }}" class="dashboard-action">Create Purchase Order</a>
+        @endif
     </section>
 
     <section class="stat-grid stat-grid-modern head-office-summary-grid" aria-label="Purchase Order summary">
@@ -81,11 +83,11 @@
                             <td>
                                 <div class="table-actions">
                                     <a href="{{ route('head-office.purchase-orders.show', $po) }}">View</a>
-                                    @if ($po->isEditable())
+                                    @if (auth()->user()->canManageSvpDocuments() && $po->isEditable())
                                         <a href="{{ route('head-office.purchase-orders.edit', $po) }}">Continue Editing</a>
                                     @endif
                                     <a href="{{ route('head-office.purchase-orders.print', $po) }}" target="_blank">Print</a>
-                                    @if ($po->canSubmit())
+                                    @if (auth()->user()->canManageSvpDocuments() && $po->canSubmit())
                                         <form method="POST" action="{{ route('head-office.purchase-orders.submit', $po) }}" onsubmit="return confirm('Submit this Purchase Order?');">
                                             @csrf
                                             @method('PATCH')

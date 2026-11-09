@@ -71,6 +71,10 @@ class RfqController extends Controller
                 ->latest('updated_at')
                 ->get(),
             'recentDrafts' => app(DocumentDraftService::class)->getRfqDraftsForUser($request->user(), 5),
+            'existingRfqs' => $this->officeRfqQuery($request->user())
+                ->with(['sourcePrDocument', 'sourceBacResolution.sourcePrDocument'])
+                ->where('status', '!=', Rfq::STATUS_DRAFT)
+                ->latest('updated_at')->limit(5)->get(),
         ]);
     }
 

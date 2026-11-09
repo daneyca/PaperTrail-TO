@@ -19,6 +19,14 @@ class EnsureUserHasRole
 
         $roleCodes = collect($roles)->flatMap(fn ($role) => [$role, str_replace('-', '_', $role)])->all();
 
+        if ($user->isOfficeDocumentActor() && ! $user->isOfficeDocumentPreparer()
+            && (in_array('head-office', $roles, true) || in_array('head_office', $roleCodes, true))
+            && ! $user->canManageSvpDocuments()
+            && $this->isSvpPreparationRoute($request)) {
+            return redirect()->route('head-office.dashboard')
+                ->with('error', 'Procurement Staff manages SVP preparation for your office. Use Signatures to review and approve documents.');
+        }
+
         if ($user->isOfficeDocumentPreparer()
             && (in_array('head-office', $roles, true) || in_array('head_office', $roleCodes, true))
             && ! $this->allowsOfficeDocumentPreparerRoute($request)) {
@@ -55,6 +63,10 @@ class EnsureUserHasRole
 
     private function allowsOfficeDocumentPreparerRoute(Request $request): bool
     {
+        if ($request->routeIs('head-office.inspection.accept', 'head-office.inspection.complete')) {
+            return false;
+        }
+
         return $request->routeIs(
             'head-office.dashboard',
             'head-office.ppmps.menu',
@@ -65,8 +77,31 @@ class EnsureUserHasRole
             'head-office.returned.*',
             'head-office.ppmp.*',
             'head-office.pr.*',
+            'head-office.resolutions.*',
+            'head-office.rfqs.*',
+            'head-office.abstracts.*',
+            'head-office.purchase-orders.*',
+            'head-office.inspection.*',
+            'head-office.supplemental-apps.*',
             'head-office.svp-tracking.*',
         );
+    }
+
+    private function isSvpPreparationRoute(Request $request): bool
+    {
+        if (! $request->routeIs(
+            'head-office.ppmp.*', 'head-office.pr.*', 'head-office.resolutions.*',
+            'head-office.rfqs.*', 'head-office.abstracts.*', 'head-office.purchase-orders.*',
+            'head-office.inspection.*',
+        ) || $request->routeIs('head-office.inspection.accept', 'head-office.inspection.complete')) {
+            return false;
+        }
+
+        if (! in_array($request->method(), ['GET', 'HEAD'], true)) {
+            return true;
+        }
+
+        return $request->routeIs('*.create', '*.edit', 'head-office.inspection.index');
     }
 
     private function allowsBacsec002PurchaseRequestRoutes(Request $request, mixed $user, array $roles, array $roleCodes): bool

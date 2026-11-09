@@ -112,13 +112,13 @@ class InspectionAcceptanceController extends Controller
             'purchaseOrder' => $purchaseOrder,
             'record' => $record,
             'records' => $purchaseOrder->inspectionAcceptanceRecords,
-            'canAccept' => in_array($purchaseOrder->status, [
+            'canAccept' => ! $request->user()->isOfficeDocumentPreparer() && in_array($purchaseOrder->status, [
                 PurchaseOrder::STATUS_SUBMITTED,
                 PurchaseOrder::STATUS_ISSUED,
                 PurchaseOrder::STATUS_FORWARDED_TO_SUPPLIER,
                 PurchaseOrder::STATUS_FUND_CERTIFIED,
             ], true),
-            'canComplete' => $purchaseOrder->status === PurchaseOrder::STATUS_APPROVED,
+            'canComplete' => ! $request->user()->isOfficeDocumentPreparer() && $purchaseOrder->status === PurchaseOrder::STATUS_APPROVED,
         ]);
     }
 

@@ -444,7 +444,7 @@ class DocumentDraftService
 
     private function canCreateHeadOfficeDocuments(User $user): bool
     {
-        return $user->roleSlug() === 'head-office';
+        return $user->canManageSvpDocuments();
     }
 
     private function canCreatePrDocumentsAsBacsec002(User $user): bool

@@ -25,6 +25,35 @@
                 document-type-label="RFQ"
                 source-title="Select RFQ Source"
             >
+                <x-slot:existingRecords>
+                    <section aria-label="Existing RFQs" style="margin-top: 18px;">
+                        <header class="document-create-split-heading">
+                            <div><p class="eyebrow">Submitted / Processed</p><h3>Existing RFQs</h3></div>
+                            <span>{{ ($existingRfqs ?? collect())->count() }}</span>
+                        </header>
+                        <div class="document-create-draft-list">
+                            @forelse ($existingRfqs ?? collect() as $existingRfq)
+                                @php
+                                    $existingPr = $existingRfq->sourcePrDocument ?? $existingRfq->sourceBacResolution?->sourcePrDocument;
+                                @endphp
+                                <article class="document-create-draft-card" data-existing-rfq="{{ $existingRfq->id }}">
+                                    <strong class="document-create-draft-number">{{ $existingRfq->rfq_number ?? $existingRfq->document_reference_number }}</strong>
+                                    <span class="document-create-draft-status">{{ $existingRfq->control_assigned_at && $existingRfq->status === \App\Models\Rfq::STATUS_SUBMITTED ? 'Number and Date Assigned' : str($existingRfq->status)->replace('_', ' ')->title() }}</span>
+                                    @if ($existingRfq->rfq_number && $existingRfq->document_reference_number)
+                                        <small>Tracking: {{ $existingRfq->document_reference_number }}</small>
+                                    @endif
+                                    @if ($existingPr)
+                                        <small>PR: {{ $existingPr->pr_no ?? $existingPr->tracking_number }}</small>
+                                    @endif
+                                    <a href="{{ route('head-office.rfqs.show', $existingRfq) }}" class="document-create-secondary-action">Open RFQ</a>
+                                </article>
+                            @empty
+                                <div class="document-create-drafts-empty"><strong>No submitted RFQs yet.</strong></div>
+                            @endforelse
+                        </div>
+                        <a href="{{ route('head-office.rfqs.index') }}" class="document-create-secondary-action" style="margin-top: 12px;">View All RFQs</a>
+                    </section>
+                </x-slot:existingRecords>
                 <form method="GET" action="{{ route('head-office.rfqs.create') }}" class="rfq-source-picker no-print">
                     <label for="source_pr_document_id">
                         Ready PR Source
@@ -70,6 +99,9 @@
                     </label>
                     <noscript><button type="submit">Use Source</button></noscript>
                 </form>
+                @if (($existingRfqs ?? collect())->isNotEmpty())
+                    <p>PRs already used for an RFQ appear under <strong>Existing RFQs</strong>. Select <strong>Open RFQ</strong> to view the assigned number and date.</p>
+                @endif
             </x-documents.create-source-split>
         </x-slot:source>
 

@@ -4,6 +4,8 @@
 
 @section('content')
     @php
+        $canModify = auth()->user()->canManageSvpDocuments() && $canModify;
+        $canSubmitToAppConsolidation = auth()->user()->canManageSvpDocuments() && $canSubmitToAppConsolidation;
         $ppmpStatusLabel = function (?string $status): string {
             return match ($status) {
                 \App\Models\ProcurementDocument::STATUS_PPMP_PENDING_SIGNATORIES => 'Pending Signature',

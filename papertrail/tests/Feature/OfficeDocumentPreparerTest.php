@@ -172,15 +172,14 @@ class OfficeDocumentPreparerTest extends TestCase
         app(HeadOfficePpmpSignatureWorkflowService::class)->start($document, $preparer);
     }
 
-    public function test_preparer_is_blocked_from_head_only_workflows(): void
+    public function test_preparer_can_manage_the_rfq_workflow(): void
     {
         $office = $this->office();
         $preparer = $this->user('MPDO-STAFF-001', $office, $this->role('office_preparer', User::ROLE_OFFICE_PREPARER, 'head-office.dashboard'));
 
         $this->actingAs($preparer)
             ->get(route('head-office.rfqs.index'))
-            ->assertRedirect(route('head-office.dashboard'))
-            ->assertSessionHas('error', 'This page is only available to the Head of Office.');
+            ->assertOk();
     }
 
     public function test_preparer_cannot_switch_to_a_legacy_linked_workspace(): void

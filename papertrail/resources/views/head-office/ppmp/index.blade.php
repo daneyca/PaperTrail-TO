@@ -22,7 +22,9 @@
             <h1>Project Procurement Management Plan</h1>
         </div>
         <div class="hero-actions">
-            <a href="{{ route('head-office.ppmp.create') }}" class="dashboard-action">Create PPMP</a>
+            @if (auth()->user()->canManageSvpDocuments())
+                <a href="{{ route('head-office.ppmp.create') }}" class="dashboard-action">Create PPMP</a>
+            @endif
         </div>
     </section>
 

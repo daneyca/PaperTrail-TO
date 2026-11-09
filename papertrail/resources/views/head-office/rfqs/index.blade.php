@@ -28,7 +28,7 @@
         $readyRfqSourceCount = $readyRfqPrSources->count() + $readyRfqResolutionSources->count();
     @endphp
 
-    @if ($readyRfqSourceCount > 0)
+    @if (auth()->user()->canManageSvpDocuments() && $readyRfqSourceCount > 0)
         <section class="table-panel" aria-label="Ready for RFQ sources">
             <div class="compact-list-header">
                 <div>
@@ -142,11 +142,11 @@
                             <td>
                                 <div class="table-actions">
                                     <a href="{{ route('head-office.rfqs.show', $rfq) }}">View</a>
-                                    @if ($rfq->isEditable())
+                                    @if (auth()->user()->canManageSvpDocuments() && $rfq->isEditable())
                                         <a href="{{ route('head-office.rfqs.edit', $rfq) }}">Continue Editing</a>
                                     @endif
                                     <a href="{{ route('head-office.rfqs.print', $rfq) }}" target="_blank">Print</a>
-                                    @if ($rfq->canSubmit())
+                                    @if (auth()->user()->canManageSvpDocuments() && $rfq->canSubmit())
                                         <form method="POST" action="{{ route('head-office.rfqs.submit', $rfq) }}" onsubmit="return confirm('Submit this RFQ?');">
                                             @csrf
                                             @method('PATCH')

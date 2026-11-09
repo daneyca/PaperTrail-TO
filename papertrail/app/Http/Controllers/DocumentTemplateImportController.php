@@ -100,7 +100,7 @@ class DocumentTemplateImportController extends Controller
             return false;
         }
 
-        if ($user->hasRole('head_office') || $user->hasRole(User::ROLE_HEAD_OFFICE)) {
+        if ($user->isOfficeDocumentActor() && $user->canManageSvpDocuments()) {
             return in_array($documentType, ['ppmp', 'pr', 'rfq', 'abstract', 'purchase_order', 'inspection_acceptance'], true);
         }
 

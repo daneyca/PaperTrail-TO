@@ -55,6 +55,9 @@
                 </div>
             @endforelse
         </div>
+        @isset($existingRecords)
+            {{ $existingRecords }}
+        @endisset
     </aside>
 
     <section class="document-create-picker-pane" aria-labelledby="{{ \Illuminate\Support\Str::slug($sourceTitle) }}-title">

@@ -6,7 +6,7 @@
     <section class="abstract-toolbar no-print">
         <div><strong>{{ $abstract->abstract_number ? 'Abstract '.$abstract->abstract_number : 'Abstract Draft' }}</strong><span>Tracking Number {{ $abstract->document_reference_number ?? 'Pending' }} &middot; {{ str($abstract->status)->replace('_', ' ')->title() }}</span></div>
         <a href="{{ route('head-office.abstracts.index') }}">Back</a>
-        @if ($abstract->isEditable())
+        @if (auth()->user()->canManageSvpDocuments() && $abstract->isEditable())
             <a href="{{ route('head-office.abstracts.edit', $abstract) }}">Edit</a>
         @endif
         <a href="{{ route('head-office.abstracts.print', $abstract) }}" target="_blank">Print</a>
@@ -16,7 +16,7 @@
             :tracking-number="$abstract->abstract_number"
             label="AI Check Abstract"
         />
-        @if ($abstract->canSubmit())
+        @if (auth()->user()->canManageSvpDocuments() && $abstract->canSubmit())
             <form method="POST" action="{{ route('head-office.abstracts.submit', $abstract) }}" onsubmit="return confirm('Submit this Abstract?');">
                 @csrf
                 @method('PATCH')
@@ -36,7 +36,7 @@
     <x-documents.attachments-panel
         :document="$abstract"
         document-type="abstract"
-        :can-upload="$abstract->isEditable()"
+        :can-upload="auth()->user()->canManageSvpDocuments() && $abstract->isEditable()"
         title="Supporting Documents"
     />
 

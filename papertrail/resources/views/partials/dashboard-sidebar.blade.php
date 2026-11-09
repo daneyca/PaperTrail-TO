@@ -272,6 +272,10 @@
         ];
     }
 
+    if ($user?->isOfficeDocumentActor() && ! $user->canManageSvpDocuments()) {
+        $items = array_values(array_filter($items, fn ($item) => ($item['label'] ?? null) !== 'Small Value Procurement'));
+    }
+
     if ($duty = $user?->officeWorkflowRole()) {
         array_splice($items, 4, 0, [$roleMenus[$duty['slug']][2]]);
     }

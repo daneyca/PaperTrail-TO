@@ -100,6 +100,7 @@
                 </div>
             </div>
 
+            @if (auth()->user()->canManageSvpDocuments())
             <form method="POST" action="{{ route('head-office.inspection.store', $purchaseOrder) }}" class="budget-action-form">
                 @csrf
 
@@ -164,6 +165,7 @@
 
                 <button type="submit">Save Inspection Record</button>
             </form>
+            @endif
 
             @if ($canAccept)
                 <form method="POST" action="{{ route('head-office.inspection.accept', $purchaseOrder) }}" class="budget-action-form" onsubmit="return confirm('Mark this Purchase Order as accepted?');">

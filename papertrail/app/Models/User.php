@@ -280,6 +280,26 @@ class User extends Authenticatable implements MustVerifyEmail
             || $this->hasRole(self::ROLE_HEAD_OFFICE);
     }
 
+    public function canManageSvpDocuments(): bool
+    {
+        if ($this->isOfficeDocumentPreparer()) {
+            return true;
+        }
+
+        if (! $this->hasRole('head_office') && ! $this->hasRole(self::ROLE_HEAD_OFFICE)) {
+            return false;
+        }
+
+        // Offices without an active staff account keep their Head-managed workflow.
+        return ! $this->office_id || ! self::query()
+            ->where('office_id', $this->office_id)
+            ->where('status', self::STATUS_ACTIVE)
+            ->where(function (Builder $staff) {
+                $staff->where('role', self::ROLE_OFFICE_PREPARER)
+                    ->orWhereHas('assignedRole', fn (Builder $role) => $role->where('code', 'office_preparer'));
+            })->exists();
+    }
+
     public function dashboardRoute(): string
     {
         if ($this->assignedRole?->dashboard_route) {

@@ -4,6 +4,11 @@
 
 @section('content')
     @php
+        $canModify = auth()->user()->canManageSvpDocuments() && ($canModify ?? false);
+        $canSubmitToBac = auth()->user()->canManageSvpDocuments() && ($canSubmitToBac ?? false);
+        $canSubmitForPrNumber = auth()->user()->canManageSvpDocuments() && ($canSubmitForPrNumber ?? false);
+    @endphp
+    @php
         $prNumber = $document->pr_no ?? 'To be assigned';
         $prDate = $document->pr_date?->format('F d, Y') ?? 'Not assigned';
         $requestingOffice = $document->submittingOffice?->name ?? $document->department_name ?? 'N/A';

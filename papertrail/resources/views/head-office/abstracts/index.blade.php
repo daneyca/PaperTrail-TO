@@ -22,7 +22,7 @@
         <x-dashboard.stat-card href="{{ route('head-office.abstracts.index', ['status' => 'returned']) }}" value="{{ $summary['returned'] }}" label="Returned" accent="red" class="{{ $activeStatus === 'returned' ? 'is-filter-active' : '' }}" />
     </section>
 
-    @if (($readyAbstractSources ?? collect())->isNotEmpty())
+    @if (auth()->user()->canManageSvpDocuments() && ($readyAbstractSources ?? collect())->isNotEmpty())
         <section class="table-panel" aria-label="Ready for Abstract sources">
             <div class="compact-list-header">
                 <div>
@@ -127,11 +127,11 @@
                             <td>
                                 <div class="table-actions">
                                     <a href="{{ route('head-office.abstracts.show', $abstract) }}">View</a>
-                                    @if ($abstract->isEditable())
+                                    @if (auth()->user()->canManageSvpDocuments() && $abstract->isEditable())
                                         <a href="{{ route('head-office.abstracts.edit', $abstract) }}">Continue Editing</a>
                                     @endif
                                     <a href="{{ route('head-office.abstracts.print', $abstract) }}" target="_blank">Print</a>
-                                    @if ($abstract->canSubmit())
+                                    @if (auth()->user()->canManageSvpDocuments() && $abstract->canSubmit())
                                         <form method="POST" action="{{ route('head-office.abstracts.submit', $abstract) }}" onsubmit="return confirm('Submit this Abstract?');">
                                             @csrf
                                             @method('PATCH')

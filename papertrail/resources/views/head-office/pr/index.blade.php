@@ -16,7 +16,9 @@
             <p>Prepare official LGU Purchase Request forms for {{ $officeName }} and submit them for official PR number assignment.</p>
         </div>
 
-        <a href="{{ route('head-office.pr.create') }}" class="dashboard-action">Create PR Draft</a>
+        @if (auth()->user()->canManageSvpDocuments())
+            <a href="{{ route('head-office.pr.create') }}" class="dashboard-action">Create PR Draft</a>
+        @endif
     </section>
 
     <section class="stat-grid stat-grid-modern head-office-summary-grid pr-summary-grid" aria-label="Purchase Request summary">

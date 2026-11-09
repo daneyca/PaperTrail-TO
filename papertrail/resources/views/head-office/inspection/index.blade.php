@@ -13,7 +13,9 @@
             <h1>Inspection / Acceptance</h1>
             <p>Monitor office Purchase Orders that are ready for inspection, acceptance, or completion records.</p>
         </div>
-        <div class="hero-actions"><a href="{{ route('head-office.inspection.create') }}" class="dashboard-action">Create Inspection / Acceptance</a></div>
+        @if (auth()->user()->canManageSvpDocuments())
+            <div class="hero-actions"><a href="{{ route('head-office.inspection.create') }}" class="dashboard-action">Create Inspection / Acceptance</a></div>
+        @endif
     </section>
 
     <section class="stat-grid stat-grid-modern head-office-summary-grid" aria-label="Inspection summary">

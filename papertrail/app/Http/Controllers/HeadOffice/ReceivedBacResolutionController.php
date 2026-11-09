@@ -68,7 +68,7 @@ class ReceivedBacResolutionController extends Controller
 
         return view('head-office.resolutions.show', [
             'resolution' => $resolution,
-            'canAcknowledge' => $this->canAcknowledge($resolution),
+            'canAcknowledge' => $request->user()->canManageSvpDocuments() && $this->canAcknowledge($resolution),
             'nextStep' => app(SvpChainService::class)->bacResolutionNextStep($resolution),
             'signedSignature' => app(ElectronicSignatureService::class)->signedSignatureFor($resolution, 'bac-resolution', 'confirmed'),
             'signatureSlots' => app(SignatureRequestService::class)->signedSignaturesForDocument($resolution, 'bac-resolution'),
