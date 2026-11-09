@@ -14,17 +14,9 @@ class WorkspaceController extends Controller
         $account = $request->user()->loginAccount();
         abort_unless($service->allows($account), 403);
         abort_unless($section === 'bac-secretariat' || isset(BacsecMpdoWorkspaceService::DESTINATIONS[$section]), 404);
-        try {
-            $workspace = $section === 'bac-secretariat' ? $account : $service->ensure($account);
-        } catch (\Illuminate\Validation\ValidationException $exception) {
-            return back()->with('error', collect($exception->errors())->flatten()->first());
-        }
-        $request->session()->put('active_workspace_id', $workspace->id);
+        // Older saved navigation forms now open the same direct pages without selecting a workspace.
+        $request->session()->forget('active_workspace_id');
         $request->session()->forget('last_authenticated_url');
-        $request->session()->regenerate();
-        AuditLogger::log('Accounts', 'workspace_switched', 'BACSEC-003 selected the MPDO preparation or BAC Secretariat workspace.', $workspace, null, null, 'info', [
-            'login_account_id' => $account->id, 'workspace_id' => $workspace->id,
-        ]);
 
         return redirect()->route($section === 'bac-secretariat' ? 'bac-secretariat.dashboard' : BacsecMpdoWorkspaceService::DESTINATIONS[$section]);
     }

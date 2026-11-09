@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class SystemNotificationService
 {
+    public static function queryForUser(User $user): \Illuminate\Database\Eloquent\Builder
+    {
+        return SystemNotification::query()->whereIn('user_id', app(BacsecMpdoWorkspaceService::class)->notificationOwnerIds($user));
+    }
+
     public static function sendToUser(
         int|User|null $user,
         string $title,
@@ -41,12 +46,12 @@ class SystemNotificationService
 
     public static function unreadCount(User $user): int
     {
-        return $user->systemNotifications()->whereNull('read_at')->count();
+        return self::queryForUser($user)->whereNull('read_at')->count();
     }
 
     public static function latestForUser(User $user, int $limit = 5)
     {
-        return $user->systemNotifications()->latest()->limit($limit)->get();
+        return self::queryForUser($user)->latest()->limit($limit)->get();
     }
 
     public static function notify(

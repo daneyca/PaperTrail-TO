@@ -68,6 +68,7 @@ class ElectronicSignatureService
     public function canSignWithReason(User $user, Model $document, string $documentType, string $action, ?SignatureRequest $signatureRequest = null): array
     {
         $type = $this->normalizeDocumentType($documentType);
+        $user = app(BacsecMpdoWorkspaceService::class)->preparationSigner($user, $document, $type);
         if ($user->isOfficeDocumentPreparer()
             && ! ($type === 'ppmp' && $document instanceof ProcurementDocument
                 && (int) ($document->prepared_by_user_id ?: $document->submitted_by_user_id) === (int) $user->id)) {
@@ -188,6 +189,7 @@ class ElectronicSignatureService
     public function signDocument(Model $document, User $user, string $documentType, string $action, array $input, ?Request $request = null, ?SignatureRequest $signatureRequest = null): array
     {
         $type = $this->normalizeDocumentType($documentType);
+        $user = app(BacsecMpdoWorkspaceService::class)->preparationSigner($user, $document, $type);
         $check = $this->canSignWithReason($user, $document, $type, $action, $signatureRequest);
         $signatureRequest = $check['signature_request'] ?? $signatureRequest;
 

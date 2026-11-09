@@ -24,6 +24,7 @@ class Authenticate extends Middleware
             }
 
             $request->attributes->set('login_account', $account);
+            $mpdo = app(\App\Services\BacsecMpdoWorkspaceService::class);
             $workspaceId = $request->session()->get('active_workspace_id', $account->id);
             $workspace = $account;
             if ((int) $workspaceId !== (int) $account->id && ! $request->routeIs('workspaces.switch', 'logout', 'session.timeout', 'switch-account')) {
@@ -35,6 +36,17 @@ class Authenticate extends Middleware
                         : abort(409, 'Your workspace changed. Reload the page before continuing.');
                 }
                 $workspace->setRelation('principalAccount', $account);
+                if ($mpdo->allows($account) && $workspace->user_id === \App\Services\BacsecMpdoWorkspaceService::WORKSPACE) {
+                    $request->session()->forget('active_workspace_id');
+                    $workspace = $account;
+                }
+            }
+
+            try {
+                $workspace = $mpdo->forRequest($account, $request) ?: $workspace;
+            } catch (\Illuminate\Validation\ValidationException $exception) {
+                return redirect()->route('bac-secretariat.dashboard')
+                    ->with('error', collect($exception->errors())->flatten()->first());
             }
 
             auth()->setUser($workspace);

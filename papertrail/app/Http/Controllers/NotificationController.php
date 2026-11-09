@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SystemNotification;
 use App\Models\User;
 use App\Services\AuditLogger;
+use App\Services\SystemNotificationService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,11 +17,8 @@ class NotificationController extends Controller
     {
         AuditLogger::log('Notifications', $this->auditAction($request, 'Notifications Page Viewed'), 'User viewed notifications.');
 
-        $userId = $request->user()->id;
-
-        $query = SystemNotification::query()
-            ->where('user_id', $userId)
-            ->latest();
+        $base = SystemNotificationService::queryForUser($request->user());
+        $query = (clone $base)->latest();
 
         $this->applyFilters($query, $request);
 
@@ -29,13 +27,13 @@ class NotificationController extends Controller
             'subtitle' => $this->subtitle($request),
             'filters' => $request->only(['search', 'type', 'module', 'status', 'date_from', 'date_to']),
             'counts' => [
-                'all' => SystemNotification::query()->where('user_id', $userId)->count(),
-                'unread' => SystemNotification::query()->where('user_id', $userId)->whereNull('read_at')->count(),
-                'read' => SystemNotification::query()->where('user_id', $userId)->whereNotNull('read_at')->count(),
-                'today' => SystemNotification::query()->where('user_id', $userId)->whereDate('created_at', today())->count(),
+                'all' => (clone $base)->count(),
+                'unread' => (clone $base)->whereNull('read_at')->count(),
+                'read' => (clone $base)->whereNotNull('read_at')->count(),
+                'today' => (clone $base)->whereDate('created_at', today())->count(),
             ],
             'types' => [SystemNotification::TYPE_INFO, SystemNotification::TYPE_SUCCESS, SystemNotification::TYPE_WARNING, SystemNotification::TYPE_ERROR],
-            'modules' => SystemNotification::query()->where('user_id', $userId)->whereNotNull('module')->select('module')->distinct()->orderBy('module')->pluck('module'),
+            'modules' => (clone $base)->whereNotNull('module')->select('module')->distinct()->orderBy('module')->pluck('module'),
         ]);
     }
 
@@ -71,8 +69,7 @@ class NotificationController extends Controller
 
     public function markAllRead(Request $request): RedirectResponse
     {
-        $request->user()
-            ->systemNotifications()
+        SystemNotificationService::queryForUser($request->user())
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
 
@@ -96,8 +93,7 @@ class NotificationController extends Controller
 
     public function clearRead(Request $request): RedirectResponse
     {
-        $deleted = $request->user()
-            ->systemNotifications()
+        $deleted = SystemNotificationService::queryForUser($request->user())
             ->whereNotNull('read_at')
             ->delete();
 
@@ -133,7 +129,7 @@ class NotificationController extends Controller
 
     private function authorizeOwner(Request $request, SystemNotification $notification): void
     {
-        if ($notification->user_id === $request->user()->id) {
+        if (SystemNotificationService::queryForUser($request->user())->whereKey($notification->id)->exists()) {
             return;
         }
 

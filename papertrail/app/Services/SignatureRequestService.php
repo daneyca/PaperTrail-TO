@@ -241,11 +241,16 @@ class SignatureRequestService
         }
         $roleTokens = $this->roleTokens($user);
         $canUseOfficeFallback = $user->office_id && ($user->hasPermission('esignature.use') || $user->hasSignatureProfile());
+        $mpdoActor = app(BacsecMpdoWorkspaceService::class)->existing($user);
 
         return SignatureRequest::query()
             ->with(['requestedBy', 'requestedTo', 'requestedOffice', 'electronicSignature'])
-            ->where(function (Builder $query) use ($user, $roleTokens, $canUseOfficeFallback) {
+            ->where(function (Builder $query) use ($user, $roleTokens, $canUseOfficeFallback, $mpdoActor) {
                 $query->where('requested_to_user_id', $user->id);
+                if ($mpdoActor) {
+                    $query->orWhere(fn (Builder $mpdo) => $mpdo->where('requested_to_user_id', $mpdoActor->id)
+                        ->where('document_type', 'ppmp')->where('signatory_slot', 'prepared_by'));
+                }
 
                 if ($roleTokens !== [] || $canUseOfficeFallback) {
                     $query->orWhere(function (Builder $fallback) use ($user, $roleTokens, $canUseOfficeFallback) {
@@ -276,6 +281,11 @@ class SignatureRequestService
 
     public function userCanAccess(SignatureRequest $signatureRequest, User $user): bool
     {
+        $mpdoActor = app(BacsecMpdoWorkspaceService::class)->existing($user);
+        if ($mpdoActor && $signatureRequest->document_type === 'ppmp' && $signatureRequest->signatory_slot === 'prepared_by'
+            && (int) $signatureRequest->requested_to_user_id === (int) $mpdoActor->id) {
+            return true;
+        }
         if ($user->isOfficeDocumentPreparer()) {
             return $signatureRequest->document_type === 'ppmp' && $signatureRequest->signatory_slot === 'prepared_by'
                 && (int) $signatureRequest->requested_to_user_id === (int) $user->id;

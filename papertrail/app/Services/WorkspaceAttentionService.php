@@ -32,7 +32,7 @@ class WorkspaceAttentionService
             ->getPendingRequestsForUser($workspace)
             ->pluck('signature_requests.id');
 
-        $unreadNotifications = $workspace->systemNotifications()
+        $unreadNotifications = SystemNotificationService::queryForUser($workspace)
             ->whereNull('read_at');
         $unreadCount = (clone $unreadNotifications)->count();
 

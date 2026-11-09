@@ -33,13 +33,14 @@ trait HasWorkspaces
         }
 
         return collect([$account])->merge($account->linkedWorkspaces()->with('assignedOffice', 'assignedRole')->get())
+            ->reject(fn (User $workspace) => $workspace->user_id === \App\Services\BacsecMpdoWorkspaceService::WORKSPACE)
             ->filter(fn (User $workspace) => $workspace->isActive())->values();
     }
 
     public function workspaceLabel(): string
     {
         if ($this->user_id === \App\Services\BacsecMpdoWorkspaceService::WORKSPACE) {
-            return 'MPDO Procurement Staff';
+            return $this->loginAccount()->workspaceLabel();
         }
         if ($this->role === self::ROLE_BAC_CHAIR) {
             return 'BAC Chairperson';

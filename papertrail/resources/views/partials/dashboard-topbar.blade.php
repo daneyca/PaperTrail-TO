@@ -1,5 +1,8 @@
 @php
     $user = auth()->user();
+    if ($user?->user_id === \App\Services\BacsecMpdoWorkspaceService::WORKSPACE) {
+        $user = $user->loginAccount();
+    }
     $unreadNotifications = \App\Services\SystemNotificationService::unreadCount($user);
     $recentNotifications = \App\Services\SystemNotificationService::latestForUser($user, 5);
     $officeName = trim((string) ($user?->assignedOffice?->name ?? $user?->office ?? ''));
