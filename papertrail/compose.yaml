@@ -33,7 +33,7 @@ services:
       FILESYSTEM_DISK: ${FILESYSTEM_DISK:-local}
       QUEUE_CONNECTION: ${QUEUE_CONNECTION:-database}
       SESSION_DRIVER: ${SESSION_DRIVER:-file}
-      SESSION_LIFETIME: ${SESSION_LIFETIME:-30}
+      SESSION_LIFETIME: ${SESSION_LIFETIME:-50}
       SESSION_DOMAIN: ${SESSION_DOMAIN:-.papertrail-to.online}
       SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-true}
       TRUSTED_HOSTS: ${TRUSTED_HOSTS:-^papertrail-to\.online$,^www\.papertrail-to\.online$}

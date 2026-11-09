@@ -160,7 +160,7 @@
         const sessionLoginUrl = @json(route('login'));
         const sessionHeartbeatToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         const sessionHeartbeatInterval = 60 * 1000;
-        const sessionIdleLimit = Math.max(@json((int) config('session.lifetime', 10) * 60 * 1000), 60 * 1000);
+        const sessionIdleLimit = Math.max(@json((int) config('session.lifetime', 50) * 60 * 1000), 60 * 1000);
         let lastSessionHeartbeatAt = Date.now();
         let lastUserActivityAt = Date.now();
         let sessionIdleTimer = null;
