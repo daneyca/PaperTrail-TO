@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Office;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -29,15 +30,16 @@ class DocumentReferenceNumberService
         $date = $createdAt ?: $this->referenceDate($document);
         $year = (int) $date->format('Y');
         $month = (int) $date->format('m');
-        $sequence = $this->nextSequence($type, $year, $month);
-
-        $referenceNumber = sprintf(
-            '%04d-%02d-%s-%04d',
-            $year,
-            $month,
-            $type,
-            $sequence,
-        );
+        $officeId = (int) ($document->getAttribute('submitting_office_id') ?: $document->getAttribute('office_id'));
+        if ($type === self::TYPE_PPMP && $officeId > 0) {
+            $sequence = $this->nextPpmpSequence($officeId, $year);
+            $code = strtoupper(trim((string) Office::whereKey($officeId)->value('code')));
+            $officeCode = preg_match('/^[A-Z0-9_-]+$/', $code) ? $code : 'OFFICE-' . $officeId;
+            $referenceNumber = sprintf('%04d-%02d-PPMP-%s-%04d', $year, $month, $officeCode, $sequence);
+        } else {
+            $sequence = $this->nextSequence($type, $year, $month);
+            $referenceNumber = sprintf('%04d-%02d-%s-%04d', $year, $month, $type, $sequence);
+        }
 
         $document->setAttribute('document_reference_number', $referenceNumber);
         $document->setAttribute('sequence_number', $sequence);
@@ -132,6 +134,22 @@ class DocumentReferenceNumberService
                     'updated_at' => now(),
                 ]);
 
+            return $next;
+        });
+    }
+
+    private function nextPpmpSequence(int $officeId, int $year): int
+    {
+        return DB::transaction(function () use ($officeId, $year): int {
+            DB::table('ppmp_reference_sequences')->insertOrIgnore([
+                'office_id' => $officeId, 'created_year' => $year, 'last_sequence' => 0,
+                'created_at' => now(), 'updated_at' => now(),
+            ]);
+            $counter = DB::table('ppmp_reference_sequences')->where('office_id', $officeId)
+                ->where('created_year', $year)->lockForUpdate()->first();
+            $next = (int) $counter->last_sequence + 1;
+            DB::table('ppmp_reference_sequences')->where('id', $counter->id)
+                ->update(['last_sequence' => $next, 'updated_at' => now()]);
             return $next;
         });
     }

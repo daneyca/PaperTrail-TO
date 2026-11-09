@@ -72,6 +72,8 @@
         </div>
     </section>
 
+    @include('components.e-signature.remarks', ['signatures' => $signatureSlots])
+
     @unless ($isSignedRequest)
         <section class="signature-request-action-strip signature-inline-signing-panel no-print pt-smooth-enter" style="--pt-delay: 140ms" aria-label="Signature actions">
             @include('components.e-signature.panel', [

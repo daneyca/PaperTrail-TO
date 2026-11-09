@@ -289,6 +289,7 @@ class HeadOfficePpmpSignatureWorkflowService
                     'status' => $this->requestStatus($request),
                     'status_label' => $this->requestStatusLabel($request),
                     'signed_at' => $signature?->signed_at ?? $request?->signed_at,
+                    'remarks' => data_get($signature?->metadata, 'remarks') ?? $request?->remarks,
                 ];
             })
             ->values();

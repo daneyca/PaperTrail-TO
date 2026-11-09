@@ -62,6 +62,32 @@ class PpmpOfficeHeadSubmissionTest extends TestCase
         $this->assertStringContainsString($head->name, $xpath->query('//div[@aria-label="Submitted By electronic signature"]')->item(0)->textContent);
     }
 
+    public function test_signature_remarks_are_visible_to_the_signer_and_next_signatory_without_changing_the_printed_form(): void
+    {
+        [$staff, $head] = $this->accounts();
+        $document = ProcurementDocument::create([
+            'document_type' => 'PPMP', 'title' => 'PPMP with signing remarks', 'fiscal_year' => 2026,
+            'status' => ProcurementDocument::STATUS_PPMP_DRAFT, 'submitting_office_id' => $staff->office_id,
+            'prepared_by_user_id' => $staff->id, 'submitted_by_user_id' => $staff->id,
+        ]);
+        $requests = app(HeadOfficePpmpSignatureWorkflowService::class)->start($document, $staff)->keyBy('signatory_slot');
+        $remarks = "done\nPlease review the delivery schedule. <script>alert('test')</script>";
+        $this->actingAs($staff)->post(route('signature-requests.sign', $requests['prepared_by']), [
+            'current_password' => 'password', 'signature_consent' => true, 'remarks' => $remarks,
+        ])->assertRedirect()->assertSessionMissing('error');
+        $signature = ElectronicSignature::where('signature_request_id', $requests['prepared_by']->id)->firstOrFail();
+        $this->assertSame($remarks, data_get($signature->metadata, 'remarks'));
+        $this->assertSame($remarks, $requests['prepared_by']->refresh()->remarks);
+
+        $this->get(route('signature-requests.show', $requests['prepared_by']))->assertOk()
+            ->assertSee('Signature Remarks')->assertSee($remarks)->assertDontSee($remarks, false);
+        $this->get(route('head-office.ppmp.show', $document))->assertOk()->assertSee('Remarks')->assertSee($remarks);
+        $this->get(route('e-signatures.certificate', $signature))->assertOk()->assertSee('Remarks')->assertSee($remarks);
+        $this->get(route('head-office.ppmp.print', $document))->assertOk()->assertDontSee($remarks);
+        $this->actingAs($head)->get(route('signature-requests.show', $requests['submitted_by']))->assertOk()
+            ->assertSee('Signature Remarks')->assertSee($remarks);
+    }
+
     public function test_pending_legacy_head_only_request_is_replaced_by_staff_and_head_requests(): void
     {
         [$staff, $head] = $this->accounts();

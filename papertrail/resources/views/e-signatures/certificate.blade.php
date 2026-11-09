@@ -6,6 +6,7 @@
     @php
         $status = $signature->isValid() ? 'Valid' : str($signature->signature_status)->replace('_', ' ')->title();
         $isAdmin = auth()->user()?->isAdmin();
+        $signatureRemarks = data_get($signature->metadata, 'remarks') ?? $signature->signatureRequest?->remarks;
     @endphp
 
     <section class="dashboard-hero admin-users-hero">
@@ -41,6 +42,9 @@
             <div><span>Document Hash</span><strong>{{ $signature->document_hash_before ?? 'N/A' }}</strong></div>
             <div><span>Snapshot Hash</span><strong>{{ $signature->signed_snapshot_hash ?? $signature->snapshot?->snapshot_hash ?? 'N/A' }}</strong></div>
             <div><span>Verification</span><strong>Electronically Signed through PaperTrail</strong></div>
+            @if (filled($signatureRemarks))
+                <div class="signature-remarks-detail"><span>Remarks</span><strong class="signature-remarks-text">{{ $signatureRemarks }}</strong></div>
+            @endif
 
             @if ($isAdmin)
                 <div><span>IP Address</span><strong>{{ $signature->ip_address ?? 'N/A' }}</strong></div>

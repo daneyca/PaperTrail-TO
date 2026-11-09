@@ -405,16 +405,7 @@ class ProcurementDocument extends Model
 
     public function shouldAssignPaperTrailReferenceOnCreate(): bool
     {
-        if ($this->paperTrailReferenceType() !== DocumentReferenceNumberService::TYPE_PPMP) {
-            return true;
-        }
-
-        return in_array($this->status, [
-            self::STATUS_PENDING_PPMP_REVIEW,
-            self::STATUS_UNDER_PPMP_REVIEW,
-            self::STATUS_RETURNED_BY_BAC_SECRETARIAT,
-            self::STATUS_ACCEPTED_FOR_APP_CONSOLIDATION,
-        ], true);
+        return true;
     }
 
     public function getTrackingNumberAttribute(?string $value): ?string

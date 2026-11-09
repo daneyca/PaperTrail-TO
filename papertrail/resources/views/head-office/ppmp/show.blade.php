@@ -151,6 +151,12 @@
                             <p>{{ $card['designation'] }}</p>
                         </div>
                         <span class="ppmp-signature-status-badge ppmp-signature-status-badge--{{ $card['status'] }}">{{ $card['status_label'] }}</span>
+                        @if (filled($card['remarks'] ?? null))
+                            <div>
+                                <strong>Remarks</strong>
+                                <p class="signature-remarks-text">{{ $card['remarks'] }}</p>
+                            </div>
+                        @endif
                         @if ($card['signed_at'])
                             <small>Signed {{ $card['signed_at']->format('M d, Y h:i A') }}</small>
                         @elseif ($card['request']?->isOpen() && $card['request']->is_required && (int) $card['request']->requested_to_user_id === (int) auth()->id())

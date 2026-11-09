@@ -1,3 +1,40 @@
+.signature-remarks-list {
+    display: grid;
+    gap: 12px;
+}
+
+.signature-remarks-entry {
+    min-width: 0;
+    padding: 14px 16px;
+    border: 1px solid var(--pt-saas-line, #dbe5f1);
+    border-radius: 8px;
+    background: var(--pt-saas-surface, #fff);
+}
+
+.signature-remarks-entry header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 14px;
+    margin-bottom: 8px;
+    font-size: 0.8rem;
+}
+
+.signature-remarks-entry header span {
+    color: var(--pt-saas-muted, #64748b);
+}
+
+.signature-remarks-text {
+    margin: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+}
+
+.signature-remarks-detail {
+    grid-column: 1 / -1;
+}
+
 .signature-settings-card,
 .signature-profile-summary,
 .e-signature-panel,
