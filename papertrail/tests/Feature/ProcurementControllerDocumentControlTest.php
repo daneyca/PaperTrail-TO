@@ -74,6 +74,15 @@ class ProcurementControllerDocumentControlTest extends TestCase
             'tracking_number' => 'PO-2026-001',
             'assigned_to_user_id' => $originator->id,
         ]);
+
+        $purchaseOrder->update(['status' => PurchaseOrder::STATUS_FORWARDED_TO_SUPPLIER]);
+
+        $this->actingAs($controller)
+            ->get(route('pr-numbering.assigned.index'))
+            ->assertOk()
+            ->assertSeeText('Controller Handoff')
+            ->assertSeeText('Returned to Requesting Office')
+            ->assertDontSeeText('Forwarded To Supplier');
     }
 
     public function test_head_office_can_submit_an_incomplete_po_for_control_assignment(): void

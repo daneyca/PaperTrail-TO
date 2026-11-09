@@ -3,6 +3,7 @@
 @section('title', 'Inspection / Acceptance Detail | PaperTrail')
 
 @section('content')
+    <link rel="stylesheet" href="{{ asset('css/inspection-acceptance.css') }}">
     @php
         $statusLabel = fn (?string $status) => $status ? str($status)->replace('_', ' ')->title() : 'Pending';
         $latestRecord = $records->first();
@@ -16,7 +17,8 @@
         </div>
 
         <div class="hero-actions no-print">
-            <a href="{{ route('head-office.inspection.index') }}" class="dashboard-action secondary-action">Back to Inspection List</a>
+            <a href="{{ route('head-office.inspection.records') }}" class="dashboard-action secondary-action">Back to Inspection List</a>
+            <a href="{{ route('head-office.inspection.print', $purchaseOrder) }}" target="_blank" rel="noopener" class="dashboard-action">Print Official IAR</a>
             @if ($latestRecord)
                 <x-ai.completeness-check-button
                     document-type="inspection_acceptance"
@@ -40,7 +42,7 @@
         title="Review Purchase Order Source"
         description="Confirm the Purchase Order details before opening inspection and acceptance controls."
         proceed-label="Proceed to Inspection Controls"
-        :back-url="route('head-office.inspection.index')"
+        :back-url="route('head-office.inspection.records')"
         back-label="Back to Inspection List"
         :autoshow="$errors->any()"
         :workflow-steps="['Select Purchase Order', 'Review Items', 'Inspection Result', 'Acceptance']"
@@ -66,7 +68,7 @@
                 <div>
                     <p class="eyebrow">Purchase Order</p>
                     <h2>{{ $purchaseOrder->po_number ?? 'Draft PO' }}</h2>
-                    <p>Inspection and acceptance records are based on the issued Purchase Order, not a final official inspection form template.</p>
+                    <p>SVP Inspection and Acceptance Report using the official Municipality of Tomas Oppus layout.</p>
                 </div>
                 <span class="status-pill status-{{ $purchaseOrder->status }}">{{ $statusLabel($purchaseOrder->status) }}</span>
             </div>
@@ -101,6 +103,10 @@
             <form method="POST" action="{{ route('head-office.inspection.store', $purchaseOrder) }}" class="budget-action-form">
                 @csrf
 
+                <label for="report_date">IAR Date</label>
+                <input id="report_date" name="report_date" type="date" value="{{ old('report_date', $record->report_date?->format('Y-m-d') ?? now()->toDateString()) }}">
+                @error('report_date')<span class="field-error">{{ $message }}</span>@enderror
+
                 <label for="inspection_date">Inspection Date</label>
                 <input id="inspection_date" name="inspection_date" type="date" value="{{ old('inspection_date', optional($record->inspection_date)->format('Y-m-d') ?? now()->toDateString()) }}" required>
                 @error('inspection_date')<span class="field-error">{{ $message }}</span>@enderror
@@ -117,13 +123,36 @@
                 <input id="invoice_number" name="invoice_number" type="text" value="{{ old('invoice_number', $record->invoice_number) }}">
                 @error('invoice_number')<span class="field-error">{{ $message }}</span>@enderror
 
+                <label for="invoice_date">Invoice Date</label>
+                <input id="invoice_date" name="invoice_date" type="date" value="{{ old('invoice_date', $record->invoice_date?->format('Y-m-d')) }}">
+                @error('invoice_date')<span class="field-error">{{ $message }}</span>@enderror
+
                 <label for="quantity_condition">Quantity Condition</label>
-                <input id="quantity_condition" name="quantity_condition" type="text" value="{{ old('quantity_condition', $record->quantity_condition ?? 'Complete') }}" required>
+                <select id="quantity_condition" name="quantity_condition" required>
+                    @foreach (['Complete', 'Partial'] as $condition)
+                        <option value="{{ $condition }}" @selected(old('quantity_condition', $record->quantity_condition ?? 'Complete') === $condition)>{{ $condition }}</option>
+                    @endforeach
+                    @if ($record->quantity_condition && ! in_array($record->quantity_condition, ['Complete', 'Partial'], true))
+                        <option value="{{ $record->quantity_condition }}" @selected(old('quantity_condition', $record->quantity_condition) === $record->quantity_condition)>{{ $record->quantity_condition }}</option>
+                    @endif
+                </select>
                 @error('quantity_condition')<span class="field-error">{{ $message }}</span>@enderror
 
                 <label for="quality_condition">Quality Condition</label>
                 <input id="quality_condition" name="quality_condition" type="text" value="{{ old('quality_condition', $record->quality_condition ?? 'Conforming') }}" required>
                 @error('quality_condition')<span class="field-error">{{ $message }}</span>@enderror
+
+                <label for="inspector_name">Inspection Officer - Des.</label>
+                <input id="inspector_name" name="inspector_name" type="text" maxlength="255" value="{{ old('inspector_name', $record->inspector_name ?? \App\Models\InspectionAcceptanceRecord::DEFAULT_INSPECTOR) }}">
+                @error('inspector_name')<span class="field-error">{{ $message }}</span>@enderror
+
+                <label for="inspection_chair_name">HRMO/Municipal Assessor Designate</label>
+                <input id="inspection_chair_name" name="inspection_chair_name" type="text" maxlength="255" value="{{ old('inspection_chair_name', $record->inspection_chair_name ?? \App\Models\InspectionAcceptanceRecord::DEFAULT_INSPECTION_CHAIR) }}">
+                @error('inspection_chair_name')<span class="field-error">{{ $message }}</span>@enderror
+
+                <label for="acceptance_officer_name">Acceptance Officer (Admin Aide I)</label>
+                <input id="acceptance_officer_name" name="acceptance_officer_name" type="text" maxlength="255" value="{{ old('acceptance_officer_name', $record->acceptance_officer_name ?? \App\Models\InspectionAcceptanceRecord::DEFAULT_ACCEPTANCE_OFFICER) }}">
+                @error('acceptance_officer_name')<span class="field-error">{{ $message }}</span>@enderror
 
                 <label for="findings">Inspection Findings</label>
                 <textarea id="findings" name="findings" rows="4" placeholder="Record findings, defects, or compliance notes.">{{ old('findings', $record->findings) }}</textarea>
@@ -158,6 +187,14 @@
                 </form>
             @endif
         </aside>
+    </section>
+
+    <section class="table-panel">
+        <div class="panel-heading">
+            <div><p class="eyebrow">Official SVP Template</p><h2>Inspection and Acceptance Report</h2><p>Save inspection details to update this preview and the printed report.</p></div>
+            <a href="{{ route('head-office.inspection.print', $purchaseOrder) }}" target="_blank" rel="noopener" class="dashboard-action secondary-action">Print Report</a>
+        </div>
+        <div class="iar-preview">@include('head-office.inspection.partials.report', ['record' => $latestRecord ?? new \App\Models\InspectionAcceptanceRecord()])</div>
     </section>
 
     @include('partials.svp-related-documents', ['source' => $latestRecord ?: $purchaseOrder, 'context' => 'head-office'])

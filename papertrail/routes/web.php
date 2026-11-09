@@ -593,7 +593,11 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         Route::patch('/{purchaseOrder}/submit-for-signatures', [HeadOfficePurchaseOrderController::class, 'submitForSignatures'])->name('submit-for-signatures');
     });
     Route::middleware(['role:head-office', 'requesting.office'])->prefix('head-office/inspection-acceptance')->name('head-office.inspection.')->group(function () {
-        Route::get('/', [HeadOfficeInspectionAcceptanceController::class, 'index'])->name('index');
+        Route::get('/', [HeadOfficeInspectionAcceptanceController::class, 'create'])->name('index');
+        Route::get('/create', [HeadOfficeInspectionAcceptanceController::class, 'create'])->name('create');
+        Route::get('/records', [HeadOfficeInspectionAcceptanceController::class, 'index'])->name('records');
+        Route::get('/template/print', [HeadOfficeInspectionAcceptanceController::class, 'printTemplate'])->name('template-print');
+        Route::get('/{purchaseOrder}/print', [HeadOfficeInspectionAcceptanceController::class, 'print'])->name('print');
         Route::get('/{purchaseOrder}', [HeadOfficeInspectionAcceptanceController::class, 'show'])->name('show');
         Route::post('/{purchaseOrder}', [HeadOfficeInspectionAcceptanceController::class, 'store'])->name('store');
         Route::patch('/{purchaseOrder}/accept', [HeadOfficeInspectionAcceptanceController::class, 'accept'])->name('accept');

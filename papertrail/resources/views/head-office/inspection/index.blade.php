@@ -13,17 +13,18 @@
             <h1>Inspection / Acceptance</h1>
             <p>Monitor office Purchase Orders that are ready for inspection, acceptance, or completion records.</p>
         </div>
+        <div class="hero-actions"><a href="{{ route('head-office.inspection.create') }}" class="dashboard-action">Create Inspection / Acceptance</a></div>
     </section>
 
     <section class="stat-grid stat-grid-modern head-office-summary-grid" aria-label="Inspection summary">
-        <x-dashboard.stat-card href="{{ route('head-office.inspection.index', ['status' => 'draft']) }}" value="{{ $summary['draft'] }}" label="Inspection Drafts" accent="gold" class="{{ $activeStatus === 'draft' ? 'is-filter-active' : '' }}" />
-        <x-dashboard.stat-card href="{{ route('head-office.inspection.index', ['status' => 'for_inspection']) }}" value="{{ $summary['forInspection'] }}" label="For Inspection" accent="blue" class="{{ $activeStatus === 'for_inspection' ? 'is-filter-active' : '' }}" />
-        <x-dashboard.stat-card href="{{ route('head-office.inspection.index', ['status' => 'accepted']) }}" value="{{ $summary['accepted'] }}" label="Accepted / Completed" accent="green" class="{{ $activeStatus === 'accepted' ? 'is-filter-active' : '' }}" />
-        <x-dashboard.stat-card href="{{ route('head-office.inspection.index', ['status' => 'completed']) }}" value="{{ $summary['completed'] }}" label="Completed" accent="green" class="{{ $activeStatus === 'completed' ? 'is-filter-active' : '' }}" />
+        <x-dashboard.stat-card href="{{ route('head-office.inspection.records', ['status' => 'draft']) }}" value="{{ $summary['draft'] }}" label="Inspection Drafts" accent="gold" class="{{ $activeStatus === 'draft' ? 'is-filter-active' : '' }}" />
+        <x-dashboard.stat-card href="{{ route('head-office.inspection.records', ['status' => 'for_inspection']) }}" value="{{ $summary['forInspection'] }}" label="For Inspection" accent="blue" class="{{ $activeStatus === 'for_inspection' ? 'is-filter-active' : '' }}" />
+        <x-dashboard.stat-card href="{{ route('head-office.inspection.records', ['status' => 'accepted']) }}" value="{{ $summary['accepted'] }}" label="Accepted / Completed" accent="green" class="{{ $activeStatus === 'accepted' ? 'is-filter-active' : '' }}" />
+        <x-dashboard.stat-card href="{{ route('head-office.inspection.records', ['status' => 'completed']) }}" value="{{ $summary['completed'] }}" label="Completed" accent="green" class="{{ $activeStatus === 'completed' ? 'is-filter-active' : '' }}" />
     </section>
 
     <section class="table-panel" aria-label="Inspection and acceptance records">
-        <x-document-filter-card :action="route('head-office.inspection.index')">
+        <x-document-filter-card :action="route('head-office.inspection.records')">
             <div class="user-search">
                 <label for="inspection-search">Search Purchase Orders</label>
                 <input id="inspection-search" name="search" type="search" value="{{ $filters['search'] ?? '' }}" placeholder="PO no., supplier, PR, or title">
@@ -39,7 +40,7 @@
             </div>
             <div class="user-filter"><label for="date-from">Date From</label><input id="date-from" name="date_from" type="date" value="{{ $filters['date_from'] ?? '' }}"></div>
             <div class="user-filter"><label for="date-to">Date To</label><input id="date-to" name="date_to" type="date" value="{{ $filters['date_to'] ?? '' }}"></div>
-            <div class="filter-actions"><button type="submit">Apply</button><a href="{{ route('head-office.inspection.index') }}">Clear</a></div>
+            <div class="filter-actions"><button type="submit">Apply</button><a href="{{ route('head-office.inspection.records') }}">Clear</a></div>
         </x-document-filter-card>
 
         <div class="table-scroll">

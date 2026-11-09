@@ -355,7 +355,7 @@ class DocumentDraftService
             'title' => $purchaseOrder?->supplier_name ? 'Inspection for ' . $purchaseOrder->supplier_name : $record->sourcePrDocument?->title ?? 'Inspection and Acceptance',
             'office_name' => $record->office?->name ?? $record->sourcePrDocument?->submittingOffice?->name ?? $purchaseOrder?->sourcePrDocument?->submittingOffice?->name ?? 'Unassigned office',
             'prepared_by' => $record->inspectedBy?->name ?? $record->acceptedBy?->name ?? $purchaseOrder?->preparedBy?->name ?? 'Unassigned',
-            'edit_url' => $purchaseOrder ? $this->url('head-office.inspection.show', $purchaseOrder) : null,
+            'edit_url' => $purchaseOrder ? route('head-office.inspection.create', ['purchase_order_id' => $purchaseOrder->id, 'edit' => 1]) : null,
             'show_url' => $purchaseOrder ? $this->url('head-office.inspection.show', $purchaseOrder) : null,
         ]);
     }

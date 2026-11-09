@@ -670,11 +670,11 @@ class DocumentSubmenuController extends Controller
             'subtitle' => 'Open inspection and acceptance records linked to Purchase Orders.',
             'backRoute' => 'head-office.dashboard',
             'cards' => [
-                $this->card('Create Inspection / Acceptance', 'Open Purchase Orders and record inspection details from the detail page.', 'document', 'orange', 'head-office.inspection.index'),
+                $this->card('Create Inspection / Acceptance', 'Select a Purchase Order and prepare the official Inspection and Acceptance Report.', 'document', 'orange', 'head-office.inspection.create'),
                 $this->templateDownloadCard('inspection_acceptance', 'orange'),
                 $this->templateUploadCard('inspection_acceptance', 'orange'),
                 $this->card('Upload Supporting Document', 'Upload delivery or inspection files.', 'upload', 'blue', 'ai-document-verification.index'),
-                $this->card('View Inspection / Acceptance Records', 'Open all inspection and acceptance records.', 'view', 'orange', 'head-office.inspection.index'),
+                $this->card('View Inspection / Acceptance Records', 'Open all inspection and acceptance records.', 'view', 'orange', 'head-office.inspection.records'),
                 $this->disabledCard('Download Final Copy', 'Open a saved record to print the official form.', 'document', 'slate', 'Open Record'),
                 $this->card('Comments / History', 'Open workflow movement history.', 'clock', 'slate', 'head-office.svp-tracking.index'),
             ],

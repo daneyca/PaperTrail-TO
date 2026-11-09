@@ -179,7 +179,7 @@
                         <th>Requesting Office</th>
                         <th>Assigned By</th>
                         <th>Assigned Date</th>
-                        <th>Status</th>
+                        <th>Controller Handoff</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -190,7 +190,7 @@
                             <td>{{ $purchaseOrder->sourcePrDocument?->submittingOffice?->name ?? 'N/A' }}</td>
                             <td>{{ $purchaseOrder->controlAssignedBy?->name ?? 'N/A' }}</td>
                             <td class="nowrap">{{ $purchaseOrder->control_assigned_at?->format('M d, Y') ?? 'N/A' }}</td>
-                            <td><span class="status-pill status-{{ $purchaseOrder->status }}">{{ str($purchaseOrder->status)->replace('_', ' ')->title() }}</span></td>
+                            <td><span class="status-pill status-submitted">Returned to Requesting Office</span></td>
                         </tr>
                     @empty
                         <tr><td colspan="6"><div class="empty-state"><strong>No assigned PO numbers yet</strong></div></td></tr>

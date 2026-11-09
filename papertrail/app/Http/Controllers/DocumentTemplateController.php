@@ -40,6 +40,10 @@ class DocumentTemplateController extends Controller
         $type = $this->normalizeDocumentType($documentType);
         abort_unless($type && $this->canDownload($request->user(), $type), 403);
 
+        if ($type === 'inspection_acceptance') {
+            $templates->ensure($type, $request->user());
+        }
+
         if (! $templates->exists($type)) {
             return back()->with('error', 'Editable template file is missing.');
         }

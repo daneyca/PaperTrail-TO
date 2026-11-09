@@ -1,0 +1,1 @@
+<input class="iar-field" type="{{ $type ?? 'text' }}" name="{{ $name }}" aria-label="{{ $label }}" value="{{ old($name, $value) }}" @if (($type ?? 'text') === 'text') maxlength="{{ $maxlength ?? 255 }}" @endif @required($required ?? false)>

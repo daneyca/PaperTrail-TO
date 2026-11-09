@@ -19,6 +19,36 @@ use Illuminate\View\View;
 
 class InspectionAcceptanceController extends Controller
 {
+    public function create(Request $request): View
+    {
+        $eligiblePurchaseOrders = $this->eligiblePurchaseOrders($request->user())
+            ->with(['sourcePrDocument.submittingOffice', 'latestInspectionAcceptanceRecord'])
+            ->latest('updated_at')->get();
+        $purchaseOrder = null;
+
+        if ($request->filled('purchase_order_id')) {
+            $purchaseOrder = $eligiblePurchaseOrders->firstWhere('id', $request->integer('purchase_order_id'));
+            abort_unless($purchaseOrder, 403);
+            $purchaseOrder->load('items');
+        }
+
+        $record = $purchaseOrder?->latestInspectionAcceptanceRecord ?? new InspectionAcceptanceRecord([
+            'report_date' => now()->toDateString(),
+            'inspection_date' => now()->toDateString(),
+            'quantity_condition' => 'Complete',
+            'quality_condition' => 'Conforming',
+        ]);
+
+        AuditLogger::log('Inspection / Acceptance', 'Inspection Create Page Viewed', 'Head Office opened the official SVP IAR creation form.');
+
+        return view('head-office.inspection.create', [
+            'purchaseOrder' => $purchaseOrder,
+            'record' => $record,
+            'eligiblePurchaseOrders' => $eligiblePurchaseOrders,
+            'recentDrafts' => app(DocumentDraftService::class)->getInspectionDraftsForUser($request->user(), 5),
+        ]);
+    }
+
     public function index(Request $request): View
     {
         AuditLogger::log('Inspection / Acceptance', 'Inspection / Acceptance Page Viewed', 'Head Office viewed office inspection and acceptance records.');
@@ -112,7 +142,9 @@ class InspectionAcceptanceController extends Controller
                     'source_pr_document_id' => $purchaseOrder->source_pr_document_id,
                     'office_id' => $purchaseOrder->sourcePrDocument?->submitting_office_id ?? $request->user()->office_id,
                     'inspected_by_user_id' => $request->user()->id,
-                    'status' => InspectionAcceptanceRecord::STATUS_INSPECTED,
+                    'status' => in_array($record?->status, [InspectionAcceptanceRecord::STATUS_ACCEPTED, InspectionAcceptanceRecord::STATUS_COMPLETED], true)
+                        ? $record->status
+                        : ($request->input('save_action') === 'draft' ? InspectionAcceptanceRecord::STATUS_DRAFT : InspectionAcceptanceRecord::STATUS_INSPECTED),
                 ])
             );
 
@@ -128,9 +160,40 @@ class InspectionAcceptanceController extends Controller
             app(SvpChainService::class)->linkInspection($record->refresh(), $request->user(), 'Inspection record saved');
         });
 
+        if ($request->input('return_to') === 'editor') {
+            return redirect()->route('head-office.inspection.create', ['purchase_order_id' => $purchaseOrder->id, 'edit' => 1])
+                ->with('status', $request->input('save_action') === 'draft' ? 'Inspection draft saved.' : 'Inspection report saved.');
+        }
+
         return redirect()
             ->route('head-office.inspection.show', $purchaseOrder)
             ->with('status', 'Inspection details saved.');
+    }
+
+    public function print(Request $request, PurchaseOrder $purchaseOrder): View
+    {
+        abort_unless($this->canAccess($request->user(), $purchaseOrder), 403);
+
+        $purchaseOrder->load(['sourcePrDocument.submittingOffice', 'items', 'latestInspectionAcceptanceRecord']);
+
+        AuditLogger::log('Inspection / Acceptance', 'Inspection Report Print Viewed', 'Head Office opened the official SVP Inspection and Acceptance Report.', $purchaseOrder);
+
+        return view('head-office.inspection.print', [
+            'purchaseOrder' => $purchaseOrder,
+            'record' => $purchaseOrder->latestInspectionAcceptanceRecord ?? new InspectionAcceptanceRecord(),
+        ]);
+    }
+
+    public function printTemplate(): View
+    {
+        $purchaseOrder = new PurchaseOrder();
+        $purchaseOrder->setRelation('items', collect());
+        $purchaseOrder->setRelation('sourcePrDocument', null);
+
+        return view('head-office.inspection.print', [
+            'purchaseOrder' => $purchaseOrder,
+            'record' => new InspectionAcceptanceRecord(),
+        ]);
     }
 
     public function accept(Request $request, PurchaseOrder $purchaseOrder): RedirectResponse
@@ -230,7 +293,7 @@ class InspectionAcceptanceController extends Controller
                     'office_id' => $purchaseOrder->sourcePrDocument?->submitting_office_id ?? $request->user()->office_id,
                     'accepted_by_user_id' => $request->user()->id,
                     'status' => InspectionAcceptanceRecord::STATUS_COMPLETED,
-                    'acceptance_date' => now()->toDateString(),
+                    'acceptance_date' => $purchaseOrder->latestInspectionAcceptanceRecord?->acceptance_date ?? now()->toDateString(),
                     'remarks' => $validated['remarks'] ?? $purchaseOrder->latestInspectionAcceptanceRecord?->remarks,
                 ]
             );
@@ -354,6 +417,11 @@ class InspectionAcceptanceController extends Controller
             'acceptance_date' => ['nullable', 'date'],
             'delivery_receipt_number' => ['nullable', 'string', 'max:120'],
             'invoice_number' => ['nullable', 'string', 'max:120'],
+            'report_date' => ['nullable', 'date'],
+            'invoice_date' => ['nullable', 'date'],
+            'inspector_name' => ['nullable', 'string', 'max:255'],
+            'inspection_chair_name' => ['nullable', 'string', 'max:255'],
+            'acceptance_officer_name' => ['nullable', 'string', 'max:255'],
             'quantity_condition' => ['required', 'string', 'max:120'],
             'quality_condition' => ['required', 'string', 'max:120'],
             'findings' => ['nullable', 'string'],

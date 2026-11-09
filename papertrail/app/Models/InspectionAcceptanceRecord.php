@@ -18,6 +18,10 @@ class InspectionAcceptanceRecord extends Model
     public const STATUS_ACCEPTED = 'accepted';
     public const STATUS_COMPLETED = 'completed';
 
+    public const DEFAULT_INSPECTOR = 'MA. ANI M. CAPULO';
+    public const DEFAULT_INSPECTION_CHAIR = 'ROGELIO A. LAYO';
+    public const DEFAULT_ACCEPTANCE_OFFICER = 'JULIE C. BUYOC';
+
     protected $fillable = [
         'purchase_order_id',
         'document_reference_number',
@@ -34,6 +38,11 @@ class InspectionAcceptanceRecord extends Model
         'acceptance_date',
         'delivery_receipt_number',
         'invoice_number',
+        'report_date',
+        'invoice_date',
+        'inspector_name',
+        'inspection_chair_name',
+        'acceptance_officer_name',
         'quantity_condition',
         'quality_condition',
         'findings',
@@ -43,6 +52,8 @@ class InspectionAcceptanceRecord extends Model
     protected $casts = [
         'inspection_date' => 'date',
         'acceptance_date' => 'date',
+        'report_date' => 'date',
+        'invoice_date' => 'date',
         'sequence_number' => 'integer',
         'created_year' => 'integer',
         'created_month' => 'integer',

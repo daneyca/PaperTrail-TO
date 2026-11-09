@@ -2,7 +2,9 @@
 
 namespace App\Services\Templates;
 
+use App\Models\DocumentTemplate;
 use App\Models\User;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 
@@ -158,6 +160,18 @@ class OfficialEditableTemplateService
     public function ensure(string $documentType, ?User $user = null): array
     {
         $definition = $this->definition($documentType);
+
+        if ($documentType === 'inspection_acceptance') {
+            $hasUploadedTemplate = Schema::hasTable('document_templates')
+                && DocumentTemplate::query()->where('document_type', $documentType)
+                    ->where('file_path', $definition['path'])->whereNotNull('uploaded_by')->exists();
+            $source = resource_path('templates/inspection-acceptance-tomas-oppus.xlsx');
+
+            if (! $hasUploadedTemplate && is_file($source)
+                && (! $this->exists($documentType) || hash_file('sha256', $source) !== hash_file('sha256', Storage::disk('local')->path($definition['path'])))) {
+                $this->writeInspectionAcceptanceTemplate();
+            }
+        }
 
         if (! $this->exists($documentType)) {
             match ($documentType) {
@@ -368,19 +382,10 @@ class OfficialEditableTemplateService
 
     private function writeInspectionAcceptanceTemplate(): void
     {
-        $rows = $this->officialHeaderRows(6, 'INSPECTION / ACCEPTANCE RECORD');
-        $rows[] = ['PO Number', '', 'Supplier', '', 'Inspection Date', now()->toDateString()];
-        $rows[] = ['Delivery Receipt No.', '', 'Invoice No.', '', 'Acceptance Date', ''];
-        $rows[] = ['Quantity Condition', 'Complete', 'Quality Condition', 'Conforming', '', ''];
-        $rows[] = ['Inspection Findings', '', '', '', '', ''];
-        $rows[] = ['Remarks', '', '', '', '', ''];
-        $rows[] = ['Item No.', 'Description', 'Qty', 'Unit', 'Unit Cost', 'Total'];
-        for ($index = 1; $index <= 12; $index++) {
-            $rows[] = [$index, '', '', '', '', ''];
-        }
-        $rows[] = ['Inspected By', '', '', 'Accepted By', '', ''];
-
-        $this->saveOfficialXlsx('inspection_acceptance', 'Inspection Acceptance', $rows, [12, 42, 10, 12, 16, 16], $this->portraitOptions(6));
+        Storage::disk('local')->put(
+            $this->path('inspection_acceptance'),
+            file_get_contents(resource_path('templates/inspection-acceptance-tomas-oppus.xlsx')),
+        );
     }
 
     private function writeBacResolutionTemplate(string $documentType = 'bac_resolution'): void

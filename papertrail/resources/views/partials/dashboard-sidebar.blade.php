@@ -253,6 +253,7 @@
         ['section' => 'Workspace'],
         ['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'dashboard'],
     ];
+    $svpDocumentMenu = collect($roleMenus['head-office'])->first(fn ($item) => ($item['label'] ?? null) === 'Small Value Procurement');
 
     if ($user?->isOfficeDocumentPreparer()) {
         $items = [
@@ -266,14 +267,7 @@
                     ['label' => 'Status Tracking', 'route' => 'head-office.svp-tracking.index', 'active' => 'head-office.svp-tracking.*'],
                 ],
             ],
-            [
-                'label' => 'Office Preparation',
-                'icon' => 'workflow',
-                'children' => [
-                    ['label' => 'PPMP', 'route' => 'head-office.ppmp.index', 'active' => 'head-office.ppmp.*'],
-                    ['label' => 'Create PR', 'route' => 'head-office.pr.create', 'active' => 'head-office.pr.create'],
-                ],
-            ],
+            $svpDocumentMenu,
             ['label' => 'AI Center', 'route' => 'assistant.index', 'icon' => 'review', 'active' => 'assistant.*'],
         ];
     }
@@ -305,6 +299,8 @@
             }
         }
         unset($item);
+        $postingMenuIndex = array_search('Posting Management', array_column($items, 'label'), true);
+        array_splice($items, $postingMenuIndex + 1, 0, [$svpDocumentMenu]);
         $items = array_values(array_filter($items, fn ($item) => ($item['label'] ?? null) !== 'Monitoring'));
     } elseif ($roleSlug === 'bac-secretariat') {
         foreach ($items as &$item) {

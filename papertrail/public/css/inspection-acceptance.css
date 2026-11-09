@@ -1,0 +1,56 @@
+.iar-report, .iar-report * { box-sizing: border-box; }
+.iar-report { width: 190mm; max-width: none; margin: 0 auto; border: 1px solid #000; color: #000; background: #fff; font: 10pt Arial, sans-serif; }
+.iar-report .iar-heading { text-align: center; min-height: 24mm; padding: 2mm 2mm 4mm; }
+.iar-report .iar-heading h2 { margin: 0; font: bold 14pt Arial, sans-serif; letter-spacing: .4px; color: #000; }
+.iar-report .iar-heading p { margin: 0; font-size: 10pt; color: #000; }
+.iar-metadata { padding: 0 1mm 4mm; font-size: 8pt; }
+.iar-meta-row { display: grid; grid-template-columns: 55% 45%; min-height: 6mm; gap: 1mm; }
+.iar-meta-row > div { display: flex; gap: 2mm; align-items: baseline; min-width: 0; padding-right: 1mm; }
+.iar-meta-row span { flex-shrink: 0; }
+.iar-meta-row strong { flex: 1; min-width: 0; min-height: 4mm; border-bottom: 1px solid #000; overflow-wrap: anywhere; font-size: 8pt; }
+.iar-meta-row .iar-office { grid-column: 1; }
+.iar-report table.iar-items { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 0; font-size: 9pt; }
+.iar-items th, .iar-items td { border: 1px solid #000; height: 5.2mm; padding: .5mm 1mm; text-align: center; font-weight: normal; line-height: 1.2; overflow-wrap: anywhere; color: #000; background: #fff; }
+.iar-items th:first-child, .iar-items td:first-child { border-left: 0; }
+.iar-items th:last-child, .iar-items td:last-child { border-right: 0; }
+.iar-items .iar-description-heading { letter-spacing: 3px; }
+.iar-items td.iar-description { text-align: left; white-space: pre-line; }
+.iar-items tr { break-inside: avoid; }
+.iar-certifications { display: grid; grid-template-columns: 71% 29%; break-inside: avoid; }
+.iar-certifications section { min-width: 0; }
+.iar-inspection { border-right: 1px solid #000; }
+.iar-certifications h3 { margin: 0; border-bottom: 1px solid #000; text-align: center; font: bold 9pt Arial, sans-serif; padding: 1mm; letter-spacing: 1px; }
+.iar-certification-body { padding: 1mm 3mm 5mm; font-size: 8pt; }
+.iar-certification-body p { margin: 0 0 1mm; line-height: 1.35; color: #000; }
+.iar-date { display: inline-block; min-width: 21mm; border-bottom: 1px solid #000; }
+.iar-check-line { display: flex; gap: 2mm; padding-left: 5mm; align-items: flex-start; }
+.iar-checkbox { display: inline-flex; align-items: center; justify-content: center; width: 3mm; height: 3mm; border: 1px solid #000; flex-shrink: 0; line-height: 1; }
+.iar-inspection-signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin-top: 13mm; }
+.iar-inspection-signatures > div, .iar-acceptance-signature { text-align: center; }
+.iar-inspection-signatures strong, .iar-acceptance-signature strong { display: block; border-bottom: 1px solid #000; font-size: 8pt; min-height: 4mm; overflow-wrap: anywhere; }
+.iar-inspection-signatures span, .iar-acceptance-signature span { display: block; font-size: 6.5pt; margin-top: 1mm; }
+.iar-acceptance-signature { margin-top: 13mm; }
+.iar-preview { overflow-x: auto; padding: 20px 0; background: #eee; }
+.iar-print-body { margin: 0; padding: 20px; background: #eee; }
+.iar-print-toolbar { display: flex; justify-content: space-between; max-width: 190mm; margin: 0 auto 20px; font: 14px Arial, sans-serif; }
+.iar-print-toolbar button { cursor: pointer; padding: 8px 16px; }
+.iar-editor-canvas { padding: 24px; overflow-x: auto; background: #e9edf3; }
+.iar-report .iar-field { display: block; width: 100%; min-width: 0; min-height: 4mm; padding: 1px 2px; margin: 0; border: 0; border-radius: 0; box-shadow: none; background: #f0f6ff; color: #000; font: inherit; }
+.iar-report .iar-field:focus { outline: 1px solid #2563eb; }
+.iar-report .iar-edit-checkbox { width: 3mm; height: 3mm; min-height: 0; padding: 0; margin: 0; border-radius: 0; flex-shrink: 0; }
+.iar-report .iar-date:has(.iar-field) { min-width: 29mm; }
+.iar-report .iar-inspection-signatures .iar-field, .iar-report .iar-acceptance-signature .iar-field { text-align: center; }
+.iar-editor-notes { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; padding: 20px; }
+.iar-editor-notes label { display: grid; gap: 6px; font-size: 12px; }
+.iar-editor-notes input, .iar-editor-notes textarea { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; }
+.iar-editor-errors { padding: 12px 20px; color: #991b1b; background: #fef2f2; }
+.iar-source-hint { margin: 12px 0; font-size: 13px; color: #536783; }
+.po-create-source-pane .po-source-picker--split input[readonly] { width: 100%; min-width: 0; height: 38px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: #f8fafc; color: #0b2341; font: inherit; font-weight: normal; }
+@media (max-width: 700px) { .iar-editor-notes { grid-template-columns: 1fr; } .iar-editor-canvas { padding: 12px; } }
+@page { size: A4 portrait; margin: 10mm; }
+@media print {
+    .iar-print-body { background: #fff; padding: 0; margin: 0; }
+    .iar-print-toolbar { display: none; }
+    .iar-report { width: 100%; margin: 0; }
+    .iar-items thead { display: table-header-group; }
+}
