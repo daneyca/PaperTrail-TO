@@ -3,6 +3,8 @@
 @section('title', $document->displayNumber() . ' | PaperTrail')
 
 @section('content')
+    <link rel="stylesheet" href="{{ asset('css/my-documents.css') }}?v={{ filemtime(public_path('css/my-documents.css')) }}">
+    <div class="my-document-detail-page">
     @php
         $isPr = in_array($document->document_type, ['PR', 'Purchase Request'], true);
         $isPpmp = $document->document_type === 'PPMP';
@@ -216,4 +218,5 @@
         </article>
     </section>
     @endif
+    </div>
 @endsection
