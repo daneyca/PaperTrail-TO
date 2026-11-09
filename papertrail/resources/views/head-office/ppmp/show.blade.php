@@ -22,7 +22,7 @@
                 \App\Models\ProcurementDocument::STATUS_PPMP_SIGNATORIES_COMPLETED,
                 \App\Models\ProcurementDocument::STATUS_PPMP_SIGNATURE_RETURNED,
             ], true);
-        $submitLabel = $canSubmitToAppConsolidation ? 'Submit to BAC Secretariat' : 'Continue to E-Signature';
+        $submitLabel = $canSubmitToAppConsolidation ? 'Submit to BAC Secretariat' : 'Continue for Signatories';
         $submitConfirm = $canSubmitToAppConsolidation
             ? 'Submit this signed PPMP to BAC Secretariat for APP consolidation?'
             : 'Generate the required Prepared By and Submitted By e-signature requests for this PPMP?';
@@ -77,7 +77,7 @@
                     method="POST"
                     action="{{ route('head-office.ppmp.submit', $document) }}"
                     data-confirm="{{ $submitConfirm }}"
-                    data-confirm-title="{{ $canSubmitToAppConsolidation ? 'Submit PPMP?' : 'Continue to E-Signature?' }}"
+                    data-confirm-title="{{ $canSubmitToAppConsolidation ? 'Submit PPMP?' : 'Continue for Signatories?' }}"
                     data-confirm-label="{{ $submitLabel }}"
                     data-confirm-type="submit"
                 >
