@@ -19,6 +19,37 @@ class SvpInspectionAcceptanceReportTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_acceptance_completion_link_opens_and_keeps_saved_names_through_completion(): void
+    {
+        [$user, $po] = $this->order();
+        $record = InspectionAcceptanceRecord::create([
+            'purchase_order_id' => $po->id, 'status' => InspectionAcceptanceRecord::STATUS_INSPECTED,
+            'inspection_date' => '2026-11-09', 'quantity_condition' => 'Complete', 'quality_condition' => 'Conforming',
+            'inspector_name' => 'Saved Inspector', 'inspection_chair_name' => 'Saved Assessor',
+            'acceptance_officer_name' => 'Saved Receiver',
+        ]);
+        $this->actingAs($user)->get(route('head-office.inspection.create', ['purchase_order_id' => $po->id, 'edit' => 1]))
+            ->assertOk()->assertSee('Acceptance / Completion')->assertSee(route('head-office.inspection.show', $po), false);
+        $this->get(route('head-office.inspection.show', $po))->assertOk()
+            ->assertSee('Mark Accepted')->assertSee('Saved Inspector')->assertSee('Saved Assessor')->assertSee('Saved Receiver')
+            ->assertSee('placeholder="Enter Name"', false);
+        $this->patch(route('head-office.inspection.accept', $po), ['acceptance_date' => '2026-11-09'])
+            ->assertSessionHasNoErrors()->assertRedirect(route('head-office.inspection.show', $po));
+        $this->get(route('head-office.inspection.show', $po))->assertOk()->assertSee('Mark Completed');
+        $this->patch(route('head-office.inspection.complete', $po))
+            ->assertSessionHasNoErrors()->assertRedirect(route('head-office.inspection.show', $po));
+        $this->get(route('head-office.inspection.show', $po))->assertOk()->assertSee('Saved Receiver');
+        $this->assertSame(InspectionAcceptanceRecord::STATUS_COMPLETED, $record->refresh()->status);
+    }
+
+    public function test_acceptance_page_also_opens_before_an_inspection_record_is_saved(): void
+    {
+        [$user, $po] = $this->order();
+        $this->actingAs($user)->get(route('head-office.inspection.show', $po))->assertOk()
+            ->assertSee('Mark Accepted')->assertSee('placeholder="Enter Name"', false);
+        $this->assertDatabaseCount('inspection_acceptance_records', 0);
+    }
+
     public function test_the_iar_template_is_available_without_any_purchase_orders(): void
     {
         [$user, $po] = $this->order();

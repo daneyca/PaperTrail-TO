@@ -15,6 +15,23 @@ use Tests\TestCase;
 
 class ManualDocumentNameFieldsTest extends TestCase
 {
+    public function test_legacy_ppmp_name_inputs_render_with_placeholders_and_saved_values(): void
+    {
+        foreach ([[], ['prepared_by_name' => 'Saved Preparer', 'submitted_by_name' => 'Saved Head']] as $names) {
+            $ppmp = (new \App\Models\Ppmp($names))->setRelation('items', collect());
+            $html = view('ppmps.partials.official-form', [
+                'ppmp' => $ppmp, 'mode' => 'create', 'errors' => new \Illuminate\Support\ViewErrorBag(),
+            ])->render();
+            $xpath = $this->xpath($html);
+            foreach (['prepared_by_name', 'submitted_by_name'] as $field) {
+                $input = $xpath->query('//input[@name="'.$field.'"]')->item(0);
+                $this->assertNotNull($input);
+                $this->assertSame('Enter Name', $input->getAttribute('placeholder'));
+                $this->assertSame($names[$field] ?? '', $input->getAttribute('value'));
+            }
+        }
+    }
+
     public function test_new_pr_names_are_blank_and_saved_names_are_kept(): void
     {
         $user = new User(['user_id' => 'MAO-STAFF', 'name' => 'Example Staff', 'role' => User::ROLE_OFFICE_PREPARER]);

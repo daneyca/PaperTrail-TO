@@ -8,7 +8,7 @@
     $items = collect(old('items_json') ? json_decode(old('items_json'), true) : null);
     $suppliers = collect(old('suppliers_json') ? json_decode(old('suppliers_json'), true) : ($abstract->suppliers_json ?? []));
     $awards = collect(old('awards_json') ? json_decode(old('awards_json'), true) : ($abstract->awards_json ?? []));
-    $committee = collect(old('committee_json') ? json_decode(old('committee_json'), true) : ($abstract->committee_json ?? []));
+    $committee = collect(old('committee_json') ? json_decode(old('committee_json'), true) : $abstract->committeeForDisplay());
     $committeeDefaults = collect([
         'bac_chairperson' => '',
         'bac_vice_chairperson' => '',
@@ -117,18 +117,20 @@
 
         return $updated ?? $html;
     };
-    $applyCommitteeDefaults = function (?string $html) use ($committeeDefaults, $committeeRoleDefinitions): ?string {
+    $applyCommitteeDefaults = function (?string $html) use ($committeeDefaults, $committeeRoleDefinitions, $committee, $committeeName): ?string {
         if (! filled($html)) {
             return $html;
         }
 
         foreach ($committeeDefaults as $role => $name) {
+            $name = $committeeName($role);
+            $hasSavedEntry = $committee->has($role);
             $html = preg_replace_callback(
                 '/(<[^>]+data-committee-role=(["\'])'.preg_quote($role, '/').'\2[^>]*>)([\s\S]*?)(<\/[^>]+>)/i',
-                function (array $matches) use ($name): string {
+                function (array $matches) use ($name, $hasSavedEntry): string {
                     $current = trim(html_entity_decode(strip_tags($matches[3]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
 
-                    return $current !== ''
+                    return ! $hasSavedEntry && $current !== ''
                         ? $matches[0]
                         : $matches[1].e($name).$matches[4];
                 },
@@ -153,6 +155,9 @@
         return $html;
     };
     $savedHtml = $applyCommitteeDefaults($upgradeCommitteeBlock($upgradeOfficialHeader(old('document_html', $abstract->document_html))));
+    if (! $isEditable && filled($savedHtml)) {
+        $savedHtml = str_replace('is-editing-signatory', '', $savedHtml);
+    }
     $isStandaloneSavedDocument = filled($savedHtml) && str_contains($savedHtml, 'aob-as-read-document');
     $supplierTotal = fn (int $number) => $suppliers->get("supplier_{$number}_total", '');
 @endphp

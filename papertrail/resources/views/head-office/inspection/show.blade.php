@@ -144,15 +144,15 @@
                 @error('quality_condition')<span class="field-error">{{ $message }}</span>@enderror
 
                 <label for="inspector_name">Inspection Officer - Des.</label>
-                <input id="inspector_name" name="inspector_name" type="text" maxlength="255" value="{{ old('inspector_name', $record- placeholder="Enter Name">inspector_name) }}">
+                <input id="inspector_name" name="inspector_name" type="text" maxlength="255" value="{{ old('inspector_name', $record->inspector_name) }}" placeholder="Enter Name">
                 @error('inspector_name')<span class="field-error">{{ $message }}</span>@enderror
 
                 <label for="inspection_chair_name">HRMO/Municipal Assessor Designate</label>
-                <input id="inspection_chair_name" name="inspection_chair_name" type="text" maxlength="255" value="{{ old('inspection_chair_name', $record- placeholder="Enter Name">inspection_chair_name) }}">
+                <input id="inspection_chair_name" name="inspection_chair_name" type="text" maxlength="255" value="{{ old('inspection_chair_name', $record->inspection_chair_name) }}" placeholder="Enter Name">
                 @error('inspection_chair_name')<span class="field-error">{{ $message }}</span>@enderror
 
                 <label for="acceptance_officer_name">Acceptance Officer (Admin Aide I)</label>
-                <input id="acceptance_officer_name" name="acceptance_officer_name" type="text" maxlength="255" value="{{ old('acceptance_officer_name', $record- placeholder="Enter Name">acceptance_officer_name) }}">
+                <input id="acceptance_officer_name" name="acceptance_officer_name" type="text" maxlength="255" value="{{ old('acceptance_officer_name', $record->acceptance_officer_name) }}" placeholder="Enter Name">
                 @error('acceptance_officer_name')<span class="field-error">{{ $message }}</span>@enderror
 
                 <label for="findings">Inspection Findings</label>

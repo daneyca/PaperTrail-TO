@@ -111,6 +111,29 @@ class AbstractQuotation extends Model
         return $this->isEditable();
     }
 
+    public function committeeForDisplay(): array
+    {
+        $committee = $this->committee_json ?: [];
+        if (! $this->exists) {
+            return $committee;
+        }
+
+        foreach (SignatureRequest::query()->forDocument('abstract', $this->id)->where('is_required', true)->get() as $request) {
+            $role = $request->signatory_slot === 'bac_member_3' ? 'bac_member_alternate' : $request->signatory_slot;
+            $entry = $committee[$role] ?? [];
+            $entry = is_array($entry) ? $entry : ['name' => (string) $entry];
+            $metadata = $request->metadata ?: [];
+            foreach (['name' => 'printed_name', 'account_code' => 'account_code', 'designation' => 'designation'] as $field => $key) {
+                if (blank($entry[$field] ?? null) && filled($metadata[$key] ?? null)) {
+                    $entry[$field] = $metadata[$key];
+                }
+            }
+            $committee[$role] = $entry;
+        }
+
+        return $committee;
+    }
+
     public function displayNumber(): string
     {
         return $this->document_reference_number

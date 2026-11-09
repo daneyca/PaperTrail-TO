@@ -290,7 +290,7 @@
             <div class="ppmp-signature-block">
                 <p>Prepared by:</p>
                 @if ($editable)
-                    <input name="prepared_by_name" type="text" value="{{ old('prepared_by_name', $ppmp- placeholder="Enter Name">prepared_by_name) }}" aria-label="Prepared by name">
+                    <input name="prepared_by_name" type="text" value="{{ old('prepared_by_name', $ppmp->prepared_by_name) }}" aria-label="Prepared by name" placeholder="Enter Name">
                     <input name="prepared_by_position" type="text" value="{{ old('prepared_by_position', $ppmp->prepared_by_position) }}" aria-label="Prepared by position">
                 @else
                     <strong>{{ $ppmp->prepared_by_name ?: '' }}</strong>
@@ -312,7 +312,7 @@
             <div class="ppmp-signature-block">
                 <p>Submitted by:</p>
                 @if ($editable)
-                    <input name="submitted_by_name" type="text" value="{{ old('submitted_by_name', $ppmp- placeholder="Enter Name">submitted_by_name) }}" aria-label="Submitted by name">
+                    <input name="submitted_by_name" type="text" value="{{ old('submitted_by_name', $ppmp->submitted_by_name) }}" aria-label="Submitted by name" placeholder="Enter Name">
                     <input name="submitted_by_position" type="text" value="{{ old('submitted_by_position', $ppmp->submitted_by_position) }}" aria-label="Submitted by position">
                 @else
                     <strong>{{ $ppmp->submitted_by_name ?: '' }}</strong>

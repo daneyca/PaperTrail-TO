@@ -59,6 +59,18 @@ class AbstractSubmissionTest extends TestCase
                 ->assertOk()->assertSee($abstract->document_reference_number);
             $this->get(route('signature-requests.show', $request))->assertOk()->assertSee('Member Two Printed Name');
         }
+
+        // Records saved by the old editor may have empty name spans and JSON names.
+        $legacyCommittee = $committee;
+        $legacyHtml = $abstract->document_html;
+        foreach ($legacyCommittee as &$entry) {
+            $legacyHtml = str_replace($entry['name'], '', $legacyHtml);
+            $entry['name'] = '';
+        }
+        unset($entry);
+        $abstract->update(['committee_json' => $legacyCommittee, 'document_html' => $legacyHtml]);
+        $this->actingAs($staff)->get(route('head-office.abstracts.show', $abstract))->assertOk()->assertSee('Member Two Printed Name');
+        $this->get(route('head-office.abstracts.print', $abstract))->assertOk()->assertSee('Member Two Printed Name');
     }
 
     public function test_missing_signer_account_keeps_the_form_open_with_a_clear_error(): void
