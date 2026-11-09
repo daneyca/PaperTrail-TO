@@ -133,11 +133,13 @@
                                     @endif
                                     @if ($canEdit)
                                         <a href="{{ route('head-office.ppmp.edit', $document) }}">Continue Editing</a>
+                                    @endif
+                                    @if (auth()->user()->canManageSvpDocuments() && in_array($document->id, $deletableDocumentIds ?? [], true))
                                         <form
                                             method="POST"
                                             action="{{ route('head-office.ppmp.destroy', $document) }}"
                                             data-confirm-title="Delete PPMP?"
-                                            data-confirm="This will permanently remove this draft or returned PPMP record and its saved item rows."
+                                            data-confirm="This will permanently delete this PPMP, its saved item rows, and any unsigned signature requests."
                                             data-confirm-label="Delete PPMP"
                                             data-confirm-type="danger"
                                         >

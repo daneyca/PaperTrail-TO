@@ -5,6 +5,7 @@ namespace App\Http\Controllers\HeadOffice;
 use App\Http\Controllers\Controller;
 use App\Models\DocumentAttachment;
 use App\Models\DocumentRoutingHistory;
+use App\Models\ElectronicSignature;
 use App\Models\Office;
 use App\Models\ProcurementDocument;
 use App\Models\SignatureRequest;
@@ -77,8 +78,11 @@ class PpmpController extends Controller
 
         $this->applyFilters($query, $request);
 
+        $documents = $query->latest('updated_at')->paginate(10)->withQueryString();
+
         return view('head-office.ppmp.index', [
-            'documents' => $query->latest('updated_at')->paginate(10)->withQueryString(),
+            'documents' => $documents,
+            'deletableDocumentIds' => $documents->getCollection()->filter(fn ($document) => $this->canDelete($document))->modelKeys(),
             'summary' => $this->summary($request->user()),
             'recentDrafts' => app(DocumentDraftService::class)->getPpmpDraftsForUser($request->user(), 5),
             'filters' => $request->only(['search', 'document_type', 'fiscal_year', 'status', 'stage', 'date_from', 'date_to']),
@@ -222,6 +226,7 @@ class PpmpController extends Controller
         return view('head-office.ppmp.show', [
             'document' => $document,
             'canModify' => $this->canModify($document),
+            'canDelete' => $this->canDelete($document),
             'canStartSignatureWorkflow' => $signatureWorkflow->canStartFor($request->user(), $document),
             'canSubmitToAppConsolidation' => $signatureWorkflow->canSubmitToAppConsolidation($request->user(), $document),
             'ppmpSignatureCards' => $signatureWorkflow->signatureStatusCards($document),
@@ -309,22 +314,27 @@ class PpmpController extends Controller
             abort(403);
         }
 
-        if (!$this->canModify($document)) {
-            return redirect()
-                ->route('head-office.ppmp.index')
-                ->with('error', 'Only draft or returned PPMP records can be deleted.');
-        }
+        $deleted = DB::transaction(function () use ($request, $document) {
+            $signatureRequestIds = SignatureRequest::query()
+                ->forDocument('ppmp', $document->id)
+                ->lockForUpdate()
+                ->pluck('id');
 
-        DB::transaction(function () use ($request, $document) {
+            if (!$this->canDelete($document->refresh())) {
+                return false;
+            }
+
             $oldValues = $document->only(['tracking_number', 'ppmp_no', 'title', 'fiscal_year', 'status', 'total_amount']);
 
             SignatureRequest::query()
-                ->forDocument('ppmp', $document->id)
+                ->whereKey($signatureRequestIds)
                 ->delete();
 
             SystemNotification::query()
-                ->where('related_type', $document::class)
-                ->where('related_id', $document->id)
+                ->where(function ($query) use ($document, $signatureRequestIds) {
+                    $query->where(fn ($query) => $query->where('related_type', $document::class)->where('related_id', $document->id))
+                        ->orWhere(fn ($query) => $query->where('related_type', SignatureRequest::class)->whereIn('related_id', $signatureRequestIds));
+                })
                 ->delete();
 
             $document->attachments()->update([
@@ -334,10 +344,17 @@ class PpmpController extends Controller
             $document->attachments()->delete();
             $document->ppmpItems()->delete();
 
-            AuditLogger::log('PPMP Submission', 'PPMP Deleted', 'Head of Office deleted a PPMP draft/returned record.', $document, $oldValues, null, 'warning');
+            AuditLogger::log('PPMP Submission', 'PPMP Deleted', 'Office user deleted a draft, returned, or unsigned pending PPMP.', $document, $oldValues, null, 'warning');
 
             $document->delete();
+            return true;
         });
+
+        if (!$deleted) {
+            return redirect()
+                ->route('head-office.ppmp.index')
+                ->with('error', 'Only draft, returned, or pending PPMPs without completed signatures can be deleted. Signed and submitted PPMPs cannot be deleted.');
+        }
 
         return redirect()
             ->route('head-office.ppmp.index')
@@ -563,6 +580,22 @@ class PpmpController extends Controller
     private function canModify(ProcurementDocument $document): bool
     {
         return in_array($document->status, self::MODIFIABLE_STATUSES, true);
+    }
+
+    private function canDelete(ProcurementDocument $document): bool
+    {
+        if ($this->canModify($document)) {
+            return true;
+        }
+
+        if ($document->status !== ProcurementDocument::STATUS_PPMP_PENDING_SIGNATORIES) {
+            return false;
+        }
+
+        return !SignatureRequest::query()->forDocument('ppmp', $document->id)
+            ->where('status', SignatureRequest::STATUS_SIGNED)->exists()
+            && !ElectronicSignature::query()->where('document_type', 'ppmp')->where('document_id', $document->id)
+                ->where('signature_status', ElectronicSignature::STATUS_SIGNED)->exists();
     }
 
     private function assignedOffice(User $user): ?Office
