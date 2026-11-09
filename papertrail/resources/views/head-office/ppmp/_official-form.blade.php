@@ -467,7 +467,6 @@
             const template = document.querySelector('#ppmpRowTemplate');
             const totalTarget = builder.querySelector('[data-ppmp-total]');
             const addButtons = document.querySelectorAll('[data-add-ppmp-row]');
-            const clearButtons = document.querySelectorAll('[data-clear-empty-ppmp-rows]');
             const boldButton = document.querySelector('[data-toggle-ppmp-bold]');
             const money = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             const pasteColumns = [
@@ -489,13 +488,6 @@
 
             function dataRows() {
                 return [...rows.querySelectorAll('.ppmp-entry-row')];
-            }
-
-            function rowHasTypedContent(row) {
-                return pasteColumns.some((name) => {
-                    const field = fieldForColumn(row, name);
-                    return field && String(field.value || '').trim() !== '';
-                });
             }
 
             function rowValues(row) {
@@ -683,20 +675,6 @@
             boldButton?.addEventListener('click', () => {
                 toggleRowBold();
             });
-
-            clearButtons.forEach((button) => button.addEventListener('click', () => {
-                const dataRows = [...rows.querySelectorAll('.ppmp-entry-row')];
-                let remainingRows = dataRows.length;
-
-                dataRows.forEach((row) => {
-                    if (remainingRows > 1 && !rowHasTypedContent(row)) {
-                        row.remove();
-                        remainingRows -= 1;
-                    }
-                });
-                recalculateTotal();
-                autosizeAllRows();
-            }));
 
             builder.addEventListener('input', (event) => {
                 const row = event.target.closest('.ppmp-entry-row');

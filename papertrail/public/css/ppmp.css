@@ -700,6 +700,83 @@
 .ppmp-col-11 { width: 6.4%; }
 .ppmp-col-12 { width: 6.5%; }
 
+/* Keep dashboard form controls within the official PPMP cells. */
+@media screen {
+    body.dashboard-body .ppmp-builder-form :is(.ppmp-entry-title, .ppmp-entry-meta, .ppmp-entry-signatures) input:not([type="radio"]) {
+        min-height: 20px !important;
+        padding: 2px 3px !important;
+        border: 0 !important;
+        border-bottom: 0.5px solid #000 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        color: #000 !important;
+        font: 10px/1.35 Arial, sans-serif !important;
+        font-weight: inherit !important;
+    }
+
+    body.dashboard-body .ppmp-builder-form .ppmp-entry-title input {
+        width: 32mm !important;
+        flex: 0 0 32mm;
+    }
+
+    body.dashboard-body .ppmp-builder-form .ppmp-entry-meta input {
+        width: 34mm !important;
+    }
+
+    body.dashboard-body .ppmp-builder-form .ppmp-entry-signatures input {
+        width: 46mm !important;
+    }
+
+    body.dashboard-body .ppmp-builder-form .ppmp-entry-table .ppmp-data-row td {
+        vertical-align: middle;
+    }
+
+    body.dashboard-body .ppmp-builder-form .ppmp-entry-table [data-ppmp-column] {
+        width: 100% !important;
+        min-height: 30px !important;
+        margin: 0;
+        padding: 3px 2px !important;
+        border: 1px solid transparent !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        color: #000 !important;
+        font: 10px/1.35 Arial, sans-serif !important;
+        font-weight: inherit !important;
+        text-align: center;
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
+        word-break: normal;
+    }
+
+    body.dashboard-body .ppmp-builder-form .ppmp-entry-table td:is(:nth-child(6), :nth-child(7), :nth-child(8)) textarea {
+        font-size: 9px !important;
+    }
+
+    body.dashboard-body .ppmp-builder-form .ppmp-entry-table [data-estimated-budget] {
+        appearance: textfield;
+        text-align: center;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .ppmp-builder-form [data-estimated-budget]::-webkit-inner-spin-button,
+    .ppmp-builder-form [data-estimated-budget]::-webkit-outer-spin-button {
+        margin: 0;
+        appearance: none;
+    }
+
+    body.dashboard-body .ppmp-builder-form .ppmp-entry-table [data-ppmp-column]:hover {
+        background: #f8fafc !important;
+    }
+
+    body.dashboard-body .ppmp-builder-form .ppmp-entry-table [data-ppmp-column]:focus {
+        outline: 1px solid #2563eb;
+        outline-offset: -1px;
+        border-color: #93c5fd !important;
+        background: #eff6ff !important;
+    }
+}
+
 .ppmp-print-body {
     margin: 0;
     padding: 18px;
