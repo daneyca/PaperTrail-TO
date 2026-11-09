@@ -38,6 +38,9 @@ trait HasWorkspaces
 
     public function workspaceLabel(): string
     {
+        if ($this->user_id === \App\Services\BacsecMpdoWorkspaceService::WORKSPACE) {
+            return 'MPDO Procurement Staff';
+        }
         if ($this->role === self::ROLE_BAC_CHAIR) {
             return 'BAC Chairperson';
         }

@@ -1,0 +1,23 @@
+body.dashboard-body .sidebar-workspace-navigation { margin: 0; }
+body.dashboard-body .sidebar-workspace-navigation button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+    padding: 9px 12px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: #435875;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+body.dashboard-body .sidebar-workspace-navigation button:hover { background: #edf4ff; color: #2563eb; }
+body.dashboard-body .sidebar-workspace-navigation button:focus-visible { outline: 2px solid #2563eb; outline-offset: -2px; }
+body.dashboard-body .sidebar-workspace-navigation button svg { width: 18px; height: 18px; flex-shrink: 0; }
+html.papertrail-dark-mode body.dashboard-body .sidebar-workspace-navigation button { color: #cbd5e1; }
+html.papertrail-dark-mode body.dashboard-body .sidebar-workspace-navigation button:hover { background: #1e293b; color: #93c5fd; }

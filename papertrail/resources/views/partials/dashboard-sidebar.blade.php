@@ -5,6 +5,8 @@
     $roleSlug = $user?->roleSlug() ?? '';
 
     $isSvpPostingProcessor = $user?->user_id === 'BACSEC-003';
+    $isBacsecMpdoWorkspace = $user?->user_id === \App\Services\BacsecMpdoWorkspaceService::WORKSPACE
+        && $user->loginAccount()->user_id === \App\Services\BacsecMpdoWorkspaceService::ACCOUNT;
     $isBacsecPrSignatureOnly = $user?->user_id === 'BACSEC-002';
     $hasBacsec002PurchaseRequestCapability = $user?->hasBacsec002PurchaseRequestCapability() ?? false;
 
@@ -304,7 +306,16 @@
         }
         unset($item);
         $postingMenuIndex = array_search('Posting Management', array_column($items, 'label'), true);
-        array_splice($items, $postingMenuIndex + 1, 0, [$svpDocumentMenu]);
+        $mpdoMenu = $svpDocumentMenu;
+        $mpdoSections = ['ppmp', 'pr', 'resolutions', 'rfq', 'abstract', 'purchase-order', 'inspection'];
+        foreach ($mpdoMenu['children'] as $index => &$child) {
+            $child['route'] = 'workspaces.bacsec-mpdo';
+            $child['parameters'] = ['section' => $mpdoSections[$index]];
+            $child['method'] = 'POST';
+        }
+        unset($child);
+        array_unshift($mpdoMenu['children'], ['section' => true, 'label' => 'MPDO Documents']);
+        array_splice($items, $postingMenuIndex + 1, 0, [$mpdoMenu]);
         $items = array_values(array_filter($items, fn ($item) => ($item['label'] ?? null) !== 'Monitoring'));
     } elseif ($roleSlug === 'bac-secretariat') {
         foreach ($items as &$item) {
@@ -510,6 +521,9 @@
     $hasPaperTrailLogo = file_exists(public_path($paperTrailLogoPath));
 @endphp
 
+@if ($isSvpPostingProcessor || $isBacsecMpdoWorkspace)
+    <link rel="stylesheet" href="{{ asset('css/mpdo-svp-workspace.css') }}?v={{ filemtime(public_path('css/mpdo-svp-workspace.css')) }}">
+@endif
 <aside id="dashboard-sidebar" class="dashboard-sidebar" aria-label="Primary navigation">
     <div class="sidebar-top">
         <div class="sidebar-header">
@@ -529,6 +543,12 @@
         </div>
 
         <nav class="sidebar-nav">
+            @if ($isBacsecMpdoWorkspace)
+                <form method="POST" action="{{ route('workspaces.bacsec-mpdo', ['section' => 'bac-secretariat']) }}" class="sidebar-workspace-navigation">
+                    @csrf
+                    <button type="submit"><x-sidebar-icon name="workflow" /><span>BAC Secretariat Duties</span></button>
+                </form>
+            @endif
             @foreach ($items as $item)
                 @if (! empty($item['section']))
                     <span class="sidebar-section-label">{{ $item['section'] }}</span>
@@ -640,6 +660,14 @@
                                 @endif
 
                                 @if (! $childHref)
+                                    @continue
+                                @endif
+
+                                @if (($child['method'] ?? null) === 'POST')
+                                    <form method="POST" action="{{ $childHref }}" class="sidebar-workspace-navigation">
+                                        @csrf
+                                        <button type="submit" title="{{ $child['label'] }}">{{ $child['label'] }}</button>
+                                    </form>
                                     @continue
                                 @endif
 
