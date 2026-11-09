@@ -128,7 +128,7 @@
     <input type="hidden" name="priority" value="{{ old('priority', $document->priority ?: 'normal') }}">
 @endif
 
-<section class="ppmp-entry-scroll {{ $mode === 'print' ? 'is-print' : '' }}">
+<section class="ppmp-entry-scroll {{ $editable ? 'ppmp-entry-editor' : '' }} {{ $mode === 'print' ? 'is-print' : '' }}">
     <article class="ppmp-sheet ppmp-entry-sheet ppmp-official-document" id="ppmpPrintPaper" data-ppmp-builder data-ppmp-mode="{{ $mode }}">
         <header class="ppmp-official-header">
             <div class="ppmp-logo-slot">
@@ -195,6 +195,10 @@
 
         @error('items')<p class="field-error ppmp-items-error">{{ $message }}</p>@enderror
 
+        @if ($editable)
+            <p class="ppmp-editor-hint no-print" id="ppmpEditorHint">Scroll across to view all columns. Long descriptions scroll inside their fields.</p>
+            <div class="ppmp-editor-grid" role="region" aria-label="PPMP project worksheet" aria-describedby="ppmpEditorHint" tabindex="0">
+        @endif
         <table class="ppmp-official-table ppmp-entry-table">
             <colgroup>
                 <col class="ppmp-col-1">
@@ -378,6 +382,9 @@
                 </tr>
             </tbody>
         </table>
+        @if ($editable)
+            </div>
+        @endif
 
         <section class="ppmp-signature-grid ppmp-entry-signatures">
             <div class="ppmp-signature-block">
@@ -508,7 +515,11 @@
                 }
 
                 field.style.height = 'auto';
-                field.style.height = `${Math.max(field.scrollHeight, 30)}px`;
+                const styles = getComputedStyle(field);
+                const minimum = parseFloat(styles.minHeight) || 30;
+                const maximum = parseFloat(styles.maxHeight) || Infinity;
+                const borders = (parseFloat(styles.borderTopWidth) || 0) + (parseFloat(styles.borderBottomWidth) || 0);
+                field.style.height = `${Math.min(maximum, Math.max(field.scrollHeight + borders, minimum))}px`;
             }
 
             function autosizeRow(row) {
