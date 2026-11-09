@@ -67,15 +67,16 @@ class ElectronicSignatureService
 
     public function canSignWithReason(User $user, Model $document, string $documentType, string $action, ?SignatureRequest $signatureRequest = null): array
     {
-        if ($user->isOfficeDocumentPreparer()) {
-            return ['ok' => false, 'message' => 'Procurement Staff prepares SVP documents. Signatures and approvals must be completed by the designated Head of Office or signatory.'];
+        $type = $this->normalizeDocumentType($documentType);
+        if ($user->isOfficeDocumentPreparer()
+            && ! ($type === 'ppmp' && $document instanceof ProcurementDocument
+                && (int) ($document->prepared_by_user_id ?: $document->submitted_by_user_id) === (int) $user->id)) {
+            return ['ok' => false, 'message' => 'Procurement Staff may sign Prepared By on their own PPMP. Signatures and approvals for other documents require the designated signatory.'];
         }
 
         if (! $user->isActive() || ! $user->loginAccount()->isActive()) {
             return ['ok' => false, 'message' => 'This account or workspace is inactive.'];
         }
-        $type = $this->normalizeDocumentType($documentType);
-
         if ($type === 'purchase_request' && $document instanceof ProcurementDocument) {
             return $this->canSignPurchaseRequestWithReason($user, $document, $type, $signatureRequest);
         }
@@ -1166,8 +1167,16 @@ class ElectronicSignatureService
             return ['ok' => false, 'message' => 'This PPMP is not configured for Head Office electronic signature routing.'];
         }
 
-        $workflow->ensureSingleSignatureRequirement($document, $user);
+        $workflow->ensureRequiredSignatures($document, $user);
         $document->refresh();
+        $signatureRequest?->refresh();
+
+        if ($signatureRequest && ($signatureRequest->document_type !== $type
+            || (int) $signatureRequest->document_id !== (int) $document->id
+            || (int) $signatureRequest->requested_to_user_id !== (int) $user->id
+            || ! $signatureRequest->is_required || ! $signatureRequest->isOpen())) {
+            return ['ok' => false, 'message' => 'Only the assigned signer can sign an active PPMP signature request.'];
+        }
 
         if ($document->status !== ProcurementDocument::STATUS_PPMP_PENDING_SIGNATORIES) {
             return ['ok' => false, 'message' => 'This PPMP is not waiting for signatory completion.'];
@@ -1177,6 +1186,10 @@ class ElectronicSignatureService
 
         if (! $requestForUser) {
             return ['ok' => false, 'message' => 'Only assigned PPMP signers can sign this document.'];
+        }
+
+        if ($user->isOfficeDocumentPreparer() && $requestForUser->signatory_slot !== 'prepared_by') {
+            return ['ok' => false, 'message' => 'Procurement Staff may only sign the PPMP Prepared By section.'];
         }
 
         if (app(SignatureRequestService::class)->signedSignatureForRequest($requestForUser)) {

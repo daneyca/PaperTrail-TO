@@ -10,11 +10,11 @@
     $awards = collect(old('awards_json') ? json_decode(old('awards_json'), true) : ($abstract->awards_json ?? []));
     $committee = collect(old('committee_json') ? json_decode(old('committee_json'), true) : ($abstract->committee_json ?? []));
     $committeeDefaults = collect([
-        'bac_chairperson' => 'ROEL J. BANO',
-        'bac_vice_chairperson' => 'EDMAR T. TAMBIS',
-        'bac_member_1' => 'PERPETUA D. SALAN',
-        'bac_member_2' => 'ROGELIO A. LAYO',
-        'bac_member_alternate' => 'JESSA G. RESUS',
+        'bac_chairperson' => '',
+        'bac_vice_chairperson' => '',
+        'bac_member_1' => '',
+        'bac_member_2' => '',
+        'bac_member_alternate' => '',
     ]);
     $committeeRoleDefinitions = collect([
         'bac_chairperson' => ['label' => 'BAC Chairperson'],
@@ -56,7 +56,7 @@
 
     foreach ($committeeRoleDefinitions as $role => $definition) {
         $committeeBlockHtml .= '<div class="abstract-committee-person">'
-            .'<span class="abstract-cell abstract-committee-name abstract-bottom-line" data-committee-role="'.e($role).'">'.e($committeeName($role)).'</span>'
+            .'<span class="abstract-cell abstract-committee-name abstract-bottom-line" data-committee-role="'.e($role).'" data-placeholder="Enter Name">'.e($committeeName($role)).'</span>'
             .'<span class="abstract-cell abstract-committee-designation" data-committee-designation="'.e($role).'">'.e($committeeDesignation($role)).'</span>'
             .'</div>';
     }
@@ -289,23 +289,23 @@
                         <td colspan="10" class="abstract-no-border">
                             <div class="abstract-committee-grid">
                                 <div class="abstract-committee-person">
-                                    <span class="abstract-cell abstract-committee-name abstract-bottom-line" data-committee-role="bac_chairperson">{{ $committeeName('bac_chairperson') }}</span>
+                                    <span class="abstract-cell abstract-committee-name abstract-bottom-line" data-committee-role="bac_chairperson" data-placeholder="Enter Name">{{ $committeeName('bac_chairperson') }}</span>
                                     <span class="abstract-cell abstract-committee-designation" data-committee-designation="bac_chairperson">{{ $committeeDesignation('bac_chairperson') }}</span>
                                 </div>
                                 <div class="abstract-committee-person">
-                                    <span class="abstract-cell abstract-committee-name abstract-bottom-line" data-committee-role="bac_vice_chairperson">{{ $committeeName('bac_vice_chairperson') }}</span>
+                                    <span class="abstract-cell abstract-committee-name abstract-bottom-line" data-committee-role="bac_vice_chairperson" data-placeholder="Enter Name">{{ $committeeName('bac_vice_chairperson') }}</span>
                                     <span class="abstract-cell abstract-committee-designation" data-committee-designation="bac_vice_chairperson">{{ $committeeDesignation('bac_vice_chairperson') }}</span>
                                 </div>
                                 <div class="abstract-committee-person">
-                                    <span class="abstract-cell abstract-committee-name abstract-bottom-line" data-committee-role="bac_member_1">{{ $committeeName('bac_member_1') }}</span>
+                                    <span class="abstract-cell abstract-committee-name abstract-bottom-line" data-committee-role="bac_member_1" data-placeholder="Enter Name">{{ $committeeName('bac_member_1') }}</span>
                                     <span class="abstract-cell abstract-committee-designation" data-committee-designation="bac_member_1">{{ $committeeDesignation('bac_member_1') }}</span>
                                 </div>
                                 <div class="abstract-committee-person">
-                                    <span class="abstract-cell abstract-committee-name abstract-bottom-line" data-committee-role="bac_member_2">{{ $committeeName('bac_member_2') }}</span>
+                                    <span class="abstract-cell abstract-committee-name abstract-bottom-line" data-committee-role="bac_member_2" data-placeholder="Enter Name">{{ $committeeName('bac_member_2') }}</span>
                                     <span class="abstract-cell abstract-committee-designation" data-committee-designation="bac_member_2">{{ $committeeDesignation('bac_member_2') }}</span>
                                 </div>
                                 <div class="abstract-committee-person">
-                                    <span class="abstract-cell abstract-committee-name abstract-bottom-line" data-committee-role="bac_member_alternate">{{ $committeeName('bac_member_alternate') }}</span>
+                                    <span class="abstract-cell abstract-committee-name abstract-bottom-line" data-committee-role="bac_member_alternate" data-placeholder="Enter Name">{{ $committeeName('bac_member_alternate') }}</span>
                                     <span class="abstract-cell abstract-committee-designation" data-committee-designation="bac_member_alternate">{{ $committeeDesignation('bac_member_alternate') }}</span>
                                 </div>
                             </div>
@@ -337,6 +337,7 @@
             const supplierColumns = ['supplier_1_amount', 'supplier_2_amount', 'supplier_3_amount', 'supplier_4_amount', 'supplier_5_amount'];
 
             function setEditableState() {
+                editor.querySelectorAll('.abstract-committee-name').forEach(cell => cell.dataset.placeholder = 'Enter Name');
                 editor.querySelectorAll('.abstract-cell').forEach((cell) => cell.setAttribute('contenteditable', 'true'));
                 reindexRows();
                 recalcAll();

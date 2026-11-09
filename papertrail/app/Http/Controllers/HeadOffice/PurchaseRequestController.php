@@ -937,6 +937,10 @@ class PurchaseRequestController extends Controller
         $defaults = $this->canSelectRequestingOffice($user)
             ? self::BACSEC002_PR_SIGNATORIES
             : self::DEFAULT_PR_SIGNATORIES;
+        foreach ($defaults as &$signatory) {
+            $signatory['printed_name'] = '';
+        }
+        unset($signatory);
         $officeName = $office?->name
             ?: $user?->assignedOffice?->name
             ?: $document?->submittingOffice?->name
@@ -946,7 +950,7 @@ class PurchaseRequestController extends Controller
         $requestingName = trim((string) ($user?->name ?: $document?->submittedBy?->name ?: $officeName));
 
         if (! $this->canSelectRequestingOffice($user)) {
-            $defaults['requested']['printed_name'] = $requestingName;
+            $defaults['requested']['printed_name'] = '';
             $defaults['requested']['designation'] = '';
         }
 

@@ -44,7 +44,7 @@
             class="{{ $nameClass }} resolution-sign-name-field"
             name="{{ $fieldPrefix }}[name]"
             value="{{ $currentName }}"
-            placeholder="Enter name"
+            placeholder="Enter Name"
             data-signer-name
             data-signatory-name
         >

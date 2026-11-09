@@ -100,7 +100,7 @@ class AnnualProcurementPlanController extends Controller
             'province' => 'Province of Southern Leyte',
             'plan_type' => 'indicative',
             'status' => AnnualProcurementPlan::STATUS_DRAFT,
-            'prepared_by_name' => $user?->name,
+            'prepared_by_name' => null,
             'prepared_by_position' => $user?->position,
             'prepared_by_office' => $user?->assignedOffice?->name ?? $user?->office,
         ]);

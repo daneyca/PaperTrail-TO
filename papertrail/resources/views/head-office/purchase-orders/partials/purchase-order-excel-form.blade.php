@@ -190,7 +190,7 @@
                             <span
                                 class="po-cell po-signature-editor-field"
                                 data-field="supplier_representative_name"
-                                data-placeholder="Enter name"
+                                data-placeholder="Enter Name"
                             >{!! $text($field('supplier_representative_name')) !!}</span>
                             <span
                                 class="po-cell po-signature-editor-field"
@@ -215,7 +215,7 @@
                         <span class="po-sign-label">{{ data_get($supplierSignatureRequest->metadata, 'supplier_designation', 'Authorized Supplier Representative') }}</span>
                         <span class="po-sign-date">{{ $supplierSignatureRequest->submitted_at?->format('M d, Y') }}</span>
                     @else
-                        <span class="po-cell po-sign-line po-sign-name" data-field="supplier_representative_name">{!! $text($field('supplier_representative_name')) !!}</span>
+                        <span class="po-cell po-sign-line po-sign-name" data-field="supplier_representative_name" data-placeholder="Enter Name">{!! $text($field('supplier_representative_name')) !!}</span>
                         <span class="po-sign-label">(Signature over printed name)</span>
                         <span class="po-cell po-sign-line po-sign-date" data-field="supplier_conforme_date">{!! $text($field('supplier_conforme_date')) !!}</span>
                         <span class="po-sign-label">(Date)</span>
@@ -230,7 +230,7 @@
                             <span
                                 class="po-cell po-signature-editor-field"
                                 data-field="authorized_official_name"
-                                data-placeholder="Enter name"
+                                data-placeholder="Enter Name"
                             >{!! $text($field('authorized_official_name')) !!}</span>
                             <span
                                 class="po-cell po-signature-editor-field"
@@ -245,7 +245,7 @@
                     @elseif ($mayorSignature)
                         <x-e-signature.compact-signed-block :signature="$mayorSignature" />
                     @else
-                        <span class="po-cell po-sign-line po-sign-name" data-field="authorized_official_name">{!! $text($field('authorized_official_name')) !!}</span>
+                        <span class="po-cell po-sign-line po-sign-name" data-field="authorized_official_name" data-placeholder="Enter Name">{!! $text($field('authorized_official_name')) !!}</span>
                         <span class="po-cell po-sign-label" data-field="authorized_official_designation">{!! $text($field('authorized_official_designation', 'Authorized Official')) !!}</span>
                     @endif
                 </div>
@@ -261,7 +261,7 @@
                             <span
                                 class="po-cell po-signature-editor-field"
                                 data-field="accountant_name"
-                                data-placeholder="Enter name"
+                                data-placeholder="Enter Name"
                             >{!! $text($field('accountant_name')) !!}</span>
                             <span
                                 class="po-cell po-signature-editor-field"
@@ -276,7 +276,7 @@
                     @elseif ($accountantSignature)
                         <x-e-signature.compact-signed-block :signature="$accountantSignature" />
                     @else
-                        <span class="po-cell po-sign-line po-sign-name" data-field="accountant_name">{!! $text($field('accountant_name')) !!}</span>
+                        <span class="po-cell po-sign-line po-sign-name" data-field="accountant_name" data-placeholder="Enter Name">{!! $text($field('accountant_name')) !!}</span>
                         <span class="po-cell po-sign-label" data-field="accountant_designation">{!! $text($field('accountant_designation', 'Municipal Accountant')) !!}</span>
                     @endif
                 </div>

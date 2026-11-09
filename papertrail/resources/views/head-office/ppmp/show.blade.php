@@ -25,7 +25,7 @@
         $submitLabel = $canSubmitToAppConsolidation ? 'Submit to BAC Secretariat' : 'Continue to E-Signature';
         $submitConfirm = $canSubmitToAppConsolidation
             ? 'Submit this signed PPMP to BAC Secretariat for APP consolidation?'
-            : 'Generate the required Head of Office e-signature request for this PPMP?';
+            : 'Generate the required Prepared By and Submitted By e-signature requests for this PPMP?';
     @endphp
 
     <div class="document-action-bar head-office-ppmp-toolbar no-print">
@@ -126,6 +126,36 @@
             </div>
         </div>
     </section>
+
+    @if ($showSignatureStatus)
+        <section class="dashboard-widget widget-wide ppmp-signature-status-panel no-print" aria-label="PPMP e-signatures">
+            <div class="widget-heading">
+                <div>
+                    <p class="eyebrow">E-Signatures</p>
+                    <h2>PPMP Signatories</h2>
+                    <p>Complete Prepared By first, then Submitted By before submitting to BAC Secretariat.</p>
+                </div>
+                <span>{{ $ppmpSignatureProgress['completed'] }} / {{ $ppmpSignatureProgress['required'] }} signed</span>
+            </div>
+            <div class="ppmp-signature-status-grid">
+                @foreach ($ppmpSignatureCards as $card)
+                    <article class="ppmp-signature-status-card ppmp-signature-status-card--{{ $card['status'] }}">
+                        <div>
+                            <span>{{ $card['label'] }}</span>
+                            <strong>{{ $card['signer_name'] }}</strong>
+                            <p>{{ $card['designation'] }}</p>
+                        </div>
+                        <span class="ppmp-signature-status-badge ppmp-signature-status-badge--{{ $card['status'] }}">{{ $card['status_label'] }}</span>
+                        @if ($card['signed_at'])
+                            <small>Signed {{ $card['signed_at']->format('M d, Y h:i A') }}</small>
+                        @elseif ($card['request']?->isOpen() && $card['request']->is_required && (int) $card['request']->requested_to_user_id === (int) auth()->id())
+                            <a href="{{ route('signature-requests.show', $card['request']) }}" class="dashboard-action">Sign {{ $card['label'] }}</a>
+                        @endif
+                    </article>
+                @endforeach
+            </div>
+        </section>
+    @endif
 
     <section class="head-office-ppmp-preview-card" aria-label="Official PPMP preview">
         <div class="head-office-ppmp-preview-card__header no-print">

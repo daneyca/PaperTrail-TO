@@ -16,18 +16,34 @@
         ?? ($user ?? null)?->office
         ?? 'MUNICIPAL BUDGET OFFICE';
 
-    $preparedName = old('prepared_by_name', $document->prepared_by_name ?: ($document->preparedBy?->name ?? $document->submittedBy?->name ?? ($user ?? null)?->name));
+    $preparedName = old('prepared_by_name', $document->prepared_by_name);
     $preparedPosition = $document->preparedBy?->position ?? $document->submittedBy?->position ?? ($user ?? null)?->position;
-    $submittedName = old('submitted_by_name', $document->submitted_by_name ?: ($document->submittedBy?->name ?? ($user ?? null)?->name));
-    $submittedPosition = $document->submittedBy?->position ?? ($user ?? null)?->position;
+    $preparer = $document->preparedBy ?? $document->submittedBy ?? ($user ?? null);
+    $staffPrepared = $preparer?->isOfficeDocumentPreparer() ?? false;
+    $submittedSigner = $staffPrepared
+        ? app(\App\Services\HeadOfficePpmpSignatureWorkflowService::class)->headSignerForOffice($document->submitting_office_id ?: (($office ?? null)?->id ?? $preparer?->office_id))
+        : ($document->submittedBy ?? ($user ?? null));
+    $submittedName = $staffPrepared
+        ? $submittedSigner?->name
+        : old('submitted_by_name', $document->submitted_by_name);
+    $submittedPosition = $submittedSigner?->signer_position ?: $submittedSigner?->position;
     $signatureSlots = isset($signatureSlots)
         ? collect($signatureSlots)
         : ($document->exists ? app(\App\Services\SignatureRequestService::class)->signedSignaturesForDocument($document, 'ppmp') : collect());
     $combinedSignature = $signatureSlots->get('prepared_and_submitted_by')
-        ?? $signatureSlots->get('prepared_by')
-        ?? $signatureSlots->get('submitted_by');
-    $preparedSignature = $combinedSignature;
-    $submittedSignature = $combinedSignature;
+        ?? ($staffPrepared
+            ? $signatureSlots->get('submitted_by')
+            : ($signatureSlots->get('prepared_by') ?? $signatureSlots->get('submitted_by')));
+    $preparedSignature = $staffPrepared ? $signatureSlots->get('prepared_by') : $combinedSignature;
+    $submittedSignature = $staffPrepared ? ($signatureSlots->get('submitted_by') ?? $signatureSlots->get('prepared_and_submitted_by')) : $combinedSignature;
+    if ($preparedSignature) {
+        $preparedName = $preparedSignature->signer_name ?: $preparedName;
+        $preparedPosition = $preparedSignature->signer_position ?: $preparedPosition;
+    }
+    if ($submittedSignature) {
+        $submittedName = $submittedSignature->signer_name ?: $submittedName;
+        $submittedPosition = $submittedSignature->signer_position ?: $submittedPosition;
+    }
     $signatureDate = function ($signature): string {
         $signedAt = $signature?->signed_at;
 
@@ -376,7 +392,7 @@
                     @endif
                 </div>
                 @if ($editable)
-                    <input name="prepared_by_name" type="text" value="{{ $preparedName }}" aria-label="Prepared by printed name">
+                    <input name="prepared_by_name" type="text" value="{{ $preparedName }}" aria-label="Prepared by printed name" placeholder="Enter Name">
                     @error('prepared_by_name')<p class="field-error">{{ $message }}</p>@enderror
                 @else
                     <strong>{{ $preparedName ?: '' }}</strong>
@@ -400,7 +416,10 @@
                     @endif
                 </div>
                 @if ($editable)
-                    <input name="submitted_by_name" type="text" value="{{ $submittedName }}" aria-label="Submitted by printed name">
+                    <input name="submitted_by_name" type="text" value="{{ $submittedName }}" aria-label="Submitted by printed name" @if ($staffPrepared) readonly @else placeholder="Enter Name" @endif>
+                    @if ($staffPrepared)
+                        <small class="no-print">{{ $submittedSigner ? 'Head of Office: ' . $submittedSigner->user_id : 'No active Head of Office is configured for this office.' }}</small>
+                    @endif
                     @error('submitted_by_name')<p class="field-error">{{ $message }}</p>@enderror
                 @else
                     <strong>{{ $submittedName ?: '' }}</strong>

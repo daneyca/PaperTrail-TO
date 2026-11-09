@@ -106,9 +106,9 @@ class PpmpController extends Controller
             'status' => Ppmp::STATUS_DRAFT,
             'office_id' => $user?->office_id,
             'office_name' => $officeName,
-            'prepared_by_name' => $user?->name,
+            'prepared_by_name' => null,
             'prepared_by_position' => $user?->position,
-            'submitted_by_name' => $user?->name,
+            'submitted_by_name' => null,
             'submitted_by_position' => $user?->position,
         ]);
 

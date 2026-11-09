@@ -86,7 +86,7 @@
         @if ($editable ?? false)
             <div class="signer-account"><span>Recipient account</span><b>{{ $signers['head']?->name ?? 'Unavailable' }} (BACSEC-002)</b></div>
             <div class="signer-fields">
-                <input type="text" name="head_name" value="{{ $data['head_name'] }}" placeholder="Enter name" aria-label="Certified by name" maxlength="120" required>
+                <input type="text" name="head_name" value="{{ $data['head_name'] }}" placeholder="Enter Name" aria-label="Certified by name" maxlength="120" required>
                 <strong class="signer-name signer-name-print" data-cert-preview="head_name"></strong>
                 <input type="text" name="head_title" value="{{ $data['head_title'] }}" placeholder="Enter position" aria-label="Certified by position" maxlength="120" required>
                 <span class="signer-title signer-title-print" data-cert-preview="head_title"></span>
@@ -103,7 +103,7 @@
         @if ($editable ?? false)
             <div class="signer-account"><span>Recipient account</span><b>{{ $signers['chair']?->name ?? 'Unavailable' }} (BACCHAIR-001)</b></div>
             <div class="signer-fields">
-                <input type="text" name="chair_name" value="{{ $data['chair_name'] }}" placeholder="Enter name" aria-label="Noted by name" maxlength="120" required>
+                <input type="text" name="chair_name" value="{{ $data['chair_name'] }}" placeholder="Enter Name" aria-label="Noted by name" maxlength="120" required>
                 <strong class="signer-name signer-name-print" data-cert-preview="chair_name"></strong>
                 <input type="text" name="chair_title" value="{{ $data['chair_title'] }}" placeholder="Enter position" aria-label="Noted by position" maxlength="120" required>
                 <span class="signer-title signer-title-print" data-cert-preview="chair_title"></span>

@@ -291,7 +291,7 @@ class RfqController extends Controller
             'rfq_date' => now()->toDateString(),
             'abc_amount' => $sourceResolution?->abc_amount ?? $sourceDocument?->total_amount,
             'purpose' => $sourceResolution?->project_title ?? $sourceResolution?->title ?? $sourceDocument?->purpose ?? $sourceDocument?->title,
-            'procurement_officer_name' => 'ROLAND P. FELICILDA',
+            'procurement_officer_name' => null,
             'procurement_officer_designation' => 'Procurement Officer',
             'warranty_text' => 'Warranty shall be a period of six (6) months for supplies and materials. One (1) year for equipment, from date of acceptance.',
             'price_validity_text' => 'Price validity shall be for a period of sixty (60) calendar days.',

@@ -2175,3 +2175,14 @@ body.dashboard-body .document-create-flow.is-document-form-ready .document-creat
         transform: none !important;
     }
 }
+
+/* Empty editable name cells show a prompt without storing it as document text. */
+[data-placeholder="Enter Name"][contenteditable="true"]:empty::before {
+    content: attr(data-placeholder);
+    color: #94a3b8;
+    pointer-events: none;
+}
+@media print {
+    [data-placeholder="Enter Name"]::before { content: none !important; }
+    [placeholder="Enter Name"]::placeholder { color: transparent !important; }
+}

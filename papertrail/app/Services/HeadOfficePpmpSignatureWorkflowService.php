@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\DocumentRoutingHistory;
+use App\Models\ElectronicSignature;
 use App\Models\ProcurementDocument;
 use App\Models\SignatureRequest;
 use App\Models\SystemNotification;
@@ -56,7 +57,7 @@ class HeadOfficePpmpSignatureWorkflowService
             ->exists();
     }
 
-    public function ensureSingleSignatureRequirement(ProcurementDocument $document, ?User $actor = null): void
+    public function ensureRequiredSignatures(ProcurementDocument $document, ?User $actor = null): void
     {
         if (! $document->exists || $document->document_type !== 'PPMP') {
             return;
@@ -66,20 +67,10 @@ class HeadOfficePpmpSignatureWorkflowService
             return;
         }
 
-        $this->retireLegacySplitRequests($document);
-
         if ($document->status !== ProcurementDocument::STATUS_PPMP_PENDING_SIGNATORIES) {
             return;
         }
-
-        $hasActiveRequest = SignatureRequest::query()
-            ->forDocument(self::DOCUMENT_TYPE, $document->id)
-            ->whereIn('signatory_slot', $this->activeSignatureSlots())
-            ->exists();
-
-        if ($hasActiveRequest) {
-            return;
-        }
+        $this->retireObsoleteRequests($document);
 
         $signer = $this->responsibleSigner($document);
 
@@ -87,24 +78,24 @@ class HeadOfficePpmpSignatureWorkflowService
             return;
         }
 
-        $this->signatureRequests->createRequestsForDocument(
-            $document->refresh(),
-            self::DOCUMENT_TYPE,
-            [
-                'signing_mode' => 'parallel',
-                'signers' => [
-                    $this->signerPayload($this->signatureDefinition($document), $signer, $document),
-                ],
-            ],
-            $actor ?: $signer,
-        );
+        foreach ($this->requiredSigners($document) as $payload) {
+            $exists = SignatureRequest::query()->forDocument(self::DOCUMENT_TYPE, $document->id)
+                ->where('signatory_slot', $payload['slot'])->where('is_required', true)
+                ->where('requested_to_user_id', $payload['slot'] === 'prepared_by' ? $this->preparedSigner($document)?->id : $signer->id)
+                ->whereIn('status', array_merge(SignatureRequest::OPEN_STATUSES, [SignatureRequest::STATUS_WAITING, SignatureRequest::STATUS_SIGNED]))
+                ->exists();
+            if (! $exists) {
+                $this->signatureRequests->createOrUpdateRequest($document, self::DOCUMENT_TYPE, $payload, $actor ?: $signer);
+            }
+        }
+        $this->activateHeadAfterPreparation($document);
     }
 
     public function canStartFor(User $actor, ProcurementDocument $document): bool
     {
         return $this->isWorkflowDocument($document)
             && ! in_array($actor->user_id, self::EXCLUDED_USER_IDS, true)
-            && $actor->isOfficeDocumentActor()
+            && $actor->canManageSvpDocuments()
             && (int) $document->submitting_office_id === (int) $actor->office_id
             && in_array($document->status, [
                 ProcurementDocument::STATUS_PPMP_DRAFT,
@@ -117,7 +108,7 @@ class HeadOfficePpmpSignatureWorkflowService
     {
         return $this->isWorkflowDocument($document)
             && ! in_array($actor->user_id, self::EXCLUDED_USER_IDS, true)
-            && $actor->isOfficeDocumentActor()
+            && $actor->canManageSvpDocuments()
             && (int) $document->submitting_office_id === (int) $actor->office_id
             && $document->status === ProcurementDocument::STATUS_PPMP_SIGNATORIES_COMPLETED
             && $this->hasCompletedRequiredSignatures($document);
@@ -139,25 +130,37 @@ class HeadOfficePpmpSignatureWorkflowService
         }
 
         $oldStatus = $document->status;
+        if (in_array($oldStatus, [ProcurementDocument::STATUS_PPMP_SIGNATURE_RETURNED, ProcurementDocument::STATUS_RETURNED_BY_BAC_SECRETARIAT], true)) {
+            $oldRequests = SignatureRequest::query()->forDocument(self::DOCUMENT_TYPE, $document->id)->where('is_required', true)->get();
+            ElectronicSignature::query()->whereIn('signature_request_id', $oldRequests->pluck('id'))
+                ->where('signature_status', ElectronicSignature::STATUS_SIGNED)
+                ->update(['signature_status' => ElectronicSignature::STATUS_INVALIDATED]);
+            foreach ($oldRequests as $oldRequest) {
+                $oldRequest->forceFill(['status' => SignatureRequest::STATUS_CANCELLED, 'is_required' => false, 'signed_at' => null, 'declined_at' => null, 'cancelled_at' => now()])->save();
+            }
+        }
         $fromOfficeId = $document->current_office_id;
         $officeId = $document->submitting_office_id ?: $actor->office_id;
 
         $document->fill([
+            'submitted_by_name' => $actor->isOfficeDocumentPreparer()
+                ? $signer->name
+                : ($document->submitted_by_name ?: $signer->name),
             'status' => ProcurementDocument::STATUS_PPMP_PENDING_SIGNATORIES,
             'stage' => ProcurementDocument::STAGE_PPMP_SIGNATURE_WORKFLOW,
             'returned_at' => null,
             'current_office_id' => $officeId,
-            'assigned_to_user_id' => $signer->id,
+            'assigned_to_user_id' => $this->isStaffPrepared($document) ? $this->preparedSigner($document)->id : $signer->id,
         ])->save();
 
-        $this->retireLegacySplitRequests($document->refresh());
+        $this->retireObsoleteRequests($document->refresh());
 
         $requests = $this->signatureRequests->createRequestsForDocument(
             $document->refresh(),
             self::DOCUMENT_TYPE,
             [
-                'signing_mode' => 'parallel',
-                'signers' => [$this->signerPayload($this->signatureDefinition($document), $signer, $document)],
+                'signing_mode' => $this->isStaffPrepared($document) ? 'sequential' : 'parallel',
+                'signers' => $this->requiredSigners($document),
             ],
             $actor,
         );
@@ -169,7 +172,7 @@ class HeadOfficePpmpSignatureWorkflowService
             $oldStatus,
             ProcurementDocument::STATUS_PPMP_PENDING_SIGNATORIES,
             $actor->isOfficeDocumentPreparer()
-                ? 'The PPMP was routed to the Head of Office for approval and electronic signature.'
+                ? 'The PPMP requires the Procurement Staff Prepared By signature, followed by the Head of Office Submitted By signature.'
                 : 'Prepared and Submitted By electronic signature request was generated.',
             $fromOfficeId,
             $document->current_office_id,
@@ -178,7 +181,7 @@ class HeadOfficePpmpSignatureWorkflowService
         AuditLogger::log('PPMP Signature Workflow', 'ppmp_signature_requests_generated', 'Head of Office PPMP electronic signature requests were generated.', $document, ['status' => $oldStatus], [
             'status' => ProcurementDocument::STATUS_PPMP_PENDING_SIGNATORIES,
             'signature_request_count' => $requests->count(),
-            'signing_mode' => 'parallel',
+            'signing_mode' => $this->isStaffPrepared($document) ? 'sequential' : 'parallel',
         ]);
 
         return $requests;
@@ -190,7 +193,8 @@ class HeadOfficePpmpSignatureWorkflowService
             return 'ignored';
         }
 
-        $this->retireLegacySplitRequests($document);
+        $this->retireObsoleteRequests($document);
+        $this->activateHeadAfterPreparation($document);
 
         if (! $this->hasCompletedRequiredSignatures($document->refresh())) {
             $this->notifyCreatorOfSignerCompletion($document->refresh(), $actor);
@@ -259,7 +263,7 @@ class HeadOfficePpmpSignatureWorkflowService
 
         return SignatureRequest::query()
             ->forDocument(self::DOCUMENT_TYPE, $document->id)
-            ->whereIn('signatory_slot', $this->activeSignatureSlots())
+            ->whereIn('signatory_slot', $this->activeSignatureSlots($document))
             ->with(['requestedTo', 'electronicSignature'])
             ->orderBy('signing_order')
             ->get();
@@ -269,15 +273,16 @@ class HeadOfficePpmpSignatureWorkflowService
     {
         $requests = $this->signatureRequests($document)->keyBy('signatory_slot');
 
-        return collect(self::SIGNATURE_SLOTS)
+        return collect($this->signatureDefinitions($document))
             ->map(function (array $definition) use ($requests, $document) {
                 $request = $requests->get($definition['slot']);
                 $signature = $request ? $this->signatureRequests->signedSignatureForRequest($request) : null;
-                $fallbackSigner = $this->responsibleSigner($document);
+                $fallbackSigner = $definition['slot'] === 'prepared_by' ? $this->preparedSigner($document) : $this->responsibleSigner($document);
 
                 return [
+                    'request' => $request,
                     'slot' => $definition['slot'],
-                    'label' => $this->signatureDefinition($document)['label'],
+                    'label' => $definition['label'],
                     'signer_name' => $request?->requestedTo?->name ?? $fallbackSigner?->name ?? 'Unassigned',
                     'signer_user_id' => $request?->requestedTo?->user_id ?? $fallbackSigner?->user_id,
                     'designation' => $request?->requested_to_role ?? $this->positionForUser($fallbackSigner),
@@ -315,11 +320,11 @@ class HeadOfficePpmpSignatureWorkflowService
     {
         $requests = SignatureRequest::query()
             ->forDocument(self::DOCUMENT_TYPE, $document->id)
-            ->whereIn('signatory_slot', $this->activeSignatureSlots())
+            ->whereIn('signatory_slot', $this->activeSignatureSlots($document))
             ->where('is_required', true)
             ->get();
 
-        return $requests->isNotEmpty()
+        return $requests->count() === count($this->signatureDefinitions($document))
             && $requests->every(fn (SignatureRequest $request) => $request->status === SignatureRequest::STATUS_SIGNED);
     }
 
@@ -382,7 +387,7 @@ class HeadOfficePpmpSignatureWorkflowService
 
         $signedRequest = SignatureRequest::query()
             ->forDocument(self::DOCUMENT_TYPE, $document->id)
-            ->whereIn('signatory_slot', $this->activeSignatureSlots())
+            ->whereIn('signatory_slot', $this->activeSignatureSlots($document))
             ->where('requested_to_user_id', $actor->id)
             ->where('status', SignatureRequest::STATUS_SIGNED)
             ->latest('signed_at')
@@ -414,7 +419,7 @@ class HeadOfficePpmpSignatureWorkflowService
             'slot' => $definition['slot'],
             'label' => $definition['label'],
             'order' => $definition['order'],
-            'signing_mode' => 'parallel',
+            'signing_mode' => $definition['mode'] ?? 'parallel',
             'account_code' => $signer->user_id,
             'role_name' => $position,
             'office_id' => $signer->office_id,
@@ -441,19 +446,61 @@ class HeadOfficePpmpSignatureWorkflowService
         );
     }
 
-    private function signatureDefinition(ProcurementDocument $document): array
+    private function signatureDefinitions(ProcurementDocument $document): array
     {
-        $creator = $this->submittedSigner($document) ?: $this->preparedSigner($document);
-        $definition = self::SIGNATURE_SLOTS[self::COMBINED_SIGNATURE_SLOT];
-
-        if ($creator?->isOfficeDocumentPreparer()) {
-            $definition['label'] = 'Head of Office Approval';
+        if ($this->isStaffPrepared($document)) {
+            if (in_array($document->status, [ProcurementDocument::STATUS_PPMP_SIGNATORIES_COMPLETED, ProcurementDocument::STATUS_PENDING_PPMP_REVIEW, ProcurementDocument::STATUS_UNDER_PPMP_REVIEW, ProcurementDocument::STATUS_ACCEPTED_FOR_APP_CONSOLIDATION], true)
+                && SignatureRequest::query()->forDocument(self::DOCUMENT_TYPE, $document->id)->where('signatory_slot', self::COMBINED_SIGNATURE_SLOT)->where('is_required', true)->where('status', SignatureRequest::STATUS_SIGNED)->exists()
+                && ! SignatureRequest::query()->forDocument(self::DOCUMENT_TYPE, $document->id)->whereIn('signatory_slot', self::LEGACY_SPLIT_SIGNATURE_SLOTS)->where('is_required', true)->exists()) {
+                return self::SIGNATURE_SLOTS;
+            }
+            return [
+                'prepared_by' => ['slot' => 'prepared_by', 'label' => 'Prepared By', 'order' => 1, 'mode' => 'sequential'],
+                'submitted_by' => ['slot' => 'submitted_by', 'label' => 'Submitted By (Head of Office)', 'order' => 2, 'mode' => 'sequential'],
+            ];
         }
-
-        return $definition;
+        return self::SIGNATURE_SLOTS;
     }
 
-    private function retireLegacySplitRequests(ProcurementDocument $document): void
+    private function isStaffPrepared(ProcurementDocument $document): bool
+    {
+        return ($this->preparedSigner($document) ?: $this->submittedSigner($document))?->isOfficeDocumentPreparer() ?? false;
+    }
+
+    private function requiredSigners(ProcurementDocument $document): array
+    {
+        $preparedSigned = SignatureRequest::query()->forDocument(self::DOCUMENT_TYPE, $document->id)
+            ->where('signatory_slot', 'prepared_by')->where('status', SignatureRequest::STATUS_SIGNED)->exists();
+        $signers = [];
+        foreach ($this->signatureDefinitions($document) as $definition) {
+            $signer = $definition['slot'] === 'prepared_by' ? $this->preparedSigner($document) : $this->responsibleSigner($document);
+            if ($signer) {
+                $payload = $this->signerPayload($definition, $signer, $document);
+                if ($definition['slot'] === 'submitted_by' && ! $preparedSigned) {
+                    $payload['initial_status'] = SignatureRequest::STATUS_WAITING;
+                }
+                $signers[] = $payload;
+            }
+        }
+        return $signers;
+    }
+
+    private function activateHeadAfterPreparation(ProcurementDocument $document): void
+    {
+        if (! $this->isStaffPrepared($document) || ! SignatureRequest::query()->forDocument(self::DOCUMENT_TYPE, $document->id)
+            ->where('signatory_slot', 'prepared_by')->where('status', SignatureRequest::STATUS_SIGNED)->where('is_required', true)->exists()) {
+            return;
+        }
+        $requests = SignatureRequest::query()->forDocument(self::DOCUMENT_TYPE, $document->id)
+            ->where('signatory_slot', 'submitted_by')->where('status', SignatureRequest::STATUS_WAITING)->get();
+        foreach ($requests as $request) {
+            $request->forceFill(['status' => SignatureRequest::STATUS_PENDING])->save();
+            $this->signatureRequests->notifySigner($request);
+            $document->forceFill(['assigned_to_user_id' => $request->requested_to_user_id])->save();
+        }
+    }
+
+    private function retireObsoleteRequests(ProcurementDocument $document): void
     {
         if (! $document->exists) {
             return;
@@ -461,12 +508,13 @@ class HeadOfficePpmpSignatureWorkflowService
 
         SignatureRequest::query()
             ->forDocument(self::DOCUMENT_TYPE, $document->id)
-            ->whereIn('signatory_slot', self::LEGACY_SPLIT_SIGNATURE_SLOTS)
+            ->whereIn('signatory_slot', $this->isStaffPrepared($document) ? [self::COMBINED_SIGNATURE_SLOT] : self::LEGACY_SPLIT_SIGNATURE_SLOTS)
+            ->where('is_required', true)
             ->get()
             ->each(function (SignatureRequest $request) {
                 $updates = [
                     'is_required' => false,
-                    'remarks' => $request->remarks ?: 'Replaced by the single Prepared and Submitted By PPMP signature requirement.',
+                    'remarks' => $request->remarks ?: 'Replaced by the current PPMP signature requirements.',
                 ];
 
                 if ($request->status !== SignatureRequest::STATUS_SIGNED) {
@@ -504,7 +552,7 @@ class HeadOfficePpmpSignatureWorkflowService
         return $this->headSignerForOffice($officeId);
     }
 
-    private function headSignerForOffice(?int $officeId): ?User
+    public function headSignerForOffice(?int $officeId): ?User
     {
         if (! $officeId) {
             return null;
@@ -540,6 +588,10 @@ class HeadOfficePpmpSignatureWorkflowService
             return SignatureRequest::STATUS_SIGNED;
         }
 
+        if ($request->status === SignatureRequest::STATUS_WAITING) {
+            return 'waiting';
+        }
+
         if (in_array($request->status, [SignatureRequest::STATUS_DECLINED, SignatureRequest::STATUS_RETURNED], true)) {
             return 'rejected';
         }
@@ -553,13 +605,14 @@ class HeadOfficePpmpSignatureWorkflowService
             SignatureRequest::STATUS_SIGNED => 'Signed',
             'rejected' => 'Rejected',
             'pending' => 'Pending Signature',
+            'waiting' => 'Waiting for Prepared By',
             default => 'Not Generated',
         };
     }
 
-    private function activeSignatureSlots(): array
+    private function activeSignatureSlots(?ProcurementDocument $document = null): array
     {
-        return array_keys(self::SIGNATURE_SLOTS);
+        return $document ? array_keys($this->signatureDefinitions($document)) : array_keys(self::SIGNATURE_SLOTS);
     }
 
     private function generateTrackingNumber(int $year, ?\App\Models\Office $office): string

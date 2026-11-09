@@ -235,6 +235,10 @@ class SignatureRequestService
 
     public function requestsForUser(User $user): Builder
     {
+        if ($user->isOfficeDocumentPreparer()) {
+            return SignatureRequest::query()->with(['requestedBy', 'requestedTo', 'requestedOffice', 'electronicSignature'])
+                ->where('requested_to_user_id', $user->id)->where('document_type', 'ppmp')->where('signatory_slot', 'prepared_by');
+        }
         $roleTokens = $this->roleTokens($user);
         $canUseOfficeFallback = $user->office_id && ($user->hasPermission('esignature.use') || $user->hasSignatureProfile());
 
@@ -272,6 +276,10 @@ class SignatureRequestService
 
     public function userCanAccess(SignatureRequest $signatureRequest, User $user): bool
     {
+        if ($user->isOfficeDocumentPreparer()) {
+            return $signatureRequest->document_type === 'ppmp' && $signatureRequest->signatory_slot === 'prepared_by'
+                && (int) $signatureRequest->requested_to_user_id === (int) $user->id;
+        }
         if ((int) $signatureRequest->requested_to_user_id === (int) $user->id) {
             return true;
         }

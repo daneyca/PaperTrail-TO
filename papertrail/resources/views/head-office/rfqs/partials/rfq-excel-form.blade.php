@@ -182,7 +182,7 @@
                     <tr><td colspan="6" class="rfq-no-border">&nbsp;</td></tr>
                     <tr>
                         <td colspan="3" class="rfq-no-border"></td>
-                        <td colspan="3" class="rfq-cell rfq-no-border rfq-center rfq-bold rfq-bottom-line" data-field="procurement_officer_name">{!! $text($field('procurement_officer_name', 'ROLAND P. FELICILDA')) !!}</td>
+                        <td colspan="3" class="rfq-cell rfq-no-border rfq-center rfq-bold rfq-bottom-line" data-field="procurement_officer_name" data-placeholder="Enter Name">{!! $text($field('procurement_officer_name')) !!}</td>
                     </tr>
                     <tr>
                         <td colspan="3" class="rfq-no-border"></td>
@@ -240,7 +240,7 @@
                         <td colspan="6" class="rfq-cell rfq-no-border rfq-center" data-field="final_statement">After having carefully read and accepted your General Condition Below, I/We quote you on items and prices noted above.</td>
                     </tr>
                     <tr class="rfq-signature-row">
-                        <td colspan="2" class="rfq-cell rfq-no-border rfq-bottom-line rfq-center" data-field="printed_name_signature"></td>
+                        <td colspan="2" class="rfq-cell rfq-no-border rfq-bottom-line rfq-center" data-field="printed_name_signature" data-placeholder="Enter Name"></td>
                         <td class="rfq-no-border"></td>
                         <td colspan="3" class="rfq-cell rfq-no-border rfq-bottom-line rfq-center" data-field="philgeps_type">PhilGeps Type of Registration:</td>
                     </tr>
@@ -364,6 +364,7 @@
             const minimumOfficialRows = {{ $rowCount }};
 
             function setEditableState() {
+                editor.querySelectorAll('[data-field="procurement_officer_name"], [data-field="printed_name_signature"]').forEach(cell => cell.dataset.placeholder = 'Enter Name');
                 editor.querySelectorAll('.rfq-cell:not(.rfq-control-field):not([data-field="rfq_number"]):not([data-field="rfq_date"])').forEach((cell) => cell.setAttribute('contenteditable', 'true'));
                 reindexRows();
             }

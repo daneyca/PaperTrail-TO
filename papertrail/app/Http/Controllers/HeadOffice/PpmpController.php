@@ -26,7 +26,7 @@ use Illuminate\View\View;
 class PpmpController extends Controller
 {
     private const APP_CONSOLIDATION_HANDLER_USER_ID = 'BACSEC-003';
-    private const SIGNATURE_REQUIRED_MESSAGE = 'PPMP requires Head of Office e-signature before submission to BAC Secretariat for APP consolidation.';
+    private const SIGNATURE_REQUIRED_MESSAGE = 'Complete the required Prepared By and Submitted By e-signatures before submitting the PPMP to BAC Secretariat for APP consolidation.';
 
     private const PLAN_TYPES = [
         'indicative' => 'Indicative',
@@ -123,8 +123,13 @@ class PpmpController extends Controller
                 'title' => 'Project Procurement Plan',
                 'status' => ProcurementDocument::STATUS_PPMP_DRAFT,
                 'ppmp_plan_type' => 'indicative',
-                'prepared_by_name' => $request->user()->name,
-                'submitted_by_name' => $request->user()->name,
+                'submitting_office_id' => $office->id,
+                'prepared_by_user_id' => $request->user()->id,
+                'submitted_by_user_id' => $request->user()->id,
+                'prepared_by_name' => null,
+                'submitted_by_name' => $request->user()->isOfficeDocumentPreparer()
+                    ? app(HeadOfficePpmpSignatureWorkflowService::class)->headSignerForOffice($office->id)?->name
+                    : null,
             ]),
             'office' => $office,
             'user' => $request->user(),
@@ -158,8 +163,10 @@ class PpmpController extends Controller
                 'submitting_office_id' => $office->id,
                 'submitted_by_user_id' => $request->user()->id,
                 'prepared_by_user_id' => $request->user()->id,
-                'prepared_by_name' => $validated['prepared_by_name'] ?? $request->user()->name,
-                'submitted_by_name' => $validated['submitted_by_name'] ?? $request->user()->name,
+                'prepared_by_name' => $validated['prepared_by_name'] ?? null,
+                'submitted_by_name' => $request->user()->isOfficeDocumentPreparer()
+                    ? app(HeadOfficePpmpSignatureWorkflowService::class)->headSignerForOffice($office->id)?->name
+                    : ($validated['submitted_by_name'] ?? null),
                 'current_office_id' => $office->id,
                 'assigned_to_user_id' => $request->user()->id,
                 'status' => ProcurementDocument::STATUS_PPMP_DRAFT,
@@ -210,6 +217,7 @@ class PpmpController extends Controller
         ]);
 
         $signatureWorkflow = app(HeadOfficePpmpSignatureWorkflowService::class);
+        $signatureWorkflow->ensureRequiredSignatures($document, $request->user());
 
         return view('head-office.ppmp.show', [
             'document' => $document,
@@ -273,7 +281,9 @@ class PpmpController extends Controller
                 'remarks' => $validated['remarks'] ?? null,
                 'prepared_by_user_id' => $request->user()->id,
                 'prepared_by_name' => $validated['prepared_by_name'] ?? null,
-                'submitted_by_name' => $validated['submitted_by_name'] ?? null,
+                'submitted_by_name' => $request->user()->isOfficeDocumentPreparer()
+                    ? app(HeadOfficePpmpSignatureWorkflowService::class)->headSignerForOffice($document->submitting_office_id)?->name
+                    : ($validated['submitted_by_name'] ?? null),
             ]);
 
             $this->syncItems($document, $validated['items'] ?? []);

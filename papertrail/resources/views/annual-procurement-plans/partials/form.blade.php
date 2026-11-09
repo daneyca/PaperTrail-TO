@@ -239,7 +239,7 @@
                         @if ($prefix === 'recommended')
                             <span>By the Authority of the Bids and Awards Com.</span>
                         @endif
-                        <input name="{{ $prefix }}_by_name" type="text" value="{{ old($prefix . '_by_name', $app->{$prefix . '_by_name'}) }}" aria-label="{{ $label }} name">
+                        <input name="{{ $prefix }}_by_name" type="text" value="{{ old($prefix . '_by_name', $app->{$prefix . '_by_name'}) }}" aria-label="{{ $label }} name" placeholder="Enter Name">
                         <em>Signature over Printed Name</em>
                         <input name="{{ $prefix }}_by_position" type="text" value="{{ old($prefix . '_by_position', $app->{$prefix . '_by_position'}) }}" aria-label="{{ $label }} position">
                         <em>Position/Designation</em>

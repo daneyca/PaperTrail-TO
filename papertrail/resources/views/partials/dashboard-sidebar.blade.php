@@ -414,7 +414,7 @@
         array_splice($items, $competitiveBiddingInsertIndex, 0, $menusToInsert);
     }
 
-    $canShowSignatureMenu = ! $user?->isOfficeDocumentPreparer() && in_array($roleSlug, [
+    $canShowSignatureMenu = in_array($roleSlug, [
         'head-office',
         'budget',
         'accounting',
@@ -437,7 +437,7 @@
             'icon' => 'settings',
             'children' => array_values(array_filter([
                 ['label' => 'Change Password', 'route' => 'profile.show', 'active' => 'profile.show', 'query' => ['password' => 1]],
-                $user?->isOfficeDocumentPreparer() ? null : ['label' => 'Manage E-Signature', 'route' => 'profile.signature.edit', 'active' => 'profile.signature.*'],
+                ['label' => 'Manage E-Signature', 'route' => 'profile.signature.edit', 'active' => 'profile.signature.*'],
                 ['label' => 'Email Verification', 'route' => 'profile.show', 'active' => 'profile.show', 'query' => ['email_recovery' => 1], 'modal' => 'email-verification'],
             ])),
         ],

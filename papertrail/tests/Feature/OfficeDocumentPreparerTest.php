@@ -124,14 +124,16 @@ class OfficeDocumentPreparerTest extends TestCase
 
         $requests = app(HeadOfficePpmpSignatureWorkflowService::class)->start($document, $preparer);
 
-        $this->assertCount(1, $requests);
-        $this->assertSame($head->id, $requests->first()->requested_to_user_id);
-        $this->assertSame($preparer->id, $requests->first()->requested_by_user_id);
-        $this->assertSame('Head of Office Approval', $requests->first()->signatory_label);
+        $this->assertCount(2, $requests);
+        $bySlot = $requests->keyBy('signatory_slot');
+        $this->assertSame($preparer->id, $bySlot['prepared_by']->requested_to_user_id);
+        $this->assertSame($head->id, $bySlot['submitted_by']->requested_to_user_id);
+        $this->assertSame($preparer->id, $bySlot['submitted_by']->requested_by_user_id);
+        $this->assertSame('waiting', $bySlot['submitted_by']->status);
         $this->assertDatabaseHas('procurement_documents', [
             'id' => $document->id,
             'status' => ProcurementDocument::STATUS_PPMP_PENDING_SIGNATORIES,
-            'assigned_to_user_id' => $head->id,
+            'assigned_to_user_id' => $preparer->id,
         ]);
     }
 

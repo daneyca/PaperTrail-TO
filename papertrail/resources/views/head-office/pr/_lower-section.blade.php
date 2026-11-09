@@ -63,6 +63,11 @@
         ],
     ];
 
+    foreach ($defaults as &$signatoryDefault) {
+        $signatoryDefault['printed_name'] = '';
+    }
+    unset($signatoryDefault);
+
     if ($document->requested_by_name) {
         $defaults['requested']['printed_name'] = $document->requested_by_name;
     }
@@ -209,7 +214,7 @@
             @foreach ($columns as $column)
                 <td class="pr-signatory-cell">
                     @if ($isEditable)
-                        <textarea class="pr-textarea pr-signatory-input pr-signatory-multiline" name="signatories[{{ $column }}][printed_name]" rows="2">{{ $cellValue($column, 'printed_name') }}</textarea>
+                        <textarea class="pr-textarea pr-signatory-input pr-signatory-multiline" name="signatories[{{ $column }}][printed_name]" rows="2" placeholder="Enter Name">{{ $cellValue($column, 'printed_name') }}</textarea>
                     @else
                         <span class="pr-signatory-text">{{ $cellValue($column, 'printed_name') }}</span>
                     @endif
