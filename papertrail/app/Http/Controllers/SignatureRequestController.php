@@ -119,9 +119,10 @@ class SignatureRequestController extends Controller
         $supplierSignatureRequest = $signatureRequest->document_type === 'purchase_order'
             ? app(PurchaseOrderSignatureWorkflowService::class)->supplierRequestFor($document)
             : null;
-        $canSubmitPpmpToAppConsolidation = $signatureRequest->document_type === 'ppmp'
-            && $document instanceof ProcurementDocument
-            && app(HeadOfficePpmpSignatureWorkflowService::class)->canSubmitToAppConsolidation($request->user(), $document);
+        if ($signatureRequest->document_type === 'ppmp' && $document instanceof ProcurementDocument
+            && $document->status === ProcurementDocument::STATUS_PPMP_SIGNATORIES_COMPLETED) {
+            app(HeadOfficePpmpSignatureWorkflowService::class)->routeSignedToBac($document, $request->user());
+        }
         $signingCheck = $this->signatures->canSignWithReason(
             $request->user(),
             $document,
@@ -141,7 +142,6 @@ class SignatureRequestController extends Controller
             'canSign' => $signingCheck['ok'],
             'canSignMessage' => $signingCheck['message'],
             'signatureProfileComplete' => $this->signatures->ensureSignatureProfile($request->user()),
-            'canSubmitPpmpToAppConsolidation' => $canSubmitPpmpToAppConsolidation,
         ]);
     }
 

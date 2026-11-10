@@ -6,7 +6,6 @@
     @php
         $canModify = auth()->user()->canManageSvpDocuments() && $canModify;
         $canDelete = auth()->user()->canManageSvpDocuments() && ($canDelete ?? false);
-        $canSubmitToAppConsolidation = auth()->user()->canManageSvpDocuments() && $canSubmitToAppConsolidation;
         $ppmpStatusLabel = function (?string $status): string {
             return match ($status) {
                 \App\Models\ProcurementDocument::STATUS_PPMP_PENDING_SIGNATORIES => 'Pending Signature',
@@ -23,10 +22,8 @@
                 \App\Models\ProcurementDocument::STATUS_PPMP_SIGNATORIES_COMPLETED,
                 \App\Models\ProcurementDocument::STATUS_PPMP_SIGNATURE_RETURNED,
             ], true);
-        $submitLabel = $canSubmitToAppConsolidation ? 'Submit to BAC Secretariat' : 'Continue for Signatories';
-        $submitConfirm = $canSubmitToAppConsolidation
-            ? 'Submit this signed PPMP to BAC Secretariat for APP consolidation?'
-            : 'Generate the required Prepared By and Submitted By e-signature requests for this PPMP?';
+        $submitLabel = 'Continue for Signature';
+        $submitConfirm = 'Generate the required PPMP e-signature requests? After all required signatures are complete, this PPMP will be sent automatically to BAC Secretariat.';
     @endphp
 
     <div class="document-action-bar head-office-ppmp-toolbar no-print">
@@ -57,7 +54,7 @@
             />
         </div>
 
-        @if ($canModify || $canDelete || $canSubmitToAppConsolidation)
+        @if ($canModify || $canDelete)
             <div class="head-office-ppmp-toolbar__group head-office-ppmp-toolbar__group--actions">
                 @if ($canModify)
                     <a href="{{ route('head-office.ppmp.edit', $document) }}" class="dashboard-action">Edit / Revise</a>
@@ -76,12 +73,12 @@
                         <button type="submit" class="dashboard-action secondary-action">Delete</button>
                     </form>
                 @endif
-                @if ($canModify || $canSubmitToAppConsolidation)
+                @if ($canModify)
                     <form
                         method="POST"
                         action="{{ route('head-office.ppmp.submit', $document) }}"
                         data-confirm="{{ $submitConfirm }}"
-                        data-confirm-title="{{ $canSubmitToAppConsolidation ? 'Submit PPMP?' : 'Continue for Signatories?' }}"
+                        data-confirm-title="Continue for Signature?"
                         data-confirm-label="{{ $submitLabel }}"
                         data-confirm-type="submit"
                     >
@@ -92,6 +89,8 @@
             </div>
         @endif
     </div>
+
+    @include('components.e-signature.ppmp-location', ['document' => $document])
 
     <section class="ppmp-readonly-strip head-office-ppmp-summary no-print" aria-label="PPMP summary">
         <div>
@@ -138,7 +137,7 @@
                 <div>
                     <p class="eyebrow">E-Signatures</p>
                     <h2>PPMP Signatories</h2>
-                    <p>Complete Prepared By first, then Submitted By before submitting to BAC Secretariat.</p>
+                    <p>Complete Prepared By first, then Submitted By. The fully signed PPMP is sent automatically to BAC Secretariat for APP consolidation.</p>
                 </div>
                 <span>{{ $ppmpSignatureProgress['completed'] }} / {{ $ppmpSignatureProgress['required'] }} signed</span>
             </div>

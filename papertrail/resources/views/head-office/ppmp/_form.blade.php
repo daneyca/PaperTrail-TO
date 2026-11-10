@@ -57,7 +57,7 @@
     <button type="button" data-toggle-ppmp-bold aria-pressed="false" title="Bold selected PPMP row">B Bold Row</button>
     <button type="button" data-add-ppmp-row>Add Row</button>
     <button type="submit" name="save_action" value="draft">Save as Draft</button>
-    <button type="submit" name="save_action" value="submit" data-confirm="PPMP created successfully. Please complete the required e-signature before submitting this document to BAC Secretariat for APP consolidation.">Continue for Signature</button>
+    <button type="submit" name="save_action" value="submit" data-confirm="Continue for signatures? The fully signed PPMP will automatically go to BAC Secretariat for APP consolidation.">Continue for Signature</button>
     @if ($document->exists && Route::has('head-office.ppmp.print'))
         <a href="{{ route('head-office.ppmp.print', $document) }}" target="_blank" rel="noopener">Print</a>
     @endif

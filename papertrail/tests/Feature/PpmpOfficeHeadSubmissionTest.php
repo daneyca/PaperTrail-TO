@@ -23,7 +23,7 @@ class PpmpOfficeHeadSubmissionTest extends TestCase
     {
         [$staff, $head] = $this->accounts();
         $document = ProcurementDocument::create([
-            'document_type' => 'PPMP', 'title' => 'MAO PPMP', 'fiscal_year' => 2026,
+            'document_type' => 'PPMP', 'title' => 'MAO PPMP', 'fiscal_year' => 2026, 'ppmp_no' => '1',
             'status' => ProcurementDocument::STATUS_PPMP_DRAFT, 'submitting_office_id' => $staff->office_id,
             'prepared_by_user_id' => $staff->id, 'submitted_by_user_id' => $staff->id,
         ]);
@@ -43,16 +43,44 @@ class PpmpOfficeHeadSubmissionTest extends TestCase
         $this->assertTrue($result['ok'], $result['message']);
         $this->assertSame(ProcurementDocument::STATUS_PPMP_PENDING_SIGNATORIES, $document->refresh()->status);
         $this->assertSame($head->id, $document->assigned_to_user_id);
+        $this->assertNull($document->submitted_at);
+        $this->assertSame(0, \App\Models\SystemNotification::where('title', 'New PPMP for APP Consolidation')->count());
         $this->assertFalse($workflow->canSubmitToAppConsolidation($staff, $document));
         $this->assertTrue($signatures->canSign($head, $document, 'ppmp', 'confirmed', $requests['submitted_by']->refresh()));
 
         $this->actingAs($head);
         $result = $signatures->signDocument($document, $head, 'ppmp', 'confirmed', ['current_password' => 'password', 'signature_consent' => true], null, $requests['submitted_by']);
         $this->assertTrue($result['ok'], $result['message']);
-        $this->assertSame(ProcurementDocument::STATUS_PPMP_SIGNATORIES_COMPLETED, $document->refresh()->status);
-        $this->assertTrue($workflow->canSubmitToAppConsolidation($staff, $document));
+        $this->assertSame(ProcurementDocument::STATUS_PENDING_PPMP_REVIEW, $document->refresh()->status);
+        $handler = User::where('user_id', 'BACSEC-003')->firstOrFail();
+        $this->assertSame($handler->id, $document->assigned_to_user_id);
+        $this->assertSame($handler->office_id, $document->current_office_id);
+        $this->assertNotNull($document->submitted_at);
+        $this->assertSame('1', $document->ppmp_no);
+        $this->assertStringContainsString('automatically sent to BAC Secretariat', $result['message']);
+        $this->assertFalse($workflow->canSubmitToAppConsolidation($staff, $document));
         $this->assertFalse($workflow->canSubmitToAppConsolidation($head, $document));
         $this->assertSame(2, ElectronicSignature::where('document_type', 'ppmp')->where('document_id', $document->id)->where('signature_status', 'signed')->count());
+        $this->assertDatabaseHas('system_notifications', ['user_id' => $staff->id, 'related_id' => $document->id, 'title' => 'PPMP Automatically Submitted']);
+        $this->assertDatabaseHas('system_notifications', ['user_id' => $handler->id, 'related_id' => $document->id, 'title' => 'New PPMP for APP Consolidation']);
+        $this->assertDatabaseHas('system_notifications', ['user_id' => $head->id, 'related_id' => $document->id, 'title' => 'PPMP Automatically Submitted']);
+        $this->actingAs($staff)->get(route('head-office.ppmp.show', $document))->assertOk()
+            ->assertSee('Current Office')->assertSee('BAC Secretariat')->assertDontSee('Submit to BAC Secretariat');
+        $this->actingAs($head)->get(route('signature-requests.show', $requests['submitted_by']))->assertOk()
+            ->assertSee('Current Office')->assertSee('BAC Secretariat')->assertDontSee('Submit to BAC Secretariat');
+        $this->get(route('head-office.documents.index'))->assertOk()->assertDontSee('Not submitted');
+        $this->actingAs($handler)->get(route('bac-secretariat.ppmp.index'))->assertOk()->assertSee($document->tracking_number);
+        $this->get(route('bac-secretariat.ppmp.show', $document))->assertOk()->assertSee($document->tracking_number);
+
+        $submittedAt = $document->submitted_at;
+        $workflow->handleSigned($document, $head, true);
+        $this->assertEquals($submittedAt, $document->refresh()->submitted_at);
+        $this->assertSame(1, $document->routingHistories()->where('action', 'PPMP Submitted to BAC')->count());
+        $this->assertSame(1, \App\Models\SystemNotification::where('user_id', $handler->id)->where('related_id', $document->id)
+            ->where('title', 'New PPMP for APP Consolidation')->count());
+        $document->update(['status' => ProcurementDocument::STATUS_UNDER_PPMP_REVIEW]);
+        $workflow->handleSigned($document, $head, true);
+        $this->assertSame(ProcurementDocument::STATUS_UNDER_PPMP_REVIEW, $document->refresh()->status);
 
         $html = $this->actingAs($staff)->get(route('head-office.ppmp.print', $document))->assertOk()->getContent();
         $dom = new \DOMDocument();
@@ -60,6 +88,55 @@ class PpmpOfficeHeadSubmissionTest extends TestCase
         $xpath = new \DOMXPath($dom);
         $this->assertStringContainsString($staff->name, $xpath->query('//div[@aria-label="Prepared By electronic signature"]')->item(0)->textContent);
         $this->assertStringContainsString($head->name, $xpath->query('//div[@aria-label="Submitted By electronic signature"]')->item(0)->textContent);
+    }
+
+    public function test_signed_ppmps_wait_for_an_active_handler_and_existing_valid_approvals_are_routed_once(): void
+    {
+        [$staff, $head] = $this->accounts();
+        $handler = User::where('user_id', 'BACSEC-003')->firstOrFail();
+        $handler->update(['status' => User::STATUS_INACTIVE]);
+        $document = ProcurementDocument::create([
+            'document_type' => 'PPMP', 'title' => 'Existing approved PPMP', 'fiscal_year' => 2026,
+            'status' => ProcurementDocument::STATUS_PPMP_DRAFT, 'submitting_office_id' => $staff->office_id,
+            'prepared_by_user_id' => $staff->id, 'submitted_by_user_id' => $staff->id,
+        ]);
+        $workflow = app(HeadOfficePpmpSignatureWorkflowService::class);
+        $requests = $workflow->start($document, $staff)->keyBy('signatory_slot');
+        foreach (['prepared_by' => $staff, 'submitted_by' => $head] as $slot => $signer) {
+            $this->actingAs($signer);
+            $result = app(ElectronicSignatureService::class)->signDocument($document, $signer, 'ppmp', 'confirmed',
+                ['current_password' => 'password', 'signature_consent' => true], null, $requests[$slot]->refresh());
+            $this->assertTrue($result['ok'], $result['message']);
+        }
+        $this->assertSame(ProcurementDocument::STATUS_PPMP_SIGNATORIES_COMPLETED, $document->refresh()->status);
+        $this->assertNull($document->submitted_at);
+        $this->assertSame(2, ElectronicSignature::where('document_type', 'ppmp')->where('document_id', $document->id)->where('signature_status', 'signed')->count());
+        $this->assertDatabaseHas('system_notifications', ['user_id' => $staff->id, 'title' => 'PPMP Signed — Routing Pending']);
+
+        $unsigned = ProcurementDocument::create([
+            'document_type' => 'PPMP', 'title' => 'Unsigned PPMP', 'fiscal_year' => 2026,
+            'status' => ProcurementDocument::STATUS_PPMP_DRAFT, 'submitting_office_id' => $staff->office_id,
+            'prepared_by_user_id' => $staff->id, 'submitted_by_user_id' => $staff->id,
+        ]);
+        $workflow->start($unsigned, $staff)->each(fn ($request) => $request->update(['status' => SignatureRequest::STATUS_SIGNED, 'signed_at' => now()]));
+        $unsigned->update(['status' => ProcurementDocument::STATUS_PPMP_SIGNATORIES_COMPLETED]);
+        $handler->update(['status' => User::STATUS_ACTIVE]);
+
+        $migration = require database_path('migrations/2026_11_10_000002_automatically_route_fully_signed_ppmps.php');
+        $migration->up();
+        $this->assertSame(ProcurementDocument::STATUS_PENDING_PPMP_REVIEW, $document->refresh()->status);
+        $this->assertSame($handler->id, $document->assigned_to_user_id);
+        $this->assertNotNull($document->submitted_at);
+        $this->assertSame(ProcurementDocument::STATUS_PPMP_SIGNATORIES_COMPLETED, $unsigned->refresh()->status);
+        $this->assertNull($unsigned->submitted_at);
+
+        $submittedAt = $document->submitted_at;
+        $migration->up();
+        $workflow->routeSignedToBac($document, $staff);
+        $this->assertEquals($submittedAt, $document->refresh()->submitted_at);
+        $this->assertSame(1, $document->routingHistories()->where('action', 'PPMP Submitted to BAC')->count());
+        $this->assertSame(1, \App\Models\SystemNotification::where('user_id', $handler->id)->where('related_id', $document->id)
+            ->where('title', 'New PPMP for APP Consolidation')->count());
     }
 
     public function test_signature_remarks_are_visible_to_the_signer_and_next_signatory_without_changing_the_printed_form(): void
@@ -164,6 +241,15 @@ class PpmpOfficeHeadSubmissionTest extends TestCase
         $head->update(['typed_signature_name' => $head->name, 'signer_position' => 'Municipal Agriculturist', 'signature_style' => 'typed', 'signature_setup_completed_at' => now()]);
         $otherOffice = Office::create(['code' => 'OTHER', 'name' => 'Other Office', 'type' => Office::TYPE_END_USER, 'is_requesting_office' => true, 'status' => Office::STATUS_ACTIVE]);
         User::factory()->create(['user_id' => 'OTHER-001', 'name' => 'Other Head', 'role' => User::ROLE_HEAD_OFFICE, 'office_id' => $otherOffice->id, 'status' => User::STATUS_ACTIVE]);
+
+        $bacOffice = Office::firstOrCreate(['code' => 'BACSEC'], ['name' => 'BAC Secretariat', 'type' => Office::TYPE_PROCUREMENT, 'status' => Office::STATUS_ACTIVE]);
+        $bacRole = Role::firstOrCreate(['code' => 'bac_secretariat'], ['name' => User::ROLE_BAC_SECRETARIAT, 'status' => Role::STATUS_ACTIVE]);
+        foreach (['ppmp.review', 'documents.view.all', 'documents.track', 'documents.return', 'documents.comment', 'workflow.update_status'] as $key) {
+            $permission = Permission::firstOrCreate(['key' => $key], ['name' => $key, 'group' => 'PPMP']);
+            $bacRole->permissions()->syncWithoutDetaching([$permission->id]);
+        }
+        User::where('user_id', 'BACSEC-003')->firstOrFail()->update(['office_id' => $bacOffice->id, 'role_id' => $bacRole->id,
+            'status' => User::STATUS_ACTIVE, 'must_change_password' => false]);
 
         return [$staff, $head];
     }

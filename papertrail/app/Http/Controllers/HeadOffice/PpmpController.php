@@ -4,7 +4,6 @@ namespace App\Http\Controllers\HeadOffice;
 
 use App\Http\Controllers\Controller;
 use App\Models\DocumentAttachment;
-use App\Models\DocumentRoutingHistory;
 use App\Models\ElectronicSignature;
 use App\Models\Office;
 use App\Models\ProcurementDocument;
@@ -12,10 +11,8 @@ use App\Models\SignatureRequest;
 use App\Models\SystemNotification;
 use App\Models\User;
 use App\Services\AuditLogger;
-use App\Services\DocumentReferenceNumberService;
 use App\Services\DocumentDraftService;
 use App\Services\HeadOfficePpmpSignatureWorkflowService;
-use App\Services\SystemNotificationService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,8 +23,7 @@ use Illuminate\View\View;
 
 class PpmpController extends Controller
 {
-    private const APP_CONSOLIDATION_HANDLER_USER_ID = 'BACSEC-003';
-    private const SIGNATURE_REQUIRED_MESSAGE = 'Complete the required Prepared By and Submitted By e-signatures before submitting the PPMP to BAC Secretariat for APP consolidation.';
+    private const SIGNATURE_REQUIRED_MESSAGE = 'Complete the Prepared By and Submitted By e-signatures. The fully signed PPMP will automatically go to BAC Secretariat for APP consolidation.';
 
     private const PLAN_TYPES = [
         'indicative' => 'Indicative',
@@ -194,7 +190,7 @@ class PpmpController extends Controller
         return redirect()
             ->route('head-office.ppmp.show', $document)
             ->with('status', $submit
-                ? 'PPMP created successfully. Please complete the required e-signature before submitting this document to BAC Secretariat for APP consolidation.'
+                ? 'PPMP created successfully. Complete the required signatures to automatically send it to BAC Secretariat for APP consolidation.'
                 : 'PPMP saved as draft.');
     }
 
@@ -228,7 +224,6 @@ class PpmpController extends Controller
             'canModify' => $this->canModify($document),
             'canDelete' => $this->canDelete($document),
             'canStartSignatureWorkflow' => $signatureWorkflow->canStartFor($request->user(), $document),
-            'canSubmitToAppConsolidation' => $signatureWorkflow->canSubmitToAppConsolidation($request->user(), $document),
             'ppmpSignatureCards' => $signatureWorkflow->signatureStatusCards($document),
             'ppmpSignatureProgress' => $signatureWorkflow->signatureProgress($document),
             'signatureSlots' => $signatureWorkflow->signedSlots($document),
@@ -303,7 +298,7 @@ class PpmpController extends Controller
         return redirect()
             ->route('head-office.ppmp.show', $document)
             ->with('status', $submit
-                ? 'PPMP updated successfully. Please complete the required e-signature before submitting this document to BAC Secretariat for APP consolidation.'
+                ? 'PPMP updated successfully. Complete the required signatures to automatically send it to BAC Secretariat for APP consolidation.'
                 : 'PPMP draft updated.');
     }
 
@@ -395,16 +390,15 @@ class PpmpController extends Controller
 
         $signatureWorkflow = app(HeadOfficePpmpSignatureWorkflowService::class);
 
-        if ($signatureWorkflow->canSubmitToAppConsolidation($request->user(), $document)) {
-            $target = $this->appConsolidationTarget();
+        if (in_array($document->status, [ProcurementDocument::STATUS_PENDING_PPMP_REVIEW,
+            ProcurementDocument::STATUS_UNDER_PPMP_REVIEW, ProcurementDocument::STATUS_ACCEPTED_FOR_APP_CONSOLIDATION], true)) {
+            return redirect()->route('head-office.ppmp.show', $document)->with('status', 'This PPMP has already been routed to BAC Secretariat.');
+        }
 
-            if (!$target['office'] || !$target['user']) {
+        if ($signatureWorkflow->canSubmitToAppConsolidation($request->user(), $document)) {
+            if (!$signatureWorkflow->routeSignedToBac($document, $request->user())) {
                 return back()->with('error', 'BACSEC-003 APP consolidation routing target is not configured.');
             }
-
-            DB::transaction(function () use ($request, $document, $target) {
-                $this->submitDocument($document->refresh(), $request->user(), $target['office'], $target['user']);
-            });
 
             return redirect()
                 ->route('head-office.ppmp.show', $document)
@@ -434,7 +428,7 @@ class PpmpController extends Controller
 
         return redirect()
             ->route('head-office.ppmp.show', $document)
-            ->with('status', 'PPMP signature request generated. Complete the required e-signature before submitting this document to BAC Secretariat for APP consolidation.');
+            ->with('status', 'PPMP signature requests generated. The fully signed PPMP will automatically go to BAC Secretariat for APP consolidation.');
     }
 
     public function storeAttachment(Request $request, ProcurementDocument $document): RedirectResponse
@@ -785,56 +779,6 @@ class PpmpController extends Controller
         return null;
     }
 
-    private function submitDocument(ProcurementDocument $document, User $user, Office $appConsolidationOffice, User $appConsolidationUser): void
-    {
-        $oldStatus = $document->status;
-        $fromOffice = $document->current_office_id;
-
-        if (!$document->document_reference_number) {
-            app(DocumentReferenceNumberService::class)->assign($document, DocumentReferenceNumberService::TYPE_PPMP, now());
-        }
-
-        if (!$document->ppmp_no || $document->ppmp_no !== $document->tracking_number) {
-            $document->ppmp_no = $document->tracking_number;
-        }
-
-        $document->fill([
-            'status' => ProcurementDocument::STATUS_PENDING_PPMP_REVIEW,
-            'stage' => ProcurementDocument::STAGE_PPMP_SUBMITTED_TO_BAC,
-            'submitted_at' => now(),
-            'current_office_id' => $appConsolidationOffice->id,
-            'assigned_to_user_id' => $appConsolidationUser->id,
-            'bac_secretariat_status' => 'pending',
-        ])->save();
-
-        $this->recordRouting(
-            $document,
-            $user,
-            'PPMP Submitted to BAC',
-            $oldStatus,
-            ProcurementDocument::STATUS_PENDING_PPMP_REVIEW,
-            'Signed PPMP routed to BACSEC-003 for APP consolidation.',
-            $fromOffice,
-            $appConsolidationOffice->id,
-        );
-
-        SystemNotificationService::notify(
-            $appConsolidationUser,
-            'New PPMP for APP Consolidation',
-            "Signed PPMP {$document->tracking_number} was submitted by {$document->submittingOffice?->name} for APP consolidation.",
-            SystemNotification::TYPE_INFO,
-            'PPMP Submission',
-            $document,
-            route('bac-secretariat.ppmp.show', $document),
-        );
-
-        AuditLogger::log('PPMP Submission', 'PPMP Submitted', 'Head of Office submitted a signed PPMP to BAC Secretariat for APP consolidation.', $document, ['status' => $oldStatus], [
-            'status' => ProcurementDocument::STATUS_PENDING_PPMP_REVIEW,
-            'tracking_number' => $document->tracking_number,
-            'assigned_to' => self::APP_CONSOLIDATION_HANDLER_USER_ID,
-        ]);
-    }
-
     private function startSignatureWorkflow(ProcurementDocument $document, User $user): void
     {
         $requests = app(HeadOfficePpmpSignatureWorkflowService::class)->start($document, $user);
@@ -867,37 +811,6 @@ class PpmpController extends Controller
         $code = strtoupper((string) preg_replace('/[^A-Za-z0-9]+/', '', $source));
 
         return $code !== '' ? $code : 'OFFICE';
-    }
-
-    private function appConsolidationTarget(): array
-    {
-        $user = User::where('status', User::STATUS_ACTIVE)
-            ->where('user_id', self::APP_CONSOLIDATION_HANDLER_USER_ID)
-            ->first();
-
-        $office = $user?->assignedOffice ?: Office::where('code', 'BACSEC')
-            ->orWhere('code', 'BAC')
-            ->orWhere('name', 'BAC Secretariat')
-            ->orWhere('name', 'like', '%Bids and Awards%')
-            ->orWhere('name', 'like', '%BAC%')
-            ->first();
-
-        return ['office' => $office, 'user' => $user];
-    }
-
-    private function recordRouting(ProcurementDocument $document, User $user, string $action, ?string $fromStatus, string $toStatus, ?string $comments, ?int $fromOfficeId, ?int $toOfficeId): void
-    {
-        DocumentRoutingHistory::create([
-            'procurement_document_id' => $document->id,
-            'action_by_user_id' => $user->id,
-            'from_office_id' => $fromOfficeId,
-            'to_office_id' => $toOfficeId,
-            'action' => $action,
-            'status_from' => $fromStatus,
-            'status_to' => $toStatus,
-            'comments' => $comments,
-            'action_at' => now(),
-        ]);
     }
 
     private function summary(User $user): array

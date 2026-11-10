@@ -98,20 +98,8 @@
         </section>
     @endunless
 
-    @if ($isPpmp && $isSignedRequest && ($canSubmitPpmpToAppConsolidation ?? false))
-        <section class="signature-request-action-strip ppmp-submit-next-step no-print pt-smooth-enter" style="--pt-delay: 140ms" aria-label="PPMP next step">
-            <form
-                method="POST"
-                action="{{ route('head-office.ppmp.submit', $document) }}"
-                data-confirm="Submit this signed PPMP to BAC Secretariat for APP consolidation?"
-                data-confirm-title="Submit PPMP?"
-                data-confirm-label="Submit to BAC Secretariat"
-                data-confirm-type="submit"
-            >
-                @csrf
-                <button type="submit" class="dashboard-action">Submit to BAC Secretariat</button>
-            </form>
-        </section>
+    @if ($isPpmp && $isSignedRequest)
+        @include('components.e-signature.ppmp-location', ['document' => $document])
     @endif
 
     <x-e-signature.signable-layout class="signature-request-workspace signature-request-workspace--inline-actions pt-smooth-enter" style="--pt-delay: 220ms" sidebar-label="Signature request actions">

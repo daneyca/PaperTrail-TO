@@ -4,12 +4,14 @@ namespace App\Services;
 
 use App\Models\DocumentRoutingHistory;
 use App\Models\ElectronicSignature;
+use App\Models\Office;
 use App\Models\ProcurementDocument;
 use App\Models\SignatureRequest;
 use App\Models\SystemNotification;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class HeadOfficePpmpSignatureWorkflowService
@@ -18,6 +20,7 @@ class HeadOfficePpmpSignatureWorkflowService
     private const COMBINED_SIGNATURE_SLOT = 'prepared_and_submitted_by';
     private const LEGACY_SPLIT_SIGNATURE_SLOTS = ['prepared_by', 'submitted_by'];
     private const EXCLUDED_USER_IDS = ['BACSEC-001'];
+    private const APP_CONSOLIDATION_HANDLER = 'BACSEC-003';
 
     private const SIGNATURE_SLOTS = [
         self::COMBINED_SIGNATURE_SLOT => [
@@ -64,6 +67,11 @@ class HeadOfficePpmpSignatureWorkflowService
         }
 
         if (! $this->isWorkflowDocument($document) && ! $this->hasSignatureRouting($document)) {
+            return;
+        }
+
+        if ($document->status === ProcurementDocument::STATUS_PPMP_SIGNATORIES_COMPLETED && $actor) {
+            $this->routeSignedToBac($document, $actor);
             return;
         }
 
@@ -189,6 +197,11 @@ class HeadOfficePpmpSignatureWorkflowService
 
     public function handleSigned(ProcurementDocument $document, User $actor, bool $fullySigned): string
     {
+        if (in_array($document->status, [ProcurementDocument::STATUS_PENDING_PPMP_REVIEW,
+            ProcurementDocument::STATUS_UNDER_PPMP_REVIEW, ProcurementDocument::STATUS_ACCEPTED_FOR_APP_CONSOLIDATION], true)) {
+            return 'submitted_to_bac';
+        }
+
         if (! $this->isWorkflowDocument($document) && ! $this->hasSignatureRouting($document)) {
             return 'ignored';
         }
@@ -202,9 +215,78 @@ class HeadOfficePpmpSignatureWorkflowService
             return 'pending';
         }
 
+        $alreadySigned = $document->status === ProcurementDocument::STATUS_PPMP_SIGNATORIES_COMPLETED;
         $this->completeSignatories($document->refresh(), $actor);
+        if ($this->routeSignedToBac($document, $actor)) {
+            return 'submitted_to_bac';
+        }
 
+        if (!$alreadySigned) {
+            $document->loadMissing(['preparedBy', 'submittedBy']);
+            SystemNotificationService::notify($document->preparedBy ?? $document->submittedBy, 'PPMP Signed — Routing Pending',
+                "All required signatures for {$document->tracking_number} are complete. Automatic routing is waiting for an active BACSEC-003 consolidation handler.",
+                SystemNotification::TYPE_WARNING, 'PPMP Submission', $document, route('head-office.ppmp.show', $document));
+        }
         return 'completed_signatories';
+    }
+
+    public function routeSignedToBac(ProcurementDocument $document, User $actor): bool
+    {
+        $routed = DB::transaction(function () use ($document, $actor): bool {
+            $current = ProcurementDocument::query()->lockForUpdate()->findOrFail($document->id);
+            if ($current->document_type !== 'PPMP') {
+                return false;
+            }
+            if (in_array($current->status, [ProcurementDocument::STATUS_PENDING_PPMP_REVIEW,
+                ProcurementDocument::STATUS_UNDER_PPMP_REVIEW, ProcurementDocument::STATUS_ACCEPTED_FOR_APP_CONSOLIDATION], true)) {
+                return true;
+            }
+            if ($current->status !== ProcurementDocument::STATUS_PPMP_SIGNATORIES_COMPLETED
+                || !$this->hasCompletedRequiredSignatures($current)) {
+                return false;
+            }
+
+            $handler = User::where('user_id', self::APP_CONSOLIDATION_HANDLER)->where('status', User::STATUS_ACTIVE)->first();
+            $office = $handler?->assignedOffice ?: Office::whereIn('code', ['BACSEC', 'BAC'])->first();
+            if (!$handler || !$office || $office->status !== Office::STATUS_ACTIVE) {
+                return false;
+            }
+            $current->loadMissing(['submittingOffice', 'preparedBy', 'submittedBy']);
+            $oldStatus = $current->status;
+            $fromOffice = $current->current_office_id;
+            if (!$current->document_reference_number) {
+                app(DocumentReferenceNumberService::class)->assign($current, DocumentReferenceNumberService::TYPE_PPMP);
+            }
+            $current->fill([
+                'status' => ProcurementDocument::STATUS_PENDING_PPMP_REVIEW,
+                'stage' => ProcurementDocument::STAGE_PPMP_SUBMITTED_TO_BAC,
+                'submitted_at' => now(),
+                'current_office_id' => $office->id,
+                'assigned_to_user_id' => $handler->id,
+                'bac_secretariat_status' => 'pending',
+            ])->save();
+            $this->recordRouting($current, $actor, 'PPMP Submitted to BAC', $oldStatus,
+                ProcurementDocument::STATUS_PENDING_PPMP_REVIEW, 'Automatically routed to BACSEC-003 after all required signatures were completed.',
+                $fromOffice, $office->id);
+
+            SystemNotificationService::notify($handler, 'New PPMP for APP Consolidation',
+                "Signed PPMP {$current->tracking_number} from {$current->submittingOffice?->name} was automatically routed to you for APP consolidation.",
+                SystemNotification::TYPE_INFO, 'PPMP Submission', $current, route('bac-secretariat.ppmp.show', $current));
+
+            $recipients = collect([$current->preparedBy ?? $current->submittedBy, $this->responsibleSigner($current), $actor])
+                ->filter()->unique('id');
+            foreach ($recipients as $recipient) {
+                SystemNotificationService::notify($recipient, 'PPMP Automatically Submitted',
+                    "{$current->tracking_number} is now with {$office->name} (BACSEC-003) for APP consolidation. All required signatures are complete.",
+                    SystemNotification::TYPE_SUCCESS, 'PPMP Submission', $current, route('head-office.ppmp.show', $current));
+            }
+            AuditLogger::log('PPMP Submission', 'PPMP Automatically Submitted', 'Fully signed PPMP automatically routed to BACSEC-003.',
+                $current, ['status' => $oldStatus], $current->only(['status', 'stage', 'submitted_at', 'current_office_id', 'assigned_to_user_id']));
+            return true;
+        });
+
+        $document->refresh();
+        return $routed;
     }
 
     public function handleDeclined(ProcurementDocument $document, User $actor, string $reason): void
@@ -326,7 +408,8 @@ class HeadOfficePpmpSignatureWorkflowService
             ->get();
 
         return $requests->count() === count($this->signatureDefinitions($document))
-            && $requests->every(fn (SignatureRequest $request) => $request->status === SignatureRequest::STATUS_SIGNED);
+            && $requests->every(fn (SignatureRequest $request) => $request->status === SignatureRequest::STATUS_SIGNED
+                && $this->signatureRequests->signedSignatureForRequest($request)?->isValid());
     }
 
     private function completeSignatories(ProcurementDocument $document, User $actor): void
@@ -356,22 +439,12 @@ class HeadOfficePpmpSignatureWorkflowService
             'PPMP Signed',
             $oldStatus,
             ProcurementDocument::STATUS_PPMP_SIGNATORIES_COMPLETED,
-            'The required PPMP electronic signature is complete. The PPMP is ready for submission to BACSEC-003 for APP consolidation.',
+            'All required PPMP signatures are complete. The PPMP will be routed automatically to BACSEC-003 for APP consolidation.',
             $fromOfficeId,
             $ownerOfficeId,
         );
 
-        SystemNotificationService::notify(
-            $creator,
-            'PPMP Signed',
-            "The required signature for {$document->tracking_number} is complete. Submit the PPMP to BACSEC-003 for APP consolidation when ready.",
-            SystemNotification::TYPE_SUCCESS,
-            'PPMP Signatures',
-            $document,
-            route('head-office.ppmp.show', $document),
-        );
-
-        AuditLogger::log('PPMP Signature Workflow', 'ppmp_ready_for_submission', 'Head of Office PPMP completed the required electronic signature and is ready for submission.', $document, ['status' => $oldStatus], [
+        AuditLogger::log('PPMP Signature Workflow', 'ppmp_ready_for_submission', 'PPMP completed all required electronic signatures for automatic routing.', $document, ['status' => $oldStatus], [
             'status' => ProcurementDocument::STATUS_PPMP_SIGNATORIES_COMPLETED,
             'tracking_number' => $document->tracking_number,
         ]);

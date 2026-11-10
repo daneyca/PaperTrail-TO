@@ -1277,7 +1277,8 @@ class ElectronicSignatureService
 
         if ($type === 'ppmp') {
             return match ($ppmpSignatureResult) {
-                'completed_signatories' => 'PPMP signature completed. Submit the PPMP to BAC Secretariat when ready.',
+                'submitted_to_bac' => 'All PPMP signatures completed. The PPMP was automatically sent to BAC Secretariat for APP consolidation.',
+                'completed_signatories' => 'All PPMP signatures completed. Automatic routing to BAC Secretariat is pending.',
                 default => $fullySigned
                     ? 'PPMP signature completed.'
                     : 'PPMP signature recorded.',
