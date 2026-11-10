@@ -590,6 +590,7 @@
     overflow-wrap: anywhere;
 }
 
+.ppmp-recovery-status[hidden],
 .ppmp-recovery-status [hidden] {
     display: none !important;
 }

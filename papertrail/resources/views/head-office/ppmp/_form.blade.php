@@ -64,13 +64,13 @@
 </div>
 
 <div class="ppmp-recovery-status no-print"
+    hidden
     data-ppmp-recovery
     data-draft-key="papertrail:ppmp:{{ $user->id }}:{{ $office->id }}:{{ $document->exists ? $document->id : 'new' }}"
     data-revision="{{ $document->updated_at?->format('Y-m-d H:i:s.u') ?? 'new' }}"
     data-has-old-input="{{ session()->hasOldInput() ? 'true' : 'false' }}">
-    <span role="status" aria-live="polite" data-ppmp-recovery-message>Your entries are backed up in this tab as you type.</span>
+    <span role="status" aria-live="polite" data-ppmp-recovery-message hidden></span>
     <button type="button" class="ppmp-action-secondary" data-ppmp-recovery-restore hidden>Restore Unsaved Changes</button>
-    <button type="button" class="ppmp-action-secondary" data-ppmp-recovery-discard hidden>Discard Unsaved Changes</button>
     <small data-ppmp-recovery-files hidden></small>
 </div>
 

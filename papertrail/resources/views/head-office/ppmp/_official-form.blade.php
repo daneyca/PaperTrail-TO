@@ -471,7 +471,6 @@
             const recovery = form?.querySelector('[data-ppmp-recovery]');
             const recoveryMessage = recovery?.querySelector('[data-ppmp-recovery-message]');
             const restoreButton = recovery?.querySelector('[data-ppmp-recovery-restore]');
-            const discardButton = recovery?.querySelector('[data-ppmp-recovery-discard]');
             const recoveryFiles = recovery?.querySelector('[data-ppmp-recovery-files]');
             const draftKey = recovery?.dataset.draftKey;
             const metadataNames = ['title', 'description', 'priority', 'fiscal_year', 'ppmp_no', 'ppmp_plan_type', 'prepared_by_name', 'submitted_by_name'];
@@ -502,8 +501,12 @@
                 return [...rows.querySelectorAll('.ppmp-entry-row')];
             }
 
-            function recoveryStatus(message) {
-                if (recoveryMessage && recoveryMessage.textContent !== message) recoveryMessage.textContent = message;
+            function recoveryStatus(message = '', visible = false) {
+                if (recoveryMessage) {
+                    recoveryMessage.textContent = visible ? message : '';
+                    recoveryMessage.hidden = !visible;
+                }
+                if (recovery) recovery.hidden = !visible && (recoveryFiles?.hidden ?? true);
             }
 
             function captureDraft() {
@@ -526,11 +529,11 @@
                 try {
                     sessionStorage.setItem(draftKey, JSON.stringify(captureDraft()));
                     backupAvailable = true;
-                    discardButton.hidden = false;
-                    recoveryStatus('Changes backed up in this tab. Use Save as Draft to keep a saved document.');
+                    restoreButton.hidden = true;
+                    recoveryStatus();
                 } catch (error) {
                     backupAvailable = false;
-                    recoveryStatus('Automatic recovery is unavailable. Use Save as Draft to keep your work.');
+                    recoveryStatus('Automatic recovery is unavailable. Use Save as Draft to keep your work.', true);
                 }
             }
 
@@ -870,7 +873,6 @@
             window.addEventListener('resize', autosizeAllRows);
             setActiveRow(dataRows()[0] || null);
 
-            const initialDraft = captureDraft();
             form?.addEventListener('input', queueRecovery);
             form?.addEventListener('change', event => {
                 if (event.target.type === 'file') {
@@ -889,17 +891,6 @@
                 if (!event.persisted || !draftKey) return;
                 try { if (!sessionStorage.getItem(draftKey)) dirty = false; } catch (error) {}
             });
-            discardButton?.addEventListener('click', () => {
-                if (!window.confirm('Discard unsaved changes and return to the form as it was when opened?')) return;
-                window.clearTimeout(recoveryTimer);
-                restoreDraft(initialDraft);
-                form.querySelectorAll('input[type="file"]').forEach(field => { field.value = ''; });
-                try { sessionStorage.removeItem(draftKey); } catch (error) {}
-                dirty = false;
-                discardButton.hidden = true;
-                restoreButton.hidden = true;
-                recoveryStatus('Unsaved changes discarded.');
-            });
             if (draftKey) {
                 try {
                     const draft = JSON.parse(sessionStorage.getItem(draftKey) || 'null');
@@ -917,24 +908,22 @@
                         } else if (draft.revision === recovery.dataset.revision) {
                             restoreDraft(draft);
                             dirty = true;
-                            discardButton.hidden = false;
-                            recoveryStatus('Your unsaved PPMP entries were restored.');
+                            recoveryStatus();
                         } else {
-                            recoveryStatus('A newer saved version is open. You can restore your previous unsaved changes.');
+                            recoveryStatus('A newer saved version is open. You can restore your previous unsaved changes.', true);
                             restoreButton.hidden = false;
-                            discardButton.hidden = false;
                             restoreButton.addEventListener('click', () => {
                                 restoreDraft(draft);
                                 dirty = true;
                                 restoreButton.hidden = true;
                                 saveRecovery();
-                                recoveryStatus('Your unsaved PPMP entries were restored.');
+                                recoveryStatus();
                             });
                         }
                     }
                 } catch (error) {
                     backupAvailable = false;
-                    recoveryStatus('Automatic recovery is unavailable. Use Save as Draft to keep your work.');
+                    recoveryStatus('Automatic recovery is unavailable. Use Save as Draft to keep your work.', true);
                 }
             }
         })();
