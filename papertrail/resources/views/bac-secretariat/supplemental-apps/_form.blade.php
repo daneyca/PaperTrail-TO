@@ -126,8 +126,11 @@
 
         function autoSizeTextarea(textarea) {
             if (!textarea) return;
+            textarea.style.setProperty('--supplemental-field-height', 'auto');
             textarea.style.height = 'auto';
-            textarea.style.height = `${textarea.scrollHeight}px`;
+            const height = `${textarea.scrollHeight}px`;
+            textarea.style.setProperty('--supplemental-field-height', height);
+            textarea.style.height = height;
         }
 
         function autoSizeAllTextareas() {

@@ -21,7 +21,7 @@ use Illuminate\View\View;
 
 class SupplementalAppController extends Controller
 {
-    private const DEFAULT_JUSTIFICATION = 'This Supplemental APP is prepared because the procurement request has no matching record in the existing PPMP/APP and is necessary to support the processing of the Purchase Request.';
+    private const DEFAULT_JUSTIFICATION = 'This Supplemental APP covers additional procurement requirements or adjustments to the APP for the stated fiscal year.';
 
     public function index(Request $request): View
     {

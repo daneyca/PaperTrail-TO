@@ -276,13 +276,13 @@ SUMMARY;
     }
 
     /** Build presentation data after the caller has authorized the document. */
-    public function buildTrackingPayload(Model $document): array
+    public function buildTrackingPayload(Model $document, bool $includeLinkedHistory = true): array
     {
-        $sourcePr = $this->sourcePrDocument($document);
+        $sourcePr = $includeLinkedHistory || $document instanceof ProcurementDocument ? $this->sourcePrDocument($document) : null;
         $chain = $this->svpChainFor($document, $sourcePr);
-        $timeline = $this->timelineFor($document, $sourcePr, $chain);
+        $timeline = $this->timelineFor($document, $sourcePr, $chain, $includeLinkedHistory);
         $currentStatus = $this->statusLabel($document->status ?? $sourcePr?->status ?? null);
-        $currentStage = $this->stageFor($document, $sourcePr, $chain);
+        $currentStage = $this->stageFor($document, $sourcePr, $includeLinkedHistory ? $chain : null);
 
         return [
             'document_type' => $this->documentTypeLabel($document),
@@ -296,7 +296,7 @@ SUMMARY;
         ];
     }
 
-    private function timelineFor(Model $document, ?ProcurementDocument $sourcePr, ?SvpProcurementChain $chain): array
+    private function timelineFor(Model $document, ?ProcurementDocument $sourcePr, ?SvpProcurementChain $chain, bool $includeLinkedHistory = true): array
     {
         $events = collect();
 
@@ -337,13 +337,21 @@ SUMMARY;
         }
 
         if (! $document instanceof ProcurementDocument) {
-            $events = $events->merge($this->modelTimeline($document));
+            $events = $events->merge($this->modelTimeline($document, $includeLinkedHistory));
         }
 
         if ($chain) {
             $chain->loadMissing(['events.fromOffice', 'events.toOffice', 'events.performedBy']);
 
             foreach ($chain->events as $event) {
+                if (! $includeLinkedHistory) {
+                    $normalize = fn ($type) => preg_replace('/[^a-z0-9]/', '', strtolower((string) $type));
+                    $types = [$this->resolver->documentTypeFor($document), get_class($document), class_basename($document), $document->document_type];
+                    if ((int) $event->document_id !== (int) $document->getKey()
+                        || ! in_array($normalize($event->document_type), array_map($normalize, $types), true)) {
+                        continue;
+                    }
+                }
                 $events->push($this->timelineEvent(
                     $event->action ?: $event->stage ?: 'SVP workflow updated',
                     $event->created_at,
@@ -381,10 +389,10 @@ SUMMARY;
             ->all();
     }
 
-    private function modelTimeline(Model $document): Collection
+    private function modelTimeline(Model $document, bool $includeLinkedHistory = true): Collection
     {
         $events = collect();
-        $office = $this->resolver->officeNameFor($document);
+        $office = $includeLinkedHistory ? $this->resolver->officeNameFor($document) : null;
 
         $events->push($this->timelineEvent($this->documentTypeLabel($document) . ' Created', $document->created_at, $office));
 
@@ -396,6 +404,7 @@ SUMMARY;
             'approved_at' => 'Approved',
             'accepted_at' => 'Accepted',
             'issued_at' => 'Issued',
+            'control_assigned_at' => 'Official number and date assigned',
             'inspection_date' => 'Inspected',
             'acceptance_date' => 'Accepted',
             'returned_at' => 'Returned',

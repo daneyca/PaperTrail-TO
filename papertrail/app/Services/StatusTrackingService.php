@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\{AbstractQuotation, AnnualProcurementPlan, BacResolution, CompetitiveBiddingSignatureDocument, InspectionAcceptanceRecord, Ppmp, ProcurementDocument, PurchaseOrder, Rfq, SignatureRequest, SupplementalApp, SvpPostingRecord, User};
+use App\Models\{AbstractQuotation, AnnualProcurementPlan, BacResolution, CompetitiveBiddingSignatureDocument, ElectronicSignature, InspectionAcceptanceRecord, Ppmp, ProcurementDocument, PurchaseOrder, Rfq, SignatureRequest, SupplementalApp, SvpChainEvent, SvpPostingRecord, User};
 use Illuminate\Database\Eloquent\{Builder, Model};
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -15,12 +15,16 @@ class StatusTrackingService
         'inspected_by_user_id', 'pr_no_assigned_by_user_id', 'budget_reviewed_by_user_id',
         'accounting_reviewed_by_user_id', 'bac_secretariat_received_by_user_id',
         'bac_member_reviewed_by_user_id', 'bac_chair_reviewed_by_user_id',
+        'ppmp_reviewed_by_user_id', 'routed_by_user_id', 'created_by_user_id', 'completed_by_user_id',
+        'control_assigned_by_user_id', 'issued_by_user_id', 'forwarded_to_hope_by_user_id',
+        'forwarded_to_supplier_by_user_id', 'returned_by_user_id',
     ];
-    private const OFFICE_FIELDS = ['office_id', 'submitting_office_id', 'current_office_id', 'route_destination_office_id', 'requesting_office_id'];
+    private array $actorIdsByUser = [];
+    private ?User $controlAccount = null;
+    private bool $controlAccountLoaded = false;
 
     public function __construct(
         private readonly DocumentResolverService $resolver,
-        private readonly SignatureRequestService $signatures,
         private readonly DocumentTrackingService $tracking,
     ) {}
 
@@ -94,8 +98,9 @@ class StatusTrackingService
 
     public function canView(User $user, string $type, Model $document): bool
     {
-        return $this->resolver->canView($user, $document)
-            || $this->signatureDocuments($user, $type)->where('document_id', $document->getKey())->exists();
+        $class = $this->registry()[$type][0] ?? null;
+        return $class && $document instanceof $class
+            && $this->visibleQuery($user, $type)->whereKey($document->getKey())->exists();
     }
 
     public function details(Model $document, string $type): array
@@ -103,12 +108,14 @@ class StatusTrackingService
         if ($document instanceof CompetitiveBiddingSignatureDocument) {
             return $this->signatureDetails($document);
         }
-        $payload = $this->tracking->buildTrackingPayload($document);
+        $payload = $this->tracking->buildTrackingPayload($document, false);
         $payload['document_type'] = $document instanceof ProcurementDocument ? $document->document_type : $this->registry()[$type][1];
         $payload['tracking_number'] = $this->resolver->displayTrackingNumber($document) ?: $payload['tracking_number'];
         $payload['current_handler'] = $this->handler($document);
-        if (($location = $this->location($document)) !== 'Not assigned') {
-            $payload['current_holder'] = $location;
+        $payload['current_holder'] = $this->location($document);
+        if ($this->isControlQueue($document)) {
+            $payload['current_stage'] = 'Procurement Control';
+            $payload['next_step'] = 'Await the Procurement Controller’s official number and date assignment.';
         }
         if ($document instanceof Ppmp) {
             $payload['title'] = $document->end_user_unit ?: $document->office_name ?: 'PPMP';
@@ -117,112 +124,74 @@ class StatusTrackingService
         return $payload;
     }
 
-    private function visibleQuery(User $user, string $type, bool $withSignatures = true): Builder
+    private function visibleQuery(User $user, string $type): Builder
     {
         [$class] = $this->registry()[$type];
         $model = new $class;
-        $query = $model->newQuery();
-        if ($user->isAdmin()) {
-            return $query;
-        }
-        return $query->where(function (Builder $visible) use ($user, $type, $model, $withSignatures) {
+        $actorIds = $this->actorIds($user);
+        return $model->newQuery()->where(function (Builder $visible) use ($user, $type, $model, $actorIds) {
             $visible->whereRaw('1 = 0');
             foreach (array_intersect(self::PARTICIPANT_FIELDS, $model->getFillable()) as $field) {
-                $visible->orWhere($model->qualifyColumn($field), $user->id);
+                $visible->orWhereIn($model->qualifyColumn($field), $actorIds);
             }
-            if ($user->office_id) {
-                foreach (array_intersect(self::OFFICE_FIELDS, $model->getFillable()) as $field) {
-                    $visible->orWhere($model->qualifyColumn($field), $user->office_id);
+            $visible->orWhereIn($model->qualifyColumn('id'), $this->signatureDocuments($user, $type)->select('document_id')->toBase());
+            $visible->orWhereIn($model->qualifyColumn('id'), ElectronicSignature::query()
+                ->whereIn('document_type', $this->registry()[$type][4])->whereIn('signer_user_id', $actorIds)->select('document_id')->toBase());
+
+            foreach (['routingHistories' => 'action_by_user_id', 'budgetReviews' => 'reviewed_by_user_id',
+                'accountingReviews' => 'reviewed_by_user_id', 'bacSecretariatReviews' => 'reviewed_by_user_id',
+                'ppmpReviews' => 'reviewed_by_user_id', 'bacMemberReviews' => 'reviewed_by_user_id',
+                'bacChairReviews' => 'reviewed_by_user_id', 'versions' => 'created_by_user_id'] as $relation => $field) {
+                if (method_exists($model, $relation) && in_array($field, $model->{$relation}()->getRelated()->getFillable(), true)) {
+                    $visible->orWhereHas($relation, fn (Builder $history) => $history->whereIn($field, $actorIds));
                 }
             }
-            if ($withSignatures) {
-                $visible->orWhereIn($model->qualifyColumn('id'), $this->signatureDocuments($user, $type)->select('document_id')->toBase());
+            if ($eventTypes = $this->eventTypes($type, $model)) {
+                $visible->orWhereIn($model->qualifyColumn('id'), SvpChainEvent::query()
+                    ->whereIn('document_type', $eventTypes)->whereIn('performed_by_user_id', $actorIds)->select('document_id')->toBase());
             }
-            $sources = $this->sourceRelations($model);
-            foreach ($sources as $index => $relation) {
-                $visible->orWhere(function (Builder $parent) use ($user, $relation, $sources, $index) {
-                    foreach (array_slice($sources, 0, $index) as $previous) {
-                        $parent->whereDoesntHave($previous);
-                    }
-                    $parent->whereHas($relation, function (Builder $source) use ($user) {
-                        // Linked records inherit the established source-document permission.
-                        $authorized = $this->visibleQuery($user, 'procurement_document', false);
-                        $source->addNestedWhereQuery($authorized->getQuery());
-                    });
-                });
+            // RFQ/PO control requests are explicitly sent to the designated PC-001 account.
+            if ($user->user_id === User::PROCUREMENT_CONTROLLER_USER_ID && $user->hasRole(User::ROLE_PROCUREMENT_CONTROLLER)
+                && ($model instanceof Rfq || $model instanceof PurchaseOrder)) {
+                $visible->orWhere($model->qualifyColumn('status'), 'pending_control');
             }
-            $visible->orWhere(function (Builder $role) use ($user, $model, $sources) {
-                foreach ($sources as $relation) {
-                    $role->whereDoesntHave($relation);
-                }
-                $this->roleScope($role, $user, $model);
-            });
         });
     }
 
-    private function roleScope(Builder $query, User $user, Model $model): void
+    private function actorIds(User $user): array
     {
-        if ($model instanceof ProcurementDocument) {
-            $scope = $this->resolver->procurementVisibility($user);
-            $query->where(function (Builder $allowed) use ($scope, $user) {
-                $allowed->whereIn('status', $scope['statuses']);
-                if ($scope['role'] === User::ROLE_BAC_SECRETARIAT) {
-                    $allowed->orWhere(fn (Builder $ppmp) => $ppmp->where('document_type', 'PPMP')->where('status', '!=', ProcurementDocument::STATUS_READY_FOR_BAC_RESOLUTION))
-                        ->orWhere(fn (Builder $assigned) => $assigned->where('status', ProcurementDocument::STATUS_READY_FOR_BAC_RESOLUTION)->where('assigned_to_user_id', $user->id));
-                }
-            });
-            return;
-        }
-        if ($model instanceof CompetitiveBiddingSignatureDocument) {
-            $query->whereRaw('1 = 0');
-            return;
-        }
-        if ($user->hasRole('bac_secretariat') || $user->hasRole(User::ROLE_BAC_SECRETARIAT)) {
-            $query->whereRaw('1 = 1');
-            return;
-        }
-        if ($model instanceof BacResolution && ($user->hasRole('bac_chair') || $user->hasRole(User::ROLE_BAC_CHAIR))) {
-            $query->whereIn('status', [BacResolution::STATUS_SUBMITTED_TO_BAC_CHAIR, BacResolution::STATUS_RETURNED_BY_BAC_CHAIR, BacResolution::STATUS_CONFIRMED_BY_BAC_CHAIR, BacResolution::STATUS_FORWARDED_TO_HOPE, BacResolution::STATUS_APPROVED_BY_HOPE]);
-            return;
-        }
-        if ($user->hasRole('approving_authority') || $user->hasRole(User::ROLE_APPROVING_AUTHORITY)) {
-            if ($model instanceof AnnualProcurementPlan) {
-                $query->whereIn('status', [AnnualProcurementPlan::STATUS_SUBMITTED, AnnualProcurementPlan::STATUS_CONSOLIDATED, AnnualProcurementPlan::STATUS_APPROVED, AnnualProcurementPlan::STATUS_RETURNED]);
-                return;
+        if (! isset($this->actorIdsByUser[$user->id])) {
+            $ids = [$user->id];
+            if ($actor = app(BacsecMpdoWorkspaceService::class)->existing($user)) {
+                $ids[] = $actor->id;
             }
-            if ($model instanceof BacResolution) {
-                $query->whereIn('status', [BacResolution::STATUS_FORWARDED_TO_HOPE, BacResolution::STATUS_APPROVED_BY_HOPE, BacResolution::STATUS_RETURNED_BY_HOPE]);
-                return;
-            }
+            $this->actorIdsByUser[$user->id] = array_values(array_unique($ids));
         }
-        $query->whereRaw('1 = 0');
+        return $this->actorIdsByUser[$user->id];
     }
 
     private function signatureDocuments(User $user, string $type): Builder
     {
-        return $this->signatures->requestsForUser($user)->setEagerLoads([])
-            ->whereIn('document_type', $this->registry()[$type][4])
-            ->whereNotIn('status', [SignatureRequest::STATUS_CANCELLED, SignatureRequest::STATUS_SKIPPED]);
+        $ids = $this->actorIds($user);
+        return SignatureRequest::query()->whereIn('document_type', $this->registry()[$type][4])
+            ->where(fn (Builder $involved) => $involved->whereIn('requested_by_user_id', $ids)
+                ->orWhere(fn (Builder $assigned) => $assigned->whereIn('requested_to_user_id', $ids)
+                    ->whereNotIn('status', [SignatureRequest::STATUS_CANCELLED, SignatureRequest::STATUS_SKIPPED])));
     }
 
-    private function sourceRelations(Model $model): array
+    private function eventTypes(string $type, Model $model): array
     {
-        $relations = array_values(array_filter(['sourcePrDocument', 'procurementDocument'], fn ($relation) => method_exists($model, $relation)));
-        if ($model instanceof InspectionAcceptanceRecord) {
-            $relations[] = 'purchaseOrder.sourcePrDocument';
-            $relations[] = 'purchaseOrder.procurementDocument';
+        if (! in_array($type, ['procurement_document', 'bac_resolution', 'rfq', 'abstract', 'purchase_order', 'inspection_acceptance'], true)) {
+            return [];
         }
-        return $relations;
+        return array_values(array_unique(array_merge($this->registry()[$type][4],
+            $model instanceof ProcurementDocument ? ['PR', 'PPMP', 'Purchase Request'] : [$this->registry()[$type][1]],
+            [get_class($model), class_basename($model)])));
     }
 
     private function relations(Model $model): array
     {
         $relations = array_values(array_filter(['currentOffice', 'assignedTo', 'submittingOffice', 'office', 'requestingOffice', 'preparedBy', 'creator', 'createdBy'], fn ($relation) => method_exists($model, $relation)));
-        foreach ($this->sourceRelations($model) as $source) {
-            foreach (['currentOffice', 'assignedTo', 'submittingOffice'] as $relation) {
-                $relations[] = $source.'.'.$relation;
-            }
-        }
         if ($model instanceof CompetitiveBiddingSignatureDocument) {
             array_push($relations, 'signatureRequests.requestedTo', 'signatureRequests.requestedBy', 'signatureRequests.requestedOffice');
         }
@@ -255,26 +224,21 @@ class StatusTrackingService
                 $row->reference = $this->resolver->displayTrackingNumber($document) ?: $row->reference;
                 $row->location = $this->location($document);
                 $row->handler = $this->handler($document);
-                $row->stage = $this->source($document)?->stage ?? $document->stage ?? $row->document_type;
+                $row->stage = $document->stage ?? ($this->isControlQueue($document) ? 'Procurement Control' : $row->document_type);
             }
         }
     }
 
     private function source(Model $document): ?ProcurementDocument
     {
-        if ($document instanceof ProcurementDocument) {
-            return $document;
-        }
-        foreach ($this->sourceRelations($document) as $relation) {
-            if (($source = data_get($document, $relation)) instanceof ProcurementDocument) {
-                return $source;
-            }
-        }
-        return null;
+        return $document instanceof ProcurementDocument ? $document : null;
     }
 
     private function location(Model $document): string
     {
+        if ($this->isControlQueue($document)) {
+            return $this->controlAccount()?->assignedOffice?->name ?? User::ROLE_PROCUREMENT_CONTROLLER;
+        }
         $source = $this->source($document);
         if ($source?->currentOffice?->name) {
             return $source->currentOffice->name;
@@ -299,10 +263,27 @@ class StatusTrackingService
 
     private function handler(Model $document): ?string
     {
+        if ($this->isControlQueue($document)) {
+            return $this->controlAccount()?->name ?? User::ROLE_PROCUREMENT_CONTROLLER;
+        }
         if ($handler = $this->source($document)?->assignedTo?->name) {
             return $handler;
         }
         return $this->pendingRequests($document)->map(fn ($request) => $request->requestedTo?->name ?? $request->requested_to_role)->filter()->unique()->implode(', ') ?: null;
+    }
+
+    private function isControlQueue(Model $document): bool
+    {
+        return ($document instanceof Rfq || $document instanceof PurchaseOrder) && $document->status === 'pending_control';
+    }
+
+    private function controlAccount(): ?User
+    {
+        if (! $this->controlAccountLoaded) {
+            $this->controlAccount = User::with('assignedOffice')->where('user_id', User::PROCUREMENT_CONTROLLER_USER_ID)->first();
+            $this->controlAccountLoaded = true;
+        }
+        return $this->controlAccount;
     }
 
     private function pendingRequestsQuery(string $type): Builder

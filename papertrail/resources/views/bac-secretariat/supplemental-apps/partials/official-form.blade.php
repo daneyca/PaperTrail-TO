@@ -36,36 +36,35 @@
                 <span>Supplemental APP No.:</span>
                 <strong>{{ $supplementalApp->supplemental_app_number ?? 'Draft' }}</strong>
             </div>
+            <p class="supplemental-document-scope">Additional procurement requirements and adjustments within the fiscal year.</p>
         </div>
 
         <table class="supplemental-info-table supplemental-app-info-table supplemental-app-official-table">
+            <colgroup><col class="col-info-label"><col class="col-info-year"><col class="col-info-label"><col class="col-info-source"><col class="col-info-label"><col class="col-info-office"></colgroup>
             <tbody>
                 <tr>
                     <th>Fiscal Year</th>
                     <td>{{ $supplementalApp->fiscal_year ?? 'N/A' }}</td>
                     <th>Source PR No.</th>
                     <td>{{ $sourcePrNumber }}</td>
-                </tr>
-                <tr>
                     <th>Requesting Office</th>
                     <td>{{ $requestingOffice }}</td>
-                    <th>Requesting Office Name</th>
-                    <td>{{ $supplementalApp->requesting_office_name ?? $requestingOffice }}</td>
                 </tr>
                 <tr>
                     <th>Title</th>
                     <td colspan="3">{{ $supplementalApp->title ?? 'N/A' }}</td>
+                    <th>Requesting Office Name</th>
+                    <td>{{ $supplementalApp->requesting_office_name ?? $requestingOffice }}</td>
                 </tr>
             </tbody>
         </table>
 
-        <table class="supplemental-text-table supplemental-app-official-table">
+        <table class="supplemental-text-table supplemental-narrative-table supplemental-app-official-table">
+            <colgroup><col class="col-text-label"><col class="col-text-value"><col class="col-text-label"><col class="col-text-value"></colgroup>
             <tbody>
                 <tr>
                     <th>PURPOSE</th>
                     <td>{!! nl2br(e($supplementalApp->purpose ?? 'N/A')) !!}</td>
-                </tr>
-                <tr>
                     <th>JUSTIFICATION</th>
                     <td>{!! nl2br(e($supplementalApp->justification ?? 'N/A')) !!}</td>
                 </tr>
@@ -83,6 +82,11 @@
                 <col class="col-remarks">
             </colgroup>
             <thead>
+                <tr class="supplemental-group-heading">
+                    <th colspan="4" scope="colgroup">Procurement Details</th>
+                    <th colspan="2" scope="colgroup">Estimated Funding</th>
+                    <th rowspan="2" scope="col">Remarks / Changes</th>
+                </tr>
                 <tr>
                     <th>Item No.</th>
                     <th>Description</th>
@@ -90,7 +94,6 @@
                     <th>Unit</th>
                     <th>Estimated Unit Cost</th>
                     <th>Estimated Total Cost</th>
-                    <th>Remarks</th>
                 </tr>
             </thead>
             <tbody>

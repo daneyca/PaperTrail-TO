@@ -37,9 +37,11 @@
                 <input id="supplemental_app_number" name="supplemental_app_number" type="text" value="{{ old('supplemental_app_number', $supplementalApp->supplemental_app_number) }}">
             </div>
             @error('supplemental_app_number')<p class="field-error">{{ $message }}</p>@enderror
+            <p class="supplemental-document-scope">Additional procurement requirements and adjustments within the fiscal year.</p>
         </div>
 
         <table class="supplemental-info-table supplemental-app-info-table supplemental-app-official-table">
+            <colgroup><col class="col-info-label"><col class="col-info-year"><col class="col-info-label"><col class="col-info-source"><col class="col-info-label"><col class="col-info-office"></colgroup>
             <tbody>
                 <tr>
                     <th>Fiscal Year</th>
@@ -49,8 +51,6 @@
                     </td>
                     <th>Source PR No.</th>
                     <td><span class="supplemental-readonly-value">{{ $sourcePrNumber }}</span></td>
-                </tr>
-                <tr>
                     <th>Requesting Office</th>
                     <td>
                         <select id="requesting_office_id" name="requesting_office_id">
@@ -61,35 +61,34 @@
                         </select>
                         @error('requesting_office_id')<p class="field-error">{{ $message }}</p>@enderror
                     </td>
-                    <th>Requesting Office Name</th>
-                    <td>
-                        <input id="requesting_office_name" name="requesting_office_name" type="text" value="{{ $requestingOfficeName }}">
-                        @error('requesting_office_name')<p class="field-error">{{ $message }}</p>@enderror
-                    </td>
                 </tr>
                 <tr>
                     <th>Title</th>
                     <td colspan="3">
-                        <input id="title" name="title" type="text" value="{{ old('title', $supplementalApp->title) }}">
+                        <textarea id="title" name="title" rows="1" aria-label="Supplemental APP title">{{ old('title', $supplementalApp->title) }}</textarea>
                         @error('title')<p class="field-error">{{ $message }}</p>@enderror
+                    </td>
+                    <th>Requesting Office Name</th>
+                    <td>
+                        <textarea id="requesting_office_name" name="requesting_office_name" rows="1" aria-label="Requesting office name">{{ $requestingOfficeName }}</textarea>
+                        @error('requesting_office_name')<p class="field-error">{{ $message }}</p>@enderror
                     </td>
                 </tr>
             </tbody>
         </table>
 
-        <table class="supplemental-text-table supplemental-app-official-table">
+        <table class="supplemental-text-table supplemental-narrative-table supplemental-app-official-table">
+            <colgroup><col class="col-text-label"><col class="col-text-value"><col class="col-text-label"><col class="col-text-value"></colgroup>
             <tbody>
                 <tr>
                     <th>PURPOSE</th>
                     <td>
-                        <textarea id="purpose" name="purpose" rows="3">{{ old('purpose', $supplementalApp->purpose) }}</textarea>
+                        <textarea id="purpose" name="purpose" rows="3" aria-label="Purpose">{{ old('purpose', $supplementalApp->purpose) }}</textarea>
                         @error('purpose')<p class="field-error">{{ $message }}</p>@enderror
                     </td>
-                </tr>
-                <tr>
                     <th>JUSTIFICATION</th>
                     <td>
-                        <textarea id="justification" name="justification" rows="4">{{ old('justification', $supplementalApp->justification) }}</textarea>
+                        <textarea id="justification" name="justification" rows="3" aria-label="Justification">{{ old('justification', $supplementalApp->justification) }}</textarea>
                         @error('justification')<p class="field-error">{{ $message }}</p>@enderror
                     </td>
                 </tr>
@@ -109,6 +108,11 @@
                 <col class="col-remarks">
             </colgroup>
             <thead>
+                <tr class="supplemental-group-heading">
+                    <th colspan="4" scope="colgroup">Procurement Details</th>
+                    <th colspan="2" scope="colgroup">Estimated Funding</th>
+                    <th rowspan="2" scope="col">Remarks / Changes</th>
+                </tr>
                 <tr>
                     <th>Item No.</th>
                     <th>Description</th>
@@ -116,7 +120,6 @@
                     <th>Unit</th>
                     <th>Estimated Unit Cost</th>
                     <th>Estimated Total Cost</th>
-                    <th>Remarks</th>
                 </tr>
             </thead>
             <tbody>

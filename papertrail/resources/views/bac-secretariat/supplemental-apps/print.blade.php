@@ -10,7 +10,7 @@
     <div class="supplemental-print-actions no-print">
         <a href="{{ $backUrl ?? route('bac-secretariat.supplemental-apps.show', $supplementalApp) }}">Back</a>
         <button type="button" onclick="window.print()">Print</button>
-        <p>Before printing, open More settings and uncheck Headers and footers.</p>
+        <p>A4 landscape. Before printing, open More settings and uncheck Headers and footers.</p>
     </div>
 
     <main class="supplemental-print-page">

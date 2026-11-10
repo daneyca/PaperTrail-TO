@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\{AnnualProcurementPlan, CompetitiveBiddingSignatureDocument, Office, ProcurementDocument, Rfq, SignatureRequest, SvpProcurementChain, User};
+use App\Models\{AnnualProcurementPlan, CompetitiveBiddingSignatureDocument, Office, ProcurementDocument, PurchaseOrder, Rfq, SignatureRequest, SvpProcurementChain, User};
 use App\Services\StatusTrackingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -37,7 +37,7 @@ class StatusTrackingTest extends TestCase
         }
     }
 
-    public function test_office_documents_and_app_plans_are_visible_but_other_office_drafts_are_not(): void
+    public function test_created_and_processed_documents_are_visible_without_exposing_department_peers_records(): void
     {
         $office = Office::create(['code' => 'TRACK-A', 'name' => 'Tracking Office A', 'type' => Office::TYPE_END_USER, 'status' => Office::STATUS_ACTIVE]);
         $otherOffice = Office::create(['code' => 'TRACK-B', 'name' => 'Tracking Office B', 'type' => Office::TYPE_END_USER, 'status' => Office::STATUS_ACTIVE]);
@@ -46,14 +46,16 @@ class StatusTrackingTest extends TestCase
         $ppmp = $this->procurement('VISIBLE-PPMP', ['document_type' => 'PPMP', 'status' => ProcurementDocument::STATUS_PPMP_DRAFT, 'submitting_office_id' => $office->id]);
         $ppmp->routingHistories()->create(['action' => 'Draft saved', 'action_by_user_id' => $user->id, 'status_to' => ProcurementDocument::STATUS_PPMP_DRAFT, 'comments' => 'Recorded tracking remarks.', 'action_at' => now()]);
         $hidden = $this->procurement('PRIVATE-OTHER-OFFICE', ['submitting_office_id' => $otherOffice->id]);
-        $app = AnnualProcurementPlan::withoutEvents(fn () => AnnualProcurementPlan::create(['title' => 'VISIBLE-APP', 'app_number' => 'APP-TRACK-TEST', 'fiscal_year' => 2026, 'office_id' => $office->id, 'status' => 'draft']));
+        $sameOffice = $this->procurement('PRIVATE-SAME-OFFICE', ['submitting_office_id' => $office->id]);
+        $app = AnnualProcurementPlan::withoutEvents(fn () => AnnualProcurementPlan::create(['title' => 'VISIBLE-APP', 'app_number' => 'APP-TRACK-TEST', 'fiscal_year' => 2026, 'office_id' => $office->id, 'prepared_by_user_id' => $user->id, 'status' => 'draft']));
 
         $this->actingAs($user)->get(route('status-tracking.index'))->assertOk()
-            ->assertSee('VISIBLE-PR')->assertSee('VISIBLE-PPMP')->assertSee('VISIBLE-APP')->assertDontSee('PRIVATE-OTHER-OFFICE');
+            ->assertSee('VISIBLE-PR')->assertSee('VISIBLE-PPMP')->assertSee('VISIBLE-APP')->assertDontSee('PRIVATE-OTHER-OFFICE')->assertDontSee('PRIVATE-SAME-OFFICE');
         $this->get(route('status-tracking.show', ['procurement_document', $pr]))->assertOk()->assertSee('PR Progress');
         $this->get(route('status-tracking.show', ['procurement_document', $ppmp]))->assertOk()->assertSee('Activity Timeline')->assertSee('Recorded tracking remarks.');
         $this->get(route('status-tracking.show', ['app', $app]))->assertOk()->assertSee('Activity Timeline');
         $this->get(route('status-tracking.show', ['procurement_document', $hidden]))->assertForbidden();
+        $this->get(route('status-tracking.show', ['procurement_document', $sameOffice]))->assertForbidden();
     }
 
     public function test_accounts_without_an_office_do_not_see_unrelated_unassigned_documents(): void
@@ -69,10 +71,11 @@ class StatusTrackingTest extends TestCase
     {
         $budget = $this->account('TRACK-REVIEWER', User::ROLE_BUDGET);
         $this->procurement('REVIEWED-MOVED-ON', ['status' => ProcurementDocument::STATUS_READY_FOR_RFQ, 'budget_reviewed_by_user_id' => $budget->id]);
-        $this->procurement('AWAITING-BUDGET', ['status' => ProcurementDocument::STATUS_PENDING_BUDGET_REVIEW]);
+        $this->procurement('AWAITING-BUDGET', ['status' => ProcurementDocument::STATUS_PENDING_BUDGET_REVIEW, 'assigned_to_user_id' => $budget->id]);
+        $this->procurement('UNASSIGNED-BUDGET', ['status' => ProcurementDocument::STATUS_PENDING_BUDGET_REVIEW]);
         $this->procurement('PRIVATE-DRAFT');
         $this->actingAs($budget)->get(route('status-tracking.index'))->assertOk()
-            ->assertSee('REVIEWED-MOVED-ON')->assertSee('AWAITING-BUDGET')->assertDontSee('PRIVATE-DRAFT');
+            ->assertSee('REVIEWED-MOVED-ON')->assertSee('AWAITING-BUDGET')->assertDontSee('PRIVATE-DRAFT')->assertDontSee('UNASSIGNED-BUDGET');
     }
 
     public function test_competitive_app_tracking_is_available_to_its_preparer_and_assigned_signatory(): void
@@ -154,15 +157,57 @@ class StatusTrackingTest extends TestCase
         $this->assertSame(2, $listing['documents']->lastPage());
     }
 
-    public function test_linked_documents_keep_the_source_documents_access_restrictions(): void
+    public function test_involvement_in_a_source_pr_does_not_expose_other_accounts_linked_documents(): void
     {
         $bac = $this->account('TRACK-BAC', User::ROLE_BAC_SECRETARIAT);
         $private = $this->procurement('PRIVATE-SOURCE');
-        $visible = $this->procurement('VISIBLE-SOURCE', ['status' => ProcurementDocument::STATUS_SUBMITTED_TO_BAC_SECRETARIAT]);
-        $privateRfq = Rfq::withoutEvents(fn () => Rfq::create(['rfq_number' => 'PRIVATE-LINKED-RFQ', 'status' => 'draft', 'source_pr_document_id' => $private->id]));
-        Rfq::withoutEvents(fn () => Rfq::create(['rfq_number' => 'VISIBLE-LINKED-RFQ', 'status' => 'draft', 'source_pr_document_id' => $visible->id]));
+        $visible = $this->procurement('VISIBLE-SOURCE', ['status' => ProcurementDocument::STATUS_SUBMITTED_TO_BAC_SECRETARIAT, 'assigned_to_user_id' => $bac->id]);
+        $private->routingHistories()->create(['action' => 'Private source action', 'status_to' => $private->status, 'comments' => 'PRIVATE-SOURCE-REMARK', 'action_at' => now()]);
+        $privateRfq = Rfq::withoutEvents(fn () => Rfq::create(['rfq_number' => 'PRIVATE-LINKED-RFQ', 'status' => 'draft', 'source_pr_document_id' => $visible->id]));
+        $ownRfq = Rfq::withoutEvents(fn () => Rfq::create(['rfq_number' => 'VISIBLE-LINKED-RFQ', 'status' => 'draft', 'source_pr_document_id' => $private->id, 'prepared_by_user_id' => $bac->id]));
         $this->actingAs($bac)->get(route('status-tracking.index'))->assertOk()->assertSee('VISIBLE-LINKED-RFQ')->assertDontSee('PRIVATE-LINKED-RFQ');
         $this->get(route('status-tracking.show', ['rfq', $privateRfq]))->assertForbidden();
+        $this->get(route('status-tracking.show', ['rfq', $ownRfq]))->assertOk()->assertDontSee('PRIVATE-SOURCE-REMARK')->assertDontSee('Private source action');
+    }
+
+    public function test_bac_accounts_do_not_gain_visibility_from_their_shared_department_or_role(): void
+    {
+        $office = Office::create(['code' => 'TRACK-BAC', 'name' => 'BAC Secretariat', 'type' => Office::TYPE_PROCUREMENT, 'status' => Office::STATUS_ACTIVE]);
+        $user = $this->account('BACSEC-003', User::ROLE_BAC_SECRETARIAT, $office->id);
+        $peer = $this->account('BACSEC-001', User::ROLE_BAC_SECRETARIAT, $office->id);
+        $assigned = $this->procurement('DARIUS-ASSIGNED-PPMP', ['document_type' => 'PPMP', 'status' => ProcurementDocument::STATUS_PENDING_PPMP_REVIEW, 'assigned_to_user_id' => $user->id, 'current_office_id' => $office->id]);
+        $private = $this->procurement('PEER-ASSIGNED-PR', ['status' => ProcurementDocument::STATUS_SUBMITTED_TO_BAC_SECRETARIAT, 'assigned_to_user_id' => $peer->id, 'current_office_id' => $office->id]);
+        $roleOnly = $this->procurement('ROLE-ONLY-PPMP', ['document_type' => 'PPMP', 'status' => ProcurementDocument::STATUS_PENDING_PPMP_REVIEW, 'current_office_id' => $office->id]);
+        SignatureRequest::create(['request_uuid' => (string) \Illuminate\Support\Str::uuid(), 'document_type' => 'ppmp', 'document_id' => $roleOnly->id, 'signatory_slot' => 'review', 'requested_to_role' => 'bac_secretariat', 'requested_to_office_id' => $office->id, 'status' => SignatureRequest::STATUS_PENDING]);
+        $this->actingAs($user)->get(route('status-tracking.index'))->assertOk()->assertSee('DARIUS-ASSIGNED-PPMP')->assertDontSee('PEER-ASSIGNED-PR')->assertDontSee('ROLE-ONLY-PPMP');
+        $this->get(route('status-tracking.show', ['procurement_document', $assigned]))->assertOk();
+        $this->get(route('status-tracking.show', ['procurement_document', $private]))->assertForbidden();
+        $this->get(route('status-tracking.show', ['procurement_document', $roleOnly]))->assertForbidden();
+    }
+
+    public function test_recorded_processing_history_retains_access_after_reassignment(): void
+    {
+        $user = $this->account('TRACK-HISTORY', User::ROLE_BAC_SECRETARIAT);
+        $peer = $this->account('TRACK-HISTORY-PEER', User::ROLE_BAC_SECRETARIAT);
+        $processed = $this->procurement('HISTORICALLY-PROCESSED', ['assigned_to_user_id' => $peer->id]);
+        $processed->routingHistories()->create(['action' => 'Reviewed and forwarded', 'status_to' => $processed->status, 'action_by_user_id' => $user->id, 'action_at' => now()]);
+        $rfq = Rfq::withoutEvents(fn () => Rfq::create(['rfq_number' => 'PERSONALLY-CONTROLLED-RFQ', 'status' => 'submitted', 'control_assigned_by_user_id' => $user->id]));
+        $this->actingAs($user)->get(route('status-tracking.index'))->assertOk()->assertSee('HISTORICALLY-PROCESSED')->assertSee('PERSONALLY-CONTROLLED-RFQ');
+        $this->get(route('status-tracking.show', ['procurement_document', $processed]))->assertOk();
+        $this->get(route('status-tracking.show', ['rfq', $rfq]))->assertOk();
+    }
+
+    public function test_pending_control_requests_are_visible_only_to_the_named_controller_and_actual_participants(): void
+    {
+        $controller = $this->account(User::PROCUREMENT_CONTROLLER_USER_ID, User::ROLE_PROCUREMENT_CONTROLLER);
+        $peer = $this->account('TRACK-PC-PEER', User::ROLE_PROCUREMENT_CONTROLLER);
+        $rfq = Rfq::withoutEvents(fn () => Rfq::create(['rfq_number' => 'DIRECTED-CONTROL-RFQ', 'status' => Rfq::STATUS_PENDING_CONTROL]));
+        $po = PurchaseOrder::withoutEvents(fn () => PurchaseOrder::create(['po_number' => 'DIRECTED-CONTROL-PO', 'fiscal_year' => 2026, 'status' => PurchaseOrder::STATUS_PENDING_CONTROL]));
+        $this->actingAs($controller)->get(route('status-tracking.index'))->assertOk()->assertSee('DIRECTED-CONTROL-RFQ')->assertSee('DIRECTED-CONTROL-PO');
+        $this->get(route('status-tracking.show', ['rfq', $rfq]))->assertOk();
+        $this->get(route('status-tracking.show', ['purchase_order', $po]))->assertOk();
+        $this->actingAs($peer)->get(route('status-tracking.index'))->assertOk()->assertDontSee('DIRECTED-CONTROL-RFQ')->assertDontSee('DIRECTED-CONTROL-PO');
+        $this->get(route('status-tracking.show', ['rfq', $rfq]))->assertForbidden();
     }
 
     public function test_tracking_requires_a_signed_in_account(): void

@@ -4,7 +4,7 @@
 
 @section('content')
     <section class="dashboard-hero admin-users-hero">
-        <div><p class="eyebrow">{{ $eyebrow }}</p><h1>Status Tracking</h1><p>Track document status, location, handler, and recorded movements across your workflows.</p></div>
+        <div><p class="eyebrow">{{ $eyebrow }}</p><h1>Status Tracking</h1><p>Track documents you created, are assigned to, or have processed.</p></div>
     </section>
 
     <section class="table-panel" aria-label="Document status tracking">
