@@ -11,7 +11,7 @@
         $usesPrSignatureRouting = $hasBacsec002PrCapability || $user->roleSlug() === 'head-office';
         $roleLabel = $hasBacsec002PrCapability ? 'BAC Secretariat' : 'Head of Office';
         $status = $document->status ?: 'pr_draft';
-        $submitButtonLabel = $usesPrSignatureRouting ? 'Submit for Signatures' : 'Submit for PR Number';
+        $submitButtonLabel = 'Submit for Signatories';
         $submitConfirmMessage = $usesPrSignatureRouting
             ? 'Generate signature requests for this Purchase Request?'
             : 'Submit this Purchase Request to the Procurement Controller?';
@@ -424,15 +424,13 @@
             >
                 <section class="pr-action-toolbar no-print" aria-label="Purchase Request actions">
                     <div class="pr-toolbar-group">
-                        <button type="button" class="btn-pr-secondary" data-pr-stage-back>Back to Items</button>
-                        <a href="{{ route('head-office.pr.index') }}" class="btn-pr-secondary">Back</a>
+                        <button type="button" class="btn-pr-secondary" data-pr-stage-back data-action-icon="false">Back to Items</button>
                     </div>
                     <div class="pr-toolbar-group">
-                        <button type="button" class="btn-pr-secondary" data-add-pr-item>Add Row</button>
-                        <button type="button" class="btn-pr-secondary" data-remove-last-pr-item>Remove Last Row</button>
-                        <button type="button" id="removeEmptyPrRowsBtn" class="btn-pr-secondary" data-clear-empty-pr-items>Remove Empty Rows</button>
-                        <button type="submit" form="purchaseRequestForm" name="form_action" value="save_draft" class="btn-pr-dark" data-pr-draft-action>Save Draft</button>
-                        <button type="submit" form="purchaseRequestForm" name="form_action" value="submit_for_pr_number" class="btn-pr-primary" id="submitForPrNumberBtn" data-submit-pr-number data-submit-confirm="{{ $submitConfirmMessage }}">{{ $submitButtonLabel }}</button>
+                        <button type="button" class="btn-pr-secondary" data-add-pr-item data-action-icon="false">Add Row</button>
+                        <button type="button" id="removeEmptyPrRowsBtn" class="btn-pr-secondary" data-clear-empty-pr-items data-action-icon="false">Remove Empty Rows</button>
+                        <button type="submit" form="purchaseRequestForm" name="form_action" value="save_draft" class="btn-pr-dark" data-pr-draft-action data-action-icon="false">Save Draft</button>
+                        <button type="submit" form="purchaseRequestForm" name="form_action" value="submit_for_pr_number" class="btn-pr-primary" id="submitForPrNumberBtn" data-submit-pr-number data-submit-confirm="{{ $submitConfirmMessage }}" data-action-icon="false">{{ $submitButtonLabel }}</button>
                     </div>
                 </section>
 
