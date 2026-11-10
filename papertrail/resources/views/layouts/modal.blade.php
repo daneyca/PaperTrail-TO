@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'PaperTrail')</title>
+    @stack('vendor-styles')
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{{ asset('css/saas.css') }}?v={{ file_exists(public_path('css/saas.css')) ? filemtime(public_path('css/saas.css')) : time() }}">
