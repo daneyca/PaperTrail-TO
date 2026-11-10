@@ -98,10 +98,6 @@
         </section>
     @endunless
 
-    @if ($isPpmp && $isSignedRequest)
-        @include('components.e-signature.ppmp-location', ['document' => $document])
-    @endif
-
     <x-e-signature.signable-layout class="signature-request-workspace signature-request-workspace--inline-actions pt-smooth-enter" style="--pt-delay: 220ms" sidebar-label="Signature request actions">
         <x-slot name="document">
             <section class="signature-document-card" aria-label="Document preview">

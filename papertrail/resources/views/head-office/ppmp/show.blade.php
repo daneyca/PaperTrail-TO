@@ -51,6 +51,20 @@
             @if (Route::has('head-office.ppmp.print'))
                 <a href="{{ route('head-office.ppmp.print', $document) }}" class="dashboard-action secondary-action" target="_blank" rel="noopener">Print PPMP</a>
             @endif
+            @if ($canDelete)
+                <form
+                    method="POST"
+                    action="{{ route('head-office.ppmp.destroy', $document) }}"
+                    data-confirm-title="Delete PPMP?"
+                    data-confirm="This will permanently delete this PPMP, its saved item rows, and any unsigned signature requests."
+                    data-confirm-label="Delete PPMP"
+                    data-confirm-type="danger"
+                >
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="dashboard-action secondary-action">Delete</button>
+                </form>
+            @endif
             <x-ai.completeness-check-button
                 document-type="ppmp"
                 :document-id="$document->id"
@@ -59,24 +73,10 @@
             />
         </div>
 
-        @if ($canModify || $canDelete)
+        @if ($canModify)
             <div class="head-office-ppmp-toolbar__group head-office-ppmp-toolbar__group--actions">
                 @if ($canModify)
                     <a href="{{ route('head-office.ppmp.edit', $document) }}" class="dashboard-action">Edit / Revise</a>
-                @endif
-                @if ($canDelete)
-                    <form
-                        method="POST"
-                        action="{{ route('head-office.ppmp.destroy', $document) }}"
-                        data-confirm-title="Delete PPMP?"
-                        data-confirm="This will permanently delete this PPMP, its saved item rows, and any unsigned signature requests."
-                        data-confirm-label="Delete PPMP"
-                        data-confirm-type="danger"
-                    >
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="dashboard-action secondary-action">Delete</button>
-                    </form>
                 @endif
                 @if ($canModify)
                     <form

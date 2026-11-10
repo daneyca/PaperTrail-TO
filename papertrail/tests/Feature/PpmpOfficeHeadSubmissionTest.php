@@ -68,7 +68,7 @@ class PpmpOfficeHeadSubmissionTest extends TestCase
             ->assertSee($document->tracking_number)->assertSee('Submitted to BAC')
             ->assertSee('BAC Secretariat')->assertDontSee('Submit to BAC Secretariat');
         $this->actingAs($head)->get(route('signature-requests.show', $requests['submitted_by']))->assertOk()
-            ->assertSee('Current Office')->assertSee('BAC Secretariat')->assertDontSee('Submit to BAC Secretariat');
+            ->assertSee($document->tracking_number)->assertSee('Signed')->assertDontSee('Submit to BAC Secretariat');
         $this->get(route('head-office.documents.index'))->assertOk()->assertDontSee('Not submitted');
         $this->actingAs($handler)->get(route('bac-secretariat.ppmp.index'))->assertOk()->assertSee($document->tracking_number);
         $this->get(route('bac-secretariat.ppmp.show', $document))->assertOk()->assertSee($document->tracking_number);
