@@ -509,6 +509,24 @@
         return ! empty($item['section']) || ! empty($item['children']) || $routeUrl($item) !== null || ! empty($item['disabled']);
     };
 
+    $hasPendingCount = function (array $item) use (&$hasPendingCount, $routeUrl): bool {
+        if (! empty($item['section']) || ! empty($item['disabled'])) {
+            return false;
+        }
+        if (empty($item['children']) && $routeUrl($item) === null) {
+            return false;
+        }
+        if ((int) ($item['count'] ?? 0) > 0) {
+            return true;
+        }
+        foreach ($item['children'] ?? [] as $child) {
+            if ($hasPendingCount($child)) {
+                return true;
+            }
+        }
+        return false;
+    };
+
     $dashboardRoute = $user?->dashboardRoute() ?? 'dashboard';
     $dashboardHref = Route::has($dashboardRoute) ? route($dashboardRoute) : url('/');
     $paperTrailLogoPath = 'images/logos/papertrail-logo.jpg';
@@ -562,10 +580,8 @@
                         >
                             <x-sidebar-icon :name="$item['icon'] ?? 'circle'" />
                             <span class="sidebar-link-label">{{ $item['label'] }}</span>
-                            @if ($itemCount > 0)
-                                <span class="sidebar-count-badge {{ ($item['label'] ?? '') === 'Signatures' ? 'sidebar-count-badge--signature' : '' }}">
-                                    {{ $itemCount > 99 ? '99+' : number_format($itemCount) }}
-                                </span>
+                            @if ($hasPendingCount($item))
+                                <span class="sidebar-pending-dot {{ ($item['label'] ?? '') === 'Signatures' ? 'sidebar-pending-dot--signature' : '' }}" role="img" aria-label="Pending documents" title="Pending documents"></span>
                             @endif
                             <span class="sidebar-dropdown-arrow" aria-hidden="true">
                                 <svg viewBox="0 0 20 20" focusable="false">
@@ -601,6 +617,9 @@
                                             data-sidebar-dropdown-toggle
                                         >
                                             <span class="sidebar-link-label">{{ $child['label'] }}</span>
+                                            @if ($hasPendingCount($child))
+                                                <span class="sidebar-pending-dot" role="img" aria-label="Pending documents" title="Pending documents"></span>
+                                            @endif
                                             <span class="sidebar-dropdown-arrow" aria-hidden="true">
                                                 <svg viewBox="0 0 20 20" focusable="false">
                                                     <path d="m6 8 4 4 4-4" />

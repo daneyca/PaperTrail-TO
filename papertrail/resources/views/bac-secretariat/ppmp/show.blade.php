@@ -68,11 +68,12 @@
         </div>
 
         <aside class="document-review-sidebar no-print">
-            <section class="table-panel budget-action-panel bac-pr-side-panel ppmp-review-action-panel">
-                <div class="panel-heading">
+            <section class="ppmp-review-controls" aria-labelledby="ppmp-review-controls-title">
+                <div class="ppmp-review-controls-header">
+                    <svg class="ppmp-review-controls-icon" viewBox="0 0 32 36" fill="none" aria-hidden="true"><path d="M10 6H5a2 2 0 0 0-2 2v25h26V8a2 2 0 0 0-2-2h-5M12 3h8v6h-8zM9 20l5 5 10-11" /></svg>
                     <div>
-                        <p class="eyebrow">PPMP Review Actions</p>
-                        <h2>Review Controls</h2>
+                        <p>PPMP Review Actions</p>
+                        <h2 id="ppmp-review-controls-title">Review Controls</h2>
                     </div>
                 </div>
 
@@ -81,9 +82,10 @@
                     \App\Models\ProcurementDocument::STATUS_UNDER_PPMP_REVIEW,
                 ], true))
                     <form
+                        id="ppmp-accept-form"
                         method="POST"
                         action="{{ route('bac-secretariat.ppmp.accept', $document) }}"
-                        class="budget-action-form"
+                        class="ppmp-review-control-form"
                         onsubmit="return confirm('Accept this PPMP for APP consolidation?');"
                     >
                         @csrf
@@ -100,13 +102,13 @@
                             <span class="field-error">{{ $message }}</span>
                         @enderror
 
-                        <button type="submit">Accept for APP Consolidation</button>
                     </form>
 
                     <form
+                        id="ppmp-return-form"
                         method="POST"
                         action="{{ route('bac-secretariat.ppmp.return', $document) }}"
-                        class="budget-action-form"
+                        class="ppmp-review-control-form"
                         onsubmit="return confirm('Return this PPMP to the submitting office for correction?');"
                     >
                         @csrf
@@ -116,16 +118,26 @@
                         <textarea
                             id="ppmp-return-comments"
                             name="comments"
-                            rows="4"
+                            rows="3"
                             required
+                            minlength="5"
                             placeholder="Explain the correction or clarification needed."
                         >{{ old('comments') }}</textarea>
                         @error('comments')
                             <span class="field-error">{{ $message }}</span>
                         @enderror
 
-                        <button type="submit" class="danger-action">Return for Correction</button>
                     </form>
+                    <div class="ppmp-review-control-actions">
+                        <button type="submit" form="ppmp-return-form" class="ppmp-review-control-button ppmp-review-control-button--return" data-action-icon="false">
+                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M6.1 7a7 7 0 0 1 11.8-1L20 9M4 15l2.1 3A7 7 0 0 0 17.9 17" /></svg>
+                            Return for Correction
+                        </button>
+                        <button type="submit" form="ppmp-accept-form" class="ppmp-review-control-button ppmp-review-control-button--accept" data-action-icon="false">
+                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m4 12 5 5L20 6" /></svg>
+                            Accept for APP Consolidation
+                        </button>
+                    </div>
                 @elseif ($document->status === \App\Models\ProcurementDocument::STATUS_ACCEPTED_FOR_APP_CONSOLIDATION)
                     <div class="empty-state">
                         <strong>Accepted for APP consolidation</strong>

@@ -423,6 +423,45 @@ textarea {
     margin-left: 0;
 }
 
+.sidebar-pending-dot {
+    display: inline-block;
+    flex: 0 0 7px;
+    width: 7px;
+    height: 7px;
+    margin-left: auto;
+    border-radius: 50%;
+    background: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
+}
+
+.sidebar-pending-dot--signature {
+    background: var(--pt-saas-purple);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+}
+
+.sidebar-pending-dot + .sidebar-dropdown-arrow {
+    margin-left: 0;
+}
+
+html.papertrail-dark-mode .sidebar-pending-dot {
+    background: #fbbf24;
+}
+
+html.papertrail-dark-mode .sidebar-pending-dot--signature {
+    background: #a78bfa;
+}
+
+body.sidebar-collapsed .sidebar-dropdown-toggle {
+    position: relative;
+}
+
+body.sidebar-collapsed .sidebar-dropdown-toggle > .sidebar-pending-dot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    margin: 0;
+}
+
 .sidebar-dropdown-menu a[aria-disabled="true"] {
     cursor: default;
     color: #6b7890;
