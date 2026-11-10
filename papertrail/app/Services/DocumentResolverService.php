@@ -332,35 +332,30 @@ class DocumentResolverService
         return null;
     }
 
-    private function canViewProcurementDocument(User $user, ProcurementDocument $document): bool
+    public function procurementVisibility(User $user): array
     {
         if ($this->hasAnyRole($user, ['budget_officer', User::ROLE_BUDGET])) {
-            return in_array($document->status, [
+            return ['role' => User::ROLE_BUDGET, 'statuses' => [
                 ProcurementDocument::STATUS_PENDING_BUDGET_REVIEW,
                 ProcurementDocument::STATUS_UNDER_BUDGET_REVIEW,
                 ProcurementDocument::STATUS_RETURNED_BY_BUDGET,
                 ProcurementDocument::STATUS_BUDGET_REVIEWED,
                 ProcurementDocument::STATUS_PENDING_ACCOUNTING_REVIEW,
-            ], true);
+            ]];
         }
 
         if ($this->hasAnyRole($user, ['accounting_officer', User::ROLE_ACCOUNTING])) {
-            return in_array($document->status, [
+            return ['role' => User::ROLE_ACCOUNTING, 'statuses' => [
                 ProcurementDocument::STATUS_PENDING_ACCOUNTING_REVIEW,
                 ProcurementDocument::STATUS_UNDER_ACCOUNTING_REVIEW,
                 ProcurementDocument::STATUS_RETURNED_BY_ACCOUNTING,
                 ProcurementDocument::STATUS_ACCOUNTING_REVIEWED,
                 ProcurementDocument::STATUS_PENDING_BAC_SECRETARIAT_REVIEW,
-            ], true);
+            ]];
         }
 
         if ($this->hasAnyRole($user, ['bac_secretariat', User::ROLE_BAC_SECRETARIAT])) {
-            if ($document->status === ProcurementDocument::STATUS_READY_FOR_BAC_RESOLUTION) {
-                return (int) $document->assigned_to_user_id === (int) $user->id;
-            }
-
-            return $document->document_type === 'PPMP'
-                || in_array($document->status, [
+            return ['role' => User::ROLE_BAC_SECRETARIAT, 'statuses' => [
                     ProcurementDocument::STATUS_PENDING_BAC_SECRETARIAT_REVIEW,
                     ProcurementDocument::STATUS_RECEIVED_BY_BAC_SECRETARIAT,
                     ProcurementDocument::STATUS_UNDER_BAC_SECRETARIAT_REVIEW,
@@ -371,47 +366,62 @@ class DocumentResolverService
                     ProcurementDocument::STATUS_UNDER_PR_VALIDATION,
                     ProcurementDocument::STATUS_BAC_RESOLUTION_CREATED,
                     ProcurementDocument::STATUS_READY_FOR_RFQ,
-                ], true);
+            ]];
         }
 
         if ($this->hasAnyRole($user, ['bac_member', User::ROLE_BAC_MEMBER])) {
-            return in_array($document->status, [
+            return ['role' => User::ROLE_BAC_MEMBER, 'statuses' => [
                 ProcurementDocument::STATUS_PENDING_BAC_MEMBER_REVIEW,
                 ProcurementDocument::STATUS_UNDER_BAC_MEMBER_REVIEW,
                 ProcurementDocument::STATUS_ENDORSED_BY_BAC_MEMBER,
                 ProcurementDocument::STATUS_RETURNED_BY_BAC_MEMBER,
-            ], true);
+            ]];
         }
 
         if ($this->hasAnyRole($user, ['bac_chair', User::ROLE_BAC_CHAIR])) {
-            return in_array($document->status, [
+            return ['role' => User::ROLE_BAC_CHAIR, 'statuses' => [
                 ProcurementDocument::STATUS_PENDING_BAC_CHAIR_REVIEW,
                 ProcurementDocument::STATUS_UNDER_BAC_CHAIR_REVIEW,
                 ProcurementDocument::STATUS_READY_FOR_BAC_CHAIR_CONFIRMATION,
                 ProcurementDocument::STATUS_CONFIRMED_BY_BAC_CHAIR,
                 ProcurementDocument::STATUS_RETURNED_BY_BAC_CHAIR,
-            ], true);
+            ]];
         }
 
         if ($this->hasAnyRole($user, ['approving_authority', User::ROLE_APPROVING_AUTHORITY])) {
-            return in_array($document->status, [
+            return ['role' => User::ROLE_APPROVING_AUTHORITY, 'statuses' => [
                 ProcurementDocument::STATUS_PENDING_APPROVAL,
                 ProcurementDocument::STATUS_UNDER_APPROVAL,
                 ProcurementDocument::STATUS_APPROVED,
                 ProcurementDocument::STATUS_RETURNED_BY_APPROVING_AUTHORITY,
-            ], true);
+            ]];
         }
 
         if ($this->hasAnyRole($user, ['pr_numbering_staff', User::ROLE_PR_NUMBERING])) {
-            return in_array($document->status, [
+            return ['role' => User::ROLE_PR_NUMBERING, 'statuses' => [
                 ProcurementDocument::STATUS_PENDING_PR_NUMBER_ASSIGNMENT,
                 ProcurementDocument::STATUS_PR_NUMBER_ASSIGNED,
                 ProcurementDocument::STATUS_PR_NUMBER_ASSIGNED_RETURNED_TO_END_USER,
                 ProcurementDocument::STATUS_RETURNED_BY_PR_NUMBERING_STAFF,
-            ], true);
+            ]];
         }
 
-        return false;
+        return ['role' => null, 'statuses' => []];
+    }
+
+    private function canViewProcurementDocument(User $user, ProcurementDocument $document): bool
+    {
+        $visibility = $this->procurementVisibility($user);
+        if ($visibility['role'] === User::ROLE_BAC_SECRETARIAT) {
+            if ($document->status === ProcurementDocument::STATUS_READY_FOR_BAC_RESOLUTION) {
+                return (int) $document->assigned_to_user_id === (int) $user->id;
+            }
+            if ($document->document_type === 'PPMP') {
+                return true;
+            }
+        }
+
+        return in_array($document->status, $visibility['statuses'], true);
     }
 
     private function sourceProcurementDocument(Model $document): ?ProcurementDocument

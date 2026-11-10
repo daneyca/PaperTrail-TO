@@ -11,6 +11,7 @@ use App\Models\Rfq;
 use App\Models\SystemNotification;
 use App\Models\User;
 use App\Services\AuditLogger;
+use App\Services\OfficialPrNumberService;
 use App\Services\SvpChainService;
 use App\Services\SystemNotificationService;
 use Illuminate\Database\Eloquent\Builder;
@@ -91,11 +92,21 @@ class PrNumberingController extends Controller
             return back()->with('error', 'This Purchase Request cannot be assigned a PR number.');
         }
 
+        if (is_string($request->input('pr_no'))) {
+            $request->merge(['pr_no' => trim($request->input('pr_no'))]);
+        }
         $validated = $request->validate([
             'pr_no' => [
+                'bail',
                 'required',
                 'string',
                 'max:120',
+                function ($attribute, $value, $fail) use ($document, $request) {
+                    $error = app(OfficialPrNumberService::class)->validationError($document, $value, $request->input('pr_date'));
+                    if ($error) {
+                        $fail($error);
+                    }
+                },
                 Rule::unique('procurement_documents', 'pr_no')->ignore($document->id),
             ],
             'pr_date' => ['required', 'date'],
@@ -549,17 +560,18 @@ class PrNumberingController extends Controller
 
     private function updateSequence(ProcurementDocument $document, User $user): void
     {
-        $year = (int) ($document->fiscal_year ?: now()->year);
-        $prefix = "PR-{$year}-";
-        $sequence = $this->extractTrailingSequence($document->pr_no);
-
-        if ($sequence < 1) {
+        $parts = app(OfficialPrNumberService::class)->parts((string) $document->pr_no);
+        if (! $parts) {
             return;
         }
+        $year = $parts['year'];
+        $prefix = $parts['fund'].'-'.$year.'-';
+        $sequence = $parts['sequence'];
 
         $current = DB::table('pr_number_sequences')
             ->where('fiscal_year', $year)
             ->where('prefix', $prefix)
+            ->lockForUpdate()
             ->first();
 
         if (! $current) {
@@ -586,15 +598,6 @@ class PrNumberingController extends Controller
                     'updated_at' => now(),
                 ]);
         }
-    }
-
-    private function extractTrailingSequence(?string $number): int
-    {
-        if (! $number || ! preg_match('/(\d+)$/', $number, $matches)) {
-            return 0;
-        }
-
-        return (int) $matches[1];
     }
 
     private function requestingOfficeReturnTarget(ProcurementDocument $document): array

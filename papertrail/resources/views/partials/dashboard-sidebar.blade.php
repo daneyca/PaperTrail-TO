@@ -110,7 +110,7 @@
                 'icon' => 'planning',
                 'children' => [
                     ['label' => 'My Documents', 'route' => 'head-office.documents.index', 'active' => ['head-office.documents.*', 'head-office.returned.*']],
-                    ['label' => 'Status Tracking', 'route' => 'head-office.svp-tracking.index', 'active' => 'head-office.svp-tracking.*'],
+                    ['label' => 'Status Tracking', 'route' => 'status-tracking.index', 'active' => ['status-tracking.*', 'head-office.svp-tracking.*']],
                 ],
             ],
             [
@@ -201,7 +201,7 @@
                 'label' => 'Monitoring',
                 'icon' => 'tracking',
                 'children' => [
-                    ['label' => 'Document Tracking', 'route' => 'bac-secretariat.routing.index', 'active' => 'bac-secretariat.routing.*'],
+                    ['label' => 'Document Routing', 'route' => 'bac-secretariat.routing.index', 'active' => 'bac-secretariat.routing.*'],
                     ['label' => 'SVP Monitoring', 'route' => 'bac-secretariat.svp-monitoring.index', 'active' => 'bac-secretariat.svp-monitoring.*'],
                     ['label' => 'Audit Trail', 'route' => 'bac-secretariat.audit.index', 'active' => 'bac-secretariat.audit.*'],
                     ['label' => 'Reports', 'route' => 'bac-secretariat.reports.index', 'active' => 'bac-secretariat.reports.*'],
@@ -267,7 +267,7 @@
                 'icon' => 'planning',
                 'children' => [
                     ['label' => 'My Documents', 'route' => 'head-office.documents.index', 'active' => ['head-office.documents.*', 'head-office.returned.*']],
-                    ['label' => 'Status Tracking', 'route' => 'head-office.svp-tracking.index', 'active' => 'head-office.svp-tracking.*'],
+                    ['label' => 'Status Tracking', 'route' => 'status-tracking.index', 'active' => ['status-tracking.*', 'head-office.svp-tracking.*']],
                 ],
             ],
             $svpDocumentMenu,
@@ -416,6 +416,25 @@
         }
 
         array_splice($items, $competitiveBiddingInsertIndex, 0, $menusToInsert);
+    }
+
+    // Add this after account-specific menu changes so every workspace retains tracking.
+    $hasStatusTracking = function (array $entries) use (&$hasStatusTracking): bool {
+        foreach ($entries as $entry) {
+            if (($entry['route'] ?? null) === 'status-tracking.index'
+                || $hasStatusTracking($entry['children'] ?? [])) {
+                return true;
+            }
+        }
+        return false;
+    };
+    if (! $hasStatusTracking($items)) {
+        array_splice($items, 2, 0, [[
+            'label' => 'Status Tracking',
+            'route' => 'status-tracking.index',
+            'active' => 'status-tracking.*',
+            'icon' => 'tracking',
+        ]]);
     }
 
     $canShowSignatureMenu = in_array($roleSlug, [

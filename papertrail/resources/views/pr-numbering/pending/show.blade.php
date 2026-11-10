@@ -3,6 +3,12 @@
 @section('title', ($document->tracking_number ?? 'Pending PR Number') . ' | PaperTrail')
 
 @section('content')
+    @php
+        $officialNumbers = app(\App\Services\OfficialPrNumberService::class);
+        $fundCode = $officialNumbers->fundCode($document);
+        $officialDate = old('pr_date', $document->pr_date?->format('Y-m-d') ?? now('Asia/Manila')->format('Y-m-d'));
+        $numberExample = $officialNumbers->example($document, is_string($officialDate) ? $officialDate : null);
+    @endphp
     <section class="dashboard-hero admin-users-hero">
         <div>
             <p class="eyebrow">PR Number Assignment</p>
@@ -35,6 +41,8 @@
             <div class="detail-grid budget-detail-grid">
                 <div><span>Tracking Number</span><strong>{{ $document->tracking_number ?? 'N/A' }}</strong></div>
                 <div><span>Fiscal Year</span><strong>{{ $document->fiscal_year }}</strong></div>
+                <div><span>Fund Source</span><strong>{{ $officialNumbers->fundSource($document) ?: 'Not specified' }}</strong></div>
+                <div><span>Official Fund Code</span><strong>{{ $fundCode ?? 'Not determined' }}</strong></div>
                 <div><span>Requesting Office</span><strong>{{ $document->submittingOffice?->name ?? 'N/A' }}</strong></div>
                 <div><span>Submitted By</span><strong>{{ $document->submittedBy?->name ?? 'N/A' }}</strong></div>
                 <div><span>Requested At</span><strong>{{ $document->pr_no_requested_at?->format('M d, Y h:i A') ?? 'N/A' }}</strong></div>
@@ -65,13 +73,18 @@
                     <div class="pr-numbering-field-grid">
                         <div class="pr-numbering-field">
                             <label for="pr_no">Official PR No.</label>
-                            <input id="pr_no" name="pr_no" type="text" value="{{ old('pr_no', $document->pr_no) }}" placeholder="Enter official PR number" required>
+                            <input id="pr_no" name="pr_no" type="text" value="{{ old('pr_no', $document->pr_no) }}" placeholder="{{ $numberExample ?? 'Fund source required' }}" pattern="{{ $fundCode ?? '(101|401|221)' }}-[0-9]{4}-(0[1-9]|1[0-2])-[0-9]{3,9}" maxlength="21" autocomplete="off" aria-describedby="pr-number-example" data-official-pr-number data-fund-code="{{ $fundCode }}" required @disabled(! $fundCode)>
+                            @if ($fundCode)
+                                <span id="pr-number-example" class="muted-text">Example: <span data-official-pr-example>{{ $numberExample }}</span>. Use the next sequence in the official PR register.</span>
+                            @else
+                                <span id="pr-number-example" class="field-error">Return this PR for correction of its fund source: General Fund (101), Trust Fund (401), or Special Fund / SEF (221).</span>
+                            @endif
                             @error('pr_no')<span class="field-error">{{ $message }}</span>@enderror
                         </div>
 
                         <div class="pr-numbering-field">
                             <label for="pr_date">Official PR Date</label>
-                            <input id="pr_date" name="pr_date" type="date" value="{{ old('pr_date', $document->pr_date?->format('Y-m-d') ?? '') }}" required>
+                            <input id="pr_date" name="pr_date" type="date" value="{{ $officialDate }}" required data-official-pr-date>
                             @error('pr_date')<span class="field-error">{{ $message }}</span>@enderror
                         </div>
 
@@ -82,7 +95,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="dashboard-action">Assign PR Number</button>
+                    <button type="submit" class="dashboard-action" @disabled(! $fundCode)>Assign PR Number</button>
                 </form>
 
                 <form method="POST" action="{{ route('pr-numbering.pending.return', $document) }}" class="budget-action-form pr-numbering-action-card pr-numbering-return-card" onsubmit="return confirm('Return this Purchase Request to the requesting office?');">
@@ -130,3 +143,7 @@
         </article>
     </section>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/official-pr-number.js') }}?v={{ filemtime(public_path('js/official-pr-number.js')) }}" defer></script>
+@endpush

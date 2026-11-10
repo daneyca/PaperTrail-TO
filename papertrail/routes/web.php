@@ -147,6 +147,8 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
     Route::post('/workspaces/switch', [\App\Http\Controllers\WorkspaceController::class, 'switch'])->name('workspaces.switch');
     Route::post('/workspaces/bacsec-003/mpdo/{section}', [\App\Http\Controllers\WorkspaceController::class, 'mpdo'])->name('workspaces.bacsec-mpdo');
     Route::get('/search', [GlobalSearchController::class, 'index'])->name('search.index');
+    Route::get('/status-tracking', [\App\Http\Controllers\StatusTrackingController::class, 'index'])->name('status-tracking.index');
+    Route::get('/status-tracking/{type}/{document}', [\App\Http\Controllers\StatusTrackingController::class, 'show'])->whereNumber('document')->name('status-tracking.show');
     Route::get('/search/suggestions', [GlobalSearchController::class, 'suggestions'])->middleware('throttle:60,1')->name('search.suggestions');
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
     Route::post('/switch-account', [LoginController::class, 'switchAccount'])->name('switch-account');

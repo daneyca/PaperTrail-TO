@@ -275,7 +275,8 @@ SUMMARY;
         }
     }
 
-    private function buildTrackingPayload(Model $document): array
+    /** Build presentation data after the caller has authorized the document. */
+    public function buildTrackingPayload(Model $document): array
     {
         $sourcePr = $this->sourcePrDocument($document);
         $chain = $this->svpChainFor($document, $sourcePr);
@@ -326,7 +327,11 @@ SUMMARY;
                 $events->push($this->timelineEvent(
                     $this->historyLabel($item->action, $item->status_to),
                     $item->action_at ?? $item->created_at,
-                    $item->toOffice?->name ?? $item->fromOffice?->name
+                    $item->toOffice?->name ?? $item->fromOffice?->name,
+                    null,
+                    $item->status_to,
+                    $item->actionBy?->name,
+                    $item->comments
                 ));
             }
         }
@@ -344,7 +349,9 @@ SUMMARY;
                     $event->created_at,
                     $event->toOffice?->name ?? $event->fromOffice?->name ?? $event->to_role ?? $event->from_role,
                     $event->stage,
-                    $event->status
+                    $event->status,
+                    $event->performedBy?->name,
+                    $event->remarks
                 ));
             }
         }
@@ -383,6 +390,7 @@ SUMMARY;
 
         foreach ([
             'submitted_at' => 'Submitted',
+            'submitted_date' => 'Submitted',
             'bac_chair_confirmed_at' => 'BAC Chair Confirmed',
             'forwarded_to_hope_at' => 'Forwarded to HOPE',
             'approved_at' => 'Approved',
@@ -392,17 +400,19 @@ SUMMARY;
             'acceptance_date' => 'Accepted',
             'returned_at' => 'Returned',
             'completed_at' => 'Completed',
+            'posted_at' => 'Posting Completed',
             'cancelled_at' => 'Cancelled',
         ] as $attribute => $label) {
             if (filled($document->{$attribute} ?? null)) {
-                $events->push($this->timelineEvent($label, $document->{$attribute}, $office));
+                $events->push($this->timelineEvent($label, $document->{$attribute}, $office, null, null, null,
+                    $attribute === 'returned_at' ? ($document->return_reason ?? $document->remarks) : null));
             }
         }
 
         return $events;
     }
 
-    private function timelineEvent(string $label, mixed $date, ?string $location = null, ?string $stage = null, ?string $status = null): ?array
+    private function timelineEvent(string $label, mixed $date, ?string $location = null, ?string $stage = null, ?string $status = null, ?string $actor = null, ?string $comments = null): ?array
     {
         if (! $date) {
             return null;
@@ -424,6 +434,8 @@ SUMMARY;
             'location' => $location,
             'stage' => $stage,
             'status' => $this->statusLabel($status),
+            'actor' => $actor,
+            'comments' => $comments,
             'state' => 'completed',
         ];
     }
@@ -457,18 +469,22 @@ SUMMARY;
     {
         $query = SvpProcurementChain::query()->with(['events.fromOffice', 'events.toOffice', 'events.performedBy']);
 
+        $linkedChain = function (string $column) use ($query, $document, $sourcePr): ?SvpProcurementChain {
+            return (clone $query)->where(function (Builder $linked) use ($column, $document, $sourcePr) {
+                $linked->where($column, $document->id);
+                if ($sourcePr) {
+                    $linked->orWhere('source_pr_document_id', $sourcePr->id);
+                }
+            })->first();
+        };
+
         return match (true) {
             $document instanceof ProcurementDocument => $query->where('source_pr_document_id', $document->id)->first(),
-            $document instanceof BacResolution => $query->where('bac_resolution_id', $document->id)
-                ->orWhere('source_pr_document_id', $sourcePr?->id)->first(),
-            $document instanceof Rfq => $query->where('rfq_id', $document->id)
-                ->orWhere('source_pr_document_id', $sourcePr?->id)->first(),
-            $document instanceof AbstractQuotation => $query->where('abstract_id', $document->id)
-                ->orWhere('source_pr_document_id', $sourcePr?->id)->first(),
-            $document instanceof PurchaseOrder => $query->where('purchase_order_id', $document->id)
-                ->orWhere('source_pr_document_id', $sourcePr?->id)->first(),
-            $document instanceof InspectionAcceptanceRecord => $query->where('inspection_id', $document->id)
-                ->orWhere('source_pr_document_id', $sourcePr?->id)->first(),
+            $document instanceof BacResolution => $linkedChain('bac_resolution_id'),
+            $document instanceof Rfq => $linkedChain('rfq_id'),
+            $document instanceof AbstractQuotation => $linkedChain('abstract_id'),
+            $document instanceof PurchaseOrder => $linkedChain('purchase_order_id'),
+            $document instanceof InspectionAcceptanceRecord => $linkedChain('inspection_id'),
             default => null,
         };
     }
