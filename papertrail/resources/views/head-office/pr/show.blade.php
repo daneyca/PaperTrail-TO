@@ -7,47 +7,7 @@
         $canModify = auth()->user()->canManageSvpDocuments() && ($canModify ?? false);
         $canSubmitToBac = auth()->user()->canManageSvpDocuments() && ($canSubmitToBac ?? false);
         $canSubmitForPrNumber = auth()->user()->canManageSvpDocuments() && ($canSubmitForPrNumber ?? false);
-    @endphp
-    @php
-        $prNumber = $document->pr_no ?? 'To be assigned';
-        $prDate = $document->pr_date?->format('F d, Y') ?? 'Not assigned';
-        $requestingOffice = $document->submittingOffice?->name ?? $document->department_name ?? 'N/A';
-        $submittedDate = $document->submitted_at?->format('F d, Y h:i A') ?? 'Not submitted';
-        $currentHandler = $document->assignedTo?->user_id
-            ?? $document->assignedTo?->name
-            ?? $document->currentOffice?->name
-            ?? 'Unassigned';
-        $statusText = strtolower((string) ($document->status ?? 'draft'));
         $statusLabel = str($document->status ?? 'draft')->replace(['_', '-'], ' ')->title();
-        $statusTone = match (true) {
-            str_contains($statusText, 'return'), str_contains($statusText, 'reject') => 'returned',
-            str_contains($statusText, 'complete'), str_contains($statusText, 'signed'), str_contains($statusText, 'assigned'), str_contains($statusText, 'ready'), str_contains($statusText, 'approved') => 'complete',
-            str_contains($statusText, 'pending'), str_contains($statusText, 'submitted'), str_contains($statusText, 'signature'), str_contains($statusText, 'number') => 'pending',
-            default => 'neutral',
-        };
-        $appReference = $document->appConsolidation ?? $document->appItem?->appConsolidation;
-        $appReferenceNumber = $appReference?->app_number ?? 'Not selected';
-        $appItemDescription = $document->appItem?->general_description ?? 'No APP item linked';
-        $appReferenceStatus = ($document->app_item_id && $appReference && in_array($appReference->status, [
-            \App\Models\AppConsolidation::STATUS_CONSOLIDATED,
-            \App\Models\AppConsolidation::STATUS_SUBMITTED_FOR_APPROVAL,
-            \App\Models\AppConsolidation::STATUS_APPROVED,
-        ], true))
-            ? 'Verified'
-            : 'Not linked';
-        $purchaseRequestInfo = [
-            ['label' => 'Official PR Number', 'value' => $prNumber],
-            ['label' => 'Tracking Number', 'value' => $document->displayNumber()],
-            ['label' => 'PR Date', 'value' => $prDate],
-            ['label' => 'Requesting Office', 'value' => $requestingOffice],
-            ['label' => 'Total Amount', 'value' => 'PHP ' . number_format((float) $document->total_amount, 2)],
-            ['label' => 'Status', 'value' => $statusLabel],
-            ['label' => 'Submitted Date', 'value' => $submittedDate],
-            ['label' => 'Current Handler', 'value' => $currentHandler],
-            ['label' => 'APP Reference', 'value' => $appReferenceNumber],
-            ['label' => 'APP Item', 'value' => str($appItemDescription)->limit(90)->toString()],
-            ['label' => 'APP Status', 'value' => $appReferenceStatus],
-        ];
     @endphp
 
     <section class="pr-view-page">
@@ -77,18 +37,6 @@
                 @endif
             </div>
         </section>
-
-        <x-ui.document-info
-            class="no-print"
-            eyebrow="Purchase Request Details"
-            :title="$document->displayNumber()"
-            description="Tracking number, official PR information, routing state, and current document handler."
-            :items="$purchaseRequestInfo"
-        >
-            <x-slot name="status">
-                <span class="pr-details-status-badge is-{{ $statusTone }}">{{ $statusLabel }}</span>
-            </x-slot>
-        </x-ui.document-info>
 
         @if (! empty($nextWorkflowAction))
             <section class="pr-next-action-card no-print" aria-labelledby="pr-next-action-title">
@@ -132,6 +80,7 @@
                 <div>
                     <p class="pr-page-kicker">Official Form Preview</p>
                     <h2>Purchase Request Form</h2>
+                    <p>{{ $document->displayNumber() }} &middot; {{ $statusLabel }}</p>
                 </div>
             </div>
 
@@ -148,8 +97,8 @@
             id="supporting-files"
             :document="$document"
             document-type="purchase_request"
-            :can-upload="$canModify"
             title="Supporting Files"
+            read-only-message="Procurement Staff can add files to draft or returned PRs, and while awaiting signatures before the first signature."
         />
 
         @include('partials.svp-related-documents', ['source' => $document, 'context' => 'head-office'])

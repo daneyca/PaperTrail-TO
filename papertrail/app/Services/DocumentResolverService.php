@@ -6,11 +6,13 @@ use App\Models\AbstractQuotation;
 use App\Models\AnnualProcurementPlan;
 use App\Models\BacResolution;
 use App\Models\DocumentAttachment;
+use App\Models\ElectronicSignature;
 use App\Models\InspectionAcceptanceRecord;
 use App\Models\Ppmp;
 use App\Models\ProcurementDocument;
 use App\Models\PurchaseOrder;
 use App\Models\Rfq;
+use App\Models\SignatureRequest;
 use App\Models\SupplementalApp;
 use App\Models\SvpPostingRecord;
 use App\Models\User;
@@ -143,6 +145,22 @@ class DocumentResolverService
             return true;
         }
 
+        if ($document instanceof ProcurementDocument && in_array($document->document_type, ['PR', 'Purchase Request'], true)) {
+            $ownOfficePreparer = $user->isOfficeDocumentPreparer() && $user->office_id
+                && (int) $user->office_id === (int) $document->submitting_office_id;
+            if ($document->status === ProcurementDocument::STATUS_PR_PENDING_SIGNATORIES) {
+                return $ownOfficePreparer && $document->exists
+                    && !SignatureRequest::forDocument('purchase_request', $document->id)
+                        ->where('is_required', true)->where('status', SignatureRequest::STATUS_SIGNED)->exists()
+                    && !ElectronicSignature::forDocument('purchase_request', $document->id)
+                        ->where('signature_status', ElectronicSignature::STATUS_SIGNED)
+                        ->whereNotNull('signed_at')->whereNull('revoked_at')->exists();
+            }
+            if ($user->isOfficeDocumentPreparer()) {
+                return $ownOfficePreparer && $this->isModifiable($document);
+            }
+        }
+
         if ($document instanceof ProcurementDocument && $document->document_type === 'PPMP') {
             if (!in_array($document->status, [ProcurementDocument::STATUS_PPMP_DRAFT,
                 ProcurementDocument::STATUS_PPMP_SIGNATURE_RETURNED, ProcurementDocument::STATUS_RETURNED_BY_BAC_SECRETARIAT], true)) {
@@ -193,7 +211,7 @@ class DocumentResolverService
             return true;
         }
 
-        if ($document instanceof ProcurementDocument && $document->document_type === 'PPMP'
+        if ($document instanceof ProcurementDocument && in_array($document->document_type, ['PPMP', 'PR', 'Purchase Request'], true)
             && !$this->canUpload($user, $document)) {
             return false;
         }

@@ -70,11 +70,15 @@ class BacsecMpdoWorkspaceService
             if (is_scalar($attachment) && ctype_digit((string) $attachment)) {
                 $attachment = DocumentAttachment::find($attachment);
             }
-            $documentId = $type === 'ppmp' ? $request->route('documentId') : null;
-            if ($attachment instanceof DocumentAttachment && $attachment->document_type === 'ppmp') {
+            $preparationTypes = ['ppmp' => ['PPMP'], 'pr' => ['PR', 'Purchase Request'], 'purchaserequest' => ['PR', 'Purchase Request']];
+            $documentTypes = $preparationTypes[$type] ?? [];
+            $documentId = $documentTypes ? $request->route('documentId') : null;
+            if ($attachment instanceof DocumentAttachment) {
+                $attachmentType = strtolower(str_replace(['-', '_', ' '], '', (string) $attachment->document_type));
+                $documentTypes = $preparationTypes[$attachmentType] ?? [];
                 $documentId = $attachment->document_id ?: $attachment->procurement_document_id;
             }
-            if ($documentId && ProcurementDocument::whereKey($documentId)->where('document_type', 'PPMP')
+            if ($documentTypes && $documentId && ProcurementDocument::whereKey($documentId)->whereIn('document_type', $documentTypes)
                 ->where('submitting_office_id', $actor->office_id)->exists()) {
                 return $actor;
             }
