@@ -65,7 +65,8 @@ class PpmpOfficeHeadSubmissionTest extends TestCase
         $this->assertDatabaseHas('system_notifications', ['user_id' => $handler->id, 'related_id' => $document->id, 'title' => 'New PPMP for APP Consolidation']);
         $this->assertDatabaseHas('system_notifications', ['user_id' => $head->id, 'related_id' => $document->id, 'title' => 'PPMP Automatically Submitted']);
         $this->actingAs($staff)->get(route('head-office.ppmp.show', $document))->assertOk()
-            ->assertSee('Current Office')->assertSee('BAC Secretariat')->assertDontSee('Submit to BAC Secretariat');
+            ->assertSee($document->tracking_number)->assertSee('Submitted to BAC')
+            ->assertSee('BAC Secretariat')->assertDontSee('Submit to BAC Secretariat');
         $this->actingAs($head)->get(route('signature-requests.show', $requests['submitted_by']))->assertOk()
             ->assertSee('Current Office')->assertSee('BAC Secretariat')->assertDontSee('Submit to BAC Secretariat');
         $this->get(route('head-office.documents.index'))->assertOk()->assertDontSee('Not submitted');

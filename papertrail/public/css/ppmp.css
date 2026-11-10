@@ -498,7 +498,7 @@
 
 .ppmp-title-row h1 span {
     display: inline-block;
-    min-width: 32mm;
+    min-width: 18mm;
     border-bottom: 0.4px solid #000000;
     line-height: 1;
 }
@@ -574,6 +574,26 @@
     font-weight: 400;
 }
 
+.ppmp-recovery-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin: 12px 0;
+    color: #425b7e;
+    font-size: 12px;
+}
+
+.ppmp-recovery-status small {
+    flex-basis: 100%;
+    color: #a16207;
+    overflow-wrap: anywhere;
+}
+
+.ppmp-recovery-status [hidden] {
+    display: none !important;
+}
+
 .ppmp-bold-row td,
 .ppmp-bold-row input,
 .ppmp-bold-row textarea {
@@ -581,7 +601,6 @@
 }
 
 .ppmp-section-row .ppmp-project-title {
-    font-weight: 900;
     text-align: center;
 }
 
@@ -590,13 +609,11 @@
 }
 
 .ppmp-subtotal-row td {
-    font-weight: 900;
     text-align: right;
 }
 
 .ppmp-subtotal-row td input,
 .ppmp-subtotal-row td textarea {
-    font-weight: 900;
     text-align: right;
 }
 
@@ -1382,68 +1399,100 @@ body.dashboard-body .dashboard-content .ppmp-review-complete-state {
     }
 }
 
-body.dashboard-body .ppmp-signature-status-panel {
-    border: 1px solid rgba(130, 151, 180, 0.24);
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.96);
-    box-shadow: 0 18px 42px rgba(15, 35, 75, 0.08);
-    overflow: hidden;
-}
-
-body.dashboard-body .ppmp-signature-status-panel .widget-heading {
-    align-items: flex-start;
-    border-bottom: 1px solid rgba(130, 151, 180, 0.18);
-}
-
-body.dashboard-body .ppmp-signature-status-panel .widget-heading p:not(.eyebrow) {
-    margin-top: 4px;
-    color: #64748b;
-    font-size: 0.92rem;
-}
-
-body.dashboard-body .ppmp-signature-status-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-    padding: 18px;
-}
-
-body.dashboard-body .ppmp-signature-status-card {
+body.dashboard-body .ppmp-signature-strip {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    min-height: 148px;
-    padding: 18px;
-    border: 1px solid rgba(130, 151, 180, 0.2);
-    border-radius: 14px;
-    background: linear-gradient(135deg, #ffffff, #f8fbff);
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 14px;
+    border: 1px solid #dbe3ef;
+    border-radius: 8px;
+    background: #ffffff;
 }
 
-body.dashboard-body .ppmp-signature-status-card > div {
-    display: grid;
-    gap: 4px;
+body.dashboard-body .ppmp-signature-details {
+    flex: 1;
+    min-width: 0;
 }
 
-body.dashboard-body .ppmp-signature-status-card span:first-child {
+body.dashboard-body .ppmp-signature-details > summary {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    min-height: 32px;
+    list-style: none;
+    cursor: pointer;
+}
+
+body.dashboard-body .ppmp-signature-details > summary::-webkit-details-marker {
+    display: none;
+}
+
+body.dashboard-body .ppmp-signature-details > summary:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+
+body.dashboard-body .ppmp-signature-toggle {
+    margin-left: auto;
     color: #2563eb;
-    font-size: 0.72rem;
-    font-weight: 800;
-    letter-spacing: 0;
-    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
-body.dashboard-body .ppmp-signature-status-card strong {
-    color: #0f172a;
-    font-size: 1rem;
-    font-weight: 800;
+body.dashboard-body .ppmp-signature-toggle > span:last-child,
+body.dashboard-body .ppmp-signature-details[open] .ppmp-signature-toggle > span:first-child {
+    display: none;
 }
 
-body.dashboard-body .ppmp-signature-status-card p,
-body.dashboard-body .ppmp-signature-status-card small {
+body.dashboard-body .ppmp-signature-details[open] .ppmp-signature-toggle > span:last-child {
+    display: inline;
+}
+
+body.dashboard-body .ppmp-signature-count,
+body.dashboard-body .ppmp-signature-detail-list small,
+body.dashboard-body .ppmp-signature-detail-list p {
     margin: 0;
     color: #64748b;
-    font-size: 0.86rem;
+    font-size: 12px;
     line-height: 1.45;
+}
+
+body.dashboard-body .ppmp-signature-detail-list {
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 0;
+    border-top: 1px solid #e5edf6;
+}
+
+body.dashboard-body .ppmp-signature-detail-list li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #e5edf6;
+    overflow-wrap: anywhere;
+}
+
+body.dashboard-body .ppmp-signature-detail-list li:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+body.dashboard-body .ppmp-signature-detail-list strong {
+    color: #0f172a;
+    font-size: 12px;
+}
+
+body.dashboard-body .ppmp-signature-detail-list small {
+    display: block;
+}
+
+body.dashboard-body .ppmp-signature-detail-list li > small,
+body.dashboard-body .ppmp-signature-detail-remarks {
+    grid-column: 1 / -1;
 }
 
 body.dashboard-body .ppmp-signature-status-badge {
@@ -1479,43 +1528,23 @@ body.dashboard-body .ppmp-signature-status-badge--not_generated {
     color: #475569;
 }
 
-body.dashboard-body .ppmp-signature-status-card--signed {
-    border-color: rgba(16, 185, 129, 0.32);
-    background: linear-gradient(135deg, #ffffff, #ecfdf5);
-}
-
-body.dashboard-body .ppmp-signature-status-card--pending {
-    border-color: rgba(245, 158, 11, 0.34);
-    background: linear-gradient(135deg, #ffffff, #fffbeb);
-}
-
-body.dashboard-body .ppmp-signature-status-card--rejected {
-    border-color: rgba(239, 68, 68, 0.28);
-    background: linear-gradient(135deg, #ffffff, #fff1f2);
-}
-
-html.papertrail-dark-mode body.dashboard-body .ppmp-signature-status-panel {
+html.papertrail-dark-mode body.dashboard-body .ppmp-signature-strip {
     background: rgba(15, 23, 42, 0.94);
     border-color: rgba(148, 163, 184, 0.22);
 }
 
-html.papertrail-dark-mode body.dashboard-body .ppmp-signature-status-card {
-    background: rgba(30, 41, 59, 0.78);
-    border-color: rgba(148, 163, 184, 0.24);
-}
-
-html.papertrail-dark-mode body.dashboard-body .ppmp-signature-status-panel .widget-heading p:not(.eyebrow),
-html.papertrail-dark-mode body.dashboard-body .ppmp-signature-status-card p,
-html.papertrail-dark-mode body.dashboard-body .ppmp-signature-status-card small {
+html.papertrail-dark-mode body.dashboard-body .ppmp-signature-count,
+html.papertrail-dark-mode body.dashboard-body .ppmp-signature-detail-list p,
+html.papertrail-dark-mode body.dashboard-body .ppmp-signature-detail-list small {
     color: #94a3b8;
 }
 
-html.papertrail-dark-mode body.dashboard-body .ppmp-signature-status-card strong {
+html.papertrail-dark-mode body.dashboard-body .ppmp-signature-detail-list strong {
     color: #e2e8f0;
 }
 
-@media (max-width: 1180px) {
-    body.dashboard-body .ppmp-signature-status-grid {
-        grid-template-columns: 1fr;
+@media (max-width: 640px) {
+    body.dashboard-body .ppmp-signature-strip {
+        flex-wrap: wrap;
     }
 }

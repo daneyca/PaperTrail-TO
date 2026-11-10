@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
@@ -184,14 +185,17 @@ class PpmpController extends Controller
                 $this->startSignatureWorkflow($document->refresh(), $request->user());
             }
 
+            $this->storeAttachments($document, $validated['attachments'] ?? [], $request->user());
+
             return $document->refresh();
         });
 
         return redirect()
             ->route('head-office.ppmp.show', $document)
-            ->with('status', $submit
+            ->with('ppmp_editor_clear_key', 'papertrail:ppmp:' . $request->user()->id . ':' . $office->id . ':new')
+            ->with('status', ($submit
                 ? 'PPMP created successfully. Complete the required signatures to automatically send it to BAC Secretariat for APP consolidation.'
-                : 'PPMP saved as draft.');
+                : 'PPMP saved as draft.') . ($request->hasFile('attachments') ? ' Supporting documents uploaded.' : ''));
     }
 
     public function show(Request $request, ProcurementDocument $document): View|RedirectResponse
@@ -297,6 +301,7 @@ class PpmpController extends Controller
 
         return redirect()
             ->route('head-office.ppmp.show', $document)
+            ->with('ppmp_editor_clear_key', 'papertrail:ppmp:' . $request->user()->id . ':' . $document->submitting_office_id . ':' . $document->id)
             ->with('status', $submit
                 ? 'PPMP updated successfully. Complete the required signatures to automatically send it to BAC Secretariat for APP consolidation.'
                 : 'PPMP draft updated.');
@@ -443,53 +448,70 @@ class PpmpController extends Controller
         }
 
         $validated = $request->validate([
-            'attachments' => ['required', 'array', 'min:1'],
+            'attachments' => ['required', 'array', 'min:1', 'max:10'],
             'attachments.*' => ['file', 'max:10240', 'mimes:pdf,doc,docx,xls,xlsx,png,jpg,jpeg'],
         ]);
 
-        foreach ($validated['attachments'] as $file) {
-            $extension = strtolower((string) $file->getClientOriginalExtension());
-            $storedFilename = (string) Str::uuid() . ($extension ? '.' . $extension : '');
-            $directory = 'document-attachments/ppmp/' . $document->id;
-            $path = $file->storeAs($directory, $storedFilename, 'local');
-            $ocrReady = $file->getMimeType() === 'application/pdf'
-                || str_starts_with((string) $file->getMimeType(), 'image/')
-                || in_array($extension, ['pdf', 'jpg', 'jpeg', 'png'], true);
-
-            $attachment = $document->attachments()->create([
-                'attachment_uuid' => (string) Str::uuid(),
-                'attachable_type' => $document::class,
-                'attachable_id' => $document->id,
-                'document_type' => 'ppmp',
-                'document_id' => $document->id,
-                'tracking_number' => $document->tracking_number,
-                'office_id' => $document->submitting_office_id,
-                'office_name' => $document->submittingOffice?->name,
-                'uploaded_by_user_id' => $request->user()->id,
-                'original_name' => $file->getClientOriginalName(),
-                'original_filename' => $file->getClientOriginalName(),
-                'stored_filename' => $storedFilename,
-                'file_path' => $path,
-                'disk' => 'local',
-                'mime_type' => $file->getMimeType(),
-                'file_extension' => $extension,
-                'size' => $file->getSize(),
-                'file_size' => $file->getSize(),
-                'file_hash' => hash_file('sha256', $file->getRealPath()),
-                'document_section' => 'ppmp',
-                'attachment_category' => DocumentAttachment::CATEGORY_SUPPORTING_DOCUMENT,
-                'ocr_status' => $ocrReady ? DocumentAttachment::OCR_PENDING : DocumentAttachment::OCR_NOT_REQUIRED,
-                'ai_analysis_status' => DocumentAttachment::AI_PENDING,
-                'status' => DocumentAttachment::STATUS_ACTIVE,
-            ]);
-
-            AuditLogger::log('PPMP Submission', 'PPMP Attachment Uploaded', 'Head of Office uploaded a PPMP attachment.', $attachment, null, [
-                'document_id' => $document->id,
-                'file_name' => $attachment->original_name,
-            ]);
-        }
+        $this->storeAttachments($document, $validated['attachments'], $request->user());
 
         return back()->with('status', 'Attachment uploaded.');
+    }
+
+    private function storeAttachments(ProcurementDocument $document, array $files, User $actor): void
+    {
+        $paths = [];
+        try {
+            DB::transaction(function () use ($document, $files, $actor, &$paths): void {
+                foreach ($files as $file) {
+                    $extension = strtolower((string) $file->getClientOriginalExtension());
+                    $storedFilename = (string) Str::uuid() . ($extension ? '.' . $extension : '');
+                    $directory = 'document-attachments/ppmp/' . $document->id;
+                    $path = $file->storeAs($directory, $storedFilename, 'local');
+                    if (!$path) {
+                        throw new \RuntimeException('The supporting document could not be stored.');
+                    }
+                    $paths[] = $path;
+                    $ocrReady = $file->getMimeType() === 'application/pdf'
+                        || str_starts_with((string) $file->getMimeType(), 'image/')
+                        || in_array($extension, ['pdf', 'jpg', 'jpeg', 'png'], true);
+
+                    $attachment = $document->attachments()->create([
+                        'attachment_uuid' => (string) Str::uuid(),
+                        'attachable_type' => $document::class,
+                        'attachable_id' => $document->id,
+                        'document_type' => 'ppmp',
+                        'document_id' => $document->id,
+                        'tracking_number' => $document->tracking_number,
+                        'office_id' => $document->submitting_office_id,
+                        'office_name' => $document->submittingOffice?->name,
+                        'uploaded_by_user_id' => $actor->id,
+                        'original_name' => $file->getClientOriginalName(),
+                        'original_filename' => $file->getClientOriginalName(),
+                        'stored_filename' => $storedFilename,
+                        'file_path' => $path,
+                        'disk' => 'local',
+                        'mime_type' => $file->getMimeType(),
+                        'file_extension' => $extension,
+                        'size' => $file->getSize(),
+                        'file_size' => $file->getSize(),
+                        'file_hash' => hash_file('sha256', $file->getRealPath()),
+                        'document_section' => 'ppmp',
+                        'attachment_category' => DocumentAttachment::CATEGORY_SUPPORTING_DOCUMENT,
+                        'ocr_status' => $ocrReady ? DocumentAttachment::OCR_PENDING : DocumentAttachment::OCR_NOT_REQUIRED,
+                        'ai_analysis_status' => DocumentAttachment::AI_PENDING,
+                        'status' => DocumentAttachment::STATUS_ACTIVE,
+                    ]);
+
+                    AuditLogger::log('PPMP Submission', 'PPMP Attachment Uploaded', 'PPMP supporting document uploaded.', $attachment, null, [
+                        'document_id' => $document->id,
+                        'file_name' => $attachment->original_name,
+                    ]);
+                }
+            });
+        } catch (\Throwable $exception) {
+            Storage::disk('local')->delete($paths);
+            throw $exception;
+        }
     }
 
     public function destroyAttachment(Request $request, ProcurementDocument $document, DocumentAttachment $attachment): RedirectResponse
@@ -617,6 +639,8 @@ class PpmpController extends Controller
             'remarks' => ['nullable', 'string'],
             'prepared_by_name' => ['nullable', 'string', 'max:255'],
             'submitted_by_name' => ['nullable', 'string', 'max:255'],
+            'attachments' => ['nullable', 'array', 'max:10'],
+            'attachments.*' => ['required', 'file', 'max:10240', 'mimes:pdf,doc,docx,xls,xlsx,png,jpg,jpeg'],
             'items' => [$submit ? 'required' : 'nullable', 'array'],
             'items.*.item_no' => ['nullable', 'string', 'max:50'],
             'items.*.general_description' => ['nullable', 'string'],

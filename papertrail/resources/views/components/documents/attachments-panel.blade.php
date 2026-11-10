@@ -5,6 +5,7 @@
     'canUpload' => null,
     'canDelete' => null,
     'title' => 'Supporting Documents',
+    'readOnlyMessage' => 'Attachments are read-only for your current role or this document status.',
     'id' => null,
 ])
 
@@ -150,7 +151,7 @@
         </form>
     @else
         <div class="attachments-readonly-note">
-            Attachments are read-only for your current role or this document status.
+            {{ $readOnlyMessage }}
         </div>
     @endif
 
@@ -250,7 +251,7 @@
                         <td colspan="7">
                             <div class="attachments-empty">
                                 <strong>No supporting documents uploaded yet.</strong>
-                                <p>Upload scanned PDFs, images, spreadsheets, or office documents here when they are available.</p>
+                                <p>{{ $canUpload ? 'Upload scanned PDFs, images, spreadsheets, or office documents here when they are available.' : 'Supporting files will appear here once uploaded during document preparation.' }}</p>
                             </div>
                         </td>
                     </tr>

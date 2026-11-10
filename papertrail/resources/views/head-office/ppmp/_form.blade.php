@@ -63,6 +63,43 @@
     @endif
 </div>
 
+<div class="ppmp-recovery-status no-print"
+    data-ppmp-recovery
+    data-draft-key="papertrail:ppmp:{{ $user->id }}:{{ $office->id }}:{{ $document->exists ? $document->id : 'new' }}"
+    data-revision="{{ $document->updated_at?->format('Y-m-d H:i:s.u') ?? 'new' }}"
+    data-has-old-input="{{ session()->hasOldInput() ? 'true' : 'false' }}">
+    <span role="status" aria-live="polite" data-ppmp-recovery-message>Your entries are backed up in this tab as you type.</span>
+    <button type="button" class="ppmp-action-secondary" data-ppmp-recovery-restore hidden>Restore Unsaved Changes</button>
+    <button type="button" class="ppmp-action-secondary" data-ppmp-recovery-discard hidden>Discard Unsaved Changes</button>
+    <small data-ppmp-recovery-files hidden></small>
+</div>
+
+@unless ($document->exists)
+    <section class="attachments-card no-print" aria-label="PPMP supporting document upload">
+        <div class="attachments-header">
+            <div>
+                <h2>PPMP Supporting Documents</h2>
+                <p>Select planning references to upload when you save the PPMP or continue for signatures.</p>
+            </div>
+        </div>
+        <div class="attachments-upload-form">
+            <div class="attachments-field attachments-field--description">
+                <label for="ppmp-planning-files">Choose Supporting Files (Optional)</label>
+                <input id="ppmp-planning-files" type="file" name="attachments[]" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" multiple>
+                <small>PDF, JPG, PNG, DOC, DOCX, XLS or XLSX. Up to 10 files, 10 MB each.</small>
+                @foreach ($errors->get('attachments') as $message)
+                    <small class="attachment-error">{{ $message }}</small>
+                @endforeach
+                @foreach ($errors->get('attachments.*') as $messages)
+                    @foreach ($messages as $message)
+                        <small class="attachment-error">{{ $message }}</small>
+                    @endforeach
+                @endforeach
+            </div>
+        </div>
+    </section>
+@endunless
+
 @include('head-office.ppmp._official-form', [
     'mode' => $document->exists ? 'edit' : 'create',
     'document' => $document,

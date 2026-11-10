@@ -3,6 +3,11 @@
 @section('title', $document->displayNumber() . ' | PaperTrail')
 
 @section('content')
+    @if (session('ppmp_editor_clear_key'))
+        <script>
+            try { sessionStorage.removeItem(@json(session('ppmp_editor_clear_key'))); } catch (error) {}
+        </script>
+    @endif
     @php
         $canModify = auth()->user()->canManageSvpDocuments() && $canModify;
         $canDelete = auth()->user()->canManageSvpDocuments() && ($canDelete ?? false);
@@ -90,81 +95,8 @@
         @endif
     </div>
 
-    @include('components.e-signature.ppmp-location', ['document' => $document])
-
-    <section class="ppmp-readonly-strip head-office-ppmp-summary no-print" aria-label="PPMP summary">
-        <div>
-            <span class="head-office-ppmp-summary__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" focusable="false"><path d="M4 7h16M4 12h16M4 17h10" /></svg>
-            </span>
-            <div>
-                <span>Tracking Number</span>
-                <strong>{{ $document->displayNumber() }}</strong>
-            </div>
-        </div>
-        <div>
-            <span class="head-office-ppmp-summary__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" focusable="false"><path d="M4 5h16M4 12h10M4 19h16" /><path d="M18 9l2 2-2 2" /></svg>
-            </span>
-            <div>
-                <span>Plan Type</span>
-                <strong>{{ str($document->ppmp_plan_type ?: 'indicative')->title() }}</strong>
-            </div>
-        </div>
-        <div>
-            <span class="head-office-ppmp-summary__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" focusable="false"><path d="M12 3v18M7 7h7a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h8" /></svg>
-            </span>
-            <div>
-                <span>Total Budget</span>
-                <strong>PHP {{ number_format((float) $document->total_amount, 2) }}</strong>
-            </div>
-        </div>
-        <div>
-            <span class="head-office-ppmp-summary__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" focusable="false"><path d="M8 6h13M8 12h13M8 18h13" /><path d="M3 6h.01M3 12h.01M3 18h.01" /></svg>
-            </span>
-            <div>
-                <span>Line Items</span>
-                <strong>{{ $document->ppmpItems->count() }}</strong>
-            </div>
-        </div>
-    </section>
-
     @if ($showSignatureStatus)
-        <section class="dashboard-widget widget-wide ppmp-signature-status-panel no-print" aria-label="PPMP e-signatures">
-            <div class="widget-heading">
-                <div>
-                    <p class="eyebrow">E-Signatures</p>
-                    <h2>PPMP Signatories</h2>
-                    <p>Complete Prepared By first, then Submitted By. The fully signed PPMP is sent automatically to BAC Secretariat for APP consolidation.</p>
-                </div>
-                <span>{{ $ppmpSignatureProgress['completed'] }} / {{ $ppmpSignatureProgress['required'] }} signed</span>
-            </div>
-            <div class="ppmp-signature-status-grid">
-                @foreach ($ppmpSignatureCards as $card)
-                    <article class="ppmp-signature-status-card ppmp-signature-status-card--{{ $card['status'] }}">
-                        <div>
-                            <span>{{ $card['label'] }}</span>
-                            <strong>{{ $card['signer_name'] }}</strong>
-                            <p>{{ $card['designation'] }}</p>
-                        </div>
-                        <span class="ppmp-signature-status-badge ppmp-signature-status-badge--{{ $card['status'] }}">{{ $card['status_label'] }}</span>
-                        @if (filled($card['remarks'] ?? null))
-                            <div>
-                                <strong>Remarks</strong>
-                                <p class="signature-remarks-text">{{ $card['remarks'] }}</p>
-                            </div>
-                        @endif
-                        @if ($card['signed_at'])
-                            <small>Signed {{ $card['signed_at']->format('M d, Y h:i A') }}</small>
-                        @elseif ($card['request']?->isOpen() && $card['request']->is_required && (int) $card['request']->requested_to_user_id === (int) auth()->id())
-                            <a href="{{ route('signature-requests.show', $card['request']) }}" class="dashboard-action">Sign {{ $card['label'] }}</a>
-                        @endif
-                    </article>
-                @endforeach
-            </div>
-        </section>
+        @include('components.e-signature.ppmp-status')
     @endif
 
     <section class="head-office-ppmp-preview-card" aria-label="Official PPMP preview">
@@ -172,7 +104,7 @@
             <div>
                 <p class="eyebrow">Official Form Preview</p>
                 <h2>Project Procurement Plan</h2>
-                <p>Readonly view of the submitted PPMP document for this end-user office.</p>
+                <p>{{ $document->displayNumber() }} &middot; {{ $ppmpStatusLabel($document->status) }}</p>
             </div>
         </div>
 
@@ -189,6 +121,7 @@
         document-type="ppmp"
         :can-upload="$canModify"
         title="PPMP Supporting Documents"
+        read-only-message="Supporting files are added by Procurement Staff while the PPMP is draft or returned. Uploads are locked once the PPMP is sent for signatures."
     />
 
     <section class="dashboard-widget widget-wide head-office-ppmp-routing no-print">

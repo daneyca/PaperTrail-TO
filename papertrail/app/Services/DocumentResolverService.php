@@ -143,6 +143,16 @@ class DocumentResolverService
             return true;
         }
 
+        if ($document instanceof ProcurementDocument && $document->document_type === 'PPMP') {
+            if (!in_array($document->status, [ProcurementDocument::STATUS_PPMP_DRAFT,
+                ProcurementDocument::STATUS_PPMP_SIGNATURE_RETURNED, ProcurementDocument::STATUS_RETURNED_BY_BAC_SECRETARIAT], true)) {
+                return false;
+            }
+            if ($user->isOfficeDocumentPreparer()) {
+                return $user->office_id && (int) $user->office_id === (int) $document->submitting_office_id;
+            }
+        }
+
         if ($this->hasAnyRole($user, ['head_office', User::ROLE_HEAD_OFFICE])) {
             return $this->sameOffice($user, $document) && $this->isModifiable($document);
         }
@@ -181,6 +191,11 @@ class DocumentResolverService
 
         if ($user->isAdmin()) {
             return true;
+        }
+
+        if ($document instanceof ProcurementDocument && $document->document_type === 'PPMP'
+            && !$this->canUpload($user, $document)) {
+            return false;
         }
 
         if ($this->isFinalDocument($document)) {

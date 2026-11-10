@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Office;
+use App\Models\DocumentAttachment;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\ProcurementDocument;
@@ -64,6 +65,20 @@ class BacsecMpdoWorkspaceService
             return $this->ensure($account);
         }
         $actor = $this->existing($account);
+        if ($actor && $request->routeIs('document-attachments.*')) {
+            $attachment = $request->route('attachment');
+            if (is_scalar($attachment) && ctype_digit((string) $attachment)) {
+                $attachment = DocumentAttachment::find($attachment);
+            }
+            $documentId = $type === 'ppmp' ? $request->route('documentId') : null;
+            if ($attachment instanceof DocumentAttachment && $attachment->document_type === 'ppmp') {
+                $documentId = $attachment->document_id ?: $attachment->procurement_document_id;
+            }
+            if ($documentId && ProcurementDocument::whereKey($documentId)->where('document_type', 'PPMP')
+                ->where('submitting_office_id', $actor->office_id)->exists()) {
+                return $actor;
+            }
+        }
         $signatureRequest = $request->route('signatureRequest');
         if ($request->routeIs('signature-requests.show', 'signature-requests.sign', 'signature-requests.decline')
             && is_scalar($signatureRequest) && ctype_digit((string) $signatureRequest)) {

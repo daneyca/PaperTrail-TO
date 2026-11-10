@@ -271,9 +271,8 @@
                         } else {
                             $renderedSectionTotal += is_numeric((string) $budget) ? max((float) $budget, 0) : 0.0;
                         }
-                        $isSectionLike = $hasReadOnlyContent && ! $hasItemColumns && str($generalDescription)->upper()->toString() === trim((string) $generalDescription);
                     @endphp
-                    <tr class="ppmp-data-row ppmp-entry-row {{ $isBold ? 'ppmp-bold-row' : '' }} {{ $isSubtotalLike ? 'ppmp-subtotal-row' : '' }} {{ $isSectionLike ? 'ppmp-section-row' : '' }} {{ $hasReadOnlyContent && ! $hasItemColumns && ! $isSubtotalLike ? 'ppmp-text-only-row' : '' }}">
+                    <tr class="ppmp-data-row ppmp-entry-row {{ $isBold ? 'ppmp-bold-row' : '' }} {{ $isSubtotalLike ? 'ppmp-subtotal-row' : '' }} {{ $hasReadOnlyContent && ! $hasItemColumns && ! $isSubtotalLike ? 'ppmp-text-only-row' : '' }}">
                         <td class="ppmp-project-title">
                             @if ($editable)
                                 <input type="hidden" name="items[{{ $index }}][is_bold]" value="{{ $isBold ? '1' : '0' }}" data-ppmp-bold-value>
@@ -468,6 +467,19 @@
             const totalTarget = builder.querySelector('[data-ppmp-total]');
             const addButtons = document.querySelectorAll('[data-add-ppmp-row]');
             const boldButton = document.querySelector('[data-toggle-ppmp-bold]');
+            const form = builder.closest('form');
+            const recovery = form?.querySelector('[data-ppmp-recovery]');
+            const recoveryMessage = recovery?.querySelector('[data-ppmp-recovery-message]');
+            const restoreButton = recovery?.querySelector('[data-ppmp-recovery-restore]');
+            const discardButton = recovery?.querySelector('[data-ppmp-recovery-discard]');
+            const recoveryFiles = recovery?.querySelector('[data-ppmp-recovery-files]');
+            const draftKey = recovery?.dataset.draftKey;
+            const metadataNames = ['title', 'description', 'priority', 'fiscal_year', 'ppmp_no', 'ppmp_plan_type', 'prepared_by_name', 'submitted_by_name'];
+            let recoveryTimer;
+            let restoring = false;
+            let dirty = false;
+            let backupAvailable = true;
+            let pendingFiles = [];
             const money = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             const pasteColumns = [
                 'general_description',
@@ -488,6 +500,81 @@
 
             function dataRows() {
                 return [...rows.querySelectorAll('.ppmp-entry-row')];
+            }
+
+            function recoveryStatus(message) {
+                if (recoveryMessage && recoveryMessage.textContent !== message) recoveryMessage.textContent = message;
+            }
+
+            function captureDraft() {
+                return {
+                    version: 1,
+                    revision: recovery?.dataset.revision,
+                    fields: [...(form?.elements || [])].filter(field => metadataNames.includes(field.name))
+                        .map(field => ({ name: field.name, value: field.value, checked: field.checked })),
+                    rows: dataRows().map(row => ({
+                        values: Object.fromEntries(pasteColumns.map(column => [column, fieldForColumn(row, column)?.value || ''])),
+                        bold: row.querySelector('[data-ppmp-bold-value]')?.value === '1',
+                    })),
+                    files: [...(form?.querySelectorAll('input[type="file"]') || [])].flatMap(field => [...field.files].map(file => file.name)).concat(pendingFiles),
+                };
+            }
+
+            function saveRecovery() {
+                window.clearTimeout(recoveryTimer);
+                if (!draftKey || restoring || !dirty) return;
+                try {
+                    sessionStorage.setItem(draftKey, JSON.stringify(captureDraft()));
+                    backupAvailable = true;
+                    discardButton.hidden = false;
+                    recoveryStatus('Changes backed up in this tab. Use Save as Draft to keep a saved document.');
+                } catch (error) {
+                    backupAvailable = false;
+                    recoveryStatus('Automatic recovery is unavailable. Use Save as Draft to keep your work.');
+                }
+            }
+
+            function queueRecovery() {
+                if (restoring || !draftKey) return;
+                dirty = true;
+                window.clearTimeout(recoveryTimer);
+                recoveryTimer = window.setTimeout(saveRecovery, 250);
+            }
+
+            function restoreDraft(draft) {
+                restoring = true;
+                dataRows().forEach(row => row.remove());
+                nextIndex = 0;
+                draft.rows.forEach(saved => {
+                    const row = addRow(false);
+                    pasteColumns.forEach(column => {
+                        const field = fieldForColumn(row, column);
+                        if (field) field.value = String(saved.values?.[column] ?? '');
+                    });
+                    const bold = saved.bold === true;
+                    row.classList.toggle('ppmp-bold-row', bold);
+                    row.querySelector('[data-ppmp-bold-value]').value = bold ? '1' : '0';
+                    updateRowPresentation(row);
+                });
+                if (!dataRows().length) addRow(false);
+                for (const field of form.elements) {
+                    if (!metadataNames.includes(field.name)) continue;
+                    const saved = draft.fields?.find(value => value.name === field.name
+                        && (field.type !== 'radio' || value.value === field.value));
+                    if (!saved) continue;
+                    if (field.type === 'radio' || field.type === 'checkbox') field.checked = saved.checked === true;
+                    else field.value = String(saved.value ?? '');
+                }
+                recalculateTotal();
+                autosizeAllRows();
+                setActiveRow(dataRows()[0]);
+                restoring = false;
+                pendingFiles = Array.isArray(draft.files) ? draft.files.filter(name => typeof name === 'string') : [];
+                if (recoveryFiles) {
+                    recoveryFiles.hidden = !pendingFiles.length;
+                    recoveryFiles.textContent = pendingFiles.length
+                        ? `Please select your supporting files again before saving: ${pendingFiles.join(', ')}` : '';
+                }
             }
 
             function rowValues(row) {
@@ -527,7 +614,6 @@
             function updateRowPresentation(row) {
                 row.classList.toggle('ppmp-subtotal-row', isSubtotalRow(row));
                 row.classList.toggle('ppmp-text-only-row', !isSubtotalRow(row) && isTextOnlyRow(row));
-                row.classList.toggle('ppmp-section-row', !isSubtotalRow(row) && isTextOnlyRow(row) && rowValues(row)[0] === rowValues(row)[0].toUpperCase());
             }
 
             function setActiveRow(row) {
@@ -549,6 +635,7 @@
                 }
 
                 setActiveRow(row);
+                queueRecovery();
             }
 
             function numericValue(value) {
@@ -601,13 +688,16 @@
                 }
             }
 
-            function addRow() {
+            function addRow(refresh = true) {
                 const row = template.content.firstElementChild.cloneNode(true);
                 row.innerHTML = row.innerHTML.replaceAll('__INDEX__', String(nextIndex));
                 nextIndex += 1;
                 rows.insertBefore(row, rows.querySelector('.ppmp-total-row'));
-                recalculateTotal();
-                autosizeRow(row);
+                if (refresh) {
+                    recalculateTotal();
+                    autosizeRow(row);
+                    queueRecovery();
+                }
 
                 return row;
             }
@@ -670,7 +760,7 @@
                 }
             }
 
-            addButtons.forEach((button) => button.addEventListener('click', addRow));
+            addButtons.forEach((button) => button.addEventListener('click', () => addRow()));
 
             boldButton?.addEventListener('click', () => {
                 toggleRowBold();
@@ -763,11 +853,15 @@
                         field.value = '';
                         autosizeField(field);
                     });
+                    dataRows[0].classList.remove('ppmp-bold-row');
+                    dataRows[0].querySelector('[data-ppmp-bold-value]').value = '0';
+                    updateRowPresentation(dataRows[0]);
                 } else {
                     event.target.closest('tr')?.remove();
                 }
 
                 recalculateTotal();
+                queueRecovery();
             });
 
             recalculateTotal();
@@ -775,6 +869,74 @@
             autosizeAllRows();
             window.addEventListener('resize', autosizeAllRows);
             setActiveRow(dataRows()[0] || null);
+
+            const initialDraft = captureDraft();
+            form?.addEventListener('input', queueRecovery);
+            form?.addEventListener('change', event => {
+                if (event.target.type === 'file') {
+                    pendingFiles = [];
+                    if (recoveryFiles) recoveryFiles.hidden = true;
+                }
+                queueRecovery();
+            });
+            window.addEventListener('pagehide', saveRecovery);
+            document.addEventListener('visibilitychange', () => { if (document.hidden) saveRecovery(); });
+            window.addEventListener('beforeunload', event => {
+                saveRecovery();
+                if (dirty && !backupAvailable) { event.preventDefault(); event.returnValue = ''; }
+            });
+            window.addEventListener('pageshow', event => {
+                if (!event.persisted || !draftKey) return;
+                try { if (!sessionStorage.getItem(draftKey)) dirty = false; } catch (error) {}
+            });
+            discardButton?.addEventListener('click', () => {
+                if (!window.confirm('Discard unsaved changes and return to the form as it was when opened?')) return;
+                window.clearTimeout(recoveryTimer);
+                restoreDraft(initialDraft);
+                form.querySelectorAll('input[type="file"]').forEach(field => { field.value = ''; });
+                try { sessionStorage.removeItem(draftKey); } catch (error) {}
+                dirty = false;
+                discardButton.hidden = true;
+                restoreButton.hidden = true;
+                recoveryStatus('Unsaved changes discarded.');
+            });
+            if (draftKey) {
+                try {
+                    const draft = JSON.parse(sessionStorage.getItem(draftKey) || 'null');
+                    if (draft?.version === 1 && Array.isArray(draft.rows) && Array.isArray(draft.fields)
+                        && draft.rows.every(row => row && typeof row.values === 'object' && row.values !== null)
+                        && draft.fields.every(field => field && typeof field.name === 'string')) {
+                        if (recovery.dataset.hasOldInput === 'true') {
+                            pendingFiles = Array.isArray(draft.files) ? draft.files.filter(name => typeof name === 'string') : [];
+                            if (pendingFiles.length && recoveryFiles) {
+                                recoveryFiles.hidden = false;
+                                recoveryFiles.textContent = `Please select your supporting files again before saving: ${pendingFiles.join(', ')}`;
+                            }
+                            dirty = true;
+                            saveRecovery();
+                        } else if (draft.revision === recovery.dataset.revision) {
+                            restoreDraft(draft);
+                            dirty = true;
+                            discardButton.hidden = false;
+                            recoveryStatus('Your unsaved PPMP entries were restored.');
+                        } else {
+                            recoveryStatus('A newer saved version is open. You can restore your previous unsaved changes.');
+                            restoreButton.hidden = false;
+                            discardButton.hidden = false;
+                            restoreButton.addEventListener('click', () => {
+                                restoreDraft(draft);
+                                dirty = true;
+                                restoreButton.hidden = true;
+                                saveRecovery();
+                                recoveryStatus('Your unsaved PPMP entries were restored.');
+                            });
+                        }
+                    }
+                } catch (error) {
+                    backupAvailable = false;
+                    recoveryStatus('Automatic recovery is unavailable. Use Save as Draft to keep your work.');
+                }
+            }
         })();
     </script>
 @else

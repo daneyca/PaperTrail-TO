@@ -7,6 +7,7 @@
         method="POST"
         action="{{ route('head-office.ppmp.store') }}"
         class="ppmp-builder-form"
+        enctype="multipart/form-data"
     >
         @include('head-office.ppmp._form', ['useDocumentCreateFlow' => false])
     </form>
