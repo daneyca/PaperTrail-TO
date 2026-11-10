@@ -372,7 +372,6 @@
             'label' => 'Competitive Bidding',
             'icon' => 'workflow',
             'children' => [
-                $competitiveBiddingTask('Annual Investment Program', 'annual-investment-program'),
                 $competitiveBiddingTask('Annual Procurement Plan', 'annual-procurement-plan'),
                 $competitiveBiddingTask('Approved Budget for the Contract (ABC)', 'approved-budget-for-the-contract'),
                 [
