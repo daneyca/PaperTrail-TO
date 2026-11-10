@@ -83,10 +83,10 @@ class PurchaseRequestSupportingDocumentsTest extends TestCase
         $this->assertFalse($resolver->canUpload($staff, $document));
     }
 
-    public function test_bacsec_003_uses_the_mpdo_preparer_for_pending_pr_files(): void
+    public function test_bacsec_001_uses_the_mpdo_preparer_for_pending_pr_files(): void
     {
         $this->seed();
-        $account = User::where('user_id', 'BACSEC-003')->firstOrFail();
+        $account = User::where('user_id', 'BACSEC-001')->firstOrFail();
         $account->update(['must_change_password' => false]);
         $actor = app(BacsecMpdoWorkspaceService::class)->ensure($account);
         $document = $this->document($actor);

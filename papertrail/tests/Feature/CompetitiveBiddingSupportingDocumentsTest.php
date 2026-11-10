@@ -128,6 +128,7 @@ class CompetitiveBiddingSupportingDocumentsTest extends TestCase
 
     public function test_bacsec_003_submits_a_project_document_to_bacsec_001_for_checking(): void
     {
+        config(['papertrail.competitive_bidding_navigation_enabled' => true]);
         Storage::fake('local');
         $bacsec001 = $this->bacSecretariatUser('BACSEC-001');
         $bacsec003 = $this->bacSecretariatUser('BACSEC-003');

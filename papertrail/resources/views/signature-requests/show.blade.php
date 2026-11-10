@@ -13,6 +13,7 @@
         $isAbstract = $signatureRequest->document_type === 'abstract';
         $isApp = $signatureRequest->document_type === 'app';
         $isPurchaseOrder = $signatureRequest->document_type === 'purchase_order';
+        $isRfq = $signatureRequest->document_type === 'rfq';
         $isCompetitiveBiddingDocument = $signatureRequest->document_type === 'competitive_bidding_document';
         $signatureDesignation = filled($signatureRequest->requested_to_role)
             ? $signatureRequest->requested_to_role
@@ -24,6 +25,7 @@
                 ?? $signatureRequest->document_label
                 ?? 'Signature Request');
         $documentFormName = match (true) {
+            $isRfq => 'RFQ form',
             $isPurchaseRequest => 'PR form',
             $isPpmp => 'PPMP form',
             $isAbstract => 'Abstract form',
@@ -36,6 +38,7 @@
             default => 'document',
         };
         $documentSignLabel = match (true) {
+            $isRfq => 'Sign RFQ Form',
             $isPurchaseRequest => 'Sign PR Form',
             $isPpmp => 'Sign PPMP Form',
             $isAbstract => 'Sign Abstract Form',
@@ -153,6 +156,9 @@
                                 'signatureSlots' => $signatureSlots,
                             ])
                         </div>
+                    @elseif ($isRfq)
+                        <link rel="stylesheet" href="{{ asset('css/rfq-responses.css') }}">
+                        @include('rfq-responses.document', ['snapshot' => app(\App\Services\RfqSupplierWorkflowService::class)->issuedSnapshot($document)])
                     @elseif ($isPurchaseOrder)
                         <div class="signature-purchase-order-preview-area">
                             @include('head-office.purchase-orders.partials.purchase-order-excel-form', [

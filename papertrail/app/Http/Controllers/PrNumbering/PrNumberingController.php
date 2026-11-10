@@ -265,6 +265,7 @@ class PrNumberingController extends Controller
 
             $rfq->update([
                 'rfq_number' => trim($validated['rfq_number']),
+                'supplier_response_enabled' => true,
                 'rfq_date' => $validated['rfq_date'],
                 'status' => Rfq::STATUS_SUBMITTED,
                 'control_assigned_by_user_id' => $request->user()->id,

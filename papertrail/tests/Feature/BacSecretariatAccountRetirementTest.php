@@ -38,6 +38,6 @@ class BacSecretariatAccountRetirementTest extends TestCase
             ->assertOk()
             ->assertSee('Planning')
             ->assertSee('Small Value Procurement')
-            ->assertSee('Competitive Bidding');
+            ->assertDontSee('data-sidebar-key="Competitive Bidding"', false);
     }
 }

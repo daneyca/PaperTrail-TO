@@ -9,6 +9,7 @@ use App\Models\ElectronicSignature;
 use App\Models\Office;
 use App\Models\ProcurementDocument;
 use App\Models\PurchaseOrder;
+use App\Models\Rfq;
 use App\Models\SignatureRequest;
 use App\Models\SystemNotification;
 use App\Models\User;
@@ -578,6 +579,9 @@ class SignatureRequestService
 
     private function documentLabel(Model $document): string
     {
+        if ($document instanceof Rfq) {
+            return 'RFQ '.$document->displayNumber();
+        }
         if ($document instanceof AbstractQuotation) {
             return 'Abstract ' . $document->displayNumber();
         }
@@ -609,6 +613,9 @@ class SignatureRequestService
 
     private function trackingNumber(Model $document): ?string
     {
+        if ($document instanceof Rfq) {
+            return $document->displayNumber();
+        }
         if ($document instanceof AbstractQuotation) {
             return $document->displayNumber();
         }

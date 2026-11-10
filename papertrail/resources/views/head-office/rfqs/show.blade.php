@@ -25,12 +25,21 @@
         @endif
     </section>
 
+    @include('rfq-responses.manage', ['rfq' => $rfq])
+
+    @if ($rfq->supplier_response_enabled && $rfq->procurement_officer_user_id)
+        <link rel="stylesheet" href="{{ asset('css/rfq-responses.css') }}">
+        <section class="table-panel rfq-response-management">
+            @include('rfq-responses.document', ['snapshot' => app(\App\Services\RfqSupplierWorkflowService::class)->issuedSnapshot($rfq)])
+        </section>
+    @else
     @include('head-office.rfqs.partials.rfq-excel-form', [
         'rfq' => $rfq,
         'sourceDocument' => $rfq->sourcePrDocument,
         'sourceResolution' => $rfq->sourceBacResolution,
         'mode' => 'show',
     ])
+    @endif
 
     <x-documents.attachments-panel
         :document="$rfq"

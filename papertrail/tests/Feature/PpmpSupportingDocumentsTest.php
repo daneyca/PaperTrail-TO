@@ -103,10 +103,10 @@ class PpmpSupportingDocumentsTest extends TestCase
         $this->assertSame([], Storage::disk('local')->allFiles('document-attachments'));
     }
 
-    public function test_bacsec_003_uploads_and_manages_mpdo_files_using_the_correct_preparer_account(): void
+    public function test_bacsec_001_uploads_and_manages_mpdo_files_using_the_correct_preparer_account(): void
     {
         $this->seed();
-        $account = User::where('user_id', 'BACSEC-003')->firstOrFail();
+        $account = User::where('user_id', 'BACSEC-001')->firstOrFail();
         $account->update(['must_change_password' => false]);
         $actor = app(BacsecMpdoWorkspaceService::class)->ensure($account);
         $document = $this->document($actor);

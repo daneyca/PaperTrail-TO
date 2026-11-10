@@ -88,6 +88,7 @@ class RfqController extends Controller
 
         DB::transaction(function () use ($request, $validated, $sourceDocument, $sourceResolution, $isSubmitting, &$rfq) {
             $rfq = Rfq::create([
+                'supplier_response_enabled' => true,
                 ...$this->payload($validated, $sourceDocument, $sourceResolution),
                 'status' => $isSubmitting ? Rfq::STATUS_PENDING_CONTROL : Rfq::STATUS_DRAFT,
                 'prepared_by_user_id' => $request->user()->id,

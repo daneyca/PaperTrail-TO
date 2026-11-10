@@ -136,6 +136,11 @@ Route::middleware(['guest', 'no.cache'])->group(function () {
     Route::post('/reset-password', [PasswordResetController::class, 'update'])->name('password.update');
 });
 
+Route::middleware(['no.cache', 'throttle:60,1,rfq-response'])->prefix('rfq-response')->name('rfq-response.')->group(function () {
+    Route::get('/{token}', [\App\Http\Controllers\PublicRfqResponseController::class, 'show'])->where('token', '[A-Za-z0-9]{64}')->name('show');
+    Route::post('/{token}', [\App\Http\Controllers\PublicRfqResponseController::class, 'submit'])->where('token', '[A-Za-z0-9]{64}')->middleware('throttle:10,1,rfq-response-submit')->name('submit');
+});
+
 Route::middleware('no.cache')->prefix('supplier-signing')->name('supplier-signing.')->group(function () {
     Route::get('/{token}', [SupplierSigningController::class, 'show'])->name('show');
     Route::post('/{token}', [SupplierSigningController::class, 'submit'])->name('submit');
@@ -586,6 +591,11 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         Route::patch('/{rfq}', [HeadOfficeRfqController::class, 'update'])->name('update');
         Route::get('/{rfq}/print', [HeadOfficeRfqController::class, 'print'])->name('print');
         Route::patch('/{rfq}/submit', [HeadOfficeRfqController::class, 'submit'])->name('submit');
+        Route::post('/{rfq}/officer-signature', [\App\Http\Controllers\RfqSupplierResponseController::class, 'requestOfficer'])->name('request-officer');
+        Route::post('/{rfq}/supplier-quotations', [\App\Http\Controllers\RfqSupplierResponseController::class, 'invite'])->name('quotations.invite');
+        Route::get('/{rfq}/supplier-quotations/{quotation}', [\App\Http\Controllers\RfqSupplierResponseController::class, 'show'])->name('quotations.show');
+        Route::patch('/{rfq}/supplier-quotations/{quotation}/review', [\App\Http\Controllers\RfqSupplierResponseController::class, 'review'])->name('quotations.review');
+        Route::patch('/{rfq}/supplier-quotations/{quotation}/cancel', [\App\Http\Controllers\RfqSupplierResponseController::class, 'cancel'])->name('quotations.cancel');
     });
     Route::middleware(['role:head-office', 'requesting.office'])->prefix('head-office/abstracts')->name('head-office.abstracts.')->group(function () {
         Route::get('/', [HeadOfficeAbstractController::class, 'index'])->name('index');

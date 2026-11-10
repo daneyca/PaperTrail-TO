@@ -306,16 +306,15 @@
             }
         }
         unset($item);
-        $postingMenuIndex = array_search('Posting Management', array_column($items, 'label'), true);
-        $mpdoMenu = $svpDocumentMenu;
-        array_unshift($mpdoMenu['children'], ['section' => true, 'label' => 'MPDO Documents']);
-        array_splice($items, $postingMenuIndex + 1, 0, [$mpdoMenu]);
         $items = array_values(array_filter($items, fn ($item) => ($item['label'] ?? null) !== 'Monitoring'));
     } elseif ($roleSlug === 'bac-secretariat') {
         foreach ($items as &$item) {
             if (($item['label'] ?? null) === 'Small Value Procurement') {
                 if ($user?->user_id === 'BACSEC-001') {
                     $item['children'] = [
+                        ['section' => true, 'label' => 'MPDO Documents'],
+                        ...$svpDocumentMenu['children'],
+                        ['section' => true, 'label' => 'BAC Secretariat Tasks'],
                         ['label' => 'PR Copies', 'route' => 'bac-secretariat.pr.index', 'active' => 'bac-secretariat.pr.*', 'count' => $submittedPrCount],
                         ['label' => 'BAC Resolutions', 'route' => 'bac-secretariat.resolutions.index', 'active' => 'bac-secretariat.resolutions.*'],
                     ];
@@ -416,6 +415,11 @@
         }
 
         array_splice($items, $competitiveBiddingInsertIndex, 0, $menusToInsert);
+    }
+
+    // Keep public bidding navigation available for a future expansion of the system's scope.
+    if ($roleSlug === 'bac-secretariat' && ! config('papertrail.competitive_bidding_navigation_enabled', false)) {
+        $items = array_values(array_filter($items, fn ($item) => ($item['label'] ?? null) !== 'Competitive Bidding'));
     }
 
     // Add this after account-specific menu changes so every workspace retains tracking.

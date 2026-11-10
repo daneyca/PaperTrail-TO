@@ -11,6 +11,7 @@ use App\Models\ElectronicSignature;
 use App\Models\Office;
 use App\Models\ProcurementDocument;
 use App\Models\PurchaseOrder;
+use App\Models\Rfq;
 use App\Models\SignatureRequest;
 use App\Models\SignedDocumentSnapshot;
 use App\Models\SystemNotification;
@@ -50,6 +51,7 @@ class ElectronicSignatureService
                 ->where('document_type', 'PPMP')
                 ->find($documentId),
             'purchase_order' => PurchaseOrder::find($documentId),
+            'rfq' => Rfq::find($documentId),
             default => null,
         };
     }
@@ -77,6 +79,15 @@ class ElectronicSignatureService
 
         if (! $user->isActive() || ! $user->loginAccount()->isActive()) {
             return ['ok' => false, 'message' => 'This account or workspace is inactive.'];
+        }
+        if ($type === 'rfq' && $document instanceof Rfq) {
+            $requestForUser = app(SignatureRequestService::class)->openRequestForUser($document, $type, $user, $signatureRequest);
+            if (! $document->isControlled() || ! $requestForUser || $requestForUser->signatory_slot !== 'procurement_officer'
+                || (int) $document->procurement_officer_user_id !== (int) $user->id
+                || app(RfqSupplierWorkflowService::class)->officerSignature($document)) {
+                return ['ok' => false, 'message' => 'Only the assigned Procurement Officer can sign a controlled RFQ awaiting their signature.'];
+            }
+            return ['ok' => true, 'message' => 'This RFQ can be signed.', 'signature_request' => $requestForUser];
         }
         if ($type === 'purchase_request' && $document instanceof ProcurementDocument) {
             return $this->canSignPurchaseRequestWithReason($user, $document, $type, $signatureRequest);
@@ -250,7 +261,7 @@ class ElectronicSignatureService
             $isPurchaseRequestSignature = $type === 'purchase_request' && $signatureRequest;
             $isPpmpSignature = $type === 'ppmp' && $signatureRequest;
             $isCompetitiveBiddingSignature = $type === 'competitive_bidding_document' && $signatureRequest;
-            $isRoutedDocumentSignature = in_array($type, ['purchase_request', 'purchase_order', 'bac_resolution', 'ppmp', 'abstract', 'app', 'competitive_bidding_document'], true) && $signatureRequest;
+            $isRoutedDocumentSignature = in_array($type, ['purchase_request', 'purchase_order', 'bac_resolution', 'ppmp', 'abstract', 'app', 'competitive_bidding_document', 'rfq'], true) && $signatureRequest;
             $signerPosition = $isRoutedDocumentSignature
                 ? ($signatureRequest->requested_to_role ?: $signatureRequest->signatory_label ?: ($user->signer_position ?: ($user->position ?: $user->role)))
                 : ($user->signer_position ?: ($user->position ?: $user->role));
@@ -322,6 +333,8 @@ class ElectronicSignatureService
             } elseif ($type === 'purchase_order' && $document instanceof PurchaseOrder && $signatureRequest) {
                 app(PurchaseOrderSignatureWorkflowService::class)
                     ->handleInternalSigned($document, $signatureRequest, $signature);
+            } elseif ($fullySigned && $type === 'rfq' && $document instanceof Rfq) {
+                app(RfqSupplierWorkflowService::class)->handleOfficerSigned($document, $user);
             } elseif ($fullySigned && $type === 'bac_resolution') {
                 $outcomeSignature = $signature;
                 $outcomeUser = $user;
@@ -341,6 +354,7 @@ class ElectronicSignatureService
             }
 
             $documentTypeLabel = match ($type) {
+                'rfq' => 'RFQ',
                 'app' => 'Annual Procurement Plan',
                 'purchase_request' => 'Purchase Request',
                 'purchase_order' => 'Purchase Order',
@@ -429,6 +443,10 @@ class ElectronicSignatureService
                     ->whereKeyNot($signatureRequest?->id)
                     ->open()
                     ->update(['status' => SignatureRequest::STATUS_CANCELLED]);
+            } elseif ($type === 'rfq' && $document instanceof Rfq) {
+                $document->update(['status' => Rfq::STATUS_RETURNED, 'remarks' => $reason]);
+                app(RfqSupplierWorkflowService::class)->notifyOwner($document, 'RFQ returned by Procurement Officer', $reason);
+                app(SvpChainService::class)->linkRfq($document, $user, 'Procurement Officer returned RFQ', $reason);
             } elseif ($type === 'purchase_order' && $document instanceof PurchaseOrder) {
                 app(PurchaseOrderSignatureWorkflowService::class)->handleDeclined($document);
             } else {
@@ -436,6 +454,7 @@ class ElectronicSignatureService
             }
 
             $documentTypeLabel = match ($type) {
+                'rfq' => 'RFQ',
                 'app' => 'Annual Procurement Plan',
                 'purchase_request' => 'Purchase Request',
                 'purchase_order' => 'Purchase Order',
@@ -458,6 +477,7 @@ class ElectronicSignatureService
             return [
                 'ok' => true,
                 'message' => match ($type) {
+                    'rfq' => 'RFQ returned to its preparer for correction.',
                     'app' => 'APP signature request declined.',
                     'purchase_request' => 'Purchase Request signature request declined.',
                     'purchase_order' => 'Purchase Order signature request declined and returned for correction.',
@@ -512,6 +532,11 @@ class ElectronicSignatureService
     {
         if ($user->id === $signature->signer_user_id || $user->isAdmin()) {
             return true;
+        }
+
+        if ($signature->document_type === 'rfq') {
+            $rfq = Rfq::find($signature->document_id);
+            return $rfq && app(RfqSupplierWorkflowService::class)->canManage($user, $rfq);
         }
 
         if ($signature->document_type === 'purchase_request' && $signature->document_id) {
@@ -629,6 +654,9 @@ class ElectronicSignatureService
 
     public function computeDocumentHash(Model $document): string
     {
+        if ($document instanceof Rfq) {
+            return app(RfqSupplierWorkflowService::class)->documentHash($document);
+        }
         $payload = [
             'class' => $document::class,
             'id' => $document->getKey(),
@@ -712,6 +740,9 @@ class ElectronicSignatureService
     {
         $text = $this->documentTextSnapshot($document);
         $html = $document instanceof BacResolution || $document instanceof AbstractQuotation || $document instanceof AnnualProcurementPlan || $document instanceof CompetitiveBiddingSignatureDocument ? $document->document_html : null;
+        if ($document instanceof Rfq) {
+            $html = view('rfq-responses.document', ['snapshot' => app(RfqSupplierWorkflowService::class)->issuedSnapshot($document)])->render();
+        }
         $hash = hash('sha256', trim(($html ?: '') . "\n" . $text . "\n" . $signature->document_hash_before));
 
         return SignedDocumentSnapshot::create([
@@ -1074,6 +1105,9 @@ class ElectronicSignatureService
 
     private function documentLabel(Model $document): string
     {
+        if ($document instanceof Rfq) {
+            return 'RFQ '.$document->displayNumber();
+        }
         if ($document instanceof AbstractQuotation) {
             return 'Abstract ' . $document->displayNumber();
         }
@@ -1265,6 +1299,9 @@ class ElectronicSignatureService
 
     private function signatureSuccessMessage(string $type, bool $fullySigned, string $prSignatureResult, string $ppmpSignatureResult = 'ignored'): string
     {
+        if ($type === 'rfq') {
+            return 'RFQ signed. The requesting office can now invite suppliers to submit quotations online.';
+        }
         if ($type === 'purchase_request') {
             return match ($prSignatureResult) {
                 'completed_signatories' => 'All PR signatures completed. Purchase Request returned to BACSEC-001 for PR number submission.',

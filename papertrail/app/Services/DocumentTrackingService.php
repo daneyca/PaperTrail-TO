@@ -530,6 +530,15 @@ SUMMARY;
 
     private function nextExpectedStep(Model $document, ?ProcurementDocument $sourcePr, ?SvpProcurementChain $chain): string
     {
+        if ($document instanceof Rfq && $document->supplier_response_enabled) {
+            return match ($document->status) {
+                Rfq::STATUS_PENDING_CONTROL => 'Await the Procurement Controller’s official quotation number and date.',
+                Rfq::STATUS_SUBMITTED => 'Route the RFQ to its Procurement Officer for electronic signature.',
+                Rfq::STATUS_ISSUED => 'Collect signed supplier quotations through private response links and verify the received responses.',
+                Rfq::STATUS_QUOTED => 'Prepare the Abstract using verified supplier quotations.',
+                default => 'Complete the RFQ and submit it for procurement control.',
+            };
+        }
         $status = (string) ($sourcePr?->status ?? $document->status ?? $chain?->current_status ?? '');
         $stage = (string) ($sourcePr?->stage ?? $chain?->current_stage ?? '');
 

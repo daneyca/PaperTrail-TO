@@ -57,9 +57,9 @@ class DashboardSidebarScrollTest extends TestCase
         return new \DOMXPath($dom);
     }
 
-    public function test_svp_plans_menu_is_hidden_from_bacsec_001_only(): void
+    public function test_bacsec_menus_hide_competitive_bidding_and_preserve_svp_assignments(): void
     {
-        foreach (['BACSEC-001', 'BACSEC-003'] as $userId) {
+        foreach (['BACSEC-001', 'BACSEC-002', 'BACSEC-003'] as $userId) {
             $user = User::where('user_id', $userId)->firstOrFail();
             $user->update([
                 'role' => User::ROLE_BAC_SECRETARIAT,
@@ -68,8 +68,10 @@ class DashboardSidebarScrollTest extends TestCase
             ]);
 
             $response = $this->actingAs($user)->get(route('bac-secretariat.dashboard'))->assertOk();
+            $response->assertDontSee('data-sidebar-key="Competitive Bidding"', false)
+                ->assertSee(route('status-tracking.index'), false);
 
-            if ($userId === 'BACSEC-001') {
+            if ($userId !== 'BACSEC-003') {
                 $response->assertDontSee('SVP Plans');
             } else {
                 $response->assertSee('SVP Plans');

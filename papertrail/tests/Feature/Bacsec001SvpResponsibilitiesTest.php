@@ -11,7 +11,7 @@ class Bacsec001SvpResponsibilitiesTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_bacsec_001_sees_only_pr_copies_and_bac_resolutions_in_svp_menu(): void
+    public function test_bacsec_001_has_mpdo_preparation_and_existing_bac_tasks_in_svp_menu(): void
     {
         $user = $this->bacsec001();
 
@@ -22,7 +22,9 @@ class Bacsec001SvpResponsibilitiesTest extends TestCase
             ->assertSee('BAC Resolutions')
             ->assertDontSee('Incoming Documents')
             ->assertDontSee('SVP Plans')
-            ->assertDontSee('>RFQ<', false);
+            ->assertSee('MPDO Documents')
+            ->assertSee(route('head-office.rfqs.create'), false)
+            ->assertSee(route('head-office.inspection.index'), false);
     }
 
     public function test_bacsec_001_can_review_pr_copies_and_resolutions_but_not_other_svp_tasks(): void

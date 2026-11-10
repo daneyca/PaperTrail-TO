@@ -53,6 +53,7 @@ class AbstractController extends Controller
 
         $abstract = new AbstractQuotation($this->defaultData($sourceDocument, $sourceRfq, $sourceResolution, $request->user()->id));
         $abstract->setRelation('items', $this->defaultItems($sourceDocument, $sourceRfq));
+        app(\App\Services\RfqSupplierWorkflowService::class)->prefillAbstract($abstract, $sourceRfq);
 
         AuditLogger::log('Abstract', 'Abstract Create Page Viewed', 'BAC Secretariat opened Abstract creation.');
 
@@ -671,6 +672,8 @@ class AbstractController extends Controller
     {
         return Rfq::query()
             ->whereIn('status', [Rfq::STATUS_SUBMITTED, Rfq::STATUS_ISSUED, Rfq::STATUS_QUOTED, 'ready_for_abstract'])
+            ->where(fn (Builder $quotes) => $quotes->where('supplier_response_enabled', false)
+                ->orWhereHas('supplierQuotations', fn (Builder $quotation) => $quotation->where('status', 'verified')))
             ->where(function (Builder $resolution) {
                 $resolution->whereHas('sourceBacResolution', fn (Builder $query) => $this->readyBacResolutionPath($query))
                     ->orWhereHas('sourcePrDocument.latestBacResolution', fn (Builder $query) => $this->readyBacResolutionPath($query));

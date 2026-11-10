@@ -54,6 +54,8 @@ class Rfq extends Model
         'control_assigned_at',
         'control_remarks',
         'remarks',
+        'supplier_response_enabled',
+        'procurement_officer_user_id',
     ];
 
     protected $casts = [
@@ -65,6 +67,7 @@ class Rfq extends Model
         'sequence_number' => 'integer',
         'created_year' => 'integer',
         'created_month' => 'integer',
+        'supplier_response_enabled' => 'boolean',
     ];
 
     public function sourcePrDocument(): BelongsTo
@@ -100,6 +103,22 @@ class Rfq extends Model
     public function abstracts(): HasMany
     {
         return $this->hasMany(AbstractQuotation::class, 'source_rfq_id');
+    }
+
+    public function supplierQuotations(): HasMany
+    {
+        return $this->hasMany(RfqSupplierQuotation::class);
+    }
+
+    public function procurementOfficer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'procurement_officer_user_id');
+    }
+
+    public function isControlled(): bool
+    {
+        return filled($this->rfq_number) && $this->rfq_date && $this->control_assigned_at
+            && in_array($this->status, [self::STATUS_SUBMITTED, self::STATUS_ISSUED, self::STATUS_QUOTED], true);
     }
 
     public function isEditable(): bool

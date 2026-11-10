@@ -16,8 +16,8 @@ use Illuminate\Validation\ValidationException;
 
 class BacsecMpdoWorkspaceService
 {
-    public const ACCOUNT = 'BACSEC-003';
-    public const WORKSPACE = 'BACSEC-003-MPDO';
+    public const ACCOUNT = 'BACSEC-001';
+    public const WORKSPACE = 'BACSEC-001-MPDO';
 
     public const DESTINATIONS = [
         'dashboard' => 'head-office.dashboard',
@@ -142,6 +142,9 @@ class BacsecMpdoWorkspaceService
                     throw ValidationException::withMessages(['workspace' => 'The MPDO preparation assignment is inactive or assigned differently. Ask the administrator to review it.']);
                 }
             } else {
+                if (User::where('user_id', 'BACSEC-003-MPDO')->exists()) {
+                    throw ValidationException::withMessages(['workspace' => 'Run the MPDO SVP transfer migration before opening this workspace so existing documents remain available.']);
+                }
                 $workspace = new User();
                 $workspace->forceFill([
                     'user_id' => self::WORKSPACE, 'principal_user_id' => $account->id,
@@ -150,7 +153,7 @@ class BacsecMpdoWorkspaceService
                     'status' => User::STATUS_ACTIVE, 'must_change_password' => false,
                     'password' => Hash::make(Str::random(64)),
                 ])->save();
-                AuditLogger::log('Accounts', 'mpdo_svp_workspace_assigned', 'BACSEC-003 was assigned MPDO SVP document preparation.', $workspace, null, null, 'notice', [
+                AuditLogger::log('Accounts', 'mpdo_svp_workspace_assigned', 'BACSEC-001 was assigned MPDO SVP document preparation.', $workspace, null, null, 'notice', [
                     'login_account_id' => $account->id, 'office_id' => $office->id,
                 ]);
             }

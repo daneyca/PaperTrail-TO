@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'competitive_bidding_navigation_enabled' => env('PAPERTRAIL_COMPETITIVE_BIDDING_NAVIGATION', false),
     'email_notifications_enabled' => env('PAPERTRAIL_EMAIL_NOTIFICATIONS', true),
     'ai_summary_cache_seconds' => env('PAPERTRAIL_AI_SUMMARY_CACHE_SECONDS', 300),
     'attachments' => [
