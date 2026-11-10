@@ -2,6 +2,54 @@
     grid-template-columns: minmax(220px, 1.35fr) repeat(3, minmax(145px, 1fr));
 }
 
+/* Keep the tracking filters usable alongside the dashboard's density rules. */
+body.dashboard-body .svp-table-panel--compact .svp-filter-toolbar {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px !important;
+    padding: 16px !important;
+}
+
+body.dashboard-body .svp-table-panel--compact .svp-filter-toolbar .user-search {
+    grid-column: span 2;
+    min-width: 0 !important;
+    max-width: none !important;
+}
+
+body.dashboard-body .svp-table-panel--compact .svp-filter-toolbar .user-filter {
+    min-width: 0 !important;
+    max-width: none !important;
+}
+
+body.dashboard-body .svp-table-panel--compact .svp-filter-toolbar :is(input, select) {
+    min-height: 36px !important;
+}
+
+body.dashboard-body .svp-table-panel--compact .svp-filter-toolbar .filter-actions {
+    justify-content: flex-end;
+    align-self: end;
+}
+
+@media (max-width: 720px) {
+    body.dashboard-body .svp-table-panel--compact .svp-filter-toolbar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    body.dashboard-body .svp-table-panel--compact .svp-filter-toolbar .filter-actions {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 440px) {
+    body.dashboard-body .svp-table-panel--compact .svp-filter-toolbar {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.dashboard-body .svp-table-panel--compact .svp-filter-toolbar .user-search {
+        grid-column: 1 / -1;
+    }
+}
+
 .svp-chain-table td {
     vertical-align: middle;
 }
@@ -252,14 +300,18 @@
     align-items: center;
     justify-content: center;
     min-height: 26px;
+    max-width: 100%;
+    box-sizing: border-box;
     padding: 5px 10px;
     border-radius: 999px;
     background: #eef2f7;
     color: #334155;
     font-size: 0.76rem;
     font-weight: 800;
-    line-height: 1;
-    white-space: nowrap;
+    line-height: 1.35;
+    white-space: normal;
+    overflow-wrap: break-word;
+    text-align: center;
 }
 
 .svp-status-badge.draft,

@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="{{ asset('css/app-form.css') }}?v={{ filemtime(public_path('css/app-form.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/annual-procurement-plan.css') }}?v={{ filemtime(public_path('css/annual-procurement-plan.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/supplemental-app.css') }}?v={{ filemtime(public_path('css/supplemental-app.css')) }}">
-    <link rel="stylesheet" href="{{ asset('css/svp-tracking.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/svp-tracking.css') }}?v={{ filemtime(public_path('css/svp-tracking.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/e-signature.css') }}?v={{ file_exists(public_path('css/e-signature.css')) ? filemtime(public_path('css/e-signature.css')) : time() }}">
     <link rel="stylesheet" href="{{ asset('css/signature-requests.css') }}">
     <link rel="stylesheet" href="{{ asset('css/document-drafts.css') }}">

@@ -4499,19 +4499,29 @@ body.dashboard-body .svp-chain-table .svp-col-status { width: 170px; }
 body.dashboard-body .svp-chain-table .svp-col-location { width: 180px; }
 body.dashboard-body .svp-chain-table .svp-col-amount { width: 130px; }
 body.dashboard-body .svp-chain-table .svp-col-updated { width: 150px; }
-body.dashboard-body .svp-chain-table .svp-col-actions { width: 88px; }
+body.dashboard-body .svp-chain-table .svp-col-actions { width: 164px; }
 
 body.dashboard-body .svp-chain-table.svp-chain-table--compact {
-    min-width: 980px !important;
+    min-width: 1080px !important;
 }
 
-body.dashboard-body .svp-chain-table.svp-chain-table--compact .svp-col-chain { width: 170px; }
-body.dashboard-body .svp-chain-table.svp-chain-table--compact .svp-col-pr { width: 160px; }
-body.dashboard-body .svp-chain-table.svp-chain-table--compact .svp-col-stage { width: 145px; }
-body.dashboard-body .svp-chain-table.svp-chain-table--compact .svp-col-status { width: 145px; }
-body.dashboard-body .svp-chain-table.svp-chain-table--compact .svp-col-location { width: 160px; }
-body.dashboard-body .svp-chain-table.svp-chain-table--compact .svp-col-updated { width: 135px; }
-body.dashboard-body .svp-chain-table.svp-chain-table--compact .svp-col-actions { width: 86px; }
+body.dashboard-body .svp-chain-table.svp-chain-table--compact .svp-col-chain { width: 16%; }
+body.dashboard-body .svp-chain-table.svp-chain-table--compact .svp-col-pr { width: 15%; }
+body.dashboard-body .svp-chain-table.svp-chain-table--compact .svp-col-stage { width: 11%; }
+body.dashboard-body .svp-chain-table.svp-chain-table--compact .svp-col-status { width: 16%; }
+body.dashboard-body .svp-chain-table.svp-chain-table--compact .svp-col-location { width: 15%; }
+body.dashboard-body .svp-chain-table.svp-chain-table--compact .svp-col-updated { width: 11%; }
+body.dashboard-body .svp-chain-table.svp-chain-table--compact .svp-col-actions { width: 16%; }
+
+body.dashboard-body .svp-chain-table .svp-updated-date,
+body.dashboard-body .svp-chain-table .svp-updated-time {
+    display: block;
+    white-space: nowrap;
+}
+
+body.dashboard-body .svp-chain-table .svp-updated-time {
+    margin-top: 4px;
+}
 
 body.dashboard-body .my-documents-table .table-actions,
 body.dashboard-body .svp-chain-table .table-actions {
@@ -4523,6 +4533,11 @@ body.dashboard-body .svp-chain-table .table-actions {
 body.dashboard-body .my-documents-table .table-actions a,
 body.dashboard-body .svp-chain-table .table-actions a {
     flex: 0 0 32px;
+}
+
+body.dashboard-body .svp-chain-table .table-actions .svp-table-text-action {
+    flex: 0 0 auto;
+    white-space: nowrap;
 }
 
 body.dashboard-body .pr-view-page {

@@ -20,7 +20,7 @@
         <x-document-filter-card :action="route($indexRoute)" class="svp-filter-toolbar">
             <div class="user-search">
                 <label for="svp-search">Search</label>
-                <input id="svp-search" name="search" type="search" value="{{ $filters['search'] ?? '' }}" placeholder="SVP chain, PR tracking number, title, or office">
+                <input id="svp-search" name="search" type="search" value="{{ $filters['search'] ?? '' }}" placeholder="Search by document, PR number, title, or office">
             </div>
 
             @if ($showOfficeFilter ?? false)
@@ -170,12 +170,21 @@
                             @unless ($isHeadOfficeStatusTracking)
                                 <td class="nowrap">PHP {{ number_format((float) $chain->total_amount, 2) }}</td>
                             @endunless
-                            <td class="nowrap">{{ $chain->updated_at?->format('M d, Y h:i A') ?? 'N/A' }}</td>
+                            <td class="nowrap">
+                                @if ($chain->updated_at)
+                                    <time datetime="{{ $chain->updated_at->toIso8601String() }}">
+                                        <span class="svp-updated-date">{{ $chain->updated_at->format('M d, Y') }}</span>
+                                        <span class="svp-updated-time muted-text">{{ $chain->updated_at->format('h:i A') }}</span>
+                                    </time>
+                                @else
+                                    N/A
+                                @endif
+                            </td>
                             <td>
                                 <div class="table-actions">
                                     <a
                                         href="{{ $trackingUrl }}"
-                                        class="svp-table-text-action svp-table-text-action--primary"
+                                        class="svp-table-text-action svp-table-text-action--primary pt-action-button--labeled"
                                         title="Track document movement"
                                         aria-label="Track document movement for {{ $trackingTitle }}"
                                     >
