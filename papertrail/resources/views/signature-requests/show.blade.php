@@ -56,11 +56,10 @@
         <div>
             <p class="eyebrow">Document Signature</p>
             <h1>{{ $documentNumber }}</h1>
-            <p>Review this document as {{ $signatureDesignation }} before applying your e-signature.</p>
         </div>
 
         <div class="hero-actions no-print">
-            <a href="{{ route('signature-requests.index') }}" class="dashboard-action secondary-action">Back to Signature Requests</a>
+            <a href="{{ route('signature-requests.index') }}" class="dashboard-action secondary-action" data-action-icon="false" aria-label="Back to Signature Requests">Back</a>
             @if ($signatureRequest->document_id && ! $isCompetitiveBiddingDocument)
                 <x-ai.completeness-check-button
                     :document-type="$signatureRequest->document_type"

@@ -93,7 +93,7 @@
         <div class="notification-list">
             @forelse ($notifications as $notification)
                 <article class="notification-row {{ $notification->read_at ? 'is-read' : 'is-unread' }}">
-                    <div class="notification-main">
+                    <a href="{{ route('notifications.show', $notification) }}" class="notification-main" data-action-icon="false">
                         <div class="notification-title-line">
                             <span class="notification-type type-{{ $notification->type }}">{{ ucfirst($notification->type) }}</span>
                             <span class="notification-module">{{ $notification->module ?? 'System' }}</span>
@@ -103,24 +103,24 @@
                         <h2>{{ $notification->title }}</h2>
                         <p>{{ $notification->message }}</p>
                         <time datetime="{{ $notification->created_at?->toIso8601String() }}">{{ $notification->created_at?->format('M d, Y h:i A') }} &middot; {{ $notification->created_at?->diffForHumans() }}</time>
-                    </div>
+                    </a>
 
                     <div class="notification-actions">
                         <x-ui.action-button
                             :href="route('notifications.show', $notification)"
-                            icon="view"
-                            label="View Details"
-                            tooltip="View Details"
+                            icon="open"
+                            label="Open Notification"
+                            tooltip="Open Notification"
                             variant="view"
                             icon-only
                         />
 
                         @if ($notification->action_url)
                             <x-ui.action-button
-                                :href="$notification->action_url"
-                                icon="open"
-                                label="Open Related Document"
-                                tooltip="Open Related Document"
+                                :href="route('notifications.details', $notification)"
+                                icon="view"
+                                label="View Details"
+                                tooltip="View Details"
                                 variant="view"
                                 icon-only
                             />

@@ -8,6 +8,9 @@
             <p class="eyebrow">Notification Detail</p>
             <h1>{{ $notification->title }}</h1>
             <p>{{ $notification->module ?? 'System' }} update received {{ $notification->created_at?->diffForHumans() }}.</p>
+            @if ($destinationUnavailable ?? false)
+                <p role="status">The related page is unavailable. You can still read this notification below.</p>
+            @endif
         </div>
 
         <a href="{{ route('notifications.index') }}" class="dashboard-action secondary-action">Back to Notifications</a>
@@ -43,8 +46,8 @@
             </div>
 
             <div class="notification-detail-actions">
-                @if ($notification->action_url)
-                    <a href="{{ $notification->action_url }}" class="dashboard-action">Open Related Page</a>
+                @if ($relatedPageUrl ?? null)
+                    <a href="{{ $relatedPageUrl }}" class="dashboard-action">Open Related Page</a>
                 @endif
 
                 <form method="POST" action="{{ route('notifications.destroy', $notification) }}" onsubmit="return confirm('Delete this notification?');">

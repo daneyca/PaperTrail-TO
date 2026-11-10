@@ -7,9 +7,14 @@ use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\SystemNotificationService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class NotificationController extends Controller
 {
@@ -37,7 +42,25 @@ class NotificationController extends Controller
         ]);
     }
 
-    public function show(Request $request, SystemNotification $notification): View
+    public function show(Request $request, SystemNotification $notification): View|RedirectResponse
+    {
+        $this->authorizeOwner($request, $notification);
+        $destination = $this->relatedPageUrl($notification);
+
+        if (!$destination) {
+            return $this->details($request, $notification);
+        }
+
+        if (!$notification->isRead()) {
+            $notification->update(['read_at' => now()]);
+        }
+
+        AuditLogger::log('Notifications', $this->auditAction($request, 'Notification Opened'), 'User opened the page related to a notification.', $notification);
+
+        return redirect($destination);
+    }
+
+    public function details(Request $request, SystemNotification $notification): View
     {
         $this->authorizeOwner($request, $notification);
 
@@ -47,7 +70,13 @@ class NotificationController extends Controller
 
         AuditLogger::log('Notifications', $this->auditAction($request, 'Notification Detail Viewed'), 'User opened notification detail.', $notification);
 
-        return view('notifications.show', ['notification' => $notification]);
+        $relatedPageUrl = $this->relatedPageUrl($notification);
+
+        return view('notifications.show', [
+            'notification' => $notification,
+            'relatedPageUrl' => $relatedPageUrl,
+            'destinationUnavailable' => filled($notification->action_url) && !$relatedPageUrl,
+        ]);
     }
 
     public function markRead(Request $request, SystemNotification $notification): RedirectResponse
@@ -60,8 +89,8 @@ class NotificationController extends Controller
 
         AuditLogger::log('Notifications', $this->auditAction($request, 'Notification Marked as Read'), 'User marked notification as read.', $notification);
 
-        if ($notification->action_url) {
-            return redirect($notification->action_url);
+        if ($destination = $this->relatedPageUrl($notification)) {
+            return redirect($destination);
         }
 
         return back()->with('status', 'Notification marked as read.');
@@ -125,6 +154,45 @@ class NotificationController extends Controller
 
         $query->when($request->filled('date_from'), fn (Builder $builder) => $builder->whereDate('created_at', '>=', $request->date('date_from')));
         $query->when($request->filled('date_to'), fn (Builder $builder) => $builder->whereDate('created_at', '<=', $request->date('date_to')));
+    }
+
+    private function relatedPageUrl(SystemNotification $notification): ?string
+    {
+        $url = trim((string) $notification->action_url);
+        if ($url === '' || preg_match('/[\x00-\x1f\x7f]/', $url)) {
+            return null;
+        }
+        $parts = parse_url($url);
+        if ($parts === false || (isset($parts['scheme']) && !in_array(strtolower($parts['scheme']), ['http', 'https'], true))) {
+            return null;
+        }
+        $path = $parts['path'] ?? '';
+        if (!str_starts_with($path, '/') || str_starts_with($path, '//') || str_contains($path, '\\')) {
+            return null;
+        }
+
+        if ($notification->related_type && $notification->related_id) {
+            $model = Relation::getMorphedModel($notification->related_type) ?: $notification->related_type;
+            if (is_subclass_of($model, Model::class) && !$model::query()->whereKey($notification->related_id)->exists()) {
+                return null;
+            }
+        }
+
+        // Use the current application origin, including for links saved before a domain change.
+        $destination = $path . (isset($parts['query']) ? '?' . $parts['query'] : '');
+        try {
+            $router = app('router');
+            $route = $router->getRoutes()->match(Request::create($destination, 'GET'));
+            if (in_array($route->getName(), ['notifications.show', 'notifications.details'], true)) {
+                return null;
+            }
+            $router->substituteBindings($route);
+            $router->substituteImplicitBindings($route);
+        } catch (ModelNotFoundException|NotFoundHttpException|MethodNotAllowedHttpException|\InvalidArgumentException $exception) {
+            return null;
+        }
+
+        return $destination . (isset($parts['fragment']) ? '#' . $parts['fragment'] : '');
     }
 
     private function authorizeOwner(Request $request, SystemNotification $notification): void
