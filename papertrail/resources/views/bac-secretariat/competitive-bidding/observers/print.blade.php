@@ -1,0 +1,3 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Observer Invitation — {{ $invitation->recipient() }}</title><link rel="stylesheet" href="{{ asset('css/observer-invitations.css') }}?v={{ filemtime(public_path('css/observer-invitations.css')) }}"></head>
+<body class="observer-print-page"><div class="observer-print-actions no-print"><button type="button" onclick="window.print()">Print / Save as PDF</button></div>@include('bac-secretariat.competitive-bidding.observers.letter', ['data' => $invitation->payload])</body></html>

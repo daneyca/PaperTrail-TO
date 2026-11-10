@@ -1,0 +1,80 @@
+.observer-toolbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; margin-bottom:16px; padding:16px; border:1px solid #d7e2f0; border-radius:10px; background:#fff; }
+.observer-toolbar h1 { margin:3px 0 0; font-size:1.2rem; }
+.observer-toolbar__actions { display:flex; flex-wrap:wrap; gap:8px; }
+.observer-file-picker { display:grid; gap:6px; max-width:620px; margin-bottom:16px; color:#334b69; font-size:.82rem; font-weight:700; }
+.observer-file-picker span { font-weight:400; }
+.observer-file-picker select,.observer-upload-form input,.observer-upload-form select,.observer-upload-form textarea { box-sizing:border-box; width:100%; min-width:0; min-height:38px; border:1px solid #c5d3e5; border-radius:7px; padding:8px 10px; background:#fff; color:#102743; font:inherit; }
+.observer-document-scroll { max-width:100%; overflow-x:auto; padding:20px; background:#e8edf4; border:1px solid #d7e2f0; border-radius:8px; }
+.observer-letter { box-sizing:border-box; width:210mm; min-height:297mm; margin:0 auto; padding:14mm 18mm 18mm; background:#fff; color:#111; box-shadow:0 5px 24px #122c4b1a; font:10.5pt/1.28 Arial,sans-serif; }
+.observer-letterhead { display:grid; grid-template-columns:23mm minmax(0,1fr) 30mm; align-items:start; gap:5mm; text-align:center; }
+.observer-letterhead img { display:block; max-width:100%; object-fit:contain; }
+.observer-lgu-logo { width:22mm; height:22mm; }
+.observer-landscape { width:30mm; height:20mm; object-fit:cover !important; }
+.observer-letterhead__text { font:10pt/1.1 'Times New Roman',serif; }
+.observer-letterhead__municipality { font-weight:700; }
+.observer-office-heading { margin:6mm 0 6mm; padding-bottom:3mm; border-bottom:2px solid #58a3a5; text-align:center; font-size:13pt; font-weight:700; }
+.observer-letter-date { margin-bottom:9mm; }
+.observer-recipient { margin-bottom:5mm; max-width:135mm; }
+.observer-recipient__name,.observer-signatory__name { font-weight:700; }
+.observer-paragraph { margin:0 0 4mm; text-align:justify; }
+.observer-paragraph--closing { margin-top:8mm; margin-bottom:0; }
+.observer-activity { margin:4mm 0 5mm 6mm; }
+.observer-activity__heading,.observer-schedule__heading { display:flex; align-items:start; gap:3mm; font-weight:700; }
+.observer-activity__heading > .observer-field,.observer-schedule__heading > .observer-field { flex:1; min-width:0; }
+.observer-schedule { margin:5mm 0 3mm 6mm; }
+.observer-projects { margin:4mm 0 2mm; padding-left:6mm; }
+.observer-project { position:relative; padding-left:2mm; margin-bottom:3mm; }
+.observer-project__text { text-align:justify; }
+.observer-signatory { max-width:100mm; break-inside:avoid; }
+.observer-physical-signature-space { height:9mm; }
+.observer-field { white-space:normal; overflow-wrap:break-word; }
+.observer-field__print { white-space:pre-wrap; }
+.observer-letterhead .observer-field,.observer-recipient > .observer-field,.observer-signatory > .observer-field { display:block; }
+.observer-letter--editable .observer-field { display:block; min-width:0; }
+.observer-letter--editable .observer-field__print { display:none; }
+.observer-letter--editable .observer-field textarea,.observer-letter--editable .observer-field input { display:block; box-sizing:border-box; width:100%; min-width:0; min-height:25px; margin:0; padding:3px 5px; border:1px solid #dce5ef; border-radius:4px; background:#fcfdff; color:inherit; font:inherit; font-weight:inherit; line-height:inherit; text-align:inherit; resize:none; overflow:hidden; }
+.observer-letter--editable .observer-field textarea:focus,.observer-letter--editable .observer-field input:focus { outline:2px solid #2563eb; outline-offset:1px; background:#fff; }
+body.dashboard-body .observer-letter--editable .observer-field textarea,body.dashboard-body .observer-letter--editable .observer-field input { min-height:0 !important; padding:3px 5px !important; border-radius:4px !important; font-family:inherit !important; font-size:inherit !important; font-weight:inherit !important; line-height:inherit !important; text-align:inherit !important; }
+.observer-letter--editable .observer-project__text { display:flex; flex-wrap:wrap; align-items:start; gap:4px; }
+.observer-letter--editable .observer-project__description { flex:1 1 65mm; }
+.observer-letter--editable .observer-project__prefix { flex:0 1 38mm; }
+.observer-letter--editable .observer-project__budget { flex:0 1 30mm; }
+.observer-letter--editable .observer-signatory,.observer-letter--editable .observer-recipient { display:grid; gap:3px; }
+.observer-letter--editable .observer-letterhead__text { display:grid; gap:2px; }
+.observer-row-add,.observer-row-remove { padding:3px 7px; border:1px solid #c6d7ef; border-radius:4px; background:#f5f9ff; color:#2457bd; font:600 11px/1.3 Arial,sans-serif; cursor:pointer; }
+.observer-row-remove { flex:0 0 auto; border-color:#edc9cc; background:#fff; color:#a92632; }
+.observer-project > .observer-row-remove { display:block; margin-top:4px; }
+.observer-notice { padding:10px 14px; border:1px solid #bed5f4; background:#f5f9ff; border-radius:7px; }
+.observer-notice--error { color:#9d1b27; border-color:#efc3c7; background:#fff7f7; }
+.observer-notice[hidden] { display:none; }
+.observer-copies { margin-top:20px; scroll-margin-top:90px; }
+.observer-upload-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; padding:16px; }
+.observer-upload-form label { display:grid; align-content:start; gap:6px; min-width:0; font-size:.82rem; font-weight:700; color:#334b69; }
+.observer-upload-form__wide { grid-column:1 / -1; }
+.observer-upload-form__actions { display:flex; justify-content:flex-end; }
+.observer-copy-note { display:block; margin-top:4px; color:#60748b; white-space:pre-wrap; }
+.observer-print-page { margin:0; background:#e8edf4; }
+.observer-print-actions { display:flex; justify-content:center; padding:16px; }
+.observer-print-actions button { padding:10px 18px; background:#102c50; color:#fff; border:0; border-radius:6px; cursor:pointer; font:700 14px Arial,sans-serif; }
+html.papertrail-dark-mode .observer-toolbar { background:#0f172a; border-color:#334155; }
+html.papertrail-dark-mode .observer-file-picker,html.papertrail-dark-mode .observer-upload-form label { color:#cbd5e1; }
+html.papertrail-dark-mode .observer-file-picker select,html.papertrail-dark-mode .observer-upload-form input,html.papertrail-dark-mode .observer-upload-form textarea,html.papertrail-dark-mode .observer-upload-form select { background:#0f172a; color:#e2e8f0; border-color:#475569; }
+@media(max-width:600px) { .observer-document-scroll { padding:8px; } .observer-upload-form { grid-template-columns:minmax(0,1fr); } .observer-toolbar__actions { width:100%; } }
+@page { size:A4 portrait; margin:14mm 18mm 18mm; }
+@media print {
+    html,body,.observer-print-page { width:auto !important; min-width:0 !important; height:auto !important; margin:0 !important; padding:0 !important; background:#fff !important; }
+    body.dashboard-body .dashboard-shell,body.dashboard-body .dashboard-main,body.dashboard-body .dashboard-content { display:block !important; width:auto !important; min-width:0 !important; margin:0 !important; padding:0 !important; }
+    body.dashboard-body .dashboard-content > :not(.observer-editor):not(.observer-document-scroll) { display:none !important; }
+    .observer-letter,.observer-letter * { visibility:visible !important; }
+    .no-print,.observer-letter--editable input,.observer-letter--editable textarea { display:none !important; }
+    body.dashboard-body .dashboard-content .observer-editor,.observer-document-scroll { display:contents !important; }
+    .observer-letter { width:auto !important; min-height:0 !important; margin:0 !important; padding:0 !important; border:0 !important; box-shadow:none !important; font-size:10.5pt; }
+    .observer-letter--editable .observer-field__print { display:inline !important; }
+    .observer-letter--editable .observer-project__text { display:block; }
+    .observer-project__description,.observer-project__prefix,.observer-project__budget { display:inline !important; }
+    .observer-project__prefix::before,.observer-project__budget::before { content:' '; }
+    .observer-letterhead,.observer-office-heading,.observer-schedule__heading { break-after:avoid; }
+    .observer-project,.observer-signatory { break-inside:avoid; }
+    .observer-signatory,.observer-recipient,.observer-letterhead__text { gap:0 !important; }
+    .observer-field { color:#111 !important; }
+}

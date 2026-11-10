@@ -218,6 +218,62 @@
     margin-top: 12px;
 }
 
+.app-included-ppmps > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 24px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.app-included-ppmps > summary::-webkit-details-marker {
+    display: none;
+}
+
+.app-included-ppmps > summary:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 5px;
+    border-radius: 4px;
+}
+
+.app-included-ppmps__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    color: #2457bd;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.app-included-ppmps__toggle svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.app-included-ppmps__hide,
+.app-included-ppmps[open] .app-included-ppmps__view {
+    display: none;
+}
+
+.app-included-ppmps[open] .app-included-ppmps__hide {
+    display: inline;
+}
+
+.app-included-ppmps[open] .app-included-ppmps__toggle svg {
+    transform: rotate(180deg);
+}
+
+html.papertrail-dark-mode .app-included-ppmps__toggle {
+    color: #93b4ff;
+}
+
 .app-ppmp-import-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;

@@ -23,6 +23,11 @@
             <h1>Annual Procurement Plan</h1>
             <p>Create and manage official landscape APP records for LGU procurement planning.</p>
         </div>
+        @if ($canConsolidate)
+            <div class="hero-actions">
+                <a href="{{ route('bac-secretariat.app.create') }}" class="dashboard-action" data-action-icon="false">Create APP</a>
+            </div>
+        @endif
     </section>
 
     <section class="stat-grid stat-grid-modern" aria-label="APP summary">

@@ -132,6 +132,10 @@ class DocumentSubmenuController extends Controller
 
     public function bacSecretariatCompetitiveBidding(Request $request)
     {
+        if ($request->user()?->user_id === 'BACSEC-003' && $request->query('task') === 'letter-of-invitation-to-observer') {
+            return redirect()->route('bac-secretariat.competitive-bidding.observers.index');
+        }
+
         return $this->render($request, 'bac-secretariat.competitive-bidding');
     }
 

@@ -382,7 +382,7 @@
                     'query' => ['document' => 'philgeps_bid_notice_abstract'],
                 ],
                 $competitiveBiddingTask('Certification of the Head of the BAC Secretariat', 'bac-secretariat-head-certification'),
-                $competitiveBiddingTask('Letter of Invitation to Observer', 'letter-of-invitation-to-observer'),
+                ['label' => 'Letter of Invitation to Observer', 'route' => 'bac-secretariat.competitive-bidding.observers.index', 'active' => 'bac-secretariat.competitive-bidding.observers.*'],
                 [
                     'label' => 'Bidding Docs',
                     'children' => [

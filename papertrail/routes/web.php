@@ -249,6 +249,18 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         Route::get('/bac-resolutions/menu', [DocumentSubmenuController::class, 'bacSecretariatBacResolution'])->name('resolutions.menu');
         Route::get('/purchase-orders/menu', [DocumentSubmenuController::class, 'bacSecretariatPurchaseOrder'])->middleware('bacsec001.svp.other')->name('purchase-orders.menu');
         Route::get('/competitive-bidding/menu', [DocumentSubmenuController::class, 'bacSecretariatCompetitiveBidding'])->name('competitive-bidding.menu');
+        Route::prefix('competitive-bidding/observer-invitations')->name('competitive-bidding.observers.')->controller(\App\Http\Controllers\BacSecretariat\ObserverInvitationController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{invitation}/edit', 'edit')->name('edit');
+            Route::put('/{invitation}', 'update')->name('update');
+            Route::get('/{invitation}/print', 'print')->name('print');
+            Route::post('/{invitation}/copies', 'uploadCopies')->name('copies.store');
+            Route::get('/{invitation}/copies/{attachment}', 'viewCopy')->name('copies.view');
+            Route::delete('/{invitation}/copies/{attachment}', 'removeCopy')->name('copies.destroy');
+            Route::get('/{invitation}', 'show')->name('show');
+        });
         Route::get('/competitive-bidding/annual-investment-program/template', [DocumentSubmenuController::class, 'bacSecretariatAnnualInvestmentProgramTemplate'])->name('competitive-bidding.annual-investment-program.template');
         Route::post('/competitive-bidding/annual-investment-program/draft', [\App\Http\Controllers\BacSecretariat\AnnualInvestmentProgramDraftController::class, 'store'])->name('competitive-bidding.annual-investment-program.draft.store');
         Route::delete('/competitive-bidding/annual-investment-program/draft', [\App\Http\Controllers\BacSecretariat\AnnualInvestmentProgramDraftController::class, 'destroy'])->name('competitive-bidding.annual-investment-program.draft.destroy');

@@ -20,7 +20,9 @@
     };
 @endphp
 
-<strong>{{ $selectedPpmpMode ? 'Selected PPMP for APP Consolidation' : 'PPMP Consolidation' }}</strong>
+@unless ($canImport && ! $createMode && $importedPpmps->isNotEmpty())
+    <strong>{{ $selectedPpmpMode ? 'Selected PPMP for APP Consolidation' : 'PPMP Consolidation' }}</strong>
+@endunless
 
 @if ($selectedPpmpMode)
     <p>Only the selected PPMP is loaded. Additional approved PPMPs may be added manually if needed.</p>
@@ -42,7 +44,15 @@
 @endif
 
 @if ($canImport && ! $createMode && $importedPpmps->isNotEmpty())
-    <p>{{ $importedPpmps->count() }} PPMP record{{ $importedPpmps->count() === 1 ? '' : 's' }} already added to this APP draft.</p>
+    <details class="app-included-ppmps">
+        <summary>
+            <strong>Included PPMPs: {{ $importedPpmps->count() }}</strong>
+            <span class="app-included-ppmps__toggle">
+                <span class="app-included-ppmps__view">View Details</span>
+                <span class="app-included-ppmps__hide">Hide Details</span>
+                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 7.5 5 5 5-5" /></svg>
+            </span>
+        </summary>
     <div class="app-ppmp-import-list">
         @foreach ($importedPpmps as $ppmp)
             @php
@@ -77,6 +87,10 @@
             @endif
         @endforeach
     </div>
+        @if ($acceptedPpmps->isEmpty() && $pendingPpmps->isEmpty())
+            <p>Add other ready PPMPs from the APP Consolidation list.</p>
+        @endif
+    </details>
 @endif
 
 @if ($canImport)
@@ -95,12 +109,12 @@
                 </form>
             @endforeach
         </div>
-    @elseif ($importedPpmps->isNotEmpty() && $pendingPpmps->isEmpty())
-        <p>Only PPMP records already added to this APP draft are shown here. Add other ready PPMPs from the APP Consolidation list.</p>
-    @elseif ($pendingPpmps->isEmpty())
-        <p>No PPMP records have been added to this APP draft yet. Add ready PPMPs from the APP Consolidation list.</p>
-    @else
-        <p>Accept the incoming PPMP records above so they become available for APP import.</p>
+    @elseif ($importedPpmps->isEmpty())
+        @if ($pendingPpmps->isEmpty())
+            <p>No PPMP records have been added to this APP draft yet. Add ready PPMPs from the APP Consolidation list.</p>
+        @else
+            <p>Accept the incoming PPMP records above so they become available for APP import.</p>
+        @endif
     @endif
 @elseif ($createMode && $acceptedPpmps->isNotEmpty())
     @if ($selectedPpmpMode)
