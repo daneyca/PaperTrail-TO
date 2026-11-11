@@ -280,19 +280,20 @@ SUMMARY;
     {
         $sourcePr = $includeLinkedHistory || $document instanceof ProcurementDocument ? $this->sourcePrDocument($document) : null;
         $chain = $this->svpChainFor($document, $sourcePr);
+        $contextChain = $includeLinkedHistory ? $chain : null;
         $timeline = $this->timelineFor($document, $sourcePr, $chain, $includeLinkedHistory);
         $currentStatus = $this->statusLabel($document->status ?? $sourcePr?->status ?? null);
-        $currentStage = $this->stageFor($document, $sourcePr, $includeLinkedHistory ? $chain : null);
+        $currentStage = $this->stageFor($document, $sourcePr, $contextChain);
 
         return [
             'document_type' => $this->documentTypeLabel($document),
             'tracking_number' => $this->displayNumber($document),
             'title' => $this->documentTitle($document),
             'current_status' => $currentStatus,
-            'current_holder' => $this->currentHolder($document, $sourcePr, $chain),
+            'current_holder' => $this->currentHolder($document, $sourcePr, $contextChain),
             'current_stage' => $currentStage,
             'timeline' => $timeline,
-            'next_step' => $this->nextExpectedStep($document, $sourcePr, $chain),
+            'next_step' => $this->nextExpectedStep($document, $sourcePr, $contextChain),
         ];
     }
 
@@ -512,8 +513,8 @@ SUMMARY;
             }
         }
 
-        if ($chain?->current_stage) {
-            return $this->holderFromStage($chain->current_stage);
+        if ($chain?->current_stage && ($holder = $this->holderFromStage($chain->current_stage))) {
+            return $holder;
         }
 
         return $this->holderFromStatus($document->status ?? $sourcePr?->status ?? null)

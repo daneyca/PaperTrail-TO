@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\{AnnualProcurementPlan, CompetitiveBiddingSignatureDocument, Office, ProcurementDocument, PurchaseOrder, Rfq, SignatureRequest, SvpProcurementChain, User};
+use App\Models\{AnnualProcurementPlan, BacResolution, CompetitiveBiddingSignatureDocument, Office, ProcurementDocument, PurchaseOrder, Rfq, SignatureRequest, SvpProcurementChain, User};
 use App\Services\StatusTrackingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -142,6 +142,44 @@ class StatusTrackingTest extends TestCase
         $record = $service->find($owner, 'app', $app->id);
         $this->assertSame($signer->name, $service->details($record, 'app')['current_handler']);
         $this->assertSame($signer->name, $service->listing($owner, [])['documents']->first()->handler);
+    }
+
+    public function test_bacsec_can_track_its_bac_resolution_with_a_linked_workflow_at_any_stage(): void
+    {
+        $this->withoutExceptionHandling([\Symfony\Component\HttpKernel\Exception\HttpException::class]);
+        $owner = $this->account('BACSEC-001', User::ROLE_BAC_SECRETARIAT);
+        $peer = $this->account('BACSEC-003', User::ROLE_BAC_SECRETARIAT);
+        $chair = $this->account('TRACK-RESOLUTION-CHAIR', User::ROLE_BAC_CHAIR);
+        $source = $this->procurement('PRIVATE-SOURCE-PR', ['prepared_by_user_id' => $peer->id]);
+        $resolution = BacResolution::withoutEvents(fn () => BacResolution::create([
+            'resolution_number' => 'BAC-TRACK-REPRO', 'document_reference_number' => 'BAC-TRACK-REPRO',
+            'title' => 'Resolution movement test', 'source_pr_document_id' => $source->id,
+            'fiscal_year' => 2026, 'status' => BacResolution::STATUS_SUBMITTED_TO_BAC_CHAIR,
+            'requesting_office_name' => 'BAC Secretariat', 'prepared_by_user_id' => $owner->id, 'submitted_at' => now(),
+        ]));
+        $chain = SvpProcurementChain::create(['chain_number' => 'SVP-RESOLUTION-TRACK', 'source_pr_document_id' => $source->id,
+            'bac_resolution_id' => $resolution->id, 'current_stage' => SvpProcurementChain::STAGE_BAC_RESOLUTION]);
+        $chain->events()->create(['document_type' => 'BAC Resolution', 'document_id' => $resolution->id,
+            'action' => 'Resolution sent for signature', 'performed_by_user_id' => $owner->id,
+            'stage' => SvpProcurementChain::STAGE_BAC_RESOLUTION, 'status' => $resolution->status]);
+        $chain->events()->create(['document_type' => 'PR', 'document_id' => $source->id,
+            'action' => 'PRIVATE SOURCE PR EVENT', 'stage' => 'PRIVATE SOURCE PR STAGE', 'performed_by_user_id' => $peer->id]);
+        SignatureRequest::create(['request_uuid' => (string) \Illuminate\Support\Str::uuid(), 'document_type' => 'bac_resolution',
+            'document_id' => $resolution->id, 'signatory_slot' => 'bac_chairperson', 'status' => SignatureRequest::STATUS_PENDING,
+            'requested_by_user_id' => $owner->id, 'requested_to_user_id' => $chair->id]);
+
+        $this->actingAs($owner);
+        foreach (array_merge(SvpProcurementChain::workflowStages(), ['Unrecognized workflow stage']) as $stage) {
+            $chain->update(['current_stage' => $stage]);
+            $this->get(route('status-tracking.show', ['bac_resolution', $resolution]))->assertOk()
+                ->assertSee('BAC-TRACK-REPRO')->assertSee('Resolution Sent For Signature')->assertSee($chair->name)
+                ->assertDontSee('PRIVATE SOURCE PR EVENT')->assertDontSee('PRIVATE-SOURCE-PR')
+                ->assertViewHas('tracking', fn ($tracking) => $tracking['current_stage'] === 'BAC Resolution');
+            $linkedTracking = app(\App\Services\DocumentTrackingService::class)->buildTrackingPayload($resolution);
+            $this->assertIsString($linkedTracking['current_holder']);
+            $this->assertNotSame('', $linkedTracking['current_holder']);
+        }
+        $this->actingAs($peer)->get(route('status-tracking.show', ['bac_resolution', $resolution]))->assertForbidden();
     }
 
     public function test_pagination_counts_only_visible_documents(): void
