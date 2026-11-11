@@ -19,6 +19,14 @@ class SvpInspectionAcceptanceReportTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function createApplication(): \Illuminate\Foundation\Application
+    {
+        $app = parent::createApplication();
+        $app['config']->set('database.default', 'mysql');
+        $app['config']->set('database.connections.mysql.database', 'papertrail_testing');
+        return $app;
+    }
+
     public function test_acceptance_completion_link_opens_and_keeps_saved_names_through_completion(): void
     {
         [$user, $po] = $this->order();
@@ -83,7 +91,9 @@ class SvpInspectionAcceptanceReportTest extends TestCase
         $this->actingAs($user)->get(route('head-office.inspection.create', ['purchase_order_id' => $po->id]))
             ->assertOk()->assertSee('INSPECTION AND ACCEPTANCE REPORT')->assertSee('Executive Table')
             ->assertSee('name="invoice_number"', false)->assertSee('name="inspection_date"', false)
-            ->assertSee('name="acceptance_officer_name"', false)->assertSee('Save Draft');
+            ->assertSee('name="acceptance_officer_name"', false)->assertSee('Save Draft')
+            ->assertSee('name="inspector_designation"', false)->assertSee('name="inspection_chair_designation"', false)
+            ->assertSee('name="acceptance_officer_designation"', false);
 
         $this->post(route('head-office.inspection.store', $po), [
             'return_to' => 'editor', 'save_action' => 'draft', 'inspection_date' => '2026-11-09',
@@ -158,12 +168,21 @@ class SvpInspectionAcceptanceReportTest extends TestCase
             'quantity_condition' => 'Complete', 'quality_condition' => 'Conforming',
             'inspector_name' => 'Saved Inspector', 'inspection_chair_name' => 'Saved Assessor',
             'acceptance_officer_name' => 'Saved Receiver',
+            'inspector_designation' => 'Inspection Team Member', 'inspection_chair_designation' => 'Inspection Team Chair',
+            'acceptance_officer_designation' => 'Supply Officer II',
         ])->assertSessionHasNoErrors()->assertRedirect(route('head-office.inspection.show', $po));
         $record = $po->latestInspectionAcceptanceRecord()->firstOrFail();
         $this->assertSame('2026-11-08', $record->invoice_date->toDateString());
         $this->assertSame('Saved Receiver', $record->acceptance_officer_name);
+        $this->assertSame('Supply Officer II', $record->acceptance_officer_designation);
         $this->actingAs($user)->get(route('head-office.inspection.print', $po))
-            ->assertOk()->assertSee('Saved Inspector')->assertSee('Saved Assessor')->assertSee('Saved Receiver');
+            ->assertOk()->assertSee('Saved Inspector')->assertSee('Saved Assessor')->assertSee('Saved Receiver')
+            ->assertSee('Inspection Team Member')->assertSee('Inspection Team Chair')->assertSee('Supply Officer II')
+            ->assertDontSee('Admin Aide I');
+        $this->get(route('head-office.inspection.create', ['purchase_order_id' => $po->id, 'edit' => 1]))
+            ->assertOk()->assertSee('value="Supply Officer II"', false);
+        $this->get(route('head-office.inspection.show', $po))->assertOk()
+            ->assertSee('name="acceptance_officer_designation"', false)->assertSee('value="Supply Officer II"', false);
 
         $this->actingAs($user)->patch(route('head-office.inspection.accept', $po), ['acceptance_date' => '2026-11-08'])
             ->assertSessionHasNoErrors()->assertRedirect();
@@ -175,6 +194,9 @@ class SvpInspectionAcceptanceReportTest extends TestCase
         $this->patch(route('head-office.inspection.complete', $po))->assertSessionHasNoErrors()->assertRedirect();
         $this->assertSame('2026-11-08', $record->refresh()->acceptance_date->toDateString());
         $this->assertSame('Saved Receiver', $record->acceptance_officer_name);
+        $this->assertSame('Inspection Team Member', $record->inspector_designation);
+        $this->assertSame('Inspection Team Chair', $record->inspection_chair_designation);
+        $this->assertSame('Supply Officer II', $record->acceptance_officer_designation);
     }
 
     public function test_template_replaces_the_generic_default_and_preserves_admin_uploads(): void

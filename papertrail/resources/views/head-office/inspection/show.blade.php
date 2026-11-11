@@ -147,13 +147,25 @@
                 <input id="inspector_name" name="inspector_name" type="text" maxlength="255" value="{{ old('inspector_name', $record->inspector_name) }}" placeholder="Enter Name">
                 @error('inspector_name')<span class="field-error">{{ $message }}</span>@enderror
 
+                <label for="inspector_designation">Inspection Officer Designation</label>
+                <input id="inspector_designation" name="inspector_designation" type="text" maxlength="255" value="{{ old('inspector_designation', $record->inspector_designation ?? 'Inspection Officer - Des.') }}">
+                @error('inspector_designation')<span class="field-error">{{ $message }}</span>@enderror
+
                 <label for="inspection_chair_name">HRMO/Municipal Assessor Designate</label>
                 <input id="inspection_chair_name" name="inspection_chair_name" type="text" maxlength="255" value="{{ old('inspection_chair_name', $record->inspection_chair_name) }}" placeholder="Enter Name">
                 @error('inspection_chair_name')<span class="field-error">{{ $message }}</span>@enderror
 
-                <label for="acceptance_officer_name">Acceptance Officer (Admin Aide I)</label>
+                <label for="inspection_chair_designation">Inspection Chair Designation</label>
+                <input id="inspection_chair_designation" name="inspection_chair_designation" type="text" maxlength="255" value="{{ old('inspection_chair_designation', $record->inspection_chair_designation ?? 'HRMO/Municipal Assessor Designate') }}">
+                @error('inspection_chair_designation')<span class="field-error">{{ $message }}</span>@enderror
+
+                <label for="acceptance_officer_name">Acceptance Officer</label>
                 <input id="acceptance_officer_name" name="acceptance_officer_name" type="text" maxlength="255" value="{{ old('acceptance_officer_name', $record->acceptance_officer_name) }}" placeholder="Enter Name">
                 @error('acceptance_officer_name')<span class="field-error">{{ $message }}</span>@enderror
+
+                <label for="acceptance_officer_designation">Acceptance Officer Designation</label>
+                <input id="acceptance_officer_designation" name="acceptance_officer_designation" type="text" maxlength="255" value="{{ old('acceptance_officer_designation', $record->acceptance_officer_designation ?? 'Admin Aide I') }}">
+                @error('acceptance_officer_designation')<span class="field-error">{{ $message }}</span>@enderror
 
                 <label for="findings">Inspection Findings</label>
                 <textarea id="findings" name="findings" rows="4" placeholder="Record findings, defects, or compliance notes.">{{ old('findings', $record->findings) }}</textarea>
