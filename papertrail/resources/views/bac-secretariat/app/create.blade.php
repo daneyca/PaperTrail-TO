@@ -35,7 +35,8 @@
                     </div>
                     <div>
                         <label for="app-year-meta">Fiscal Year</label>
-                        <input id="app-year-meta" type="number" min="2020" max="2100" data-app-meta-field="fiscal_year" value="{{ old('fiscal_year', $app->fiscal_year ?? now()->year) }}">
+                        <input id="app-year-meta" type="number" min="2020" max="2100" data-app-meta-field="fiscal_year" value="{{ old('fiscal_year', $app->fiscal_year ?? now()->year) }}" readonly>
+                        <a href="{{ route('bac-secretariat.app.create') }}">Choose another fiscal year</a>
                     </div>
                     <div>
                         <label for="app-title-meta">Title</label>

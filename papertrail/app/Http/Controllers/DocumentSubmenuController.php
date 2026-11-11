@@ -844,7 +844,7 @@ class DocumentSubmenuController extends Controller
             'subtitle' => 'Choose an action for Annual Procurement Plan consolidation records.',
             'backRoute' => 'bac-secretariat.dashboard',
             'cards' => [
-                $this->card('Create Online', 'Create a consolidated Annual Procurement Plan in PaperTrail.', 'app', 'emerald', 'bac-secretariat.app.create'),
+                $this->card('Create / Open APP', 'Choose a fiscal year to create a new APP or continue its existing plan.', 'app', 'emerald', 'bac-secretariat.app.create'),
                 $this->card('Ready PPMPs', 'Accepted PPMPs waiting to be added to an APP draft.', 'view', 'violet', 'bac-secretariat.ppmp.index', [], ['status' => ProcurementDocument::STATUS_ACCEPTED_FOR_APP_CONSOLIDATION], $this->count(ProcurementDocument::class, [], $readyPpmpScope)),
                 $this->templateDownloadCard('app', 'emerald'),
                 $this->templateUploadCard('app', 'emerald'),

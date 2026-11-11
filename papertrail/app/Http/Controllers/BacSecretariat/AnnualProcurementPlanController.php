@@ -104,6 +104,31 @@ class AnnualProcurementPlanController extends Controller
             return $this->deny($request, 'APP Create Unauthorized', 'User attempted to create an APP without consolidation access.');
         }
 
+        $request->validate(['fiscal_year' => ['nullable', 'integer', 'min:2020', 'max:2100']]);
+
+        if (! $request->filled('fiscal_year') && ! $request->filled('ppmp_document_id')) {
+            $plansByYear = AnnualProcurementPlan::query()
+                ->whereIn('status', self::MAIN_APP_STATUSES)
+                ->orderByRaw('CASE WHEN app_number IS NULL THEN 1 ELSE 0 END')
+                ->orderBy('app_number')->orderBy('created_at')->orderBy('id')
+                ->get()->groupBy('fiscal_year')->map(function ($plans) {
+                    $plan = $plans->first();
+                    return [
+                        'number' => $plan->app_number ?: $plan->displayNumber(),
+                        'status' => $plan->status,
+                        'status_label' => str($plan->status)->replace('_', ' ')->title()->toString(),
+                        'editable' => $plan->isEditable(),
+                        'supplemental_url' => $plan->status === AnnualProcurementPlan::STATUS_APPROVED
+                            ? route('bac-secretariat.supplemental-apps.create', ['fiscal_year' => $plan->fiscal_year]) : null,
+                    ];
+                })->all();
+
+            return view('bac-secretariat.app.select-year', [
+                'currentYear' => now('Asia/Manila')->year,
+                'plansByYear' => $plansByYear,
+            ]);
+        }
+
         $selectedPpmpMode = $request->filled('ppmp_document_id');
         $selectedPpmp = null;
 
@@ -141,7 +166,7 @@ class AnnualProcurementPlanController extends Controller
             }
         }
 
-        $fiscalYear = (int) ($selectedPpmp?->fiscal_year ?: ($request->integer('fiscal_year') ?: now()->year));
+        $fiscalYear = (int) ($selectedPpmp?->fiscal_year ?: ($request->integer('fiscal_year') ?: now('Asia/Manila')->year));
 
         if ($mainApp = $this->mainAppForYear($fiscalYear)) {
             AuditLogger::log('Annual Procurement Plan', 'Existing APP Continued', 'BAC Secretariat continued the fiscal-year APP record instead of creating another APP number.', $mainApp);
@@ -160,7 +185,9 @@ class AnnualProcurementPlanController extends Controller
 
             return redirect()
                 ->route('bac-secretariat.app.show', $mainApp)
-                ->with('status', "APP {$mainApp->displayNumber()} already exists for CY {$fiscalYear}. Add approved PPMPs from APP Consolidation to start the next revision under the same APP number.");
+                ->with('status', $mainApp->status === AnnualProcurementPlan::STATUS_APPROVED
+                    ? "An approved APP already exists for CY {$fiscalYear}. Use Supplemental APP for additional purchases in this year, or choose another fiscal year to create a new main APP."
+                    : "APP {$mainApp->displayNumber()} already exists for CY {$fiscalYear}. Open this APP to check its progress, or choose another fiscal year to create a new main APP.");
         }
 
         $versioning = $this->automaticPlanVersion($fiscalYear);

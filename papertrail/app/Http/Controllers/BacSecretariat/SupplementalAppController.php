@@ -45,10 +45,12 @@ class SupplementalAppController extends Controller
 
     public function create(Request $request): View
     {
+        $request->validate(['fiscal_year' => ['nullable', 'integer', 'min:2000', 'max:2100']]);
+        $fiscalYear = $request->integer('fiscal_year') ?: now('Asia/Manila')->year;
         return view('bac-secretariat.supplemental-apps.create', [
             'supplementalApp' => new SupplementalApp([
-                'supplemental_app_number' => $this->nextSupplementalAppNumber(now()->year),
-                'fiscal_year' => now()->year,
+                'supplemental_app_number' => $this->nextSupplementalAppNumber($fiscalYear),
+                'fiscal_year' => $fiscalYear,
                 'justification' => self::DEFAULT_JUSTIFICATION,
             ]),
             'sourceDocument' => null,
