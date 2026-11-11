@@ -42,6 +42,7 @@
                     <h2>Supplier Signing Link</h2>
                     <p>Status: {{ $supplierSignatureRequest->statusLabel() }}</p>
                     <p>{{ $supplierSignatureRequest->signatory_name ?: $supplierSignatureRequest->supplier_name }}{{ $supplierSignatureRequest->supplier_contact ? ' · '.$supplierSignatureRequest->supplier_contact : '' }}</p>
+                    @if ($po->supplier_tin)<p>TIN: {{ $po->supplier_tin }}</p>@endif
                 </div>
                 <a href="{{ $supplierSignatureRequest->publicUrl() }}" target="_blank" rel="noopener">Open Supplier Link</a>
             </div>

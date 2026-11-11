@@ -4,7 +4,8 @@
     $sourceDocument = $sourceDocument ?? $po->sourcePrDocument;
     $sourceAbstract = $sourceAbstract ?? $po->sourceAbstract;
     $field = fn (string $name, mixed $default = '') => old($name, filled($po->{$name} ?? null) ? $po->{$name} : $default);
-    $money = fn ($value) => filled($value) ? number_format((float) $value, 2, '.', '') : '';
+    $money = fn ($value) => filled($value) ? number_format((float) $value, 2, '.', ',') : '';
+    $quantity = fn ($value) => filled($value) ? rtrim(rtrim(number_format((float) $value, 2, '.', ''), '0'), '.') : '';
     $text = fn ($value, string $fallback = '') => e(filled($value) ? $value : $fallback);
     $sourceId = old('source_pr_document_id', $po->source_pr_document_id ?? $sourceDocument?->id);
     $sourceAbstractId = old('source_abstract_id', $po->source_abstract_id ?? $sourceAbstract?->id);
@@ -55,14 +56,14 @@
 
 <div class="po-document-wrap po-head-office-po">
     <section class="po-a4-page">
-        <div id="purchaseOrderEditor" class="po-paper-content po-clean-document po-head-office-po-content">
-            <div class="po-cell po-annex" data-field="annex_number">Annex 29</div>
-
-            @include('purchase-orders.partials.official-header')
-
-            <div class="po-title-block">
+        <div id="purchaseOrderEditor" class="po-paper-content po-clean-document po-head-office-po-content po-lgu-template">
+            <div class="po-lgu-form-heading">
+            <header class="po-title-block po-lgu-heading" aria-label="Official LGU Purchase Order">
+                <div class="po-cell po-annex" data-field="annex_number">Annex 29</div>
                 <div class="po-cell po-title" data-field="po_title">PURCHASE ORDER</div>
-            </div>
+                <div class="po-title-office">TOMAS OPPUS</div>
+                <div class="po-title-lgu">LGU</div>
+            </header>
 
             <div class="po-meta-grid">
                 <div class="po-meta-left">
@@ -75,14 +76,6 @@
                         <span class="po-label">Address</span>
                         <span class="po-colon">:</span>
                         <span class="po-cell po-edit-line" data-field="supplier_address">{!! $text($field('supplier_address')) !!}</span>
-                    </div>
-                    <div class="po-line-field">
-                        <span class="po-label">Contact No.</span><span class="po-colon">:</span>
-                        <span class="po-cell po-edit-line" data-field="supplier_contact">{!! $text($field('supplier_contact')) !!}</span>
-                    </div>
-                    <div class="po-line-field">
-                        <span class="po-label">TIN</span><span class="po-colon">:</span>
-                        <span class="po-cell po-edit-line" data-field="supplier_tin">{!! $text($field('supplier_tin')) !!}</span>
                     </div>
                     @if ($isEditable)
                         <span hidden class="po-cell" data-field="supplier_email">{!! $text($field('supplier_email')) !!}</span>
@@ -107,7 +100,7 @@
                     <div class="po-line-field">
                         <span class="po-label">PR No./s</span>
                         <span class="po-colon">:</span>
-                        <span class="po-cell po-edit-line" data-field="pr_numbers">{!! $text($sourceDocument?->tracking_number) !!}</span>
+                        <span class="po-cell po-edit-line" data-field="pr_numbers">{!! $text($sourceDocument?->pr_no ?: $sourceDocument?->tracking_number) !!}</span>
                     </div>
                 </div>
             </div>
@@ -137,30 +130,31 @@
                         <span class="po-cell po-edit-line" data-field="delivery_term">{!! $text($field('delivery_term', $po->delivery_terms)) !!}</span>
                     </div>
                     <div class="po-line-field">
-                        <span class="po-label">Payment Term</span>
+                        <span class="po-label">Project Term</span>
                         <span class="po-colon">:</span>
                         <span class="po-cell po-edit-line" data-field="payment_term">{!! $text($field('payment_term', $po->payment_terms)) !!}</span>
                     </div>
                 </div>
             </div>
+            </div>
 
             <table class="po-items-table" id="purchaseOrderItemsTable">
                 <colgroup>
-                    <col style="width: 10%">
-                    <col style="width: 10%">
-                    <col style="width: 10%">
-                    <col style="width: 40%">
-                    <col style="width: 15%">
-                    <col style="width: 15%">
+                    <col style="width: 7%">
+                    <col style="width: 7%">
+                    <col style="width: 9%">
+                    <col style="width: 51%">
+                    <col style="width: 12%">
+                    <col style="width: 14%">
                 </colgroup>
                 <thead>
                     <tr class="po-items-header po-item-heading-row">
-                        <th>ITEM<br>NO.</th>
-                        <th>QTY</th>
-                        <th>UNIT</th>
-                        <th>DESCRIPTION</th>
-                        <th>UNIT<br>COST</th>
-                        <th>TOTAL</th>
+                        <th>Item<br>No.</th>
+                        <th>Qty.</th>
+                        <th>Unit</th>
+                        <th>Description</th>
+                        <th>Unit<br>Cost</th>
+                        <th>Total</th>
                     </tr>
                 </thead>
                 <tbody id="poItemsBody">
@@ -168,7 +162,7 @@
                         @php $item = $items->get($index, []); @endphp
                         <tr class="po-item-row" data-row="{{ $index }}">
                             <td class="po-cell po-item-cell po-center" data-column="item_no" data-row="{{ $index }}">{!! $text($item['item_no'] ?? '') !!}</td>
-                            <td class="po-cell po-item-cell po-center po-number" data-column="quantity" data-row="{{ $index }}">{!! $text($money($item['quantity'] ?? null)) !!}</td>
+                            <td class="po-cell po-item-cell po-center po-number" data-column="quantity" data-row="{{ $index }}">{!! $text($quantity($item['quantity'] ?? null)) !!}</td>
                             <td class="po-cell po-item-cell po-center" data-column="unit" data-row="{{ $index }}">{!! $text($item['unit'] ?? '') !!}</td>
                             <td class="po-cell po-item-cell po-description-cell" data-column="description" data-row="{{ $index }}">{!! $text($item['description'] ?? '') !!}</td>
                             <td class="po-cell po-item-cell po-money" data-column="unit_cost" data-row="{{ $index }}">{!! $text($money($item['unit_cost'] ?? null)) !!}</td>
@@ -211,6 +205,12 @@
                                 data-field="supplier_representative_designation"
                                 data-placeholder="Enter position"
                             >{!! $text($field('supplier_representative_designation')) !!}</span>
+                            <label>Contact No.
+                                <span class="po-cell po-signature-editor-field" data-field="supplier_contact">{!! $text($field('supplier_contact')) !!}</span>
+                            </label>
+                            <label>TIN
+                                <span class="po-cell po-signature-editor-field" data-field="supplier_tin">{!! $text($field('supplier_tin')) !!}</span>
+                            </label>
                         </div>
                         <div class="po-signature-template-output" aria-hidden="true">
                             <span class="po-sign-line po-sign-name" data-print-field="supplier_representative_name"></span>

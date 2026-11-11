@@ -6,7 +6,7 @@
     <title>{{ $po->po_number ? 'Purchase Order '.$po->po_number : 'Purchase Order' }} | PaperTrail</title>
     <link rel="stylesheet" href="{{ asset('css/landing.css') }}">
     <link rel="stylesheet" href="{{ asset('css/e-signature.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/purchase-order.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/purchase-order.css') }}?v={{ filemtime(public_path('css/purchase-order.css')) }}">
 </head>
 <body class="po-print-body">
     <main class="po-print-page">

@@ -1119,3 +1119,175 @@
         border-bottom: 2px solid #000 !important;
     }
 }
+
+/* LGU Tomas Oppus Annex 29: one continuous form, shared by view and print. */
+.po-lgu-template .po-lgu-form-heading {
+    border: 1px solid #000;
+    border-bottom: 0;
+}
+
+.po-lgu-template .po-lgu-heading {
+    position: relative;
+    margin: 0;
+    padding: 5mm 2mm 4mm;
+    border-bottom: 1px solid #000;
+    text-align: center;
+    break-inside: avoid;
+}
+
+.po-lgu-template .po-lgu-heading .po-annex {
+    position: absolute;
+    top: 1mm;
+    right: 2mm;
+    width: auto;
+    min-height: 0;
+    margin: 0;
+    font-size: 10pt;
+    font-style: normal;
+}
+
+.po-lgu-template .po-title {
+    margin-bottom: 1mm;
+    font-size: 15pt !important;
+}
+
+.po-lgu-template .po-title-office,
+.po-lgu-template .po-title-lgu {
+    min-height: 0;
+    font-size: 11pt !important;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 1.2;
+}
+
+.po-lgu-template .po-meta-grid,
+.po-lgu-template .po-delivery-grid {
+    grid-template-columns: minmax(0, 52fr) minmax(0, 48fr) !important;
+    gap: 0 !important;
+    margin: 0;
+    break-inside: avoid;
+}
+
+.po-lgu-template .po-meta-grid {
+    padding: 2mm;
+    border-bottom: 1px solid #000;
+    column-gap: 8mm !important;
+}
+
+.po-lgu-template .po-line-field {
+    grid-template-columns: auto 4px minmax(0, 1fr);
+    gap: 2px;
+    margin-bottom: 1mm;
+}
+
+.po-lgu-template .po-line-field:last-child {
+    margin-bottom: 0;
+}
+
+.po-lgu-template .po-gentlemen-section {
+    margin: 0;
+    padding: 2mm;
+    border-bottom: 1px solid #000;
+    break-inside: avoid;
+}
+
+.po-lgu-template .po-gentlemen-section p {
+    margin: 0 0 1mm;
+}
+
+.po-lgu-template .po-delivery-grid > div {
+    padding: 2mm;
+}
+
+.po-lgu-template .po-delivery-grid > div + div {
+    border-left: 1px solid #000;
+}
+
+.po-lgu-template .po-items-table {
+    margin: 0 !important;
+}
+
+.po-lgu-template .po-items-table th,
+.po-lgu-template .po-items-table td {
+    border-color: #000 !important;
+    padding: 0.6mm 1mm !important;
+    vertical-align: middle !important;
+}
+
+.po-lgu-template .po-items-table th {
+    height: 9mm !important;
+    background: #fff;
+    text-transform: none;
+}
+
+.po-lgu-template .po-items-table .po-item-row td {
+    height: 5.8mm !important;
+}
+
+.po-lgu-template .po-items-table .po-description-cell {
+    white-space: pre-line !important;
+}
+
+.po-lgu-template .po-items-table [data-column="quantity"] {
+    text-align: center;
+}
+
+.po-lgu-template .po-total-section {
+    grid-template-columns: minmax(0, 1fr) 26% !important;
+    border-color: #000;
+}
+
+.po-lgu-template .po-total-words {
+    border-right: 1px solid #000;
+    border-bottom: 0;
+}
+
+.po-lgu-template .po-signature-section,
+.po-lgu-template .po-fund-section {
+    break-inside: avoid;
+}
+
+.po-lgu-template [hidden] {
+    display: none !important;
+}
+
+@media print {
+    #purchaseOrderPrintPaper .po-lgu-template .po-meta-grid,
+    #purchaseOrderPrintPaper .po-lgu-template .po-delivery-grid {
+        grid-template-columns: minmax(0, 52fr) minmax(0, 48fr) !important;
+        gap: 0 !important;
+    }
+
+    #purchaseOrderPrintPaper .po-lgu-template .po-meta-grid {
+        column-gap: 8mm !important;
+    }
+
+    #purchaseOrderPrintPaper .po-lgu-template .po-items-table th,
+    #purchaseOrderPrintPaper .po-lgu-template .po-items-table td {
+        border-color: #000 !important;
+        padding: 0.6mm 1mm !important;
+        vertical-align: middle !important;
+    }
+
+    #purchaseOrderPrintPaper .po-lgu-template .po-items-table th {
+        height: 9mm !important;
+    }
+
+    #purchaseOrderPrintPaper .po-lgu-template .po-items-table .po-item-row td {
+        height: 5.8mm !important;
+        break-inside: avoid;
+    }
+
+    #purchaseOrderPrintPaper .po-lgu-template .po-total-section {
+        grid-template-columns: minmax(0, 1fr) 26% !important;
+        border-color: #000 !important;
+    }
+
+    #purchaseOrderPrintPaper .po-lgu-template .po-total-words {
+        border-color: #000 !important;
+    }
+
+    #purchaseOrderPrintPaper .po-lgu-template [hidden] {
+        display: none !important;
+    }
+}

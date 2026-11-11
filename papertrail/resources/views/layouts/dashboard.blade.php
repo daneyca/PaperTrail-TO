@@ -10,7 +10,7 @@
     @stack('vendor-styles')
     <link rel="stylesheet" href="{{ asset('css/shared-document-lists.css') }}">
     <link rel="stylesheet" href="{{ asset('css/bac-resolution.css') }}?v={{ file_exists(public_path('css/bac-resolution.css')) ? filemtime(public_path('css/bac-resolution.css')) : time() }}">
-    <link rel="stylesheet" href="{{ asset('css/purchase-order.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/purchase-order.css') }}?v={{ filemtime(public_path('css/purchase-order.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/rfq.css') }}">
     <link rel="stylesheet" href="{{ asset('css/abstract.css') }}">
     <link rel="stylesheet" href="{{ asset('css/app-form.css') }}?v={{ filemtime(public_path('css/app-form.css')) }}">
