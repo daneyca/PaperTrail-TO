@@ -4,6 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\{AbstractQuotation, BacResolution, ElectronicSignature, Office, ProcurementDocument, Rfq, RfqSupplierQuotation, Role, SignatureRequest, User};
 use App\Services\RfqSupplierWorkflowService;
+use App\Models\PurchaseOrder;
+use App\Models\SupplierSignatureRequest;
+use App\Services\PurchaseOrderSupplierService;
+use App\Services\PurchaseOrderSignatureWorkflowService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -51,6 +55,89 @@ class RfqSupplierResponseTest extends TestCase
             'warranty_text' => 'Six months warranty.', 'price_validity_text' => 'Valid for sixty days.']);
         $this->rfq->items()->create(['item_no' => '1', 'description' => 'Bond paper', 'quantity' => 2.50,
             'unit_of_issue' => 'Reams', 'unit_price' => 99, 'total' => 247.50, 'sort_order' => 0]);
+    }
+
+    public function test_po_conforme_uses_selected_verified_supplier_and_requires_a_separate_po_signature(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('local');
+        $this->signOfficer();
+        $other = $this->invite('Other Supplier');
+        $winner = $this->invite('Winning Supplier');
+        foreach ([$other, $winner] as $quote) {
+            $this->post(route('rfq-response.submit', $quote->link_token), $this->payload())->assertSessionHasNoErrors();
+            $quote->refresh()->update(['status' => 'verified']);
+        }
+        $abstract = AbstractQuotation::create(['source_rfq_id' => $this->rfq->id,
+            'source_pr_document_id' => $this->rfq->source_pr_document_id,
+            'lowest_supplier_name' => 'Winning Supplier', 'status' => AbstractQuotation::STATUS_READY_FOR_PO,
+            'prepared_by_user_id' => $this->staff->id]);
+        $this->actingAs($this->staff)->get(route('head-office.purchase-orders.create', ['source_abstract_id' => $abstract->id]))
+            ->assertOk()->assertSee('Winning Supplier')->assertSee('Authorized Supplier Representative')
+            ->assertSee('001-234-567-000')->assertSee('09171234567')
+            ->assertViewHas('po', fn ($po) => $po->source_rfq_supplier_quotation_id === $winner->id && ! $po->supplier_conforme_date);
+        $this->post(route('head-office.purchase-orders.store'), ['source_abstract_id' => $abstract->id, 'save_action' => 'draft',
+            'source_rfq_supplier_quotation_id' => $other->id, // Never trust a posted source quotation ID.
+            'items' => [['item_no' => '1', 'description' => 'PO accepted supplies', 'quantity' => 2, 'unit' => 'Reams', 'unit_cost' => 12.34]]])
+            ->assertSessionHasNoErrors()->assertRedirect();
+        $order = PurchaseOrder::where('source_abstract_id', $abstract->id)->firstOrFail();
+        $this->assertSame($winner->id, $order->source_rfq_supplier_quotation_id);
+        $this->assertSame('001-234-567-000', $order->supplier_tin);
+        $this->assertSame('09171234567', $order->supplier_contact);
+        $this->assertSame('Owner', $order->supplier_representative_designation);
+        $order->forceFill(['po_number' => 'PO-DIGITAL-CONFORME', 'po_date' => now()->toDateString(), 'status' => PurchaseOrder::STATUS_SUBMITTED])->save();
+        $workflow = app(PurchaseOrderSignatureWorkflowService::class);
+        $workflow->submit($order, $this->staff);
+        $request = $workflow->supplierRequestFor($order);
+        $this->assertSame($winner->id, data_get($request->metadata, 'source_rfq_supplier_quotation_id'));
+        $this->assertSame('Authorized Supplier Representative', $request->signatory_name);
+        $this->assertSame('Owner', $request->signatory_position);
+        $this->assertSame('09171234567', $request->supplier_contact);
+        $this->assertNotSame($winner->link_token, $request->public_token);
+        $this->assertFalse($request->hasSignedDocument());
+        $this->assertNull($order->fresh()->supplier_conforme_date);
+        $this->get(route('head-office.purchase-orders.show', $order))->assertOk()->assertSee('Copy this private PO signing link');
+        auth()->logout();
+        $this->get($request->publicUrl())->assertOk()->assertSee('PO accepted supplies')->assertSee('001-234-567-000')
+            ->assertSee('Authorized Supplier Representative')->assertDontSee('Other Supplier');
+        $signature = ['signatory_name' => 'PO Representative', 'signatory_position' => 'Authorized Manager',
+            'signature_data' => $this->payload()['signature_data'], 'signature_consent' => true];
+        $order->update(['payment_term' => 'Changed after invitation']);
+        $this->post(route('supplier-signing.submit', $request->public_token), $signature)->assertStatus(409);
+        $this->assertFalse($request->fresh()->hasSignedDocument());
+        $order->update(['payment_term' => null]);
+        $this->post(route('supplier-signing.submit', $request->public_token), [
+            'signatory_name' => 'PO Representative', 'signatory_position' => 'Authorized Manager',
+            'signature_data' => $this->payload()['signature_data'], 'signature_consent' => true,
+        ])->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertSame(SupplierSignatureRequest::STATUS_SUBMITTED, $request->fresh()->status);
+        $this->assertSame('PO Representative', $order->refresh()->supplier_representative_name);
+        $this->assertSame('Authorized Manager', $order->supplier_representative_designation);
+        $this->assertNotNull($order->supplier_conforme_date);
+        $this->assertSame('Authorized Supplier Representative', $winner->fresh()->signatory_name);
+        $this->assertTrue($winner->responseIsIntact());
+        $this->assertDatabaseMissing('audit_logs', ['request_url' => $request->publicUrl()]);
+        $order->update(['status' => PurchaseOrder::STATUS_SUBMITTED]);
+        $workflow->submit($order, $this->staff);
+        $replacement = $workflow->supplierRequestFor($order);
+        $this->assertNotSame($request->public_token, $replacement->public_token);
+        $this->assertFalse($replacement->hasSignedDocument());
+        $this->assertTrue($request->fresh()->hasSignedDocument());
+    }
+
+    public function test_po_never_prefills_an_unverified_tampered_or_unrelated_supplier_response(): void
+    {
+        $this->signOfficer();
+        $quote = $this->invite();
+        $this->post(route('rfq-response.submit', $quote->link_token), $this->payload())->assertSessionHasNoErrors();
+        $abstract = new AbstractQuotation(['source_rfq_id' => $this->rfq->id, 'lowest_supplier_name' => 'Supplier One']);
+        $service = app(PurchaseOrderSupplierService::class);
+        $this->assertSame([], $service->defaults($abstract));
+        $quote->refresh()->update(['status' => 'verified']);
+        $this->assertSame($quote->id, $service->defaults($abstract)['source_rfq_supplier_quotation_id']);
+        $this->assertSame([], $service->defaults($abstract, 'Different Supplier'));
+        $this->assertSame([], $service->defaults(null, 'Supplier One'));
+        $quote->update(['response_snapshot' => [...$quote->response_snapshot, 'supplier_tin' => 'TAMPERED']]);
+        $this->assertSame([], $service->defaults($abstract));
     }
 
     private function signOfficer(): void

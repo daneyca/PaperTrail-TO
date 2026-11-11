@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\DocumentDraftService;
 use App\Services\PurchaseOrderSignatureWorkflowService;
+use App\Services\PurchaseOrderSupplierService;
 use App\Services\SvpChainService;
 use App\Services\SystemNotificationService;
 use Illuminate\Database\Eloquent\Builder;
@@ -60,6 +61,7 @@ class PurchaseOrderController extends Controller
         $sourceDocument = $sourceAbstract?->sourcePrDocument ?: $this->selectedEligiblePr($request->input('source_pr_document_id'));
         $purchaseOrder = new PurchaseOrder([
             ...$this->defaultOrderData($sourceDocument, $request->user()),
+            ...app(PurchaseOrderSupplierService::class)->defaults($sourceAbstract),
             'source_abstract_id' => $sourceAbstract?->id,
             'source_bac_resolution_id' => $sourceAbstract?->source_bac_resolution_id,
         ]);
@@ -168,6 +170,7 @@ class PurchaseOrderController extends Controller
         }
 
         $purchaseOrder->load(['sourcePrDocument.submittingOffice', 'sourceAbstract', 'items']);
+        app(PurchaseOrderSupplierService::class)->fillMissing($purchaseOrder);
 
         return view('head-office.po.edit', [
             'po' => $purchaseOrder,
@@ -350,6 +353,9 @@ class PurchaseOrderController extends Controller
             'source_abstract_id' => ['nullable', 'exists:abstracts,id'],
             'supplier_name' => ['nullable', 'string', 'max:255'],
             'supplier_address' => ['nullable', 'string'],
+            'supplier_email' => ['nullable', 'email', 'max:255'],
+            'supplier_contact' => ['nullable', 'string', 'max:40'],
+            'supplier_tin' => ['nullable', 'string', 'max:40'],
             'mode_of_procurement' => ['nullable', 'string', 'max:255'],
             'place_of_delivery' => ['nullable', 'string', 'max:255'],
             'date_of_delivery' => ['nullable', 'string', 'max:255'],
@@ -391,6 +397,12 @@ class PurchaseOrderController extends Controller
 
     private function orderPayload(array $validated, ?ProcurementDocument $sourceDocument, ?AbstractQuotation $sourceAbstract = null): array
     {
+        $supplierDefaults = app(PurchaseOrderSupplierService::class)->defaults($sourceAbstract, $validated['supplier_name'] ?? null);
+        foreach ($supplierDefaults as $field => $value) {
+            if (blank($validated[$field] ?? null)) {
+                $validated[$field] = $value;
+            }
+        }
         $totalAmount = $this->money($validated['total_amount'] ?? 0);
 
         return [
@@ -400,6 +412,10 @@ class PurchaseOrderController extends Controller
             'fiscal_year' => $sourceDocument?->fiscal_year ?? now()->year,
             'supplier_name' => $validated['supplier_name'] ?? null,
             'supplier_address' => $validated['supplier_address'] ?? null,
+            'source_rfq_supplier_quotation_id' => $supplierDefaults['source_rfq_supplier_quotation_id'] ?? null,
+            'supplier_email' => $validated['supplier_email'] ?? null,
+            'supplier_contact' => $validated['supplier_contact'] ?? null,
+            'supplier_tin' => $validated['supplier_tin'] ?? null,
             'mode_of_procurement' => $validated['mode_of_procurement'] ?? null,
             'place_of_delivery' => $validated['place_of_delivery'] ?? null,
             'date_of_delivery' => $validated['date_of_delivery'] ?? null,

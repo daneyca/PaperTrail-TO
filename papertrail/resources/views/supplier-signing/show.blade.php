@@ -234,6 +234,10 @@
                 </div>
             </header>
 
+            @if ($supplierRequest->document_type === 'purchase_order' && data_get($supplierRequest->metadata, 'purchase_order_snapshot'))
+                @include('supplier-signing.purchase-order', ['order' => data_get($supplierRequest->metadata, 'purchase_order_snapshot')])
+            @endif
+
             <div class="supplier-body">
                 <section class="supplier-section">
                     @if (session('status'))
@@ -257,6 +261,10 @@
                             <dt>Reference</dt>
                             <dd>{{ $supplierRequest->tracking_number ?: 'No reference number provided' }}</dd>
                         </div>
+                        @if ($supplierRequest->document_type === 'purchase_order')
+                            <div><dt>Contact number</dt><dd>{{ $supplierRequest->supplier_contact ?: 'Not provided' }}</dd></div>
+                            <div><dt>TIN</dt><dd>{{ data_get($supplierRequest->metadata, 'supplier_tin') ?: 'Not provided' }}</dd></div>
+                        @endif
                         <div>
                             <dt>Status</dt>
                             <dd>{{ $supplierRequest->statusLabel() }}</dd>
@@ -322,7 +330,7 @@
 
                             <label class="supplier-check">
                                 <input name="signature_consent" type="checkbox" value="1" required>
-                                <span>I confirm that I am authorized to sign for {{ $supplierRequest->supplier_name }} and that the information submitted is complete and accurate.</span>
+                                <span>I confirm that I am authorized to sign for {{ $supplierRequest->supplier_name }} and that the information submitted is complete and accurate. @if ($supplierRequest->document_type === 'purchase_order') I accept this Purchase Order, its items, prices, delivery requirements, and terms. @endif</span>
                             </label>
                             @error('signature_consent')<small>{{ $message }}</small>@enderror
 

@@ -26,6 +26,13 @@ class PurchaseOrderSignatureWorkflowService
         }
 
         return DB::transaction(function () use ($purchaseOrder, $requester): PurchaseOrder {
+            $suppliers = app(PurchaseOrderSupplierService::class);
+            $quote = $suppliers->quotation($purchaseOrder->sourceAbstract, $purchaseOrder->supplier_name);
+            if ($purchaseOrder->source_rfq_supplier_quotation_id && $quote?->id !== $purchaseOrder->source_rfq_supplier_quotation_id) {
+                throw new RuntimeException('The linked supplier quotation is no longer verified. Review the PO supplier before requesting signatures.');
+            }
+            $suppliers->fillMissing($purchaseOrder);
+            $purchaseOrder->save();
             $requests = $this->signatureRequests->createRequestsForDocument(
                 $purchaseOrder,
                 'purchase_order',
@@ -54,24 +61,33 @@ class PurchaseOrderSignatureWorkflowService
                 throw new RuntimeException('The Mayor and Municipal Accounting accounts must be active before submitting the PO.');
             }
 
-            SupplierSignatureRequest::query()->updateOrCreate(
-                [
-                    'document_type' => 'purchase_order',
-                    'tracking_number' => $purchaseOrder->displayNumber(),
+            SupplierSignatureRequest::query()
+                ->where('document_type', 'purchase_order')
+                ->where('tracking_number', $purchaseOrder->displayNumber())
+                ->whereIn('status', SupplierSignatureRequest::ACTIVE_STATUSES)
+                ->update(['status' => SupplierSignatureRequest::STATUS_CANCELLED, 'cancelled_at' => now()]);
+
+            SupplierSignatureRequest::create([
+                'document_type' => 'purchase_order',
+                'requested_by_user_id' => $requester->getKey(),
+                'supplier_name' => $purchaseOrder->supplier_name ?: 'Supplier',
+                'supplier_email' => $purchaseOrder->supplier_email,
+                'supplier_contact' => $purchaseOrder->supplier_contact,
+                'signatory_name' => $purchaseOrder->supplier_representative_name,
+                'signatory_position' => $purchaseOrder->supplier_representative_designation,
+                'document_title' => 'Purchase Order '.$purchaseOrder->displayNumber(),
+                'tracking_number' => $purchaseOrder->displayNumber(),
+                'status' => SupplierSignatureRequest::STATUS_PENDING,
+                'expires_at' => now()->addDays(30),
+                'instructions' => 'Review this Purchase Order, then sign below to confirm your acceptance. Your RFQ signature is separate from this PO Conforme.',
+                'metadata' => [
+                    'purchase_order_id' => $purchaseOrder->getKey(),
+                    'signatory_slot' => 'supplier_conforme',
+                    'source_rfq_supplier_quotation_id' => $purchaseOrder->source_rfq_supplier_quotation_id,
+                    'supplier_tin' => $purchaseOrder->supplier_tin,
+                    'purchase_order_snapshot' => $suppliers->snapshot($purchaseOrder),
                 ],
-                [
-                    'requested_by_user_id' => $requester->getKey(),
-                    'supplier_name' => $purchaseOrder->supplier_name ?: 'Supplier',
-                    'supplier_contact' => $purchaseOrder->supplier_contact,
-                    'document_title' => 'Purchase Order '.$purchaseOrder->displayNumber(),
-                    'tracking_number' => $purchaseOrder->displayNumber(),
-                    'status' => SupplierSignatureRequest::STATUS_PENDING,
-                    'metadata' => [
-                        'purchase_order_id' => $purchaseOrder->getKey(),
-                        'signatory_slot' => 'supplier_conforme',
-                    ],
-                ]
-            );
+            ]);
 
             $purchaseOrder->forceFill([
                 'status' => PurchaseOrder::STATUS_FORWARDED_TO_SUPPLIER,
@@ -128,7 +144,7 @@ class PurchaseOrderSignatureWorkflowService
 
         $purchaseOrder->forceFill([
             'supplier_representative_name' => $request->signatory_name ?: $request->supplier_name,
-            'supplier_representative_designation' => data_get($request->metadata, 'supplier_designation', 'Authorized Supplier Representative'),
+            'supplier_representative_designation' => $request->signatory_position ?: data_get($request->metadata, 'supplier_designation', 'Authorized Supplier Representative'),
             'supplier_conforme_date' => now()->toDateString(),
         ])->save();
 
@@ -149,8 +165,8 @@ class PurchaseOrderSignatureWorkflowService
             SupplierSignatureRequest::query()
                 ->where('document_type', 'purchase_order')
                 ->where('tracking_number', $purchaseOrder->displayNumber())
-                ->where('status', SupplierSignatureRequest::STATUS_PENDING)
-                ->update(['status' => SupplierSignatureRequest::STATUS_CANCELLED]);
+                ->whereIn('status', SupplierSignatureRequest::ACTIVE_STATUSES)
+                ->update(['status' => SupplierSignatureRequest::STATUS_CANCELLED, 'cancelled_at' => now()]);
         });
     }
 

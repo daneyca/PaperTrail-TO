@@ -43,7 +43,7 @@
     <input type="hidden" name="document_text" id="po_document_text">
     <input type="hidden" name="items_json" id="po_items_json">
     @foreach ([
-        'supplier_name', 'supplier_address', 'mode_of_procurement', 'place_of_delivery',
+        'supplier_name', 'supplier_address', 'supplier_email', 'supplier_contact', 'supplier_tin', 'mode_of_procurement', 'place_of_delivery',
         'date_of_delivery', 'delivery_term', 'payment_term', 'total_amount', 'total_amount_words', 'penalty_clause',
         'authorized_official_name', 'authorized_official_designation', 'supplier_representative_name',
         'supplier_representative_designation', 'supplier_conforme_date', 'fund_available_text', 'alobs_number',
@@ -76,6 +76,17 @@
                         <span class="po-colon">:</span>
                         <span class="po-cell po-edit-line" data-field="supplier_address">{!! $text($field('supplier_address')) !!}</span>
                     </div>
+                    <div class="po-line-field">
+                        <span class="po-label">Contact No.</span><span class="po-colon">:</span>
+                        <span class="po-cell po-edit-line" data-field="supplier_contact">{!! $text($field('supplier_contact')) !!}</span>
+                    </div>
+                    <div class="po-line-field">
+                        <span class="po-label">TIN</span><span class="po-colon">:</span>
+                        <span class="po-cell po-edit-line" data-field="supplier_tin">{!! $text($field('supplier_tin')) !!}</span>
+                    </div>
+                    @if ($isEditable)
+                        <span hidden class="po-cell" data-field="supplier_email">{!! $text($field('supplier_email')) !!}</span>
+                    @endif
                 </div>
                 <div class="po-meta-right">
                     <div class="po-line-field">
@@ -187,6 +198,9 @@
                         <div class="po-signature-editor-panel">
                             <span class="po-signature-recipient-label">Recipient</span>
                             <strong class="po-signature-recipient">Supplier / Contractor (secure signing link)</strong>
+                            @if ($po->source_rfq_supplier_quotation_id)
+                                <small>Details from verified RFQ. Submit for Signatures after PO control to create the separate PO signing link.</small>
+                            @endif
                             <span
                                 class="po-cell po-signature-editor-field"
                                 data-field="supplier_representative_name"

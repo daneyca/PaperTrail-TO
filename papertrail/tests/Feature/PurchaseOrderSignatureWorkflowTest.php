@@ -16,6 +16,14 @@ class PurchaseOrderSignatureWorkflowTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function createApplication(): \Illuminate\Foundation\Application
+    {
+        $app = parent::createApplication();
+        $app['config']->set('database.default', 'mysql');
+        $app['config']->set('database.connections.mysql.database', 'papertrail_testing');
+        return $app;
+    }
+
     protected function setUp(): void
     {
         parent::setUp();

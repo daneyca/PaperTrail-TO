@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\SupplierSignatureRequest;
+use App\Models\PurchaseOrder;
+use App\Models\RfqSupplierQuotation;
 use App\Services\AuditLogger;
 use App\Services\PurchaseOrderSignatureWorkflowService;
+use App\Services\PurchaseOrderSupplierService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -51,9 +54,18 @@ class SupplierSigningController extends Controller
             return back()->with('error', 'This signing link is no longer accepting submissions.');
         }
 
+        if ($supplierRequest->document_type === 'purchase_order' && data_get($supplierRequest->metadata, 'purchase_order_snapshot')) {
+            $order = PurchaseOrder::find(data_get($supplierRequest->metadata, 'purchase_order_id'));
+            abort_unless($order && in_array($order->status, [PurchaseOrder::STATUS_FORWARDED_TO_SUPPLIER, PurchaseOrder::STATUS_APPROVED, PurchaseOrder::STATUS_FUND_CERTIFIED], true), 409, 'This PO is no longer accepting signatures.');
+            abort_unless(hash_equals(
+                RfqSupplierQuotation::hashSnapshot(data_get($supplierRequest->metadata, 'purchase_order_snapshot')),
+                RfqSupplierQuotation::hashSnapshot(app(PurchaseOrderSupplierService::class)->snapshot($order))
+            ), 409, 'This PO has changed. Please request a new signing link.');
+        }
+
         $validated = $request->validate([
             'signatory_name' => ['required', 'string', 'max:255'],
-            'signatory_position' => ['nullable', 'string', 'max:255'],
+            'signatory_position' => [$supplierRequest->document_type === 'purchase_order' ? 'required' : 'nullable', 'string', 'max:255'],
             'supplier_remarks' => ['nullable', 'string', 'max:2000'],
             'signature_data' => ['nullable', 'string', 'required_without:signed_document'],
             'signed_document' => ['nullable', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png', 'required_without:signature_data'],
@@ -99,7 +111,9 @@ class SupplierSigningController extends Controller
             'signer_ip_address' => $request->ip(),
             'signer_user_agent' => $request->userAgent(),
             'supplier_remarks' => $validated['supplier_remarks'] ?? null,
-            'consent_text' => 'Supplier representative confirmed the uploaded signed document is complete and authorized for this procurement record.',
+            'consent_text' => $supplierRequest->document_type === 'purchase_order'
+                ? 'I am authorized to sign for the supplier and accept this Purchase Order, its items, prices, delivery requirements, and terms.'
+                : 'Supplier representative confirmed the signed document is complete and authorized for this procurement record.',
             'metadata' => [
                 ...($supplierRequest->metadata ?: []),
                 'supplier_designation' => $validated['signatory_position'] ?? 'Authorized Supplier Representative',

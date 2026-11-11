@@ -181,7 +181,8 @@ class AuditLogger
                 'ip_address' => Request::ip(),
                 'user_agent' => Request::userAgent(),
                 'request_method' => Request::method(),
-                'request_url' => Request::routeIs('rfq-response.*') ? url('/rfq-response/[private]') : Request::fullUrl(),
+                'request_url' => Request::routeIs('rfq-response.*') ? url('/rfq-response/[private]')
+                    : (Request::routeIs('supplier-signing.*') ? url('/supplier-signing/[private]') : Request::fullUrl()),
             ]);
         } catch (Throwable $exception) {
             Log::error('PaperTrail audit logging failed.', [

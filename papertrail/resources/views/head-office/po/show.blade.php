@@ -41,9 +41,16 @@
                     <p class="eyebrow">Supplier Conforme</p>
                     <h2>Supplier Signing Link</h2>
                     <p>Status: {{ $supplierSignatureRequest->statusLabel() }}</p>
+                    <p>{{ $supplierSignatureRequest->signatory_name ?: $supplierSignatureRequest->supplier_name }}{{ $supplierSignatureRequest->supplier_contact ? ' · '.$supplierSignatureRequest->supplier_contact : '' }}</p>
                 </div>
                 <a href="{{ $supplierSignatureRequest->publicUrl() }}" target="_blank" rel="noopener">Open Supplier Link</a>
             </div>
+            @if ($supplierSignatureRequest->isOpenForSupplier())
+                <label>Copy this private PO signing link and send it to the supplier.
+                    <input type="text" value="{{ $supplierSignatureRequest->publicUrl() }}" readonly onclick="this.select()" style="width:100%" aria-label="Private PO signing link">
+                </label>
+                <p>The supplier signs the PO separately. The RFQ signature is kept with the quotation.</p>
+            @endif
         </section>
     @endif
 
