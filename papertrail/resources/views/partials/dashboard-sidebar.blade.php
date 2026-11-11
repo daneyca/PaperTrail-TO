@@ -441,7 +441,7 @@
         ]]);
     }
 
-    $canShowSignatureMenu = in_array($roleSlug, [
+    $canShowSignatureMenu = $user?->user_id === 'MO-STAFF' || in_array($roleSlug, [
         'head-office',
         'budget',
         'accounting',

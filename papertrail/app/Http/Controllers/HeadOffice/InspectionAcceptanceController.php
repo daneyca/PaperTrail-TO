@@ -9,6 +9,7 @@ use App\Models\SystemNotification;
 use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\DocumentDraftService;
+use App\Services\InspectionSignatureWorkflowService;
 use App\Services\SvpChainService;
 use App\Services\SystemNotificationService;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,6 +17,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Illuminate\Validation\ValidationException;
 
 class InspectionAcceptanceController extends Controller
 {
@@ -112,13 +114,13 @@ class InspectionAcceptanceController extends Controller
             'purchaseOrder' => $purchaseOrder,
             'record' => $record,
             'records' => $purchaseOrder->inspectionAcceptanceRecords,
-            'canAccept' => ! $request->user()->isOfficeDocumentPreparer() && in_array($purchaseOrder->status, [
+            'canAccept' => app(InspectionSignatureWorkflowService::class)->isFullySigned($record) && ! $request->user()->isOfficeDocumentPreparer() && in_array($purchaseOrder->status, [
                 PurchaseOrder::STATUS_SUBMITTED,
                 PurchaseOrder::STATUS_ISSUED,
                 PurchaseOrder::STATUS_FORWARDED_TO_SUPPLIER,
                 PurchaseOrder::STATUS_FUND_CERTIFIED,
             ], true),
-            'canComplete' => ! $request->user()->isOfficeDocumentPreparer() && $purchaseOrder->status === PurchaseOrder::STATUS_APPROVED,
+            'canComplete' => app(InspectionSignatureWorkflowService::class)->isFullySigned($record) && ! $request->user()->isOfficeDocumentPreparer() && $purchaseOrder->status === PurchaseOrder::STATUS_APPROVED,
         ]);
     }
 
@@ -133,7 +135,10 @@ class InspectionAcceptanceController extends Controller
         $validated = $request->validate($this->recordRules());
 
         DB::transaction(function () use ($purchaseOrder, $request, $validated) {
-            $record = $purchaseOrder->latestInspectionAcceptanceRecord()->first();
+            $record = $purchaseOrder->latestInspectionAcceptanceRecord()->lockForUpdate()->first();
+            if ($record && app(InspectionSignatureWorkflowService::class)->isLocked($record)) {
+                throw ValidationException::withMessages(['signatures' => 'Use Revise Report to edit a routed or signed report. All three accounts must sign a revised report again.']);
+            }
             $oldValues = $record?->only(array_keys($validated));
 
             $record = InspectionAcceptanceRecord::updateOrCreate(
@@ -158,16 +163,36 @@ class InspectionAcceptanceController extends Controller
             );
 
             app(SvpChainService::class)->linkInspection($record->refresh(), $request->user(), 'Inspection record saved');
+            if ($request->input('save_action') === 'submit') {
+                app(InspectionSignatureWorkflowService::class)->submit($record, $request->user());
+            }
         });
 
         if ($request->input('return_to') === 'editor') {
             return redirect()->route('head-office.inspection.create', ['purchase_order_id' => $purchaseOrder->id, 'edit' => 1])
-                ->with('status', $request->input('save_action') === 'draft' ? 'Inspection draft saved.' : 'Inspection report saved.');
+                ->with('status', $request->input('save_action') === 'submit' ? 'IAR routed to MO-STAFF, MCR-001, and PC-001 for signatures.' : 'Inspection draft saved.');
         }
 
         return redirect()
             ->route('head-office.inspection.show', $purchaseOrder)
             ->with('status', 'Inspection details saved.');
+    }
+
+    public function submitForSignatures(Request $request, PurchaseOrder $purchaseOrder): RedirectResponse
+    {
+        abort_unless($this->canAccess($request->user(), $purchaseOrder), 403);
+        $record = $purchaseOrder->latestInspectionAcceptanceRecord()->firstOrFail();
+        app(InspectionSignatureWorkflowService::class)->submit($record, $request->user());
+        return back()->with('status', 'IAR routed to MO-STAFF, MCR-001, and PC-001 for signatures.');
+    }
+
+    public function revise(Request $request, PurchaseOrder $purchaseOrder): RedirectResponse
+    {
+        abort_unless($this->canAccess($request->user(), $purchaseOrder), 403);
+        $record = $purchaseOrder->latestInspectionAcceptanceRecord()->firstOrFail();
+        app(InspectionSignatureWorkflowService::class)->revise($record, $request->user());
+        return redirect()->route('head-office.inspection.create', ['purchase_order_id' => $purchaseOrder->id, 'edit' => 1])
+            ->with('status', 'Report reopened. Previous signatures are preserved in history; all three accounts must sign the revision.');
     }
 
     public function print(Request $request, PurchaseOrder $purchaseOrder): View
@@ -204,6 +229,11 @@ class InspectionAcceptanceController extends Controller
             abort(403);
         }
 
+        $signedRecord = $purchaseOrder->latestInspectionAcceptanceRecord()->first();
+        if (! $signedRecord || ! app(InspectionSignatureWorkflowService::class)->isFullySigned($signedRecord)) {
+            return back()->with('error', 'All three assigned accounts must sign the current IAR before acceptance.');
+        }
+
         if (! in_array($purchaseOrder->status, [
             PurchaseOrder::STATUS_SUBMITTED,
             PurchaseOrder::STATUS_ISSUED,
@@ -217,9 +247,17 @@ class InspectionAcceptanceController extends Controller
             'acceptance_date' => ['required', 'date'],
             'remarks' => ['nullable', 'string'],
         ]);
+        if (\Illuminate\Support\Carbon::parse($validated['acceptance_date'])->toDateString() !== $signedRecord->acceptance_date?->toDateString()) {
+            throw ValidationException::withMessages(['acceptance_date' => 'The date received must match the signed report. Revise and re-sign the report to change it.']);
+        }
 
         DB::transaction(function () use ($purchaseOrder, $request, $validated) {
             $oldStatus = $purchaseOrder->status;
+
+            $currentReport = $purchaseOrder->latestInspectionAcceptanceRecord()->lockForUpdate()->first();
+            if (! $currentReport || ! app(InspectionSignatureWorkflowService::class)->isFullySigned($currentReport)) {
+                throw ValidationException::withMessages(['signatures' => 'All three signatures on the current report are required.']);
+            }
 
             $record = InspectionAcceptanceRecord::updateOrCreate(
                 ['purchase_order_id' => $purchaseOrder->id],
@@ -227,11 +265,11 @@ class InspectionAcceptanceController extends Controller
                     'source_pr_document_id' => $purchaseOrder->source_pr_document_id,
                     'office_id' => $purchaseOrder->sourcePrDocument?->submitting_office_id ?? $request->user()->office_id,
                     'inspected_by_user_id' => $purchaseOrder->latestInspectionAcceptanceRecord?->inspected_by_user_id ?? $request->user()->id,
-                    'accepted_by_user_id' => $request->user()->id,
+                    'accepted_by_user_id' => User::where('user_id', User::PROCUREMENT_CONTROLLER_USER_ID)->value('id'),
                     'status' => InspectionAcceptanceRecord::STATUS_ACCEPTED,
                     'inspection_date' => $purchaseOrder->latestInspectionAcceptanceRecord?->inspection_date ?? now()->toDateString(),
                     'acceptance_date' => $validated['acceptance_date'],
-                    'remarks' => $validated['remarks'] ?? $purchaseOrder->latestInspectionAcceptanceRecord?->remarks,
+                    'remarks' => $purchaseOrder->latestInspectionAcceptanceRecord?->remarks,
                 ]
             );
 
@@ -275,6 +313,11 @@ class InspectionAcceptanceController extends Controller
             abort(403);
         }
 
+        $signedRecord = $purchaseOrder->latestInspectionAcceptanceRecord()->first();
+        if (! $signedRecord || ! app(InspectionSignatureWorkflowService::class)->isFullySigned($signedRecord)) {
+            return back()->with('error', 'All three assigned accounts must sign the current IAR before completion.');
+        }
+
         if ($purchaseOrder->status !== PurchaseOrder::STATUS_APPROVED) {
             return back()->with('error', 'Only accepted Purchase Orders can be marked completed.');
         }
@@ -286,15 +329,20 @@ class InspectionAcceptanceController extends Controller
         DB::transaction(function () use ($purchaseOrder, $request, $validated) {
             $oldStatus = $purchaseOrder->status;
 
+            $currentReport = $purchaseOrder->latestInspectionAcceptanceRecord()->lockForUpdate()->first();
+            if (! $currentReport || ! app(InspectionSignatureWorkflowService::class)->isFullySigned($currentReport)) {
+                throw ValidationException::withMessages(['signatures' => 'All three signatures on the current report are required.']);
+            }
+
             $record = InspectionAcceptanceRecord::updateOrCreate(
                 ['purchase_order_id' => $purchaseOrder->id],
                 [
                     'source_pr_document_id' => $purchaseOrder->source_pr_document_id,
                     'office_id' => $purchaseOrder->sourcePrDocument?->submitting_office_id ?? $request->user()->office_id,
-                    'accepted_by_user_id' => $request->user()->id,
+                    'accepted_by_user_id' => User::where('user_id', User::PROCUREMENT_CONTROLLER_USER_ID)->value('id'),
                     'status' => InspectionAcceptanceRecord::STATUS_COMPLETED,
                     'acceptance_date' => $purchaseOrder->latestInspectionAcceptanceRecord?->acceptance_date ?? now()->toDateString(),
-                    'remarks' => $validated['remarks'] ?? $purchaseOrder->latestInspectionAcceptanceRecord?->remarks,
+                    'remarks' => $purchaseOrder->latestInspectionAcceptanceRecord?->remarks,
                 ]
             );
 

@@ -3,6 +3,8 @@
 @section('title', 'Inspection / Acceptance Detail | PaperTrail')
 
 @section('content')
+    @php $iarLocked = app(\App\Services\InspectionSignatureWorkflowService::class)->isLocked($record); @endphp
+    @include('head-office.inspection.partials.signature-workflow')
     <link rel="stylesheet" href="{{ asset('css/inspection-acceptance.css') }}?v={{ filemtime(public_path('css/inspection-acceptance.css')) }}">
     @php
         $statusLabel = fn (?string $status) => $status ? str($status)->replace('_', ' ')->title() : 'Pending';
@@ -101,7 +103,7 @@
             </div>
 
             @if (auth()->user()->canManageSvpDocuments())
-            <form method="POST" action="{{ route('head-office.inspection.store', $purchaseOrder) }}" class="budget-action-form iar-control-form" aria-label="Inspection details">
+            @if (! $iarLocked)<form method="POST" action="{{ route('head-office.inspection.store', $purchaseOrder) }}" class="budget-action-form iar-control-form" aria-label="Inspection details">
                 @csrf
 
                 <label for="report_date">IAR Date</label>
@@ -176,7 +178,7 @@
                 @error('remarks')<span class="field-error">{{ $message }}</span>@enderror
 
                 <button type="submit">Save Inspection Record</button>
-            </form>
+            </form>@endif
             @endif
 
             @if ($canAccept)

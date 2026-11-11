@@ -631,6 +631,9 @@ SUMMARY;
         }
 
         if ($document instanceof InspectionAcceptanceRecord) {
+            if ($document->status === InspectionAcceptanceRecord::STATUS_PENDING_SIGNATURES) {
+                return 'Await the required IAR signatures from MO-STAFF, MCR-001, and PC-001.';
+            }
             return $document->status === InspectionAcceptanceRecord::STATUS_COMPLETED
                 ? 'Inspection / Acceptance is completed.'
                 : 'Complete inspection and acceptance recording.';

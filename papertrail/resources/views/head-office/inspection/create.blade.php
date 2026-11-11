@@ -3,7 +3,7 @@
 @section('title', 'Create Inspection / Acceptance | PaperTrail')
 
 @section('content')
-    <link rel="stylesheet" href="{{ asset('css/inspection-acceptance.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/inspection-acceptance.css') }}?v={{ filemtime(public_path('css/inspection-acceptance.css')) }}">
     @php $inspectionDrafts = collect($recentDrafts ?? []); @endphp
 
     <x-documents.document-create-flow
@@ -67,14 +67,18 @@
 
         <x-slot:form>
             @if ($purchaseOrder)
+                @php $iarLocked = app(\App\Services\InspectionSignatureWorkflowService::class)->isLocked($record); @endphp
+                @include('head-office.inspection.partials.signature-workflow')
                 <form method="POST" action="{{ route('head-office.inspection.store', $purchaseOrder) }}" class="po-workspace iar-editor-form">
                     @csrf
                     <input type="hidden" name="return_to" value="editor">
                     <section class="po-toolbar no-print">
                         <div><strong>Inspection and Acceptance Report</strong><span>Edit directly inside the official LGU Tomas Oppus form.</span></div>
                         <a href="{{ route('head-office.inspection.index') }}">Change Source</a>
-                        <button type="submit" name="save_action" value="draft">Save Draft</button>
-                        <button type="submit" name="save_action" value="submit">Submit Inspection</button>
+                        @if (! $iarLocked)
+                            <button type="submit" name="save_action" value="draft">Save Draft</button>
+                            <button type="submit" name="save_action" value="submit">Submit for Signatures</button>
+                        @endif
                         @if ($record->exists)
                             <a href="{{ route('head-office.inspection.show', $purchaseOrder) }}">Acceptance / Completion</a>
                             <a href="{{ route('head-office.inspection.print', $purchaseOrder) }}" target="_blank" rel="noopener">Print</a>
@@ -84,11 +88,11 @@
                         <div class="iar-editor-errors" role="alert">@foreach ($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>
                     @endif
                     <div class="iar-editor-canvas">@include('head-office.inspection.partials.report', ['editable' => true])</div>
-                    <div class="iar-editor-notes no-print">
+                    @if (! $iarLocked)<div class="iar-editor-notes no-print">
                         <label for="delivery_receipt_number">Delivery Receipt No.<input id="delivery_receipt_number" name="delivery_receipt_number" maxlength="120" value="{{ old('delivery_receipt_number', $record->delivery_receipt_number) }}"></label>
                         <label for="findings">Inspection Findings<textarea id="findings" name="findings" rows="2">{{ old('findings', $record->findings) }}</textarea></label>
                         <label for="remarks">Remarks<textarea id="remarks" name="remarks" rows="2">{{ old('remarks', $record->remarks) }}</textarea></label>
-                    </div>
+                    </div>@endif
                 </form>
             @else
                 @php

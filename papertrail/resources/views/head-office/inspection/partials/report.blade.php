@@ -1,10 +1,13 @@
 @php
     $editable = $editable ?? false;
+    $workflow = app(\App\Services\InspectionSignatureWorkflowService::class);
+    $editable = $editable && ! $workflow->isLocked($record);
+    $iarSignatures = $workflow->slots($record);
     $formatQuantity = fn ($quantity) => rtrim(rtrim(number_format((float) $quantity, 2, '.', ','), '0'), '.');
-    $isInspected = $record->exists && in_array($record->status, ['inspected', 'accepted', 'completed'], true);
-    $isAccepted = $record->exists && in_array($record->status, ['accepted', 'completed'], true);
+    $isInspected = $record->exists && in_array($record->status, ['inspected', 'pending_signatures', 'fully_signed', 'accepted', 'completed'], true);
+    $isAccepted = $record->exists && in_array($record->status, ['pending_signatures', 'fully_signed', 'accepted', 'completed'], true);
 @endphp
-<article class="iar-report" aria-label="Official Inspection and Acceptance Report">
+<article class="iar-report" @if ($record->signature_revision) data-signature-workflow @endif aria-label="Official Inspection and Acceptance Report">
     <header class="iar-heading">
         <h2>INSPECTION AND ACCEPTANCE REPORT</h2>
         <p>Municipality of Tomas Oppus</p>
@@ -43,10 +46,12 @@
                 <p class="iar-check-line">@if ($editable)<input type="hidden" name="quality_condition" value="Non-conforming"><input class="iar-edit-checkbox" type="checkbox" name="quality_condition" value="Conforming" aria-label="Inspected and found OK" @checked(old('quality_condition', $record->quality_condition) === 'Conforming')>@else<span class="iar-checkbox">{{ $isInspected && strcasecmp((string) $record->quality_condition, 'Conforming') === 0 ? '✓' : '' }}</span>@endif<span>Inspected, verified and found OK<br>as to quantity and specifications</span></p>
                 <div class="iar-inspection-signatures">
                     <div>
+                        @include('head-office.inspection.partials.signature', ['signature' => $iarSignatures->get('inspection_officer')])
                         <strong>@if ($editable) @include('head-office.inspection.partials.field', ['name' => 'inspector_name', 'label' => 'Inspection officer name', 'value' => $record->inspector_name]) @else{{ $record->inspector_name }}@endif</strong>
                         <span>@if ($editable) @include('head-office.inspection.partials.field', ['name' => 'inspector_designation', 'label' => 'Inspection officer designation', 'value' => $record->inspector_designation ?? 'Inspection Officer - Des.']) @else{{ $record->inspector_designation ?? 'Inspection Officer - Des.' }}@endif</span>
                     </div>
                     <div>
+                        @include('head-office.inspection.partials.signature', ['signature' => $iarSignatures->get('inspection_chair')])
                         <strong>@if ($editable) @include('head-office.inspection.partials.field', ['name' => 'inspection_chair_name', 'label' => 'Municipal assessor name', 'value' => $record->inspection_chair_name]) @else{{ $record->inspection_chair_name }}@endif</strong>
                         <span>@if ($editable) @include('head-office.inspection.partials.field', ['name' => 'inspection_chair_designation', 'label' => 'Inspection chair designation', 'value' => $record->inspection_chair_designation ?? 'HRMO/Municipal Assessor Designate']) @else{{ $record->inspection_chair_designation ?? 'HRMO/Municipal Assessor Designate' }}@endif</span>
                     </div>
@@ -60,6 +65,7 @@
                 <p class="iar-check-line">@if ($editable)<input class="iar-edit-checkbox" type="radio" name="quantity_condition" value="Complete" aria-label="Complete delivery" @checked(old('quantity_condition', $record->quantity_condition ?? 'Complete') === 'Complete') required>@else<span class="iar-checkbox">{{ $isAccepted && strcasecmp((string) $record->quantity_condition, 'Complete') === 0 ? '✓' : '' }}</span>@endif<span>Complete</span></p>
                 <p class="iar-check-line">@if ($editable)<input class="iar-edit-checkbox" type="radio" name="quantity_condition" value="Partial" aria-label="Partial delivery" @checked(old('quantity_condition', $record->quantity_condition) === 'Partial') required>@else<span class="iar-checkbox">{{ $isAccepted && strcasecmp((string) $record->quantity_condition, 'Partial') === 0 ? '✓' : '' }}</span>@endif<span>Partial</span></p>
                 <div class="iar-acceptance-signature">
+                    @include('head-office.inspection.partials.signature', ['signature' => $iarSignatures->get('acceptance_officer')])
                     <strong>@if ($editable) @include('head-office.inspection.partials.field', ['name' => 'acceptance_officer_name', 'label' => 'Acceptance officer name', 'value' => $record->acceptance_officer_name]) @else{{ $record->acceptance_officer_name }}@endif</strong>
                     <span>@if ($editable) @include('head-office.inspection.partials.field', ['name' => 'acceptance_officer_designation', 'label' => 'Acceptance officer designation', 'value' => $record->acceptance_officer_designation ?? 'Admin Aide I']) @else{{ $record->acceptance_officer_designation ?? 'Admin Aide I' }}@endif</span>
                 </div>

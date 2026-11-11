@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Inspection and Acceptance Report {{ $record->document_reference_number }} | PaperTrail</title>
-    <link rel="stylesheet" href="{{ asset('css/inspection-acceptance.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/inspection-acceptance.css') }}?v={{ filemtime(public_path('css/inspection-acceptance.css')) }}">
 </head>
 <body class="iar-print-body">
     <nav class="iar-print-toolbar">

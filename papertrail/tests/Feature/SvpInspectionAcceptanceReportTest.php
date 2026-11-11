@@ -8,6 +8,12 @@ use App\Models\InspectionAcceptanceRecord;
 use App\Models\Office;
 use App\Models\PurchaseOrder;
 use App\Models\User;
+use App\Models\SignatureRequest;
+use App\Models\ElectronicSignature;
+use App\Services\InspectionSignatureWorkflowService;
+use App\Services\ElectronicSignatureService;
+use App\Services\SignatureRequestService;
+use Illuminate\Support\Facades\Hash;
 use App\Services\Templates\OfficialEditableTemplateService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
@@ -39,8 +45,10 @@ class SvpInspectionAcceptanceReportTest extends TestCase
         $this->actingAs($user)->get(route('head-office.inspection.create', ['purchase_order_id' => $po->id, 'edit' => 1]))
             ->assertOk()->assertSee('Acceptance / Completion')->assertSee(route('head-office.inspection.show', $po), false);
         $this->get(route('head-office.inspection.show', $po))->assertOk()
-            ->assertSee('Mark Accepted')->assertSee('Saved Inspector')->assertSee('Saved Assessor')->assertSee('Saved Receiver')
+            ->assertDontSee('Mark Accepted')->assertSee('Saved Inspector')->assertSee('Saved Assessor')->assertSee('Saved Receiver')
             ->assertSee('placeholder="Enter Name"', false);
+        $this->signReport($user, $po, $record);
+        $this->get(route('head-office.inspection.show', $po))->assertOk()->assertSee('Mark Accepted');
         $this->patch(route('head-office.inspection.accept', $po), ['acceptance_date' => '2026-11-09'])
             ->assertSessionHasNoErrors()->assertRedirect(route('head-office.inspection.show', $po));
         $this->get(route('head-office.inspection.show', $po))->assertOk()->assertSee('Mark Completed');
@@ -54,7 +62,7 @@ class SvpInspectionAcceptanceReportTest extends TestCase
     {
         [$user, $po] = $this->order();
         $this->actingAs($user)->get(route('head-office.inspection.show', $po))->assertOk()
-            ->assertSee('Mark Accepted')->assertSee('placeholder="Enter Name"', false);
+            ->assertDontSee('Mark Accepted')->assertSee('placeholder="Enter Name"', false);
         $this->assertDatabaseCount('inspection_acceptance_records', 0);
     }
 
@@ -184,12 +192,15 @@ class SvpInspectionAcceptanceReportTest extends TestCase
         $this->get(route('head-office.inspection.show', $po))->assertOk()
             ->assertSee('name="acceptance_officer_designation"', false)->assertSee('value="Supply Officer II"', false);
 
+        $record->update(['acceptance_date' => '2026-11-08']);
+        $this->signReport($user, $po, $record);
+
         $this->actingAs($user)->patch(route('head-office.inspection.accept', $po), ['acceptance_date' => '2026-11-08'])
             ->assertSessionHasNoErrors()->assertRedirect();
         $this->post(route('head-office.inspection.store', $po), [
             'inspection_date' => '2026-11-09', 'quantity_condition' => 'Complete', 'quality_condition' => 'Conforming',
             'inspector_name' => 'Updated Inspector',
-        ])->assertSessionHasNoErrors()->assertRedirect();
+        ])->assertSessionHasErrors('signatures')->assertRedirect();
         $this->assertSame(InspectionAcceptanceRecord::STATUS_ACCEPTED, $record->refresh()->status);
         $this->patch(route('head-office.inspection.complete', $po))->assertSessionHasNoErrors()->assertRedirect();
         $this->assertSame('2026-11-08', $record->refresh()->acceptance_date->toDateString());
@@ -197,6 +208,124 @@ class SvpInspectionAcceptanceReportTest extends TestCase
         $this->assertSame('Inspection Team Member', $record->inspector_designation);
         $this->assertSame('Inspection Team Chair', $record->inspection_chair_designation);
         $this->assertSame('Supply Officer II', $record->acceptance_officer_designation);
+        $this->assertSame('Saved Inspector', $record->inspector_name);
+    }
+
+    public function test_iar_routes_to_exact_accounts_and_requires_all_three_actual_signatures(): void
+    {
+        [$owner, $po] = $this->order();
+        $signers = $this->signers($owner);
+        $this->actingAs($owner)->post(route('head-office.inspection.store', $po), $this->signaturePayload())
+            ->assertSessionHasNoErrors()->assertRedirect();
+        $record = $po->latestInspectionAcceptanceRecord()->firstOrFail();
+        $this->assertSame(InspectionAcceptanceRecord::STATUS_PENDING_SIGNATURES, $record->status);
+        $requests = app(InspectionSignatureWorkflowService::class)->currentRequests($record)->with('requestedTo')->get();
+        $this->assertCount(3, $requests);
+        $this->assertSame(['inspection_officer' => 'MO-STAFF', 'inspection_chair' => 'MCR-001', 'acceptance_officer' => 'PC-001'],
+            $requests->pluck('requestedTo.user_id', 'signatory_slot')->all());
+        $this->patch(route('head-office.inspection.accept', $po), ['acceptance_date' => '2026-11-09'])->assertSessionHas('error');
+        $this->patch(route('head-office.inspection.complete', $po))->assertSessionHas('error');
+        foreach ($requests as $index => $request) {
+            $signer = $signers[$request->requestedTo->user_id];
+            $this->actingAs($signer)->get(route('signature-requests.index'))->assertOk()->assertSee($record->displayNumber())->assertSee('Pending Signatures');
+            $this->get(route('signature-requests.show', $request))->assertOk()->assertSee('Executive Table')->assertSee('INSPECTION AND ACCEPTANCE REPORT');
+            $this->post(route('signature-requests.sign', $request), ['current_password' => 'password', 'signature_consent' => true])
+                ->assertSessionHasNoErrors()->assertSessionMissing('error')->assertRedirect();
+            $this->assertSame(SignatureRequest::STATUS_SIGNED, $request->refresh()->status);
+            if ($index < 2) {
+                $this->assertFalse(app(InspectionSignatureWorkflowService::class)->isFullySigned($record->refresh()));
+            }
+        }
+        $this->assertTrue(app(InspectionSignatureWorkflowService::class)->isFullySigned($record->refresh()));
+        $this->assertSame(InspectionAcceptanceRecord::STATUS_FULLY_SIGNED, $record->status);
+        $this->actingAs($owner)->get(route('head-office.inspection.print', $po))->assertOk()->assertSee('Electronic signature');
+        $this->patch(route('head-office.inspection.accept', $po), ['acceptance_date' => '2026-11-09'])->assertSessionMissing('error')->assertRedirect();
+        $this->patch(route('head-office.inspection.complete', $po))->assertSessionMissing('error')->assertRedirect();
+        $this->assertSame(InspectionAcceptanceRecord::STATUS_COMPLETED, $record->refresh()->status);
+        $this->assertSame($signers['PC-001']->id, $record->accepted_by_user_id);
+    }
+
+    public function test_iar_revision_invalidates_old_signatures_and_routes_new_requests_without_erasing_history(): void
+    {
+        [$owner, $po] = $this->order();
+        $this->signers($owner);
+        $this->actingAs($owner)->post(route('head-office.inspection.store', $po), $this->signaturePayload())->assertSessionHasNoErrors();
+        $record = $po->latestInspectionAcceptanceRecord()->firstOrFail();
+        $request = app(InspectionSignatureWorkflowService::class)->currentRequests($record)->firstOrFail();
+        $this->actingAs($request->requestedTo)->post(route('signature-requests.sign', $request), ['current_password' => 'password', 'signature_consent' => true])->assertSessionMissing('error');
+        $oldSignature = ElectronicSignature::where('signature_request_id', $request->id)->firstOrFail();
+        $this->actingAs($owner)->patch(route('head-office.inspection.revise', $po))->assertSessionHasNoErrors();
+        $this->assertSame(ElectronicSignature::STATUS_INVALIDATED, $oldSignature->refresh()->signature_status);
+        $this->assertSame(InspectionAcceptanceRecord::STATUS_DRAFT, $record->refresh()->status);
+        $this->post(route('head-office.inspection.store', $po), [...$this->signaturePayload(), 'inspector_designation' => 'Revised Inspector'])
+            ->assertSessionHasNoErrors()->assertSessionMissing('error');
+        $record->refresh();
+        $this->assertSame(2, $record->signature_revision);
+        $newRequests = app(InspectionSignatureWorkflowService::class)->currentRequests($record)->get();
+        $this->assertCount(3, $newRequests);
+        $this->assertFalse($newRequests->contains('id', $request->id));
+        $this->assertDatabaseHas('electronic_signatures', ['id' => $oldSignature->id]);
+        $this->get(route('head-office.inspection.print', $po))->assertOk()->assertDontSee($oldSignature->signature_code);
+        $this->actingAs($request->requestedTo)->post(route('signature-requests.sign', $request), ['current_password' => 'password', 'signature_consent' => true])->assertSessionHas('error');
+    }
+
+    public function test_iar_decline_tampering_inactive_accounts_and_unassigned_users_cannot_bypass_signatures(): void
+    {
+        [$owner, $po] = $this->order();
+        $signers = $this->signers($owner);
+        $signers['MO-STAFF']->update(['status' => User::STATUS_INACTIVE]);
+        $this->actingAs($owner)->post(route('head-office.inspection.store', $po), $this->signaturePayload())->assertSessionHasErrors('signatures');
+        $this->assertDatabaseCount('signature_requests', 0);
+        $signers['MO-STAFF']->update(['status' => User::STATUS_ACTIVE]);
+        $this->post(route('head-office.inspection.store', $po), $this->signaturePayload())->assertSessionHasNoErrors();
+        $record = $po->latestInspectionAcceptanceRecord()->firstOrFail();
+        $request = app(InspectionSignatureWorkflowService::class)->currentRequests($record)->firstOrFail();
+        $peer = User::factory()->create(['user_id' => 'IAR-PEER', 'office_id' => $owner->office_id, 'role' => User::ROLE_HEAD_OFFICE, 'must_change_password' => false, 'status' => User::STATUS_ACTIVE]);
+        $this->actingAs($peer)->get(route('signature-requests.show', $request))->assertForbidden();
+        $this->post(route('signature-requests.sign', $request), ['current_password' => 'password', 'signature_consent' => true])->assertForbidden();
+        $item = $po->items()->firstOrFail();
+        $item->update(['quantity' => 99]);
+        $this->actingAs($request->requestedTo)->post(route('signature-requests.sign', $request), ['current_password' => 'password', 'signature_consent' => true])->assertSessionHas('error');
+        $this->assertDatabaseCount('electronic_signatures', 0);
+        $item->update(['quantity' => 1.5]);
+        $this->post(route('signature-requests.decline', $request), ['reason' => 'Correct the delivery details'])->assertSessionMissing('error');
+        $this->assertSame(InspectionAcceptanceRecord::STATUS_RETURNED, $record->refresh()->status);
+        $this->assertSame(0, app(InspectionSignatureWorkflowService::class)->currentRequests($record)->count());
+    }
+
+    private function signaturePayload(): array
+    {
+        return ['save_action' => 'submit', 'inspection_date' => '2026-11-09', 'acceptance_date' => '2026-11-09',
+            'quantity_condition' => 'Complete', 'quality_condition' => 'Conforming'];
+    }
+
+    private function signers(User $owner): array
+    {
+        $users = [];
+        foreach (['MO-STAFF', 'MCR-001', 'PC-001'] as $code) {
+            $office = $code === 'MCR-001' ? $owner->office_id : Office::firstOrCreate(['code' => 'IAR-'.$code],
+                ['name' => 'IAR Signatory '.$code, 'type' => Office::TYPE_END_USER, 'is_requesting_office' => true, 'status' => Office::STATUS_ACTIVE])->id;
+            $user = User::where('user_id', $code)->first() ?: User::factory()->create(['user_id' => $code,
+                'role' => $code === 'MO-STAFF' ? User::ROLE_OFFICE_PREPARER : User::ROLE_HEAD_OFFICE]);
+            $user->update(['role_id' => null, 'role' => $code === 'MO-STAFF' ? User::ROLE_OFFICE_PREPARER : User::ROLE_HEAD_OFFICE,
+                'office_id' => $office, 'password' => Hash::make('password'), 'status' => User::STATUS_ACTIVE,
+                'must_change_password' => false, 'typed_signature_name' => $code.' Signer', 'signer_position' => 'Assigned IAR Signatory',
+                'signature_style' => 'typed', 'signature_setup_completed_at' => now()]);
+            $users[$code] = $user;
+        }
+        return $users;
+    }
+
+    private function signReport(User $owner, PurchaseOrder $po, InspectionAcceptanceRecord $record): void
+    {
+        $this->signers($owner);
+        $record->update(['acceptance_date' => $record->acceptance_date ?: '2026-11-09']);
+        app(InspectionSignatureWorkflowService::class)->submit($record, $owner);
+        foreach (app(InspectionSignatureWorkflowService::class)->currentRequests($record->refresh())->with('requestedTo')->get() as $request) {
+            $result = app(ElectronicSignatureService::class)->signDocument($record->refresh(), $request->requestedTo, 'inspection_acceptance', 'confirmed',
+                ['current_password' => 'password', 'signature_consent' => true], null, $request);
+            $this->assertTrue($result['ok'], $result['message']);
+        }
     }
 
     public function test_template_replaces_the_generic_default_and_preserves_admin_uploads(): void

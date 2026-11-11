@@ -11,6 +11,7 @@ use App\Models\ProcurementDocument;
 use App\Models\PurchaseOrder;
 use App\Models\Rfq;
 use App\Models\SignatureRequest;
+use App\Models\InspectionAcceptanceRecord;
 use App\Models\SystemNotification;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -90,7 +91,7 @@ class SignatureRequestService
             });
         }
 
-        $signatureRequest = $query->latest('updated_at')->first() ?: new SignatureRequest([
+        $signatureRequest = (empty($signerData['new_cycle']) ? $query->latest('updated_at')->first() : null) ?: new SignatureRequest([
             'request_uuid' => (string) Str::uuid(),
             'status' => $initialStatus,
         ]);
@@ -238,7 +239,12 @@ class SignatureRequestService
     {
         if ($user->isOfficeDocumentPreparer()) {
             return SignatureRequest::query()->with(['requestedBy', 'requestedTo', 'requestedOffice', 'electronicSignature'])
-                ->where('requested_to_user_id', $user->id)->where('document_type', 'ppmp')->where('signatory_slot', 'prepared_by');
+                ->where('requested_to_user_id', $user->id)->where(function (Builder $query) use ($user) {
+                    $query->where(fn (Builder $ppmp) => $ppmp->where('document_type', 'ppmp')->where('signatory_slot', 'prepared_by'));
+                    if ($user->user_id === 'MO-STAFF') {
+                        $query->orWhere(fn (Builder $iar) => $iar->where('document_type', 'inspection_acceptance')->where('signatory_slot', 'inspection_officer'));
+                    }
+                });
         }
         $roleTokens = $this->roleTokens($user);
         $canUseOfficeFallback = $user->office_id && ($user->hasPermission('esignature.use') || $user->hasSignatureProfile());
@@ -282,6 +288,9 @@ class SignatureRequestService
 
     public function userCanAccess(SignatureRequest $signatureRequest, User $user): bool
     {
+        if ($signatureRequest->document_type === 'inspection_acceptance') {
+            return (int) $signatureRequest->requested_to_user_id === (int) $user->id;
+        }
         $mpdoActor = app(BacsecMpdoWorkspaceService::class)->existing($user);
         if ($mpdoActor && $signatureRequest->document_type === 'ppmp' && $signatureRequest->signatory_slot === 'prepared_by'
             && (int) $signatureRequest->requested_to_user_id === (int) $mpdoActor->id) {
@@ -579,6 +588,9 @@ class SignatureRequestService
 
     private function documentLabel(Model $document): string
     {
+        if ($document instanceof InspectionAcceptanceRecord) {
+            return 'Inspection / Acceptance '.$document->displayNumber();
+        }
         if ($document instanceof Rfq) {
             return 'RFQ '.$document->displayNumber();
         }

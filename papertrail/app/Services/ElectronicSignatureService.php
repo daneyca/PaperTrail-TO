@@ -8,6 +8,7 @@ use App\Models\AbstractQuotation;
 use App\Models\CompetitiveBiddingSignatureDocument;
 use App\Models\DocumentRoutingHistory;
 use App\Models\ElectronicSignature;
+use App\Models\InspectionAcceptanceRecord;
 use App\Models\Office;
 use App\Models\ProcurementDocument;
 use App\Models\PurchaseOrder;
@@ -33,6 +34,7 @@ class ElectronicSignatureService
             'competitive_bidding_document', 'competitive_bidding_signature_document' => 'competitive_bidding_document',
             'ppmp', 'project_procurement_management_plan' => 'ppmp',
             'po', 'purchase_order', 'purchaseorder' => 'purchase_order',
+            'inspection', 'iar', 'inspection_acceptance' => 'inspection_acceptance',
             default => strtolower(str_replace('-', '_', $documentType)),
         };
     }
@@ -52,6 +54,7 @@ class ElectronicSignatureService
                 ->find($documentId),
             'purchase_order' => PurchaseOrder::find($documentId),
             'rfq' => Rfq::find($documentId),
+            'inspection_acceptance' => InspectionAcceptanceRecord::find($documentId),
             default => null,
         };
     }
@@ -72,6 +75,7 @@ class ElectronicSignatureService
         $type = $this->normalizeDocumentType($documentType);
         $user = app(BacsecMpdoWorkspaceService::class)->preparationSigner($user, $document, $type);
         if ($user->isOfficeDocumentPreparer()
+            && ! ($type === 'inspection_acceptance' && $document instanceof InspectionAcceptanceRecord && $user->user_id === 'MO-STAFF')
             && ! ($type === 'ppmp' && $document instanceof ProcurementDocument
                 && (int) ($document->prepared_by_user_id ?: $document->submitted_by_user_id) === (int) $user->id)) {
             return ['ok' => false, 'message' => 'Procurement Staff may sign Prepared By on their own PPMP. Signatures and approvals for other documents require the designated signatory.'];
@@ -88,6 +92,13 @@ class ElectronicSignatureService
                 return ['ok' => false, 'message' => 'Only the assigned Procurement Officer can sign a controlled RFQ awaiting their signature.'];
             }
             return ['ok' => true, 'message' => 'This RFQ can be signed.', 'signature_request' => $requestForUser];
+        }
+        if ($type === 'inspection_acceptance' && $document instanceof InspectionAcceptanceRecord) {
+            $requestForUser = $signatureRequest ?: app(SignatureRequestService::class)->openRequestForUser($document, $type, $user);
+            $canSign = app(InspectionSignatureWorkflowService::class)->canSign($document, $user, $requestForUser);
+            return ['ok' => $canSign,
+                'message' => $canSign ? 'This IAR can be signed.' : 'Only the assigned account can sign the current submitted IAR. A revised report requires new signatures.',
+                'signature_request' => $requestForUser];
         }
         if ($type === 'purchase_request' && $document instanceof ProcurementDocument) {
             return $this->canSignPurchaseRequestWithReason($user, $document, $type, $signatureRequest);
@@ -254,6 +265,13 @@ class ElectronicSignatureService
         $signature = $this->preparePasswordConfirmedSignature($document, $type, $action, $user, $signatureRequest);
 
         return DB::transaction(function () use ($document, $user, $type, $action, $input, $request, $signature, $signatureRequest) {
+            if ($type === 'inspection_acceptance') {
+                $document = InspectionAcceptanceRecord::whereKey($document->id)->lockForUpdate()->firstOrFail();
+                $signatureRequest = SignatureRequest::whereKey($signatureRequest?->id)->lockForUpdate()->first();
+                if (! app(InspectionSignatureWorkflowService::class)->canSign($document, $user, $signatureRequest)) {
+                    return ['ok' => false, 'message' => 'This IAR or signature request has changed. Refresh before signing.'];
+                }
+            }
             $document->refresh();
             $documentHash = $this->computeDocumentHash($document);
             $consent = $input['consent_text']
@@ -261,7 +279,7 @@ class ElectronicSignatureService
             $isPurchaseRequestSignature = $type === 'purchase_request' && $signatureRequest;
             $isPpmpSignature = $type === 'ppmp' && $signatureRequest;
             $isCompetitiveBiddingSignature = $type === 'competitive_bidding_document' && $signatureRequest;
-            $isRoutedDocumentSignature = in_array($type, ['purchase_request', 'purchase_order', 'bac_resolution', 'ppmp', 'abstract', 'app', 'competitive_bidding_document', 'rfq'], true) && $signatureRequest;
+            $isRoutedDocumentSignature = in_array($type, ['purchase_request', 'purchase_order', 'bac_resolution', 'ppmp', 'abstract', 'app', 'competitive_bidding_document', 'rfq', 'inspection_acceptance'], true) && $signatureRequest;
             $signerPosition = $isRoutedDocumentSignature
                 ? ($signatureRequest->requested_to_role ?: $signatureRequest->signatory_label ?: ($user->signer_position ?: ($user->position ?: $user->role)))
                 : ($user->signer_position ?: ($user->position ?: $user->role));
@@ -335,6 +353,8 @@ class ElectronicSignatureService
                     ->handleInternalSigned($document, $signatureRequest, $signature);
             } elseif ($fullySigned && $type === 'rfq' && $document instanceof Rfq) {
                 app(RfqSupplierWorkflowService::class)->handleOfficerSigned($document, $user);
+            } elseif ($type === 'inspection_acceptance' && $document instanceof InspectionAcceptanceRecord) {
+                app(InspectionSignatureWorkflowService::class)->handleSigned($document, $user);
             } elseif ($fullySigned && $type === 'bac_resolution') {
                 $outcomeSignature = $signature;
                 $outcomeUser = $user;
@@ -354,6 +374,7 @@ class ElectronicSignatureService
             }
 
             $documentTypeLabel = match ($type) {
+                'inspection_acceptance' => 'Inspection / Acceptance',
                 'rfq' => 'RFQ',
                 'app' => 'Annual Procurement Plan',
                 'purchase_request' => 'Purchase Request',
@@ -447,6 +468,8 @@ class ElectronicSignatureService
                 $document->update(['status' => Rfq::STATUS_RETURNED, 'remarks' => $reason]);
                 app(RfqSupplierWorkflowService::class)->notifyOwner($document, 'RFQ returned by Procurement Officer', $reason);
                 app(SvpChainService::class)->linkRfq($document, $user, 'Procurement Officer returned RFQ', $reason);
+            } elseif ($type === 'inspection_acceptance' && $document instanceof InspectionAcceptanceRecord) {
+                app(InspectionSignatureWorkflowService::class)->revise($document, $user, $reason, true);
             } elseif ($type === 'purchase_order' && $document instanceof PurchaseOrder) {
                 app(PurchaseOrderSignatureWorkflowService::class)->handleDeclined($document);
             } else {
@@ -454,6 +477,7 @@ class ElectronicSignatureService
             }
 
             $documentTypeLabel = match ($type) {
+                'inspection_acceptance' => 'Inspection / Acceptance',
                 'rfq' => 'RFQ',
                 'app' => 'Annual Procurement Plan',
                 'purchase_request' => 'Purchase Request',
@@ -477,6 +501,7 @@ class ElectronicSignatureService
             return [
                 'ok' => true,
                 'message' => match ($type) {
+                    'inspection_acceptance' => 'IAR returned for correction. All three accounts must sign the revised report again.',
                     'rfq' => 'RFQ returned to its preparer for correction.',
                     'app' => 'APP signature request declined.',
                     'purchase_request' => 'Purchase Request signature request declined.',
@@ -532,6 +557,12 @@ class ElectronicSignatureService
     {
         if ($user->id === $signature->signer_user_id || $user->isAdmin()) {
             return true;
+        }
+        if ($signature->document_type === 'inspection_acceptance') {
+            $actor = app(BacsecMpdoWorkspaceService::class)->existing($user);
+            $ids = array_filter([$user->id, $actor?->id]);
+            return SignatureRequest::forDocument('inspection_acceptance', $signature->document_id)
+                ->where(fn ($query) => $query->whereIn('requested_by_user_id', $ids)->orWhereIn('requested_to_user_id', $ids))->exists();
         }
 
         if ($signature->document_type === 'rfq') {
@@ -654,6 +685,9 @@ class ElectronicSignatureService
 
     public function computeDocumentHash(Model $document): string
     {
+        if ($document instanceof InspectionAcceptanceRecord) {
+            return app(InspectionSignatureWorkflowService::class)->hash($document);
+        }
         if ($document instanceof Rfq) {
             return app(RfqSupplierWorkflowService::class)->documentHash($document);
         }
@@ -742,6 +776,10 @@ class ElectronicSignatureService
         $html = $document instanceof BacResolution || $document instanceof AbstractQuotation || $document instanceof AnnualProcurementPlan || $document instanceof CompetitiveBiddingSignatureDocument ? $document->document_html : null;
         if ($document instanceof Rfq) {
             $html = view('rfq-responses.document', ['snapshot' => app(RfqSupplierWorkflowService::class)->issuedSnapshot($document)])->render();
+        }
+        if ($document instanceof InspectionAcceptanceRecord) {
+            $html = view('head-office.inspection.partials.report', ['record' => $document,
+                'purchaseOrder' => $document->purchaseOrder->loadMissing(['items', 'sourcePrDocument.submittingOffice']), 'editable' => false])->render();
         }
         $hash = hash('sha256', trim(($html ?: '') . "\n" . $text . "\n" . $signature->document_hash_before));
 
@@ -1055,6 +1093,9 @@ class ElectronicSignatureService
 
     private function documentTextSnapshot(Model $document): string
     {
+        if ($document instanceof InspectionAcceptanceRecord) {
+            return json_encode(app(InspectionSignatureWorkflowService::class)->snapshot($document), JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+        }
         if ($document instanceof AbstractQuotation) {
             return trim(implode("\n", array_filter([
                 $document->abstract_number,
@@ -1105,6 +1146,9 @@ class ElectronicSignatureService
 
     private function documentLabel(Model $document): string
     {
+        if ($document instanceof InspectionAcceptanceRecord) {
+            return 'Inspection / Acceptance '.$document->displayNumber();
+        }
         if ($document instanceof Rfq) {
             return 'RFQ '.$document->displayNumber();
         }
@@ -1139,6 +1183,9 @@ class ElectronicSignatureService
 
     private function trackingNumber(Model $document): ?string
     {
+        if ($document instanceof InspectionAcceptanceRecord) {
+            return $document->displayNumber();
+        }
         if ($document instanceof AbstractQuotation) {
             return $document->displayNumber();
         }
@@ -1299,6 +1346,9 @@ class ElectronicSignatureService
 
     private function signatureSuccessMessage(string $type, bool $fullySigned, string $prSignatureResult, string $ppmpSignatureResult = 'ignored'): string
     {
+        if ($type === 'inspection_acceptance') {
+            return $fullySigned ? 'All three IAR signatures are complete.' : 'IAR signature recorded. Other required signatures are still pending.';
+        }
         if ($type === 'rfq') {
             return 'RFQ signed. The requesting office can now invite suppliers to submit quotations online.';
         }

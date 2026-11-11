@@ -17,6 +17,9 @@ class InspectionAcceptanceRecord extends Model
     public const STATUS_INSPECTED = 'inspected';
     public const STATUS_ACCEPTED = 'accepted';
     public const STATUS_COMPLETED = 'completed';
+    public const STATUS_PENDING_SIGNATURES = 'pending_signatures';
+    public const STATUS_FULLY_SIGNED = 'fully_signed';
+    public const STATUS_RETURNED = 'returned';
 
     public const DEFAULT_INSPECTOR = 'MA. ANI M. CAPULO';
     public const DEFAULT_INSPECTION_CHAIR = 'ROGELIO A. LAYO';
@@ -34,6 +37,8 @@ class InspectionAcceptanceRecord extends Model
         'inspected_by_user_id',
         'accepted_by_user_id',
         'status',
+        'signature_revision',
+        'signature_document_hash',
         'inspection_date',
         'acceptance_date',
         'delivery_receipt_number',
@@ -53,6 +58,7 @@ class InspectionAcceptanceRecord extends Model
     ];
 
     protected $casts = [
+        'signature_revision' => 'integer',
         'inspection_date' => 'date',
         'acceptance_date' => 'date',
         'report_date' => 'date',

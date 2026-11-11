@@ -30,6 +30,12 @@
 .iar-inspection-signatures strong, .iar-acceptance-signature strong { display: block; border-bottom: 1px solid #000; font-size: 8pt; min-height: 4mm; overflow-wrap: anywhere; }
 .iar-inspection-signatures span, .iar-acceptance-signature span { display: block; font-size: 6.5pt; margin-top: 1mm; }
 .iar-acceptance-signature { margin-top: 13mm; }
+.iar-electronic-signature { min-height: 12mm; text-align: center; break-inside: avoid; }
+.iar-electronic-signature img { display: block; max-width: 100%; width: auto; height: 10mm; object-fit: contain; margin: 0 auto; }
+.iar-electronic-signature .iar-signature-typed { margin: 0; font: italic 16pt cursive; }
+.iar-electronic-signature small { display: block; font-size: 5.5pt; overflow-wrap: anywhere; }
+.iar-report[data-signature-workflow] .iar-inspection-signatures,
+.iar-report[data-signature-workflow] .iar-acceptance-signature { margin-top: 1mm; }
 .iar-preview { overflow-x: auto; padding: 20px 0; background: #eee; }
 .iar-print-body { margin: 0; padding: 20px; background: #eee; }
 .iar-print-toolbar { display: flex; justify-content: space-between; max-width: 190mm; margin: 0 auto 20px; font: 14px Arial, sans-serif; }

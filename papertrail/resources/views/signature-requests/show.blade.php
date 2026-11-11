@@ -14,6 +14,7 @@
         $isApp = $signatureRequest->document_type === 'app';
         $isPurchaseOrder = $signatureRequest->document_type === 'purchase_order';
         $isRfq = $signatureRequest->document_type === 'rfq';
+        $isInspection = $signatureRequest->document_type === 'inspection_acceptance';
         $isCompetitiveBiddingDocument = $signatureRequest->document_type === 'competitive_bidding_document';
         $signatureDesignation = filled($signatureRequest->requested_to_role)
             ? $signatureRequest->requested_to_role
@@ -26,6 +27,7 @@
                 ?? 'Signature Request');
         $documentFormName = match (true) {
             $isRfq => 'RFQ form',
+            $isInspection => 'Inspection and Acceptance Report',
             $isPurchaseRequest => 'PR form',
             $isPpmp => 'PPMP form',
             $isAbstract => 'Abstract form',
@@ -39,6 +41,7 @@
         };
         $documentSignLabel = match (true) {
             $isRfq => 'Sign RFQ Form',
+            $isInspection => 'Sign Inspection / Acceptance Report',
             $isPurchaseRequest => 'Sign PR Form',
             $isPpmp => 'Sign PPMP Form',
             $isAbstract => 'Sign Abstract Form',
@@ -155,6 +158,12 @@
                                 'mode' => 'show',
                                 'signatureSlots' => $signatureSlots,
                             ])
+                        </div>
+                    @elseif ($isInspection)
+                        <link rel="stylesheet" href="{{ asset('css/inspection-acceptance.css') }}?v={{ filemtime(public_path('css/inspection-acceptance.css')) }}">
+                        <div class="iar-preview">
+                            @include('head-office.inspection.partials.report', ['record' => $document,
+                                'purchaseOrder' => $document->purchaseOrder->loadMissing(['items', 'sourcePrDocument.submittingOffice']), 'editable' => false])
                         </div>
                     @elseif ($isRfq)
                         <link rel="stylesheet" href="{{ asset('css/rfq-responses.css') }}">

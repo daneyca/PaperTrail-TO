@@ -626,6 +626,8 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         Route::get('/{purchaseOrder}/print', [HeadOfficeInspectionAcceptanceController::class, 'print'])->name('print');
         Route::get('/{purchaseOrder}', [HeadOfficeInspectionAcceptanceController::class, 'show'])->name('show');
         Route::post('/{purchaseOrder}', [HeadOfficeInspectionAcceptanceController::class, 'store'])->name('store');
+        Route::patch('/{purchaseOrder}/signatures', [HeadOfficeInspectionAcceptanceController::class, 'submitForSignatures'])->name('submit-for-signatures');
+        Route::patch('/{purchaseOrder}/revise', [HeadOfficeInspectionAcceptanceController::class, 'revise'])->name('revise');
         Route::patch('/{purchaseOrder}/accept', [HeadOfficeInspectionAcceptanceController::class, 'accept'])->name('accept');
         Route::patch('/{purchaseOrder}/complete', [HeadOfficeInspectionAcceptanceController::class, 'complete'])->name('complete');
     });
