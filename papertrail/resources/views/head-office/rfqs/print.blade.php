@@ -6,7 +6,7 @@
     <title>{{ $rfq->rfq_number ? 'RFQ '.$rfq->rfq_number : 'RFQ' }} | PaperTrail</title>
     <link rel="stylesheet" href="{{ asset('css/landing.css') }}">
     <link rel="stylesheet" href="{{ asset('css/rfq.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/rfq-responses.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/rfq-responses.css') }}?v={{ filemtime(public_path('css/rfq-responses.css')) }}">
 </head>
 <body class="rfq-print-body">
     <main class="rfq-print-page">

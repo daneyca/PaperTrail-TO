@@ -39,6 +39,7 @@
     <link rel="stylesheet" href="{{ asset('css/papertrail-dark-mode.css') }}?v={{ file_exists(public_path('css/papertrail-dark-mode.css')) ? filemtime(public_path('css/papertrail-dark-mode.css')) : time() }}">
     <link rel="stylesheet" href="{{ asset('css/papertrail-auth-shell.css') }}?v={{ file_exists(public_path('css/papertrail-auth-shell.css')) ? filemtime(public_path('css/papertrail-auth-shell.css')) : time() }}">
     <link rel="stylesheet" href="{{ asset('css/global-search.css') }}?v={{ filemtime(public_path('css/global-search.css')) }}">
+    @stack('page-styles')
     <script>
         try {
             if (localStorage.getItem('papertrail_theme') === 'dark') {

@@ -21,11 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const price = Number(input.value);
             const valid = input.value !== '' && Number.isFinite(price) && price >= 0;
             const line = valid ? Math.round((price * Number(row.dataset.quantity) + Number.EPSILON) * 100) / 100 : 0;
-            row.querySelector('[data-line-total]').textContent = valid ? money(line) : '—';
+            row.querySelector('[data-line-total]').textContent = valid ? money(line) : '';
             total += line;
             hasPrices ||= valid;
         });
-        form.querySelector('[data-quote-total]').textContent = hasPrices ? money(total) : '—';
+        form.querySelector('[data-quote-total]').textContent = hasPrices ? money(total) : '';
     };
     form.querySelectorAll('[data-unit-price]').forEach(input => input.addEventListener('input', updatePrices));
     updatePrices();

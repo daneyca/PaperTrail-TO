@@ -2,8 +2,10 @@
     const form = document.querySelector('[data-global-search]');
     if (!form) return;
 
-    const input = form.querySelector('input[name="q"]');
+    const input = form.querySelector('input[type="search"]');
     const list = form.querySelector('.global-search-suggestions');
+    const scope = form.querySelector('[data-search-scope]');
+    const searchesGlobally = () => !scope || scope.value === 'global';
     const suggestionsUrl = form.dataset.suggestionsUrl;
     let timer;
     let controller;
@@ -68,7 +70,7 @@
         clearTimeout(timer);
         controller?.abort();
         const term = input.value.trim();
-        if (term.length < 2) {
+        if (!searchesGlobally() || term.length < 2) {
             close();
             return;
         }
@@ -80,8 +82,9 @@
                     headers: { Accept: 'application/json' },
                     signal: controller.signal,
                 });
-                if (!response.ok || input.value.trim() !== term) return;
+                if (!response.ok || !searchesGlobally() || input.value.trim() !== term) return;
                 const payload = await response.json();
+                if (!searchesGlobally() || input.value.trim() !== term) return;
                 render(payload.results || [], term);
             } catch (error) {
                 if (error.name !== 'AbortError') close();

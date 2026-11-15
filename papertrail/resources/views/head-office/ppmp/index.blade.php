@@ -15,7 +15,26 @@
                 default => str($status ?: 'Unknown')->replace('_', ' ')->title()->replace('Ppmp', 'PPMP')->toString(),
             };
         };
+
+        $ppmpStatusOptions = collect($statuses)->mapWithKeys(fn ($status) => [$status => $ppmpStatusLabel($status)])->all();
+        $summaryStatusLabels = ['draft' => 'Drafts', 'signatures' => 'Pending Signature', 'ready' => 'Signed',
+            'submitted' => 'Submitted to BAC', 'reviewed' => 'Under APP Consolidation', 'returned' => 'Returned', 'accepted' => 'Accepted'];
+        if (isset($summaryStatusLabels[$filters['status'] ?? ''])) {
+            $ppmpStatusOptions = [$filters['status'] => $summaryStatusLabels[$filters['status']]] + $ppmpStatusOptions;
+        }
+        $ppmpFilterFields = [
+            'document_type' => ['label' => 'Document type', 'empty' => 'All types', 'options' => collect($documentTypes)->mapWithKeys(fn ($type) => [$type => $type])->all()],
+            'fiscal_year' => ['label' => 'Fiscal year', 'empty' => 'All years', 'options' => collect($fiscalYears)->mapWithKeys(fn ($year) => [$year => $year])->all()],
+            'status' => ['label' => 'Status', 'empty' => 'All statuses', 'options' => $ppmpStatusOptions],
+            'stage' => ['label' => 'Stage', 'empty' => 'All stages', 'options' => collect($stages)->mapWithKeys(fn ($stage) => [$stage => $stage])->all()],
+            'date_from' => ['label' => 'Updated from', 'type' => 'date'],
+            'date_to' => ['label' => 'Updated to', 'type' => 'date'],
+        ];
     @endphp
+
+    @section('topbar-search')
+        <x-document-list-controls :action="route('head-office.ppmp.index')" :filters="$filters" :fields="$ppmpFilterFields" />
+    @endsection
 
     <section class="dashboard-hero admin-users-hero ppmp-page-hero">
         <div>
@@ -39,60 +58,7 @@
     </section>
 
     <section class="table-panel">
-        <form method="GET" action="{{ route('head-office.ppmp.index') }}" class="ppmp-filter-toolbar">
-            <label>
-                <span>SEARCH DOCUMENTS</span>
-                <input type="search" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Tracking number, title, or description">
-            </label>
-            <label>
-                <span>DOCUMENT TYPE</span>
-                <select name="document_type">
-                    <option value="">All types</option>
-                    @foreach ($documentTypes as $type)
-                        <option value="{{ $type }}" @selected(($filters['document_type'] ?? '') === $type)>{{ $type }}</option>
-                    @endforeach
-                </select>
-            </label>
-            <label>
-                <span>FISCAL YEAR</span>
-                <select name="fiscal_year">
-                    <option value="">All years</option>
-                    @foreach ($fiscalYears as $year)
-                        <option value="{{ $year }}" @selected((string) ($filters['fiscal_year'] ?? '') === (string) $year)>{{ $year }}</option>
-                    @endforeach
-                </select>
-            </label>
-            <label>
-                <span>STATUS</span>
-                <select name="status">
-                    <option value="">All statuses</option>
-                    @foreach ($statuses as $status)
-                        <option value="{{ $status }}" @selected(($filters['status'] ?? '') === $status)>{{ $ppmpStatusLabel($status) }}</option>
-                    @endforeach
-                </select>
-            </label>
-            <label>
-                <span>STAGE</span>
-                <select name="stage">
-                    <option value="">All stages</option>
-                    @foreach ($stages as $stage)
-                        <option value="{{ $stage }}" @selected(($filters['stage'] ?? '') === $stage)>{{ $stage }}</option>
-                    @endforeach
-                </select>
-            </label>
-            <label>
-                <span>DATE FROM</span>
-                <input type="date" name="date_from" value="{{ $filters['date_from'] ?? '' }}">
-            </label>
-            <label>
-                <span>DATE TO</span>
-                <input type="date" name="date_to" value="{{ $filters['date_to'] ?? '' }}">
-            </label>
-            <div class="filter-actions">
-                <button type="submit">Apply</button>
-                <a href="{{ route('head-office.ppmp.index') }}">Clear</a>
-            </div>
-        </form>
+        <x-document-filter-summary :action="route('head-office.ppmp.index')" :filters="$filters" :fields="$ppmpFilterFields" :total="$documents->total()" />
 
         <div class="table-scroll ppmp-table-scroll">
             <table class="user-management-table ppmp-registry-table head-office-doc-table">
@@ -155,8 +121,13 @@
                         <tr>
                             <td colspan="9">
                                 <div class="empty-state">
+                                    @if (collect($filters)->contains(fn ($value) => filled($value)))
+                                        <strong>No PPMPs match your search or filters</strong>
+                                        <p>Try a different search or <a href="{{ route('head-office.ppmp.index') }}">clear search and filters</a>.</p>
+                                    @else
                                     <strong>No PPMP records yet</strong>
                                     <p>Create a PPMP draft to begin your office procurement planning.</p>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

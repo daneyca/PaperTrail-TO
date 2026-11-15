@@ -13,7 +13,19 @@
                 default => str($status ?: 'Unknown')->replace('_', ' ')->title()->replace('Ppmp', 'PPMP')->toString(),
             };
         };
+
+        $ppmpFilterFields = [
+            'fiscal_year' => ['label' => 'Fiscal year', 'empty' => 'All years', 'options' => collect($fiscalYears)->mapWithKeys(fn ($year) => [$year => $year])->all()],
+            'office_id' => ['label' => 'Requesting office', 'empty' => 'All offices', 'options' => $offices->pluck('name', 'id')->all()],
+            'status' => ['label' => 'Status', 'empty' => 'All statuses', 'options' => collect($statuses)->mapWithKeys(fn ($status) => [$status => $ppmpStatusLabel($status)])->all()],
+            'date_from' => ['label' => 'Updated from', 'type' => 'date'],
+            'date_to' => ['label' => 'Updated to', 'type' => 'date'],
+        ];
     @endphp
+
+    @section('topbar-search')
+        <x-document-list-controls :action="route('bac-secretariat.ppmp.index')" :filters="$filters" :fields="$ppmpFilterFields" />
+    @endsection
 
     <section class="dashboard-hero admin-users-hero ppmp-page-hero">
         <div>
@@ -31,51 +43,7 @@
     </section>
 
     <section class="table-panel">
-        <form method="GET" action="{{ route('bac-secretariat.ppmp.index') }}" class="ppmp-filter-toolbar">
-            <label>
-                <span>SEARCH DOCUMENTS</span>
-                <input type="search" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Tracking number, title, or office">
-            </label>
-            <label>
-                <span>FISCAL YEAR</span>
-                <select name="fiscal_year">
-                    <option value="">All years</option>
-                    @foreach ($fiscalYears as $year)
-                        <option value="{{ $year }}" @selected((string) ($filters['fiscal_year'] ?? '') === (string) $year)>{{ $year }}</option>
-                    @endforeach
-                </select>
-            </label>
-            <label>
-                <span>REQUESTING OFFICE</span>
-                <select name="office_id">
-                    <option value="">All offices</option>
-                    @foreach ($offices as $office)
-                        <option value="{{ $office->id }}" @selected((string) ($filters['office_id'] ?? '') === (string) $office->id)>{{ $office->name }}</option>
-                    @endforeach
-                </select>
-            </label>
-            <label>
-                <span>STATUS</span>
-                <select name="status">
-                    <option value="">All statuses</option>
-                    @foreach ($statuses as $status)
-                        <option value="{{ $status }}" @selected(($filters['status'] ?? '') === $status)>{{ $ppmpStatusLabel($status) }}</option>
-                    @endforeach
-                </select>
-            </label>
-            <label>
-                <span>DATE FROM</span>
-                <input type="date" name="date_from" value="{{ $filters['date_from'] ?? '' }}">
-            </label>
-            <label>
-                <span>DATE TO</span>
-                <input type="date" name="date_to" value="{{ $filters['date_to'] ?? '' }}">
-            </label>
-            <div class="filter-actions">
-                <button type="submit">Apply</button>
-                <a href="{{ route('bac-secretariat.ppmp.index') }}">Clear</a>
-            </div>
-        </form>
+        <x-document-filter-summary :action="route('bac-secretariat.ppmp.index')" :filters="$filters" :fields="$ppmpFilterFields" :total="$documents->total()" />
 
         <div class="table-scroll ppmp-table-scroll">
             <table class="user-management-table ppmp-registry-table head-office-doc-table">
@@ -109,8 +77,13 @@
                         <tr>
                             <td colspan="7">
                                 <div class="empty-state">
+                                    @if (collect($filters)->contains(fn ($value) => filled($value)))
+                                        <strong>No PPMPs match your search or filters</strong>
+                                        <p>Try a different search or <a href="{{ route('bac-secretariat.ppmp.index') }}">clear search and filters</a>.</p>
+                                    @else
                                     <strong>No PPMP documents for review</strong>
                                     <p>Submitted PPMP records from Head Office users will appear here.</p>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

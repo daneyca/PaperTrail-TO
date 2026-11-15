@@ -51,6 +51,9 @@
     </div>
 
     <div class="enterprise-topbar__right">
+        @hasSection('topbar-search')
+            @yield('topbar-search')
+        @else
         <form class="dashboard-search enterprise-topbar__search" role="search" method="GET" action="{{ route('search.index') }}" data-global-search data-suggestions-url="{{ route('search.suggestions') }}">
             <label class="sr-only" for="dashboard-search">Search procurement records</label>
             <span class="dashboard-search-icon" aria-hidden="true">
@@ -61,6 +64,7 @@
             <input id="dashboard-search" name="q" type="search" value="{{ request()->routeIs('search.index') ? ($term ?? '') : '' }}" placeholder="Search records..." autocomplete="off" aria-autocomplete="list" aria-controls="dashboard-search-suggestions" aria-expanded="false">
             <div id="dashboard-search-suggestions" class="global-search-suggestions" role="listbox" hidden></div>
         </form>
+        @endif
 
         <div class="enterprise-topbar__middle">
             <div class="pht-clock-widget" data-pht-clock aria-live="polite">

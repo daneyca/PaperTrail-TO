@@ -240,7 +240,7 @@
                     <tr class="rfq-signature-row">
                         <td colspan="2" class="rfq-cell rfq-no-border rfq-bottom-line rfq-center" data-field="printed_name_signature" data-placeholder="Enter Name"></td>
                         <td class="rfq-no-border"></td>
-                        <td colspan="3" class="rfq-cell rfq-no-border rfq-bottom-line rfq-center" data-field="philgeps_type">PhilGeps Type of Registration:</td>
+                        <td colspan="3" class="rfq-cell rfq-no-border rfq-bottom-line rfq-center" data-field="philgeps_type"></td>
                     </tr>
                     <tr class="rfq-signature-row">
                         <td colspan="2" class="rfq-no-border rfq-center">Printed Name &amp; Signature</td>

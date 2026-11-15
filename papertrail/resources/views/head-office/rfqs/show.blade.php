@@ -28,10 +28,8 @@
     @include('rfq-responses.manage', ['rfq' => $rfq])
 
     @if ($rfq->supplier_response_enabled && $rfq->procurement_officer_user_id)
-        <link rel="stylesheet" href="{{ asset('css/rfq-responses.css') }}">
-        <section class="table-panel rfq-response-management">
-            @include('rfq-responses.document', ['snapshot' => app(\App\Services\RfqSupplierWorkflowService::class)->issuedSnapshot($rfq)])
-        </section>
+        <link rel="stylesheet" href="{{ asset('css/rfq-responses.css') }}?v={{ filemtime(public_path('css/rfq-responses.css')) }}">
+        @include('rfq-responses.document', ['snapshot' => app(\App\Services\RfqSupplierWorkflowService::class)->issuedSnapshot($rfq)])
     @else
     @include('head-office.rfqs.partials.rfq-excel-form', [
         'rfq' => $rfq,
