@@ -41,6 +41,9 @@ class DocumentListControlsTest extends TestCase
         $search = $xpath->query('//form[@data-list-search]')->item(0);
 
         $this->assertSame($action, $search->getAttribute('action'));
+        $this->assertCount(0, $xpath->query('.//select', $search));
+        $this->assertFalse($search->hasAttribute('data-global-search'));
+        $this->assertSame('Search PPMPs...', $xpath->query('.//input[@name="search"]', $search)->item(0)->getAttribute('placeholder'));
         $this->assertSame('Office supplies', $xpath->query('.//input[@name="search"]', $search)->item(0)->getAttribute('value'));
         $this->assertSame('accepted', $xpath->query('.//input[@name="status"]', $search)->item(0)->getAttribute('value'));
         $this->assertSame('2026', $xpath->query('.//input[@name="fiscal_year"]', $search)->item(0)->getAttribute('value'));

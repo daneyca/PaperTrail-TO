@@ -7,24 +7,17 @@
 @endphp
 
 <form class="dashboard-search enterprise-topbar__search document-list-search" role="search" method="GET" action="{{ $action }}"
-      data-global-search data-list-search data-list-action="{{ $action }}" data-global-action="{{ route('search.index') }}"
-      data-suggestions-url="{{ route('search.suggestions') }}" data-list-label="{{ $label }}">
-    <label class="sr-only" for="dashboard-search-scope">Where to search</label>
-    <select id="dashboard-search-scope" class="document-list-search__scope" data-search-scope>
-        <option value="page">{{ $label }}</option>
-        <option value="global">All records</option>
-    </select>
+      data-list-search>
     <label class="sr-only" for="dashboard-search">Search {{ $label }} by tracking number or title</label>
     <input id="dashboard-search" name="search" type="search" value="{{ $query['search'] ?? '' }}"
-           placeholder="Tracking number or title…" aria-label="Search {{ $label }} by tracking number or title"
-           autocomplete="off" aria-autocomplete="none" aria-controls="dashboard-search-suggestions" aria-expanded="false">
+           placeholder="Search {{ $label }}..." aria-label="Search {{ $label }} by tracking number or title"
+           autocomplete="off">
     @foreach (\Illuminate\Support\Arr::except($query, 'search') as $name => $value)
-        <input type="hidden" name="{{ $name }}" value="{{ $value }}" data-list-search-filter>
+        <input type="hidden" name="{{ $name }}" value="{{ $value }}">
     @endforeach
     <button class="document-list-search__submit" type="submit" aria-label="Search {{ $label }}">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7.5"/><path d="m16 16 5 5"/></svg>
     </button>
-    <div id="dashboard-search-suggestions" class="global-search-suggestions" role="listbox" hidden></div>
 </form>
 <button class="document-list-filter-toggle" type="button" data-open-list-filters="{{ $id }}-filter-dialog"
         aria-haspopup="dialog" aria-controls="{{ $id }}-filter-dialog" aria-expanded="false" title="Filter {{ $label }} on this page">

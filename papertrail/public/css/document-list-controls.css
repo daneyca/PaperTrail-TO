@@ -3,23 +3,8 @@ body.dashboard-body .document-list-search {
     min-width: 180px !important;
 }
 body.dashboard-body .document-list-search input[type="search"] {
-    padding-left: 104px !important;
+    padding-left: 13px !important;
     padding-right: 40px !important;
-}
-body.dashboard-body .document-list-search__scope {
-    position: absolute;
-    inset: 4px auto 4px 6px;
-    width: 88px;
-    min-height: 0;
-    padding: 0 3px;
-    border: 0;
-    border-right: 1px solid var(--pt-saas-line, #dbe3ef);
-    border-radius: 0;
-    background: transparent;
-    color: var(--pt-saas-ink, #102c50);
-    font: inherit;
-    font-size: 12px;
-    font-weight: 700;
 }
 body.dashboard-body .document-list-search__submit {
     position: absolute;

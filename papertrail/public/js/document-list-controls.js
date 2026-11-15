@@ -3,26 +3,6 @@
     if (!search) return;
 
     const input = search.querySelector('input[type="search"]');
-    const scope = search.querySelector('[data-search-scope]');
-    const submit = search.querySelector('button[type="submit"]');
-    const terms = { page: input.value, global: '' };
-    let currentScope = scope.value;
-
-    scope.addEventListener('change', () => {
-        terms[currentScope] = input.value;
-        currentScope = scope.value;
-        const isPage = currentScope === 'page';
-        search.action = isPage ? search.dataset.listAction : search.dataset.globalAction;
-        input.name = isPage ? 'search' : 'q';
-        input.value = terms[currentScope];
-        input.placeholder = isPage ? 'Tracking number or title…' : 'Search all records…';
-        const label = isPage ? `Search ${search.dataset.listLabel} by tracking number or title` : 'Search all procurement records';
-        input.setAttribute('aria-label', label);
-        input.setAttribute('aria-autocomplete', isPage ? 'none' : 'list');
-        submit.setAttribute('aria-label', isPage ? `Search ${search.dataset.listLabel}` : 'Search all records');
-        search.querySelectorAll('[data-list-search-filter]').forEach(field => { field.disabled = !isPage; });
-        input.dispatchEvent(new Event('input'));
-    });
 
     document.querySelectorAll('[data-open-list-filters]').forEach(trigger => {
         const dialog = document.getElementById(trigger.dataset.openListFilters);
@@ -42,10 +22,6 @@
             form.querySelector('[data-list-filter-search]').value = input.value;
         });
         trigger.addEventListener('click', () => {
-            if (scope.value !== 'page') {
-                scope.value = 'page';
-                scope.dispatchEvent(new Event('change'));
-            }
             form.reset();
             validateDates();
             form.querySelector('[data-list-filter-search]').value = input.value;
