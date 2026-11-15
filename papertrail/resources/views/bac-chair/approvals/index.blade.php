@@ -25,7 +25,7 @@
     </section>
 
     <section class="table-panel pt-smooth-enter" style="--pt-delay: 220ms" aria-label="BAC Chair approval queue">
-        <form method="GET" action="{{ route('bac-chair.approvals.index') }}" class="budget-filter-toolbar">
+        <x-navbar-filter-form :action="route('bac-chair.approvals.index')" class="budget-filter-toolbar">
             <div class="user-search">
                 <label for="approval-search">Search documents</label>
                 <input id="approval-search" name="search" type="search" value="{{ $filters['search'] ?? '' }}" placeholder="Tracking number, title, or requesting office">
@@ -85,7 +85,7 @@
                 <button type="submit">Apply</button>
                 <a href="{{ route('bac-chair.approvals.index') }}">Clear</a>
             </div>
-        </form>
+        </x-navbar-filter-form>
 
         <div class="table-scroll">
             <table class="user-management-table">

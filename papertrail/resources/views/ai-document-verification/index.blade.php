@@ -149,7 +149,7 @@
                 </div>
             </header>
 
-            <form method="GET" action="{{ route('ai-document-verification.index') }}" class="ai-verification-filter-toolbar">
+            <x-navbar-filter-form :action="route('ai-document-verification.index')" class="ai-verification-filter-toolbar">
                 <label class="ai-verification-field">
                     <span>Search</span>
                     <input type="search" name="search" value="{{ $filters['search'] }}" placeholder="File name, tracking number, or office">
@@ -181,7 +181,7 @@
                     <button type="submit">Apply</button>
                     <a href="{{ route('ai-document-verification.index', ['scope' => $filters['scope']]) }}">Clear</a>
                 </div>
-            </form>
+            </x-navbar-filter-form>
 
             <div class="ai-verification-table-wrap">
                 <table class="data-table ai-verification-table">

@@ -26,7 +26,7 @@
     </section>
 
     <section class="table-panel" aria-label="Reviewed accounting documents">
-        <form method="GET" action="{{ route('accounting.reviewed.index') }}" class="budget-filter-toolbar reviewed-filter-toolbar">
+        <x-navbar-filter-form :action="route('accounting.reviewed.index')" class="budget-filter-toolbar reviewed-filter-toolbar">
             <div class="user-search">
                 <label for="accounting-reviewed-search">Search documents</label>
                 <input id="accounting-reviewed-search" name="search" type="search" value="{{ $filters['search'] ?? '' }}" placeholder="Tracking number, title, or requesting office">
@@ -86,7 +86,7 @@
                 <button type="submit">Apply</button>
                 <a href="{{ route('accounting.reviewed.index') }}">Clear</a>
             </div>
-        </form>
+        </x-navbar-filter-form>
 
         <div class="table-scroll">
             <table class="user-management-table">

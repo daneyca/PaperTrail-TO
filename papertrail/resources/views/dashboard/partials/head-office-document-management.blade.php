@@ -59,7 +59,7 @@
     </section>
 
     @if ($searchAction)
-        <form method="GET" action="{{ $searchAction }}" class="head-office-doc-filter pt-smooth-enter rounded-2xl border border-slate-200 bg-white p-3 shadow-sm" style="--pt-delay: 120ms">
+        <x-navbar-filter-form :action="$searchAction" label="Documents" class="head-office-doc-filter pt-smooth-enter rounded-2xl border border-slate-200 bg-white p-3 shadow-sm" style="--pt-delay: 120ms">
             <label class="pt-sr-only" for="dashboard-search-documents">Search documents</label>
             <div class="relative">
                 <x-papertrail.icon name="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -89,7 +89,7 @@
                 <x-papertrail.icon name="filter" class="h-4 w-4" />
                 Filter
             </button>
-        </form>
+        </x-navbar-filter-form>
     @endif
 
     <nav class="document-filter-tabs pt-smooth-enter" style="--pt-delay: 150ms" aria-label="Document type filters">

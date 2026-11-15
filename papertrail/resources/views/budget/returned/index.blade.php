@@ -26,7 +26,7 @@
     </section>
 
     <section class="table-panel" aria-label="Returned budget documents">
-        <form method="GET" action="{{ route('budget.returned.index') }}" class="budget-filter-toolbar returned-filter-toolbar">
+        <x-navbar-filter-form :action="route('budget.returned.index')" class="budget-filter-toolbar returned-filter-toolbar">
             <div class="user-search">
                 <label for="returned-search">Search documents</label>
                 <input id="returned-search" name="search" type="search" value="{{ $filters['search'] ?? '' }}" placeholder="Tracking number, title, or requesting office">
@@ -76,7 +76,7 @@
                 <button type="submit">Apply</button>
                 <a href="{{ route('budget.returned.index') }}">Clear</a>
             </div>
-        </form>
+        </x-navbar-filter-form>
 
         <div class="table-scroll">
             <table class="user-management-table">

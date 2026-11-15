@@ -27,7 +27,7 @@
                 <h2>Assigned PR Numbers and Dates</h2>
             </div>
         </div>
-        <form method="GET" action="{{ route('pr-numbering.assigned.index') }}" class="budget-filter-toolbar pr-filter-toolbar">
+        <x-navbar-filter-form :action="route('pr-numbering.assigned.index')" class="budget-filter-toolbar pr-filter-toolbar">
             <div class="user-search">
                 <label for="assigned-pr-search">Search Assigned PRs</label>
                 <input id="assigned-pr-search" name="search" type="search" value="{{ $filters['search'] ?? '' }}" placeholder="PR number, tracking number, title, or office">
@@ -67,7 +67,7 @@
                 <button type="submit">Apply</button>
                 <a href="{{ route('pr-numbering.assigned.index') }}">Clear</a>
             </div>
-        </form>
+        </x-navbar-filter-form>
 
         <div class="table-scroll">
             <table class="user-management-table">

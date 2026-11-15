@@ -25,7 +25,7 @@
     </section>
 
     <section class="table-panel pt-smooth-enter" style="--pt-delay: 220ms" aria-label="BAC Resolutions table">
-        <form method="GET" action="{{ route('bac-chair.resolutions.index') }}" class="budget-filter-toolbar app-filter-toolbar">
+        <x-navbar-filter-form :action="route('bac-chair.resolutions.index')" class="budget-filter-toolbar app-filter-toolbar">
             <div class="user-search">
                 <label for="resolution-search">Search</label>
                 <input id="resolution-search" name="search" type="search" value="{{ $filters['search'] ?? '' }}" placeholder="Resolution no., title, PR, office">
@@ -65,7 +65,7 @@
                 <button type="submit">Apply</button>
                 <a href="{{ route('bac-chair.resolutions.index') }}">Clear</a>
             </div>
-        </form>
+        </x-navbar-filter-form>
 
         <div class="table-scroll">
             <table class="user-management-table">

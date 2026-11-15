@@ -23,7 +23,7 @@
     </section>
 
     <section class="table-panel" aria-label="Pending accounting review documents">
-        <form method="GET" action="{{ route('accounting.pending-review.index') }}" class="budget-filter-toolbar">
+        <x-navbar-filter-form :action="route('accounting.pending-review.index')" class="budget-filter-toolbar">
             <div class="user-search">
                 <label for="accounting-search">Search documents</label>
                 <input id="accounting-search" name="search" type="search" value="{{ $filters['search'] ?? '' }}" placeholder="Tracking number, title, or requesting office">
@@ -82,7 +82,7 @@
                 <button type="submit">Apply</button>
                 <a href="{{ route('accounting.pending-review.index') }}">Clear</a>
             </div>
-        </form>
+        </x-navbar-filter-form>
 
         <div class="table-scroll">
             <table class="user-management-table">

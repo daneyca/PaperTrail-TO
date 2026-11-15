@@ -50,7 +50,7 @@
     </section>
 
     <section class="table-panel pt-smooth-enter" style="--pt-delay: 220ms" aria-label="BAC Chair report filters">
-        <form method="GET" action="{{ route('bac-chair.reports.index') }}" class="budget-filter-toolbar">
+        <x-navbar-filter-form :action="route('bac-chair.reports.index')" class="budget-filter-toolbar">
             <div class="user-filter">
                 <label for="fiscal-year">Fiscal Year</label>
                 <select id="fiscal-year" name="fiscal_year">
@@ -107,7 +107,7 @@
             <div class="user-filter"><label for="date-from">Date From</label><input id="date-from" name="date_from" type="date" value="{{ $filters['date_from'] ?? '' }}"></div>
             <div class="user-filter"><label for="date-to">Date To</label><input id="date-to" name="date_to" type="date" value="{{ $filters['date_to'] ?? '' }}"></div>
             <div class="filter-actions"><button type="submit">Apply</button><a href="{{ route('bac-chair.reports.index') }}">Clear</a></div>
-        </form>
+        </x-navbar-filter-form>
     </section>
 
     <section class="table-panel pt-smooth-enter" style="--pt-delay: 300ms">

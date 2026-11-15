@@ -79,7 +79,7 @@
     </section>
 
     <section class="table-panel">
-        <form method="GET" action="{{ route('admin.roles.index') }}" class="office-table-toolbar">
+        <x-navbar-filter-form :action="route('admin.roles.index')" class="office-table-toolbar">
             <div class="user-search">
                 <label for="role-search">Search roles</label>
                 <input id="role-search" name="search" type="search" value="{{ $filters['search'] ?? '' }}" placeholder="Search code, name, or description">
@@ -104,7 +104,7 @@
                 <button type="submit">Apply</button>
                 <a href="{{ route('admin.roles.index') }}">Clear</a>
             </div>
-        </form>
+        </x-navbar-filter-form>
 
         <div class="table-scroll">
             <table class="user-management-table">

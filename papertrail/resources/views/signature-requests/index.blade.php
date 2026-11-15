@@ -37,7 +37,7 @@
     </section>
 
     <section class="signature-request-list pt-smooth-enter" style="--pt-delay: 220ms">
-        <form method="GET" action="{{ route('signature-requests.index') }}" class="signature-filter-card">
+        <x-navbar-filter-form :action="route('signature-requests.index')" class="signature-filter-card">
             <div class="signature-filter-grid">
                 <div class="signature-filter-field">
                     <label for="search">Search</label>
@@ -84,7 +84,7 @@
                     <a href="{{ route('signature-requests.index') }}" class="btn btn-clear">Clear</a>
                 </div>
             </div>
-        </form>
+        </x-navbar-filter-form>
 
         <div class="signature-table-card">
             <div class="signature-table-wrap">

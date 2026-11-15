@@ -65,6 +65,7 @@
             <div id="dashboard-search-suggestions" class="global-search-suggestions" role="listbox" hidden></div>
         </form>
         @endif
+        @yield('topbar-filters')
 
         <div class="enterprise-topbar__middle">
             <div class="pht-clock-widget" data-pht-clock aria-live="polite">

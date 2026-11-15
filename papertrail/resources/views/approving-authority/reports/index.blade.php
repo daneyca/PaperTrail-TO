@@ -45,7 +45,7 @@
     </section>
 
     <section class="table-panel pt-smooth-enter" style="--pt-delay: 220ms" aria-label="Head of the Procuring Entity report filters">
-        <form method="GET" action="{{ route('approving-authority.reports.index') }}" class="budget-filter-toolbar">
+        <x-navbar-filter-form :action="route('approving-authority.reports.index')" class="budget-filter-toolbar">
             <div class="user-filter"><label for="fiscal-year">Fiscal Year</label><select id="fiscal-year" name="fiscal_year"><option value="">All years</option>@foreach ($fiscalYears as $year)<option value="{{ $year }}" @selected((string) ($filters['fiscal_year'] ?? '') === (string) $year)>{{ $year }}</option>@endforeach</select></div>
             <div class="user-filter"><label for="report-type">Report Type</label><select id="report-type" name="report_type">@foreach ($reportTypes as $value => $text)<option value="{{ $value }}" @selected(($filters['report_type'] ?? 'all') === $value)>{{ $text }}</option>@endforeach</select></div>
             <div class="user-filter"><label for="document-type">Document Type</label><select id="document-type" name="document_type"><option value="">All types</option>@foreach ($documentTypes as $type)<option value="{{ $type }}" @selected(($filters['document_type'] ?? '') === $type)>{{ $type }}</option>@endforeach</select></div>
@@ -55,7 +55,7 @@
             <div class="user-filter"><label for="date-from">Date From</label><input id="date-from" name="date_from" type="date" value="{{ $filters['date_from'] ?? '' }}"></div>
             <div class="user-filter"><label for="date-to">Date To</label><input id="date-to" name="date_to" type="date" value="{{ $filters['date_to'] ?? '' }}"></div>
             <div class="filter-actions"><button type="submit">Apply</button><a href="{{ route('approving-authority.reports.index') }}">Clear</a></div>
-        </form>
+        </x-navbar-filter-form>
     </section>
 
     <section class="table-panel pt-smooth-enter" style="--pt-delay: 300ms">

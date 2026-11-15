@@ -24,7 +24,7 @@
     </section>
 
     <section class="table-panel pt-smooth-enter" style="--pt-delay: 220ms" aria-label="BAC Member documents for review">
-        <form method="GET" action="{{ route('bac-member.review.index') }}" class="budget-filter-toolbar">
+        <x-navbar-filter-form :action="route('bac-member.review.index')" class="budget-filter-toolbar">
             <div class="user-search">
                 <label for="review-search">Search documents</label>
                 <input id="review-search" name="search" type="search" value="{{ $filters['search'] ?? '' }}" placeholder="Tracking number, title, or requesting office">
@@ -84,7 +84,7 @@
                 <button type="submit">Apply</button>
                 <a href="{{ route('bac-member.review.index') }}">Clear</a>
             </div>
-        </form>
+        </x-navbar-filter-form>
 
         <div class="table-scroll">
             <table class="user-management-table">

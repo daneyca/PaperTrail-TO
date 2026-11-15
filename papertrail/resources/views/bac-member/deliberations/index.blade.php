@@ -25,7 +25,7 @@
     </section>
 
     <section class="table-panel pt-smooth-enter" style="--pt-delay: 220ms" aria-label="BAC deliberations list">
-        <form method="GET" action="{{ route('bac-member.deliberations.index') }}" class="budget-filter-toolbar reviewed-filter-toolbar">
+        <x-navbar-filter-form :action="route('bac-member.deliberations.index')" class="budget-filter-toolbar reviewed-filter-toolbar">
             <div class="user-search">
                 <label for="deliberation-search">Search deliberations</label>
                 <input id="deliberation-search" name="search" type="search" value="{{ $filters['search'] ?? '' }}" placeholder="Deliberation number, tracking number, title, or office">
@@ -74,7 +74,7 @@
                 <button type="submit">Apply</button>
                 <a href="{{ route('bac-member.deliberations.index') }}">Clear</a>
             </div>
-        </form>
+        </x-navbar-filter-form>
 
         <div class="table-scroll">
             <table class="user-management-table">

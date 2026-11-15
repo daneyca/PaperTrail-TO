@@ -31,7 +31,7 @@
     </section>
 
     <section class="table-panel" aria-label="{{ $title }}">
-        <form method="GET" action="{{ url()->current() }}" class="report-filter-toolbar">
+        <x-navbar-filter-form :action="url()->current()" class="report-filter-toolbar">
             <div class="user-search">
                 <label for="report-search">Search report</label>
                 <input id="report-search" name="search" type="search" value="{{ request('search') }}" placeholder="Search by account, office, module, or action">
@@ -41,7 +41,7 @@
                 <button type="submit">Apply</button>
                 <a href="{{ url()->current() }}">Clear</a>
             </div>
-        </form>
+        </x-navbar-filter-form>
 
         <div class="table-scroll">
             <table class="user-management-table report-table">

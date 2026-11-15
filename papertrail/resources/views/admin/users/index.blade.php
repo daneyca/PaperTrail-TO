@@ -37,7 +37,7 @@
     </section>
 
     <section class="table-panel" aria-label="Accounts">
-        <form method="GET" action="{{ route('admin.users.index') }}" class="user-table-toolbar">
+        <x-navbar-filter-form :action="route('admin.users.index')" class="user-table-toolbar">
             <div class="user-search">
                 <label for="user-search">Search accounts</label>
                 <input id="user-search" name="search" type="search" value="{{ $filters['search'] ?? '' }}" placeholder="Search User ID, name, or office">
@@ -85,7 +85,7 @@
                 <button type="submit">Apply</button>
                 <a href="{{ route('admin.users.index') }}">Clear</a>
             </div>
-        </form>
+        </x-navbar-filter-form>
 
         <div class="table-scroll">
             <table class="user-management-table">

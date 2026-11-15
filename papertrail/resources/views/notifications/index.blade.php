@@ -37,7 +37,7 @@
     </section>
 
     <section class="table-panel notification-filter-panel" aria-label="Notification filters">
-        <form method="GET" action="{{ route('notifications.index') }}" class="notification-filter-toolbar">
+        <x-navbar-filter-form :action="route('notifications.index')" class="notification-filter-toolbar">
             <div class="user-search">
                 <label for="notification-search">Search notifications</label>
                 <input id="notification-search" name="search" type="search" value="{{ $filters['search'] ?? '' }}" placeholder="Title or message">
@@ -86,7 +86,7 @@
                 <button type="submit">Apply</button>
                 <a href="{{ route('notifications.index') }}">Clear</a>
             </div>
-        </form>
+        </x-navbar-filter-form>
     </section>
 
     <section class="table-panel notification-list-panel" aria-label="Notifications list">

@@ -79,7 +79,7 @@
         </section>
 
         <section class="ai-summary-filter-card" aria-label="AI procurement summary filters">
-            <form method="GET" action="{{ route('admin.ai-summary.index') }}" class="ai-summary-filter-grid">
+            <x-navbar-filter-form :action="route('admin.ai-summary.index')" class="ai-summary-filter-grid">
                 <label>
                     <span>Date From</span>
                     <input type="date" name="date_from" value="{{ $filters['date_from_input'] ?? '' }}">
@@ -128,7 +128,7 @@
                     <button type="submit" class="dashboard-action">Apply</button>
                     <a href="{{ route('admin.ai-summary.index') }}" class="btn-secondary">Clear</a>
                 </div>
-            </form>
+            </x-navbar-filter-form>
         </section>
 
         <section class="ai-summary-kpis" aria-label="Procurement summary metrics">

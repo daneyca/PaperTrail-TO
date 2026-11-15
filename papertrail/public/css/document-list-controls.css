@@ -165,7 +165,7 @@ body.dashboard-body .document-filter-summary {
 html.papertrail-dark-mode .document-list-filter-dialog { color-scheme: dark; }
 html.papertrail-dark-mode .document-list-filter-count { background: #1e3a5f; color: #bfdbfe; }
 @media (max-width: 760px) {
-    body.dashboard-body .enterprise-topbar__right:has(.document-list-search) { flex-wrap: wrap !important; }
+    body.dashboard-body .enterprise-topbar__right:has(.document-list-filter-toggle) { flex-wrap: wrap !important; }
     body.dashboard-body .document-list-search { flex: 1 1 calc(100% - 112px) !important; width: auto !important; max-width: none !important; }
 }
 @media (max-width: 420px) {

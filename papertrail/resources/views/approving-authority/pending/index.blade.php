@@ -24,7 +24,7 @@
     </section>
 
     <section class="table-panel pt-smooth-enter" style="--pt-delay: 220ms" aria-label="Pending approval documents">
-        <form method="GET" action="{{ route('approving-authority.pending.index') }}" class="budget-filter-toolbar">
+        <x-navbar-filter-form :action="route('approving-authority.pending.index')" class="budget-filter-toolbar">
             <div class="user-search">
                 <label for="approval-search">Search documents</label>
                 <input id="approval-search" name="search" type="search" value="{{ $filters['search'] ?? '' }}" placeholder="Tracking number, title, or requesting office">
@@ -36,7 +36,7 @@
             <div class="user-filter"><label for="date-from">Date From</label><input id="date-from" name="date_from" type="date" value="{{ $filters['date_from'] ?? '' }}"></div>
             <div class="user-filter"><label for="date-to">Date To</label><input id="date-to" name="date_to" type="date" value="{{ $filters['date_to'] ?? '' }}"></div>
             <div class="filter-actions"><button type="submit">Apply</button><a href="{{ route('approving-authority.pending.index') }}">Clear</a></div>
-        </form>
+        </x-navbar-filter-form>
 
         <div class="table-scroll">
             <table class="user-management-table">

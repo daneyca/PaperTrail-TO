@@ -74,7 +74,7 @@
     </section>
 
     <section class="table-panel pt-smooth-enter" aria-label="Supplier signature requests">
-        <form method="GET" action="{{ route('supplier-signatures.index') }}" class="user-table-toolbar">
+        <x-navbar-filter-form :action="route('supplier-signatures.index')" class="user-table-toolbar">
             <div class="user-search">
                 <label for="search">Search</label>
                 <input id="search" name="search" type="search" value="{{ $filters['search'] ?? '' }}" placeholder="Supplier, document, tracking number">
@@ -94,7 +94,7 @@
                 <button type="submit">Apply</button>
                 <a href="{{ route('supplier-signatures.index') }}">Clear</a>
             </div>
-        </form>
+        </x-navbar-filter-form>
 
         <div class="table-scroll">
             <table class="user-management-table">

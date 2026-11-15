@@ -19,7 +19,7 @@
     </section>
 
     <section class="table-panel notification-filter-panel" aria-label="Email activity filters">
-        <form method="GET" action="{{ route('email-activity.index') }}" class="notification-filter-toolbar">
+        <x-navbar-filter-form :action="route('email-activity.index')" class="notification-filter-toolbar">
             <div class="user-search">
                 <label for="email-activity-search">Search emails</label>
                 <input id="email-activity-search" name="search" type="search" value="{{ $filters['search'] ?? '' }}" placeholder="Subject, recipient, tracking no.">
@@ -49,7 +49,7 @@
                 <button type="submit">Apply</button>
                 <a href="{{ route('email-activity.index') }}">Clear</a>
             </div>
-        </form>
+        </x-navbar-filter-form>
     </section>
 
     <section class="table-panel notification-list-panel" aria-label="Email activity list">

@@ -59,7 +59,7 @@
                 <h2 id="bidding-files-heading">Bidding Files</h2>
             </div>
 
-            <form method="GET" action="{{ route('bac-secretariat.competitive-bidding.supporting-documents.index') }}" class="cb-support-search">
+            <x-navbar-filter-form :action="route('bac-secretariat.competitive-bidding.supporting-documents.index')" class="cb-support-search">
                 <label for="supporting-search">Search</label>
                 <div>
                     <input id="supporting-search" name="search" type="search" value="{{ $search }}" placeholder="Reference, project, or supplier">
@@ -70,7 +70,7 @@
                         <a href="{{ route('bac-secretariat.competitive-bidding.supporting-documents.index') }}">Clear</a>
                     @endif
                 </div>
-            </form>
+            </x-navbar-filter-form>
         </header>
 
         <div class="cb-support-table-scroll">

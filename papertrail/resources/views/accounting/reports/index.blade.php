@@ -40,7 +40,7 @@
     </section>
 
     <section class="table-panel budget-report-filter-panel" aria-label="Accounting report filters">
-        <form method="GET" action="{{ route('accounting.reports.index') }}" class="budget-report-filter-toolbar">
+        <x-navbar-filter-form :action="route('accounting.reports.index')" class="budget-report-filter-toolbar">
             <div class="user-filter">
                 <label for="fiscal-year">Fiscal Year</label>
                 <select id="fiscal-year" name="fiscal_year">
@@ -105,7 +105,7 @@
                 <button type="submit">Apply</button>
                 <a href="{{ route('accounting.reports.index') }}">Clear</a>
             </div>
-        </form>
+        </x-navbar-filter-form>
     </section>
 
     <section class="budget-report-grid" aria-label="Accounting report visual summaries">

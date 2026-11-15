@@ -168,14 +168,14 @@
                 </div>
             </div>
 
-            <form method="GET" action="{{ route($config['route_prefix'] . '.index') }}" class="rule-config-search">
+            <x-navbar-filter-form :action="route($config['route_prefix'] . '.index')" class="rule-config-search">
                 <label for="rule-search">Search rules</label>
                 <input id="rule-search" type="search" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Rule name, document type, status, or template key">
                 <div class="filter-actions">
                     <button type="submit">Apply</button>
                     <a href="{{ route($config['route_prefix'] . '.index') }}">Clear</a>
                 </div>
-            </form>
+            </x-navbar-filter-form>
 
             <div class="table-scroll">
                 <table class="rule-config-table">

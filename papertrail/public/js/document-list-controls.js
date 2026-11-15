@@ -1,8 +1,6 @@
 (() => {
     const search = document.querySelector('[data-list-search]');
-    if (!search) return;
-
-    const input = search.querySelector('input[type="search"]');
+    const input = search?.querySelector('input[type="search"]');
 
     document.querySelectorAll('[data-open-list-filters]').forEach(trigger => {
         const dialog = document.getElementById(trigger.dataset.openListFilters);
@@ -19,12 +17,14 @@
         form.addEventListener('submit', event => {
             validateDates();
             if (!form.reportValidity()) event.preventDefault();
-            form.querySelector('[data-list-filter-search]').value = input.value;
+            const keyword = form.querySelector('[data-list-filter-search]');
+            if (keyword && input) keyword.value = input.value;
         });
         trigger.addEventListener('click', () => {
             form.reset();
             validateDates();
-            form.querySelector('[data-list-filter-search]').value = input.value;
+            const keyword = form.querySelector('[data-list-filter-search]');
+            if (keyword && input) keyword.value = input.value;
             dialog.showModal();
             trigger.setAttribute('aria-expanded', 'true');
         });

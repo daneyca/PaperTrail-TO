@@ -22,7 +22,7 @@
         <div class="panel-heading">
             <div><p class="eyebrow">Purchase Requests</p><h2>Pending PR Number and Date</h2></div>
         </div>
-        <form method="GET" action="{{ route('pr-numbering.pending.index') }}" class="budget-filter-toolbar pr-filter-toolbar">
+        <x-navbar-filter-form :action="route('pr-numbering.pending.index')" class="budget-filter-toolbar pr-filter-toolbar">
             <div class="user-search">
                 <label for="pr-number-search">Search Requests</label>
                 <input id="pr-number-search" name="search" type="search" value="{{ $filters['search'] ?? '' }}" placeholder="Tracking number, title, or office">
@@ -62,7 +62,7 @@
                 <button type="submit">Apply</button>
                 <a href="{{ route('pr-numbering.pending.index') }}">Clear</a>
             </div>
-        </form>
+        </x-navbar-filter-form>
 
         <div class="table-scroll">
             <table class="user-management-table">

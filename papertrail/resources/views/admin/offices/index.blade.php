@@ -29,7 +29,7 @@
     </section>
 
     <section class="table-panel" aria-label="Offices">
-        <form method="GET" action="{{ route('admin.offices.index') }}" class="office-table-toolbar">
+        <x-navbar-filter-form :action="route('admin.offices.index')" class="office-table-toolbar">
             <div class="user-search">
                 <label for="office-search">Search offices</label>
                 <input id="office-search" name="search" type="search" value="{{ $filters['search'] ?? '' }}" placeholder="Search code, name, or type">
@@ -58,7 +58,7 @@
                 <button type="submit">Apply</button>
                 <a href="{{ route('admin.offices.index') }}">Clear</a>
             </div>
-        </form>
+        </x-navbar-filter-form>
 
         <div class="table-scroll">
             <table class="user-management-table">
