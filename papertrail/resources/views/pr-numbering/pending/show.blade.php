@@ -7,7 +7,10 @@
         $officialNumbers = app(\App\Services\OfficialPrNumberService::class);
         $fundCode = $officialNumbers->fundCode($document);
         $officialDate = old('pr_date', $document->pr_date?->format('Y-m-d') ?? now('Asia/Manila')->format('Y-m-d'));
-        $numberExample = $officialNumbers->example($document, is_string($officialDate) ? $officialDate : null);
+        $officialDate = is_string($officialDate) ? $officialDate : '';
+        $parsedDate = \DateTimeImmutable::createFromFormat('!Y-m-d', $officialDate);
+        $numberPreview = $parsedDate && $parsedDate->format('Y-m-d') === $officialDate
+            ? $officialNumbers->preview($document, $officialDate) : null;
     @endphp
     <section class="dashboard-hero admin-users-hero">
         <div>
@@ -72,12 +75,12 @@
 
                     <div class="pr-numbering-field-grid">
                         <div class="pr-numbering-field">
-                            <label for="pr_no">Official PR No.</label>
-                            <input id="pr_no" name="pr_no" type="text" value="{{ old('pr_no', $document->pr_no) }}" placeholder="{{ $numberExample ?? 'Fund source required' }}" pattern="{{ $fundCode ?? '(101|401|221)' }}-[0-9]{4}-(0[1-9]|1[0-2])-[0-9]{3,9}" maxlength="21" autocomplete="off" aria-describedby="pr-number-example" data-official-pr-number data-fund-code="{{ $fundCode }}" required @disabled(! $fundCode)>
+                            <label for="pr_no">Next Official PR No. (Automatic)</label>
+                            <input id="pr_no" type="text" value="{{ $numberPreview }}" placeholder="{{ $fundCode ? 'Choose a valid PR date' : 'Fund source required' }}" readonly aria-describedby="pr-number-help" data-official-pr-number data-fund-code="{{ $fundCode }}" data-preview-url="{{ route('pr-numbering.pending.number-preview', $document) }}">
                             @if ($fundCode)
-                                <span id="pr-number-example" class="muted-text">Example: <span data-official-pr-example>{{ $numberExample }}</span>. Use the next sequence in the official PR register.</span>
+                                <span id="pr-number-help" class="muted-text" role="status" data-official-pr-help>The system assigns the next available number when you save. No typing needed.</span>
                             @else
-                                <span id="pr-number-example" class="field-error">Return this PR for correction of its fund source: General Fund (101), Trust Fund (401), or Special Fund / SEF (221).</span>
+                                <span id="pr-number-help" class="field-error">Return this PR for correction of its fund source: General Fund (101), Trust Fund (401), or Special Fund / SEF (221).</span>
                             @endif
                             @error('pr_no')<span class="field-error">{{ $message }}</span>@enderror
                         </div>

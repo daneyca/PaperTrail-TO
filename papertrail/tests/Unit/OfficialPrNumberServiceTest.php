@@ -11,7 +11,7 @@ class OfficialPrNumberServiceTest extends TestCase
     public function test_fund_code_comes_from_the_pr_fund_cluster(): void
     {
         $service = new OfficialPrNumberService;
-        foreach (['General Fund' => '101', 'general fund (development)' => '101', 'GF' => '101', 'Trust Fund' => '401', '401' => '401', 'Special Fund' => '221', 'Special Education Fund' => '221', 'SEF' => '221', 'School Fund' => '221'] as $fund => $code) {
+        foreach (['General Fund' => '101', 'General Funds' => '101', 'general fund (development)' => '101', 'GF' => '101', 'Trust Fund' => '401', 'Trust Funds' => '401', '401' => '401', 'Special Fund' => '221', 'Special Funds' => '221', 'Special Education Fund' => '221', 'SEF' => '221', 'School Fund' => '221'] as $fund => $code) {
             $this->assertSame($code, $service->fundCode(new ProcurementDocument(['fund_cluster' => (string) $fund])));
         }
         $this->assertNull($service->fundCode(new ProcurementDocument(['fund_cluster' => 'General Fund / Trust Fund'])));

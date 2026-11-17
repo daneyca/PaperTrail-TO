@@ -15,6 +15,7 @@ use App\Services\OfficialPrNumberService;
 use App\Services\SvpChainService;
 use App\Services\SystemNotificationService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -92,38 +93,32 @@ class PrNumberingController extends Controller
             return back()->with('error', 'This Purchase Request cannot be assigned a PR number.');
         }
 
-        if (is_string($request->input('pr_no'))) {
-            $request->merge(['pr_no' => trim($request->input('pr_no'))]);
-        }
         $validated = $request->validate([
-            'pr_no' => [
-                'bail',
-                'required',
-                'string',
-                'max:120',
-                function ($attribute, $value, $fail) use ($document, $request) {
-                    $error = app(OfficialPrNumberService::class)->validationError($document, $value, $request->input('pr_date'));
-                    if ($error) {
-                        $fail($error);
-                    }
-                },
-                Rule::unique('procurement_documents', 'pr_no')->ignore($document->id),
-            ],
-            'pr_date' => ['required', 'date'],
+            'pr_date' => ['required', 'date_format:Y-m-d'],
             'remarks' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        DB::transaction(function () use ($request, $document, $validated) {
+        $assignedNumber = DB::transaction(function () use ($request, $document, $validated): ?string {
+            $document = ProcurementDocument::whereKey($document->id)->lockForUpdate()->firstOrFail();
+            if (! $this->canViewPending($document)) {
+                return null;
+            }
+
             $oldValues = $document->only(['status', 'pr_number_status', 'pr_no', 'pr_date', 'current_office_id', 'assigned_to_user_id']);
             $oldStatus = $document->status;
             $fromOffice = $document->current_office_id;
+            // Finalize one PR at a time per office, including its related SVP record.
+            if ($document->submitting_office_id) {
+                $document->setRelation('submittingOffice', Office::whereKey($document->submitting_office_id)->lockForUpdate()->first());
+            }
+            $number = app(OfficialPrNumberService::class)->nextNumber($document, $validated['pr_date'], $request->user());
             $returnTarget = $this->requestingOfficeReturnTarget($document);
             $requestingOffice = $returnTarget['office'];
             $requestingUser = $returnTarget['user'];
             $requestingOfficeId = $requestingOffice?->id ?? $document->submitting_office_id;
 
             $document->update([
-                'pr_no' => trim($validated['pr_no']),
+                'pr_no' => $number,
                 'pr_number_status' => ProcurementDocument::PR_NUMBER_STATUS_ASSIGNED,
                 'pr_no_assigned_by_user_id' => $request->user()->id,
                 'pr_no_assigned_at' => now(),
@@ -137,8 +132,6 @@ class PrNumberingController extends Controller
                 'assigned_to_user_id' => $requestingUser?->id,
                 'bac_secretariat_status' => null,
             ]);
-
-            $this->updateSequence($document->fresh(), $request->user());
 
             $this->recordRouting(
                 $document,
@@ -166,11 +159,28 @@ class PrNumberingController extends Controller
             AuditLogger::log('PR Number Assignment', 'PR Number Assigned', 'Procurement Controller assigned an official PR number and returned the PR to the requesting office.', $document, $oldValues, $document->fresh()->only(['status', 'pr_number_status', 'pr_no', 'pr_date', 'current_office_id', 'assigned_to_user_id']));
 
             app(SvpChainService::class)->findOrCreateFromPr($document->refresh(), $request->user(), 'PR number assigned and returned to Requesting Office', $validated['remarks'] ?? null);
-        });
+
+            return $number;
+        }, 5);
+
+        if (! $assignedNumber) {
+            return back()->with('error', 'This Purchase Request is no longer pending PR number assignment.');
+        }
 
         return redirect()
             ->route('pr-numbering.assigned.index')
-            ->with('status', 'Official PR number assigned and returned to the requesting office.');
+            ->with('status', 'Official PR number '.$assignedNumber.' assigned and returned to the requesting office.');
+    }
+
+    public function previewNumber(Request $request, ProcurementDocument $document): JsonResponse
+    {
+        abort_unless($this->canViewPending($document), 409, 'This Purchase Request is no longer pending PR number assignment.');
+
+        $validated = $request->validate(['pr_date' => ['required', 'date_format:Y-m-d']]);
+
+        return response()->json([
+            'number' => app(OfficialPrNumberService::class)->preview($document, $validated['pr_date']),
+        ])->header('Cache-Control', 'no-store');
     }
 
     public function return(Request $request, ProcurementDocument $document): RedirectResponse
@@ -515,7 +525,8 @@ class PrNumberingController extends Controller
     {
         return in_array($document->document_type, ['PR', 'Purchase Request'], true)
             && $document->status === ProcurementDocument::STATUS_PENDING_PR_NUMBER_ASSIGNMENT
-            && $document->pr_number_status === ProcurementDocument::PR_NUMBER_STATUS_PENDING_ASSIGNMENT;
+            && $document->pr_number_status === ProcurementDocument::PR_NUMBER_STATUS_PENDING_ASSIGNMENT
+            && blank($document->pr_no);
     }
 
     private function applyFilters(Builder $query, Request $request): void
@@ -557,48 +568,6 @@ class PrNumberingController extends Controller
                 + Rfq::where('status', Rfq::STATUS_RETURNED)->count()
                 + PurchaseOrder::where('status', PurchaseOrder::STATUS_RETURNED)->count(),
         ];
-    }
-
-    private function updateSequence(ProcurementDocument $document, User $user): void
-    {
-        $parts = app(OfficialPrNumberService::class)->parts((string) $document->pr_no);
-        if (! $parts) {
-            return;
-        }
-        $year = $parts['year'];
-        $prefix = $parts['fund'].'-'.$year.'-';
-        $sequence = $parts['sequence'];
-
-        $current = DB::table('pr_number_sequences')
-            ->where('fiscal_year', $year)
-            ->where('prefix', $prefix)
-            ->lockForUpdate()
-            ->first();
-
-        if (! $current) {
-            DB::table('pr_number_sequences')->insert([
-                'fiscal_year' => $year,
-                'office_id' => null,
-                'prefix' => $prefix,
-                'last_sequence' => $sequence,
-                'created_by_user_id' => $user->id,
-                'updated_by_user_id' => $user->id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            return;
-        }
-
-        if ($sequence > (int) $current->last_sequence) {
-            DB::table('pr_number_sequences')
-                ->where('id', $current->id)
-                ->update([
-                    'last_sequence' => $sequence,
-                    'updated_by_user_id' => $user->id,
-                    'updated_at' => now(),
-                ]);
-        }
     }
 
     private function requestingOfficeReturnTarget(ProcurementDocument $document): array
@@ -658,15 +627,15 @@ class PrNumberingController extends Controller
 
         $user = User::where('user_id', 'BACSEC-001')->where('status', User::STATUS_ACTIVE)->first()
             ?: User::where('status', User::STATUS_ACTIVE)
-            ->where(function (Builder $query) {
-                $query->whereHas('assignedRole', function (Builder $roleQuery) {
-                    $roleQuery->where('code', 'bac_secretariat')
-                        ->orWhere('name', User::ROLE_BAC_SECRETARIAT);
+                ->where(function (Builder $query) {
+                    $query->whereHas('assignedRole', function (Builder $roleQuery) {
+                        $roleQuery->where('code', 'bac_secretariat')
+                            ->orWhere('name', User::ROLE_BAC_SECRETARIAT);
+                    })
+                        ->orWhere('role', User::ROLE_BAC_SECRETARIAT)
+                        ->orWhere('user_id', 'BACSEC-001');
                 })
-                    ->orWhere('role', User::ROLE_BAC_SECRETARIAT)
-                    ->orWhere('user_id', 'BACSEC-001');
-            })
-            ->first();
+                ->first();
 
         return ['office' => $office, 'user' => $user];
     }

@@ -648,6 +648,7 @@ Route::middleware(['no.cache', 'auth', 'password.changed', 'remember.page'])->gr
         Route::patch('/pending/purchase-orders/{purchaseOrder}/assign', [PrNumberingController::class, 'assignPurchaseOrder'])->middleware('permission:pr-number.assign')->name('purchase-orders.assign');
         Route::patch('/pending/purchase-orders/{purchaseOrder}/return', [PrNumberingController::class, 'returnPurchaseOrder'])->middleware('permission:pr-number.return')->name('purchase-orders.return');
         Route::get('/pending/{document}', [PrNumberingController::class, 'show'])->name('pending.show');
+        Route::get('/pending/{document}/number-preview', [PrNumberingController::class, 'previewNumber'])->name('pending.number-preview');
         Route::patch('/pending/{document}/assign', [PrNumberingController::class, 'assign'])
             ->middleware('permission:pr-number.assign')
             ->name('pending.assign');
