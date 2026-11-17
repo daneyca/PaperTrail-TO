@@ -35,11 +35,11 @@
         </div>
     </section>
 
-    <section class="workflow-summary-grid workflow-summary-grid--four" aria-label="PPMP review summary">
-        <x-dashboard.workflow-stat-card :href="route('bac-secretariat.ppmp.index', ['status' => 'pending_ppmp_review'])" :count="$summary['submitted']" :total="array_sum($summary)" label="Submitted to BAC" accent="blue" icon="send" :active="($filters['status'] ?? '') === 'pending_ppmp_review'" />
-        <x-dashboard.workflow-stat-card :href="route('bac-secretariat.ppmp.index', ['status' => 'under_ppmp_review'])" :count="$summary['underReview']" :total="array_sum($summary)" label="Under APP Consolidation" accent="green" icon="consolidate" :active="($filters['status'] ?? '') === 'under_ppmp_review'" />
-        <x-dashboard.workflow-stat-card :href="route('bac-secretariat.ppmp.index', ['status' => 'returned_by_bac_secretariat'])" :count="$summary['returned']" :total="array_sum($summary)" label="Returned" accent="red" icon="return" :active="($filters['status'] ?? '') === 'returned_by_bac_secretariat'" />
-        <x-dashboard.workflow-stat-card :href="route('bac-secretariat.ppmp.index', ['status' => 'accepted_for_app_consolidation'])" :count="$summary['accepted']" :total="array_sum($summary)" label="Approved" accent="green" icon="check" :active="($filters['status'] ?? '') === 'accepted_for_app_consolidation'" />
+    <section class="stat-grid-modern ppmp-summary-grid">
+        <x-dashboard.stat-card href="{{ route('bac-secretariat.ppmp.index', ['status' => 'pending_ppmp_review']) }}" value="{{ $summary['submitted'] }}" label="Submitted to BAC" accent="blue" />
+        <x-dashboard.stat-card href="{{ route('bac-secretariat.ppmp.index', ['status' => 'under_ppmp_review']) }}" value="{{ $summary['underReview'] }}" label="Under APP Consolidation" accent="blue" />
+        <x-dashboard.stat-card href="{{ route('bac-secretariat.ppmp.index', ['status' => 'returned_by_bac_secretariat']) }}" value="{{ $summary['returned'] }}" label="Returned" accent="red" />
+        <x-dashboard.stat-card href="{{ route('bac-secretariat.ppmp.index', ['status' => 'accepted_for_app_consolidation']) }}" value="{{ $summary['accepted'] }}" label="Approved" accent="green" />
     </section>
 
     <section class="table-panel">
