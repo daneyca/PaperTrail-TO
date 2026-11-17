@@ -39,6 +39,7 @@
     <section class="dashboard-hero admin-users-hero ppmp-page-hero">
         <div>
             <h1>Project Procurement Management Plan</h1>
+            <p class="ppmp-summary-budget">Total budget <strong>PHP {{ number_format((float) $summary['budget'], 2) }}</strong></p>
         </div>
         <div class="hero-actions">
             @if (auth()->user()->canManageSvpDocuments())
@@ -47,14 +48,13 @@
         </div>
     </section>
 
-    <section class="stat-grid stat-grid-modern head-office-summary-grid ppmp-summary-grid" aria-label="PPMP summary">
-        <x-dashboard.stat-card href="{{ route('head-office.ppmp.index') }}" value="{{ $summary['total'] }}" label="Total PPMPs" accent="navy" class="{{ blank($activeStatus) ? 'is-filter-active' : '' }}" />
-        <x-dashboard.stat-card href="{{ route('head-office.ppmp.index', ['status' => 'draft']) }}" value="{{ $summary['draft'] }}" label="Drafts" accent="gold" class="{{ $activeStatus === 'draft' ? 'is-filter-active' : '' }}" />
-        <x-dashboard.stat-card href="{{ route('head-office.ppmp.index', ['status' => 'submitted']) }}" value="{{ $summary['submitted'] }}" label="Submitted to BAC" accent="blue" class="{{ $activeStatus === 'submitted' ? 'is-filter-active' : '' }}" />
-        <x-dashboard.stat-card href="{{ route('head-office.ppmp.index', ['status' => 'reviewed']) }}" value="{{ $summary['reviewed'] }}" label="Under APP Consolidation" accent="green" class="{{ $activeStatus === 'reviewed' ? 'is-filter-active' : '' }}" />
-        <x-dashboard.stat-card href="{{ route('head-office.ppmp.index', ['status' => 'returned']) }}" value="{{ $summary['returned'] }}" label="Returned" accent="red" class="{{ $activeStatus === 'returned' ? 'is-filter-active' : '' }}" />
-        <x-dashboard.stat-card href="{{ route('head-office.ppmp.index', ['status' => 'accepted']) }}" value="{{ $summary['accepted'] }}" label="Accepted" accent="green" class="{{ $activeStatus === 'accepted' ? 'is-filter-active' : '' }}" />
-        <x-dashboard.stat-card href="{{ route('head-office.ppmp.index') }}" value="PHP {{ number_format((float) $summary['budget'], 2) }}" label="Total Budget" accent="navy" class="budget-amount-card" />
+    <section class="workflow-summary-grid" aria-label="PPMP summary">
+        <x-dashboard.workflow-stat-card :href="route('head-office.ppmp.index')" :count="$summary['total']" :total="$summary['total']" label="Total PPMPs" accent="navy" icon="layers" :active="blank($activeStatus)" />
+        <x-dashboard.workflow-stat-card :href="route('head-office.ppmp.index', ['status' => 'draft'])" :count="$summary['draft']" :total="$summary['total']" label="Drafts" accent="gold" :active="$activeStatus === 'draft'" />
+        <x-dashboard.workflow-stat-card :href="route('head-office.ppmp.index', ['status' => 'submitted'])" :count="$summary['submitted']" :total="$summary['total']" label="Submitted to BAC" accent="blue" icon="send" :active="$activeStatus === 'submitted'" />
+        <x-dashboard.workflow-stat-card :href="route('head-office.ppmp.index', ['status' => 'reviewed'])" :count="$summary['reviewed']" :total="$summary['total']" label="Under APP Consolidation" accent="green" icon="consolidate" :active="$activeStatus === 'reviewed'" />
+        <x-dashboard.workflow-stat-card :href="route('head-office.ppmp.index', ['status' => 'returned'])" :count="$summary['returned']" :total="$summary['total']" label="Returned" accent="red" icon="return" :active="$activeStatus === 'returned'" />
+        <x-dashboard.workflow-stat-card :href="route('head-office.ppmp.index', ['status' => 'accepted'])" :count="$summary['accepted']" :total="$summary['total']" label="Accepted" accent="green" icon="check" :active="$activeStatus === 'accepted'" />
     </section>
 
     <section class="table-panel">
