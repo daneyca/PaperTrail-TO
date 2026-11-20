@@ -24,7 +24,7 @@ class PpmpTrackingNumberTest extends TestCase
             ->assertSessionHasNoErrors()->assertRedirect();
         $document = ProcurementDocument::where('document_type', 'PPMP')->firstOrFail();
         $number = $document->tracking_number;
-        $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-PPMP-NUMBER-TEST-0001$/', $number);
+        $this->assertMatchesRegularExpression('/^PT-PPMP-\d{4}-0001$/', $number);
         $this->assertSame($number, $document->displayNumber());
         $this->assertSame(ProcurementDocument::STATUS_PPMP_DRAFT, $document->status);
 
@@ -44,7 +44,7 @@ class PpmpTrackingNumberTest extends TestCase
         $this->actingAs($user)->post(route('head-office.ppmp.store'), $this->payload('submit'))
             ->assertSessionHasNoErrors()->assertRedirect();
         $document = ProcurementDocument::where('document_type', 'PPMP')->firstOrFail();
-        $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-PPMP-NUMBER-TEST-0001$/', $document->tracking_number);
+        $this->assertMatchesRegularExpression('/^PT-PPMP-\d{4}-0001$/', $document->tracking_number);
         $this->assertSame(ProcurementDocument::STATUS_PPMP_PENDING_SIGNATORIES, $document->status);
         $requests = SignatureRequest::forDocument('ppmp', $document->id)->get();
         $this->assertNotEmpty($requests);
@@ -80,7 +80,7 @@ class PpmpTrackingNumberTest extends TestCase
         $migration = require database_path('migrations/2026_11_10_000001_number_existing_unnumbered_ppmps.php');
         $migration->up();
         $document = ProcurementDocument::findOrFail($id);
-        $this->assertMatchesRegularExpression('/^2026-11-PPMP-NUMBER-TEST-\d{4}$/', $document->tracking_number);
+        $this->assertMatchesRegularExpression('/^PT-PPMP-2026-\d{4}$/', $document->tracking_number);
         $this->assertSame(ProcurementDocument::STATUS_PPMP_PENDING_SIGNATORIES, $document->status);
         $this->assertSame($updatedAt, $document->updated_at->format('Y-m-d H:i:s'));
         $this->assertDatabaseHas('signature_requests', ['id' => $requestId, 'tracking_number' => $document->tracking_number, 'status' => 'notified']);
@@ -91,21 +91,21 @@ class PpmpTrackingNumberTest extends TestCase
         $this->assertSame($document->tracking_number, $document->refresh()->tracking_number);
     }
 
-    public function test_each_office_has_its_own_yearly_sequence_that_continues_across_months_and_deletions(): void
+    public function test_offices_share_a_yearly_sequence_that_continues_across_months_and_deletions(): void
     {
         $user = $this->officeUser();
         $other = Office::create(['code' => 'MPDO', 'name' => 'Planning Office', 'type' => Office::TYPE_END_USER]);
         $first = $this->numberedDocument($user->office_id, '2026-01-05');
         $otherFirst = $this->numberedDocument($other->id, '2026-11-01');
         $second = $this->numberedDocument($user->office_id, '2026-11-02');
-        $this->assertSame('2026-01-PPMP-NUMBER-TEST-0001', $first->tracking_number);
-        $this->assertSame('2026-11-PPMP-MPDO-0001', $otherFirst->tracking_number);
-        $this->assertSame('2026-11-PPMP-NUMBER-TEST-0002', $second->tracking_number);
+        $this->assertSame('PT-PPMP-2026-0001', $first->tracking_number);
+        $this->assertSame('PT-PPMP-2026-0002', $otherFirst->tracking_number);
+        $this->assertSame('PT-PPMP-2026-0003', $second->tracking_number);
         $second->delete();
-        $this->assertSame('2026-12-PPMP-NUMBER-TEST-0003', $this->numberedDocument($user->office_id, '2026-12-01')->tracking_number);
-        $this->assertSame('2027-01-PPMP-NUMBER-TEST-0001', $this->numberedDocument($user->office_id, '2027-01-01')->tracking_number);
-        $this->assertSame('2026-11-PR-0001', $this->numberedDocument($user->office_id, '2026-11-01', 'PR')->tracking_number);
-        $this->assertSame('2026-11-PR-0002', $this->numberedDocument($other->id, '2026-11-02', 'PR')->tracking_number);
+        $this->assertSame('PT-PPMP-2026-0004', $this->numberedDocument($user->office_id, '2026-12-01')->tracking_number);
+        $this->assertSame('PT-PPMP-2027-0001', $this->numberedDocument($user->office_id, '2027-01-01')->tracking_number);
+        $this->assertSame('PT-PR-2026-0001', $this->numberedDocument($user->office_id, '2026-11-01', 'PR')->tracking_number);
+        $this->assertSame('PT-PR-2026-0002', $this->numberedDocument($other->id, '2026-11-02', 'PR')->tracking_number);
     }
 
     public function test_office_number_migration_updates_existing_references_and_keeps_signed_snapshots_intact(): void
@@ -138,7 +138,7 @@ class PpmpTrackingNumberTest extends TestCase
         $prReference = $pr->tracking_number;
         $migration = require database_path('migrations/2026_11_10_000000_scope_ppmp_tracking_numbers_by_office.php');
         $migration->up();
-        $newReference = '2026-11-PPMP-NUMBER-TEST-0001';
+        $newReference = 'PT-PPMP-2026-0001';
         $this->assertDatabaseHas('procurement_documents', ['id' => $id, 'tracking_number' => $newReference,
             'document_reference_number' => $newReference, 'ppmp_no' => $newReference, 'sequence_number' => 1, 'updated_at' => $stamp,
             'status' => ProcurementDocument::STATUS_PPMP_PENDING_SIGNATORIES]);
@@ -148,19 +148,19 @@ class PpmpTrackingNumberTest extends TestCase
             'text_snapshot' => 'original signed content', 'snapshot_hash' => $snapshotHash]);
         $this->assertSame($prReference, $pr->refresh()->tracking_number);
         $second = $this->numberedDocument($user->office_id, '2026-11-10');
-        $this->assertSame('2026-11-PPMP-NUMBER-TEST-0002', $second->tracking_number);
+        $this->assertSame('PT-PPMP-2026-0002', $second->tracking_number);
         $migration->up();
         $this->assertSame($second->tracking_number, $second->refresh()->tracking_number);
-        $this->assertSame('2026-11-PPMP-NUMBER-TEST-0003', $this->numberedDocument($user->office_id, '2026-11-11')->tracking_number);
+        $this->assertSame('PT-PPMP-2026-0003', $this->numberedDocument($user->office_id, '2026-11-11')->tracking_number);
     }
 
-    public function test_long_office_codes_fit_tracking_and_audit_reference_columns(): void
+    public function test_tracking_numbers_stay_short_even_with_long_office_codes(): void
     {
         $user = $this->officeUser();
         $office = $user->assignedOffice;
         $office->update(['code' => str_repeat('A', 50)]);
         $document = $this->numberedDocument($office->id, '2026-11-01');
-        $this->assertSame('2026-11-PPMP-' . str_repeat('A', 50) . '-0001', $document->tracking_number);
+        $this->assertSame('PT-PPMP-2026-0001', $document->tracking_number);
         \App\Services\AuditLogger::log('PPMP Numbering', 'Test Reference', 'Office PPMP created.', $document);
         $this->assertDatabaseHas('audit_logs', ['document_id' => $document->id, 'document_reference_number' => $document->tracking_number]);
     }

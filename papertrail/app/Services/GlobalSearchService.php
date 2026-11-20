@@ -108,7 +108,7 @@ class GlobalSearchService
                         BacResolution::STATUS_APPROVED_BY_HOPE,
                         BacResolution::STATUS_RETURNED_BY_HOPE,
                     ]), ['resolution_number', 'document_reference_number', 'title', 'project_title', 'supplier_name'],
-                        'BAC resolution', 'bac-chair.resolutions.show', 'resolution_number', 'project_title', 'status'];
+                        'BAC resolution', 'bac-chair.resolutions.show', 'display_number', 'project_title', 'status'];
                 }
                 break;
             case 'approving-authority':
@@ -183,7 +183,7 @@ class GlobalSearchService
                     ProcurementDocument::STATUS_READY_FOR_RFQ,
                 ]);
             }), ['resolution_number', 'document_reference_number', 'title', 'project_title', 'supplier_name'],
-                'BAC resolution', 'head-office.resolutions.show', 'resolution_number', 'project_title', 'status'];
+                'BAC resolution', 'head-office.resolutions.show', 'display_number', 'project_title', 'status'];
         }
 
         $sources[] = [$rfqs, ['rfq_number', 'document_reference_number', 'supplier_name', 'purpose'],
@@ -199,7 +199,7 @@ class GlobalSearchService
 
         if (! $headOffice && $user->hasPermission('bac.resolution.view')) {
             $sources[] = [BacResolution::query(), ['resolution_number', 'document_reference_number', 'title', 'project_title', 'supplier_name'],
-                'BAC resolution', 'bac-secretariat.resolutions.show', 'resolution_number', 'project_title', 'status'];
+                'BAC resolution', 'bac-secretariat.resolutions.show', 'display_number', 'project_title', 'status'];
         }
     }
 }

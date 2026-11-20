@@ -171,7 +171,7 @@ SUMMARY;
             [
                 'types' => ['ppmp', 'pr', 'purchase_request', 'procurement_document'],
                 'model' => ProcurementDocument::class,
-                'columns' => ['tracking_number', 'pr_no', 'ppmp_no', 'title'],
+                'columns' => ['document_reference_number', 'tracking_number', 'pr_no', 'ppmp_no', 'title'],
                 'with' => [
                     'submittingOffice',
                     'currentOffice',
@@ -186,7 +186,7 @@ SUMMARY;
             [
                 'types' => ['app', 'annual_procurement_plan'],
                 'model' => AnnualProcurementPlan::class,
-                'columns' => ['app_number', 'app_no', 'title'],
+                'columns' => ['document_reference_number', 'app_number', 'app_no', 'title'],
                 'with' => ['office', 'preparedBy', 'submittedBy', 'approvedBy'],
             ],
             [
@@ -198,31 +198,31 @@ SUMMARY;
             [
                 'types' => ['bac_resolution', 'resolution'],
                 'model' => BacResolution::class,
-                'columns' => ['resolution_number', 'pr_number', 'title', 'project_title'],
+                'columns' => ['document_reference_number', 'resolution_number', 'pr_number', 'title', 'project_title'],
                 'with' => ['sourcePrDocument.submittingOffice', 'preparedBy', 'submittedBy', 'approvedBy', 'bacChairConfirmedBy', 'forwardedToHopeBy'],
             ],
             [
                 'types' => ['rfq'],
                 'model' => Rfq::class,
-                'columns' => ['rfq_number', 'supplier_name', 'purpose'],
+                'columns' => ['document_reference_number', 'rfq_number', 'supplier_name', 'purpose'],
                 'with' => ['sourcePrDocument.submittingOffice', 'sourceBacResolution', 'preparedBy', 'submittedBy'],
             ],
             [
                 'types' => ['abstract', 'abstract_quotation'],
                 'model' => AbstractQuotation::class,
-                'columns' => ['abstract_number', 'project_name', 'purpose'],
+                'columns' => ['document_reference_number', 'abstract_number', 'project_name', 'purpose'],
                 'with' => ['sourcePrDocument.submittingOffice', 'sourceRfq', 'sourceBacResolution', 'preparedBy', 'submittedBy'],
             ],
             [
                 'types' => ['po', 'purchase_order'],
                 'model' => PurchaseOrder::class,
-                'columns' => ['po_number', 'supplier_name'],
+                'columns' => ['document_reference_number', 'po_number', 'supplier_name'],
                 'with' => ['sourcePrDocument.submittingOffice', 'sourceBacResolution', 'sourceAbstract', 'preparedBy', 'submittedBy', 'issuedBy'],
             ],
             [
                 'types' => ['inspection', 'inspection_acceptance'],
                 'model' => InspectionAcceptanceRecord::class,
-                'columns' => ['delivery_receipt_number', 'invoice_number'],
+                'columns' => ['document_reference_number', 'delivery_receipt_number', 'invoice_number'],
                 'with' => ['sourcePrDocument.submittingOffice', 'purchaseOrder', 'office', 'inspectedBy', 'acceptedBy'],
             ],
         ];
@@ -662,21 +662,25 @@ SUMMARY;
 
     private function requestNumberMessage(?string $documentTypeHint): string
     {
+        $year = now()->year;
+
         return match ($documentTypeHint) {
-            'pr', 'purchase_request' => "I can help track your Purchase Request. Please provide your PR number.\n\nExample:\nPR-2026-0005",
-            'po', 'purchase_order' => "I can help track your Purchase Order. Please provide your PO number.\n\nExample:\nPO-2026-0005",
-            'bac_resolution', 'resolution' => "I can help track your BAC Resolution. Please provide the resolution number.\n\nExample:\nBAC-RES-2026-0005",
-            'ppmp' => "I can help track your PPMP. Please provide the PPMP number.\n\nExample:\nPPMP-2026-0005",
-            'app', 'annual_procurement_plan' => "I can help track your APP. Please provide the APP number.\n\nExample:\nAPP-2026-0005",
-            'rfq' => "I can help track your RFQ. Please provide the RFQ number.\n\nExample:\nRFQ-2026-0005",
-            'abstract', 'abstract_quotation' => "I can help track your Abstract. Please provide the Abstract number.\n\nExample:\nABS-2026-0005",
-            default => "I can help track your procurement document. Please provide the document number.\n\nExamples:\nPR-2026-0005\nPO-2026-0005\nBAC-RES-2026-0005",
+            'pr', 'purchase_request' => "I can help track your Purchase Request. Please provide its tracking number or official PR number.\n\nTracking example:\nPT-PR-{$year}-0005",
+            'po', 'purchase_order' => "I can help track your Purchase Order. Please provide its tracking number or official PO number.\n\nTracking example:\nPT-PO-{$year}-0005",
+            'bac_resolution', 'resolution' => "I can help track your BAC Resolution. Please provide its tracking number or official resolution number.\n\nTracking example:\nPT-BAC-{$year}-0005",
+            'ppmp' => "I can help track your PPMP. Please provide its tracking number.\n\nExample:\nPT-PPMP-{$year}-0005",
+            'app', 'annual_procurement_plan' => "I can help track your APP. Please provide its tracking number or official APP number.\n\nTracking example:\nPT-APP-{$year}-0005",
+            'rfq' => "I can help track your RFQ. Please provide its tracking number or official RFQ number.\n\nTracking example:\nPT-RFQ-{$year}-0005",
+            'abstract', 'abstract_quotation' => "I can help track your Abstract. Please provide its tracking number or official Abstract number.\n\nTracking example:\nPT-AOQ-{$year}-0005",
+            'inspection', 'inspection_acceptance' => "I can help track your Inspection and Acceptance report. Please provide its tracking number.\n\nExample:\nPT-IA-{$year}-0005",
+            default => "I can help track your procurement document. Please provide its tracking number or official document number.\n\nTracking examples:\nPT-PR-{$year}-0005\nPT-PO-{$year}-0005\nPT-BAC-{$year}-0005",
         };
     }
 
     private function extractTrackingNumber(string $query): ?string
     {
         $patterns = [
+            '/\bPT[-\s]+(?:PPMP|APP|PR|BAC|RFQ|AOQ|PO|IA)[-\s]+\d{4}[-\s]+\d{4,}\b/i',
             '/\bBAC[-\s]?RES[-\s]?\d{4}[-\s]?[A-Z0-9-]*\d+\b/i',
             '/\b(PPMP|APP|SAIP|SUPP[-\s]?APP|PR|PO|RFQ|ABSTRACT|ABS|IAR)[-\s]?\d{4}[-\s]?[A-Z0-9-]*\d+\b/i',
             '/\b(BAC[-\s]?RES|PPMP|APP|SAIP|SUPP[-\s]?APP|PR|PO|RFQ|ABSTRACT|ABS|IAR)(?:[-\s]?[A-Z0-9]+){1,5}\b/i',

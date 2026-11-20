@@ -50,7 +50,8 @@ return new class extends Migration
         foreach ($documents as $record) {
             DB::transaction(function () use ($record): void {
                 $document = ProcurementDocument::query()->lockForUpdate()->find($record->id);
-                if (!$document || preg_match('/^\d{4}-\d{2}-PPMP-.+-\d{4,}$/', (string) $document->document_reference_number)) {
+                // References issued by newer formats also remain stable on a rerun.
+                if (!$document || preg_match('/^(?:\d{4}-\d{2}-PPMP-.+-\d{4,}|PT-PPMP-\d{4}-\d{4,})$/', (string) $document->document_reference_number)) {
                     return;
                 }
                 $old = $document->only(['document_reference_number', 'tracking_number', 'ppmp_no', 'sequence_number']);

@@ -134,10 +134,7 @@ class EndUserPrSignatoryRoutingService
         $fromOfficeId = $document->current_office_id;
 
         if (! $document->tracking_number) {
-            $document->tracking_number = $this->generateTrackingNumber(
-                (int) $document->fiscal_year,
-                $document->submittingOffice ?: $actor->assignedOffice,
-            );
+            app(DocumentReferenceNumberService::class)->assign($document, DocumentReferenceNumberService::TYPE_PR);
         }
 
         $document->fill([

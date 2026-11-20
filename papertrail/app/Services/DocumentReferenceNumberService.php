@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Office;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -12,12 +11,19 @@ use Illuminate\Support\Str;
 class DocumentReferenceNumberService
 {
     public const TYPE_PPMP = 'PPMP';
+
     public const TYPE_APP = 'APP';
+
     public const TYPE_PR = 'PR';
+
     public const TYPE_BAC = 'BAC';
+
     public const TYPE_RFQ = 'RFQ';
+
     public const TYPE_AOQ = 'AOQ';
+
     public const TYPE_PO = 'PO';
+
     public const TYPE_IA = 'IA';
 
     public function assign(Model $document, string $documentType, ?CarbonInterface $createdAt = null): void
@@ -30,16 +36,8 @@ class DocumentReferenceNumberService
         $date = $createdAt ?: $this->referenceDate($document);
         $year = (int) $date->format('Y');
         $month = (int) $date->format('m');
-        $officeId = (int) ($document->getAttribute('submitting_office_id') ?: $document->getAttribute('office_id'));
-        if ($type === self::TYPE_PPMP && $officeId > 0) {
-            $sequence = $this->nextPpmpSequence($officeId, $year);
-            $code = strtoupper(trim((string) Office::whereKey($officeId)->value('code')));
-            $officeCode = preg_match('/^[A-Z0-9_-]+$/', $code) ? $code : 'OFFICE-' . $officeId;
-            $referenceNumber = sprintf('%04d-%02d-PPMP-%s-%04d', $year, $month, $officeCode, $sequence);
-        } else {
-            $sequence = $this->nextSequence($type, $year, $month);
-            $referenceNumber = sprintf('%04d-%02d-%s-%04d', $year, $month, $type, $sequence);
-        }
+        $sequence = $this->nextSequence($type, $year, $month);
+        $referenceNumber = sprintf('PT-%s-%04d-%04d', $type, $year, $sequence);
 
         $document->setAttribute('document_reference_number', $referenceNumber);
         $document->setAttribute('sequence_number', $sequence);
@@ -97,61 +95,30 @@ class DocumentReferenceNumberService
     protected function nextSequence(string $type, int $year, int $month): int
     {
         return DB::transaction(function () use ($type, $year, $month): int {
-            $sequences = DB::table('document_reference_sequences')
+            // The unique document type/year key also protects the first allocation.
+            DB::table('document_reference_sequences')->insertOrIgnore([
+                'document_type' => $type,
+                'created_year' => $year,
+                'created_month' => $month,
+                'last_sequence' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $counter = DB::table('document_reference_sequences')
                 ->where('document_type', $type)
                 ->where('created_year', $year)
-                ->lockForUpdate()
-                ->orderBy('id')
-                ->get();
-
-            if ($sequences->isEmpty()) {
-                DB::table('document_reference_sequences')->insert([
-                    'document_type' => $type,
-                    'created_year' => $year,
-                    'created_month' => $month,
-                    'last_sequence' => 1,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-
-                return 1;
-            }
-
-            $sequence = $sequences->first();
-            $next = ((int) $sequences->max('last_sequence')) + 1;
-
-            if ($sequences->count() > 1) {
-                DB::table('document_reference_sequences')
-                    ->whereIn('id', $sequences->skip(1)->pluck('id')->all())
-                    ->delete();
-            }
-
-            DB::table('document_reference_sequences')
-                ->where('id', $sequence->id)
-                ->update([
-                    'created_month' => $month,
-                    'last_sequence' => $next,
-                    'updated_at' => now(),
-                ]);
-
-            return $next;
-        });
-    }
-
-    private function nextPpmpSequence(int $officeId, int $year): int
-    {
-        return DB::transaction(function () use ($officeId, $year): int {
-            DB::table('ppmp_reference_sequences')->insertOrIgnore([
-                'office_id' => $officeId, 'created_year' => $year, 'last_sequence' => 0,
-                'created_at' => now(), 'updated_at' => now(),
-            ]);
-            $counter = DB::table('ppmp_reference_sequences')->where('office_id', $officeId)
-                ->where('created_year', $year)->lockForUpdate()->first();
+                ->lockForUpdate()->first();
             $next = (int) $counter->last_sequence + 1;
-            DB::table('ppmp_reference_sequences')->where('id', $counter->id)
-                ->update(['last_sequence' => $next, 'updated_at' => now()]);
+
+            DB::table('document_reference_sequences')->where('id', $counter->id)->update([
+                'created_month' => $month,
+                'last_sequence' => $next,
+                'updated_at' => now(),
+            ]);
+
             return $next;
-        });
+        }, 5);
     }
 
     protected function referenceDate(Model $document): CarbonInterface

@@ -18,6 +18,7 @@ use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\Bacsec002PrSignatoryRoutingService;
 use App\Services\DocumentDraftService;
+use App\Services\DocumentReferenceNumberService;
 use App\Services\EndUserPrSignatoryRoutingService;
 use App\Services\PurchaseRequestBudgetService;
 use App\Services\SvpChainService;
@@ -1717,7 +1718,7 @@ class PurchaseRequestController extends Controller
         $fromOffice = $document->current_office_id;
 
         if (! $document->tracking_number) {
-            $document->tracking_number = $this->generateTrackingNumber((int) $document->fiscal_year, $document->submittingOffice ?: $this->assignedOffice($user));
+            app(DocumentReferenceNumberService::class)->assign($document, DocumentReferenceNumberService::TYPE_PR);
         }
 
         $document->fill([
