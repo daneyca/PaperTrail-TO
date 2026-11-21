@@ -1,15 +1,39 @@
-@props(['href', 'count' => 0, 'total' => 0, 'label' => '', 'accent' => 'blue', 'icon' => 'document', 'active' => false])
+@props([
+    'href' => null,
+    'count' => 0,
+    'value' => null,
+    'total' => null,
+    'label' => '',
+    'description' => null,
+    'accent' => 'blue',
+    'icon' => 'document',
+    'iconColor' => null,
+    'active' => false,
+    'ariaLabel' => null,
+])
 @php
     $count = max(0, (int) $count);
-    $total = max(0, (int) $total);
-    $percentage = $total > 0 ? round(min(100, $count / $total * 100), 1) : 0;
-    $accent = in_array($accent, ['navy', 'gold', 'blue', 'green', 'red'], true) ? $accent : 'blue';
+    $displayValue = $value === null ? number_format($count) : (string) $value;
+    $plainNumber = str_replace(',', '', trim($displayValue));
+    $numericValue = is_numeric($plainNumber) ? max(0, (float) $plainNumber) : null;
+    $total = $total === null ? null : max(0, (float) $total);
+    // A ratio is shown only when the page supplies a meaningful total.
+    $percentage = $total !== null
+        ? ($total > 0 ? round(min(100, ($numericValue ?? $count) / $total * 100), 1) : 0)
+        : (($numericValue ?? 1) > 0 ? 100 : 0);
+    $accent = match ($accent) { 'yellow' => 'gold', 'slate' => 'gray', default => $accent };
+    $accent = in_array($accent, ['navy', 'gold', 'blue', 'green', 'red', 'purple', 'orange', 'gray'], true) ? $accent : 'blue';
+    $tag = $href ? 'a' : 'article';
+    $longValue = $numericValue === null || mb_strlen($displayValue) > 11;
+    $accessibleLabel = $ariaLabel ?: $label.': '.$displayValue;
 @endphp
-<a href="{{ $href }}" {{ $attributes->class(['workflow-stat-card', 'workflow-stat-card--'.$accent, 'is-active' => $active]) }}
-   aria-label="{{ $label }}: {{ number_format($count) }} of {{ number_format($total) }} PPMPs"
+<{{ $tag }} @if ($href) href="{{ $href }}" @endif
+   {{ $attributes->class(['workflow-stat-card', 'workflow-stat-card--'.$accent, 'workflow-stat-card--long-value' => $longValue, 'is-active' => $active]) }}
+   aria-label="{{ $accessibleLabel }}"
    @if ($active) aria-current="true" @endif>
     <span class="workflow-stat-card__main">
-        <span class="workflow-stat-card__icon" aria-hidden="true">
+        <span class="workflow-stat-card__icon" @if ($iconColor) style="color: {{ $iconColor }}" @endif aria-hidden="true">
+            @if (in_array($icon, ['layers', 'send', 'consolidate', 'return', 'check'], true))
             <svg viewBox="0 0 24 24" fill="none" focusable="false">
                 @switch($icon)
                     @case('layers')
@@ -35,19 +59,19 @@
                         <path d="M6 3h8l5 5v13H6V3Zm8 0v5h5" />
                 @endswitch
             </svg>
+            @else
+                <x-papertrail.icon :name="$icon" />
+            @endif
         </span>
         <span class="workflow-stat-card__copy">
-            <span class="workflow-stat-card__value">{{ number_format($count) }}</span>
+            <span class="workflow-stat-card__value">{{ $displayValue }}</span>
             <span class="workflow-stat-card__label">{{ $label }}</span>
+            @if ($description)
+                <small class="workflow-stat-card__description">{{ $description }}</small>
+            @endif
         </span>
     </span>
     <span class="workflow-stat-card__meter" aria-hidden="true">
         <span style="width: {{ $percentage }}%"></span>
     </span>
-</a>
-
-@once
-    @push('page-styles')
-        <link rel="stylesheet" href="{{ asset('css/workflow-summary.css') }}?v={{ filemtime(public_path('css/workflow-summary.css')) }}">
-    @endpush
-@endonce
+</{{ $tag }}>

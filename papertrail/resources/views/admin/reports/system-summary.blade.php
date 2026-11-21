@@ -30,12 +30,9 @@
         </div>
     </section>
 
-    <section class="summary-grid" aria-label="System summary counts">
+    <section class="summary-grid stat-grid-modern" aria-label="System summary counts">
         @foreach ($summary as $label => $value)
-            <article class="summary-card">
-                <span>{{ $value }}</span>
-                <p>{{ $label }}</p>
-            </article>
+            <x-dashboard.stat-card :value="$value" :label="$label" />
         @endforeach
     </section>
 

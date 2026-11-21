@@ -5,6 +5,7 @@
     'tone' => 'blue',
     'icon' => 'document',
     'href' => null,
+    'total' => null,
 ])
 
 <x-dashboard.kpi-card
@@ -14,5 +15,6 @@
     :tone="$tone"
     :icon="$icon"
     :href="$href"
+    :total="$total"
     {{ $attributes }}
 />

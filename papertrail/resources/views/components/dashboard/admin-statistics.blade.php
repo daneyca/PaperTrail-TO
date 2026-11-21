@@ -21,17 +21,12 @@
 
     <div class="admin-stat-kpi-grid">
         @foreach ($kpis as $kpi)
-            @if (! empty($kpi['href']))
-                <a href="{{ $kpi['href'] }}" class="admin-stat-kpi admin-stat-{{ $kpi['tone'] ?? 'blue' }}">
-                    <strong>{{ number_format((int) ($kpi['value'] ?? 0)) }}</strong>
-                    <span>{{ $kpi['label'] }}</span>
-                </a>
-            @else
-                <div class="admin-stat-kpi admin-stat-{{ $kpi['tone'] ?? 'blue' }}">
-                    <strong>{{ number_format((int) ($kpi['value'] ?? 0)) }}</strong>
-                    <span>{{ $kpi['label'] }}</span>
-                </div>
-            @endif
+            <x-dashboard.stat-card
+                :href="$kpi['href'] ?? null"
+                :value="number_format((int) ($kpi['value'] ?? 0))"
+                :label="$kpi['label']"
+                :accent="$kpi['tone'] ?? 'blue'"
+            />
         @endforeach
     </div>
 
